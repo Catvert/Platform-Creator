@@ -1,0 +1,79 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        jcenter()
+    }
+    dependencies {
+    }
+}
+
+buildscript {
+    ext.kotlinVersion = '1.1.2'
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+    }
+}
+
+allprojects {
+    apply plugin: "eclipse"
+    apply plugin: "idea"
+
+    version = '1.0'
+    ext {
+        appName = "MaryoTheReturn-KTX"
+        gdxVersion = '1.9.6'
+        roboVMVersion = '2.3.1'
+        box2DLightsVersion = '1.4'
+        ashleyVersion = '1.7.0'
+        aiVersion = '1.8.0'
+    }
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+    }
+}
+
+project(":desktop") {
+    apply plugin: "kotlin"
+
+
+    dependencies {
+        compile project(":core")
+        compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+        compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+        compile "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
+        compile "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
+        compile "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
+    }
+}
+
+project(":core") {
+    apply plugin: "kotlin"
+    dependencies {
+        compile "com.badlogicgames.ashley:ashley:1.7.3"
+        compile group: 'io.github.libktx', name: 'ktx-app', version: '1.9.6-b4'
+        compile group: 'io.github.libktx', name: 'ktx-actors', version: '1.9.6-b4'
+        compile group: 'io.github.libktx', name: 'ktx-assets', version: '1.9.6-b4'
+        compile group: 'io.github.libktx', name: 'ktx-async', version: '1.9.6-b4'
+        compile group: 'io.github.libktx', name: 'ktx-collections', version: '1.9.6-b4'
+        compile group: 'io.github.libktx', name: 'ktx-inject', version: '1.9.6-b4'
+        compile group: 'io.github.libktx', name: 'ktx-log', version: '1.9.6-b4'
+        compile group: 'io.github.libktx', name: 'ktx-math', version: '1.9.6-b4'
+        compile group: 'io.github.libktx', name: 'ktx-scene2d', version: '1.9.6-b4'
+        compile group: 'io.github.libktx', name: 'ktx-style', version: '1.9.6-b4'
+        compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+        compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+        compile "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+        compile "net.dermetfan.libgdx-utils:libgdx-utils:0.13.4"
+    }
+}
+
+tasks.eclipse.doLast {
+    delete ".project"
+}
