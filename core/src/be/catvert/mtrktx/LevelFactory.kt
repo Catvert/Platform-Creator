@@ -29,17 +29,17 @@ class LevelFactory() {
                 engine += e
             }
 
-            val player = EntityFactory.createPlayer(game, Vector2(400f, 400f))
+            val player = EntityFactory.createPlayer(game, Vector2(0f, 400f))
             addEntity(player)
-
-            val entity2 = EntityFactory.createPhysicsSprite(Rectangle(700f, 800f, 500f, 50f), game.assetManager.loadOnDemand<Texture>("levelObjects/blocks/brick/Brick Blue.png").asset, PhysicsComponent(true))
-            addEntity(entity2)
-
-            val entity3 = EntityFactory.createPhysicsSprite(Rectangle(900f, 1000f, 50f, 50f), game.assetManager.loadOnDemand<Texture>("levelObjects/blocks/brick/Brick Blue.png").asset, PhysicsComponent(true))
-            addEntity(entity3)
 
             val entity4 = EntityFactory.createPhysicsSprite(Rectangle(0f, 0f, 50f, 50f), game.assetManager.loadOnDemand<Texture>("levelObjects/blocks/brick/Brick Blue.png").asset, PhysicsComponent(true))
             addEntity(entity4)
+
+            for(x in 0..30) {
+                for(y in 0..30) {
+                    addEntity(EntityFactory.createPhysicsSprite(Rectangle(300f + x * 50, 300f + y * 50, 50f, 50f), game.assetManager.loadOnDemand<Texture>("levelObjects/blocks/brick/Brick Red.png").asset, PhysicsComponent(true)))
+                }
+            }
 
 
             return Level("test", player, loadedEntities)

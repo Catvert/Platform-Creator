@@ -29,9 +29,11 @@ class RenderingSystem(private val game: MtrGame) : EntitySystem() {
 
         game.batch.use {
             entities.forEach {
+
                 if(transformMapper[it].active) {
                     val rect = transformMapper[it].rectangle
-                    game.batch.draw(renderMapper[it].texture, rect.x, rect.y, rect.width, rect.height)
+                    val renderComp = renderMapper[it]
+                    game.batch.draw(renderComp.texture, rect.x, rect.y, rect.width, rect.height, 0, 0, renderComp.texture.width, renderComp.texture.height, renderComp.flipX, renderComp.flipY)
                 }
             }
         }

@@ -12,6 +12,7 @@ import com.badlogic.ashley.utils.ImmutableArray
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Camera
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Rectangle
 import ktx.app.use
 
@@ -28,25 +29,32 @@ class PhysicsSystem(private val game: MtrGame, private val level: Level, private
     private lateinit var entities: ImmutableArray<Entity>
 
     private val sizeGridCell = 200f
-    private val matrixSize = 100
-    private val matrixRect = Rectangle(0f, 0f, sizeGridCell * matrixSize, sizeGridCell * matrixSize)
-    private val matrixGrid = matrix2d(10, 10, { row: Int, width: Int -> Array(width) { col -> Pair(mutableListOf<Entity>(), Rectangle(row.toFloat() * sizeGridCell, col.toFloat() * sizeGridCell, sizeGridCell, sizeGridCell)) } })
+    private val matrixSizeX = 300
+    private val matrixSizeY = 100
+    private val matrixRect = Rectangle(0f, 0f, sizeGridCell * matrixSizeX, sizeGridCell * matrixSizeY)
+    private val matrixGrid = matrix2d(matrixSizeX, matrixSizeY, { row: Int, width: Int -> Array(width) { col -> Pair(mutableListOf<Entity>(), Rectangle(row.toFloat() * sizeGridCell, col.toFloat() * sizeGridCell, sizeGridCell, sizeGridCell)) } })
 
     private val activeGridCells = mutableListOf<GridCell>()
 
     private val playerRect = Rectangle(level.player.getComponent(TransformComponent::class.java).rectangle)
 
+    var drawDebugCells = false
+
     init {
         playerRect.setSize(Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
         level.loadedEntities.forEach {
             setEntityGrid(it) // Besoin de setGrid car les entités n'ont pas encore été ajoutée à la matrix
+            if (it == level.player)
+                return@forEach
+            it.components.filter { c -> c is BaseComponent }.forEach {
+                (it as BaseComponent).active = false
+            }
         }
     }
 
     override fun addedToEngine(engine: Engine?) {
         super.addedToEngine(engine)
         entities = getEngine().getEntitiesFor(Family.all(PhysicsComponent::class.java, TransformComponent::class.java).get())
-        // updateActiveCells()
     }
 
     override fun onEntityAdded(entity: Entity) { // Appelé lors de l'ajout d'entité APRES le chargement du niveau
@@ -58,19 +66,18 @@ class PhysicsSystem(private val game: MtrGame, private val level: Level, private
     override fun update(deltaTime: Float) {
         super.update(deltaTime)
 
-        game.batch.use {
-            game.mainFont.draw(game.batch, "BONJOUR", 100f, 100f)
+        if (drawDebugCells) {
             shapeRenderer.projectionMatrix = camera.combined
             shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
             matrixGrid.forEachIndexed { x, it ->
                 it.forEachIndexed { y, it ->
-                    game.mainFont.draw(game.batch, "{$x,$y}", it.second.x, it.second.y)
                     shapeRenderer.rect(it.second.x, it.second.y, it.second.width, it.second.height)
                 }
             }
             shapeRenderer.rect(playerRect.x, playerRect.y, playerRect.width, playerRect.height)
             shapeRenderer.end()
         }
+
         for (i in 0..entities.size() - 1) {
             val entity = entities[i]
             val physicsComp = physicsMapper[entity]
@@ -81,29 +88,34 @@ class PhysicsSystem(private val game: MtrGame, private val level: Level, private
 
             if (physicsComp.gravity)
                 physicsComp.nextActions += PhysicsComponent.NextActions.GRAVITY
+
+            var moveSpeedX = 0
+            var moveSpeedY = 0
             physicsComp.nextActions.forEach {
                 when (it) {
-                    PhysicsComponent.NextActions.GO_LEFT -> {
-                        tryMove(-physicsComp.moveSpeed, 0, entity, transformComp)
-                    }
-                    PhysicsComponent.NextActions.GO_RIGHT -> {
-                        tryMove(physicsComp.moveSpeed, 0, entity, transformComp)
-                    }
-                    PhysicsComponent.NextActions.GO_UP -> {
-                        tryMove(0, physicsComp.moveSpeed, entity, transformComp)
-                    }
-                    PhysicsComponent.NextActions.GO_DOWN -> {
-                        tryMove(0, -physicsComp.moveSpeed, entity, transformComp)
-                    }
-                    PhysicsComponent.NextActions.GRAVITY -> {
-                        tryMove(0, -gravity, entity, transformComp)
-                    }
+                    PhysicsComponent.NextActions.GO_LEFT -> moveSpeedX -= physicsComp.moveSpeed
+                    PhysicsComponent.NextActions.GO_RIGHT -> moveSpeedX += physicsComp.moveSpeed
+                    PhysicsComponent.NextActions.GO_UP -> moveSpeedY += physicsComp.moveSpeed
+                    PhysicsComponent.NextActions.GO_DOWN -> moveSpeedY -= physicsComp.moveSpeed
+                    PhysicsComponent.NextActions.GRAVITY -> moveSpeedY -= gravity
                 }
+            }
+            if (physicsComp.smoothMove != null) { // Smooth mode
+                physicsComp.smoothMove.targetMoveSpeedX = moveSpeedX
+                physicsComp.smoothMove.targetMoveSpeedY = moveSpeedY
 
-                if (entity == level.player) {
-                    playerRect.setPosition(Math.max(0f, transformComp.rectangle.x - playerRect.width / 2 + transformComp.rectangle.width / 2), Math.max(0f, transformComp.rectangle.y - playerRect.height / 2 + transformComp.rectangle.height / 2))
-                    updateActiveCells()
-                }
+                physicsComp.smoothMove.actualMoveSpeedX = MathUtils.lerp(physicsComp.smoothMove.actualMoveSpeedX, physicsComp.smoothMove.targetMoveSpeedX.toFloat(), 0.5f)
+                physicsComp.smoothMove.actualMoveSpeedY = MathUtils.lerp(physicsComp.smoothMove.actualMoveSpeedY, physicsComp.smoothMove.targetMoveSpeedY.toFloat(), 0.5f)
+
+                tryMove(physicsComp.smoothMove.actualMoveSpeedX.toInt(), physicsComp.smoothMove.actualMoveSpeedY.toInt(), entity, transformComp)
+
+            } else { // NO smooth mode
+                tryMove(moveSpeedX, moveSpeedY, entity, transformComp)
+            }
+
+            if (entity == level.player) {
+                playerRect.setPosition(Math.max(0f, transformComp.rectangle.x - playerRect.width / 2 + transformComp.rectangle.width / 2), Math.max(0f, transformComp.rectangle.y - playerRect.height / 2 + transformComp.rectangle.height / 2))
+                updateActiveCells()
             }
 
             physicsComp.nextActions.clear()
@@ -112,26 +124,31 @@ class PhysicsSystem(private val game: MtrGame, private val level: Level, private
 
     private fun tryMove(moveX: Int, moveY: Int, entity: Entity, transformTarget: TransformComponent) {
         if (moveX != 0 || moveY != 0) {
-            if (!collideOnMove(moveX, moveY, entity)) {
-                transformTarget.rectangle.x += moveX
-                transformTarget.rectangle.y += moveY
+            var newMoveX = moveX
+            var newMoveY = moveY
+
+            if (!collideOnMove(moveX, 0, entity)) {
+                transformTarget.rectangle.x = Math.max(0f, transformTarget.rectangle.x + moveX)
                 setEntityGrid(entity)
-            } else {
-                var newMoveX = moveX
-                var newMoveY = moveY
-
-                if (newMoveX > 0)
-                    newMoveX -= 1
-                else if (newMoveX < 0)
-                    newMoveX += 1
-
-                if (newMoveY > 0)
-                    newMoveY -= 1
-                else if (newMoveY < 0)
-                    newMoveY += 1
-
-                tryMove(newMoveX, newMoveY, entity, transformTarget)
+                newMoveX = 0
             }
+            if (!collideOnMove(0, moveY, entity)) {
+                transformTarget.rectangle.y = Math.max(0f, transformTarget.rectangle.y + moveY)
+                setEntityGrid(entity)
+                newMoveY = 0
+            }
+
+            if (newMoveX > 0)
+                newMoveX -= 1
+            else if (newMoveX < 0)
+                newMoveX += 1
+
+            if (newMoveY > 0)
+                newMoveY -= 1
+            else if (newMoveY < 0)
+                newMoveY += 1
+
+            tryMove(newMoveX, newMoveY, entity, transformTarget)
         }
     }
 
@@ -177,16 +194,14 @@ class PhysicsSystem(private val game: MtrGame, private val level: Level, private
                         ++x
                         cells += GridCell(x, y)
                         continue
-                    }
-                    else {
+                    } else {
                         x = firstXCell
                     }
 
                     if (rectContains(x, y + 1)) {
                         ++y
                         cells += GridCell(x, y)
-                    }
-                    else
+                    } else
                         break
                 } while (true)
             }
@@ -219,7 +234,7 @@ class PhysicsSystem(private val game: MtrGame, private val level: Level, private
     private fun updateActiveCells() {
         activeGridCells.forEach {
             matrixGrid[it.x][it.y].first.forEach matrix@ {
-                if(it == level.player)
+                if (it == level.player)
                     return@matrix
                 it.components.filter { c -> c is BaseComponent }.forEach {
                     (it as BaseComponent).active = false
@@ -230,7 +245,7 @@ class PhysicsSystem(private val game: MtrGame, private val level: Level, private
         activeGridCells.clear()
 
         activeGridCells.addAll(getRectCells(playerRect))
-        println(activeGridCells.size)
+
         activeGridCells.forEach {
             matrixGrid[it.x][it.y].first.forEach {
                 it.components.filter { c -> c is BaseComponent }.forEach {

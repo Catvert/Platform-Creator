@@ -38,17 +38,22 @@ class EntityFactory {
         }
 
         fun createPlayer(game: MtrGame, pos: Vector2): Entity {
-            val entity = createPhysicsSprite(Rectangle(pos.x, pos.y, 50f, 100f), game.assetManager.loadOnDemand<Texture>("game/maryo/small/stand_right.png").asset, PhysicsComponent(false, 10))
+            val entity = createPhysicsSprite(Rectangle(pos.x, pos.y, 50f, 100f), game.assetManager.loadOnDemand<Texture>("game/maryo/small/stand_right.png").asset, PhysicsComponent(false, 10, true))
 
+            val renderComp = entity.getComponent(RenderComponent::class.java)
             val physicsComp = entity.getComponent(PhysicsComponent::class.java)
 
             entity += UpdateComponent(object : IUpdateable {
                 override fun update(deltaTime: Float) {
 
-                    if(Gdx.input.isKeyPressed(Input.Keys.D))
+                    if(Gdx.input.isKeyPressed(Input.Keys.D)) {
+                        renderComp.flipX = false
                         physicsComp.nextActions += PhysicsComponent.NextActions.GO_RIGHT
-                    if(Gdx.input.isKeyPressed(Input.Keys.Q))
+                    }
+                    if(Gdx.input.isKeyPressed(Input.Keys.Q)) {
+                        renderComp.flipX = true
                         physicsComp.nextActions += PhysicsComponent.NextActions.GO_LEFT
+                    }
                     if(Gdx.input.isKeyPressed(Input.Keys.Z))
                         physicsComp.nextActions += PhysicsComponent.NextActions.GO_UP
                     if(Gdx.input.isKeyPressed(Input.Keys.S))

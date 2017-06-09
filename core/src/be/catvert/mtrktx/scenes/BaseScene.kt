@@ -25,12 +25,11 @@ import ktx.assets.disposeSafely
 abstract class BaseScene(protected val _game: MtrGame, vararg systems: EntitySystem) : KtxScreen {
     protected val _viewPort: Viewport
     protected val _stage: Stage
-    protected val _camera: Camera
+    protected val _camera: OrthographicCamera = OrthographicCamera()
 
     protected val _engine = Engine()
 
     init {
-        _camera = OrthographicCamera()
         _viewPort = ScreenViewport(_camera)
         _stage = Stage(_viewPort, _game.batch)
 
