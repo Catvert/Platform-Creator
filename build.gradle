@@ -10,7 +10,7 @@ buildscript {
 }
 
 buildscript {
-    ext.kotlinVersion = '1.1.2'
+    ext.kotlinVersion = '1.1.2-2'
 
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"

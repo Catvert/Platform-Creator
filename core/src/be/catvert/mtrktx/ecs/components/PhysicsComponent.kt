@@ -8,7 +8,7 @@ import com.badlogic.ashley.core.Component
  * Created by arno on 04/06/17.
  */
 
-class PhysicsComponent(var isStatic: Boolean, var moveSpeed: Int = 0, var gravity: Boolean = !isStatic) : Component {
+class PhysicsComponent(var isStatic: Boolean, var moveSpeed: Int = 0, var gravity: Boolean = !isStatic) : BaseComponent() {
     enum class NextActions {
         GO_LEFT, GO_RIGHT, GO_UP, GO_DOWN, GRAVITY
     }

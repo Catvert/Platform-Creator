@@ -7,4 +7,4 @@ import com.badlogic.gdx.graphics.Texture
  * Created by arno on 05/06/17.
  */
 
-class RenderComponent(var texture: Texture) : Component
+class RenderComponent(var texture: Texture) : BaseComponent()

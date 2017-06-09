@@ -23,7 +23,8 @@ class UpdateSystem() : EntitySystem() {
         super.update(deltaTime)
 
         entities.forEach {
-            updateMapper[it].update(deltaTime)
+            if(updateMapper[it].active)
+                updateMapper[it].update(deltaTime)
         }
     }
 }

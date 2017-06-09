@@ -3,19 +3,12 @@ package be.catvert.mtrktx.scenes
 import be.catvert.mtrktx.Level
 import be.catvert.mtrktx.LevelFactory
 import be.catvert.mtrktx.MtrGame
-import be.catvert.mtrktx.ecs.EntityFactory
-import be.catvert.mtrktx.ecs.IUpdateable
-import be.catvert.mtrktx.ecs.components.PhysicsComponent
-import be.catvert.mtrktx.ecs.components.UpdateComponent
+import be.catvert.mtrktx.ecs.components.TransformComponent
 import be.catvert.mtrktx.ecs.systems.physics.PhysicsSystem
 import be.catvert.mtrktx.ecs.systems.RenderingSystem
 import be.catvert.mtrktx.ecs.systems.UpdateSystem
-import be.catvert.mtrktx.plusAssign
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
-import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.math.Rectangle
-import ktx.assets.loadOnDemand
 
 
 /**
@@ -29,16 +22,26 @@ class GameScene(game: MtrGame, levelPath: String) : BaseScene(game, RenderingSys
 
     private val level = LevelFactory.loadLevel(game, _engine, levelPath)
 
+    private val followPlayerCamera = true
+
+    private val transformPlayer: TransformComponent
+
     init {
-        physicsSystem = PhysicsSystem(game, level, _camera)
+        physicsSystem = PhysicsSystem(level, _camera)
         _engine.addSystem(physicsSystem)
+
+        transformPlayer = level.player.getComponent(TransformComponent::class.java)
     }
 
     override fun render(delta: Float) {
         _game.batch.projectionMatrix = _camera.combined
 
+        //_camera.position.set(transformPlayer.rectangle.x - Gdx.graphics.width / 2, transformPlayer.rectangle.y + Gdx.graphics.height / 2, 0f)
+
         super.render(delta)
     }
+
+
 
     override fun updateInputs() {
         super.updateInputs()
