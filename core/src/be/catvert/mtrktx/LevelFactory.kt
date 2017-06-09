@@ -4,6 +4,7 @@ import be.catvert.mtrktx.ecs.EntityFactory
 import be.catvert.mtrktx.ecs.components.PhysicsComponent
 import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
@@ -32,12 +33,12 @@ class LevelFactory() {
             val player = EntityFactory.createPlayer(game, Vector2(0f, 400f))
             addEntity(player)
 
-            val entity4 = EntityFactory.createPhysicsSprite(Rectangle(0f, 0f, 50f, 50f), game.assetManager.loadOnDemand<Texture>("levelObjects/blocks/brick/Brick Blue.png").asset, PhysicsComponent(true))
+            val entity4 = EntityFactory.createPhysicsSprite(Rectangle(0f, 0f, 50f, 50f), game.getTexture(Gdx.files.internal("levelObjects/blocks/brick/Brick Blue.png")), PhysicsComponent(true))
             addEntity(entity4)
 
-            for(x in 0..30) {
-                for(y in 0..30) {
-                    addEntity(EntityFactory.createPhysicsSprite(Rectangle(300f + x * 50, 300f + y * 50, 50f, 50f), game.assetManager.loadOnDemand<Texture>("levelObjects/blocks/brick/Brick Red.png").asset, PhysicsComponent(true)))
+            for(x in 0..500) {
+                for(y in 0..500) {
+                    addEntity(EntityFactory.createPhysicsSprite(Rectangle(300f + x * 50, 300f + y * 50, 50f, 50f), game.getTexture(Gdx.files.internal("levelObjects/blocks/brick/Brick Red.png")), PhysicsComponent(true)))
                 }
             }
 

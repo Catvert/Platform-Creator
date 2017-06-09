@@ -8,6 +8,8 @@ import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
+import com.badlogic.gdx.files.FileHandle
+import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
@@ -24,8 +26,6 @@ class MtrGame : KtxGame<BaseScene>() {
         private set
 
     val assetManager = AssetManager()
-
-    val engine = Engine()
 
     override fun create() {
         GridCell(20, 20)
@@ -51,11 +51,22 @@ class MtrGame : KtxGame<BaseScene>() {
 
     fun getLogo() : Entity {
         val (logoWidth, logoHeight) = Pair(Gdx.graphics.width.toFloat() / 3 * 2, Gdx.graphics.height.toFloat() / 4)
-        return EntityFactory.createSprite(Rectangle(Gdx.graphics.width / 2f - logoWidth / 2f , Gdx.graphics.height - logoHeight, logoWidth, logoHeight), assetManager.loadOnDemand<Texture>("game/logo.png").asset)
+        return EntityFactory.createSprite(Rectangle(Gdx.graphics.width / 2f - logoWidth / 2f , Gdx.graphics.height - logoHeight, logoWidth, logoHeight), getTexture(Gdx.files.internal("game/logo.png")))
     }
 
     fun getMainBackground() : Entity {
-       return EntityFactory.createSprite(Rectangle(0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat()), assetManager.loadOnDemand<Texture>("game/mainmenu.png").asset)
+       return EntityFactory.createSprite(Rectangle(0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat()), getTexture(Gdx.files.internal("game/mainmenu.png")))
+    }
+
+    fun getTexture(path: FileHandle): Texture {
+        try {
+            if(!path.exists())
+                throw Exception("La chemin n'existe pas")
+            return assetManager.loadOnDemand<Texture>(path.path()).asset
+        } catch(e: Exception) {
+            println("Erreur lors du chargement de la texture : $path : $e")
+        }
+        return Texture(1, 1, Pixmap.Format.Alpha)
     }
 
     override fun dispose() {

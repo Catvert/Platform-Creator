@@ -78,47 +78,49 @@ class PhysicsSystem(private val game: MtrGame, private val level: Level, private
             shapeRenderer.end()
         }
 
-        for (i in 0..entities.size() - 1) {
-            val entity = entities[i]
-            val physicsComp = physicsMapper[entity]
-            val transformComp = transformMapper[entity]
+        getRectCells(playerRect).forEach {
+            for(i in 0..matrixGrid[it.x][it.y].first.size - 1) {
+                val entity = matrixGrid[it.x][it.y].first[i]
+                val physicsComp = physicsMapper[entity]
+                val transformComp = transformMapper[entity]
 
-            if (physicsComp.isStatic || !physicsComp.active)
-                continue
+                if (physicsComp.isStatic || !physicsComp.active)
+                    continue
 
-            if (physicsComp.gravity)
-                physicsComp.nextActions += PhysicsComponent.NextActions.GRAVITY
+                if (physicsComp.gravity)
+                    physicsComp.nextActions += PhysicsComponent.NextActions.GRAVITY
 
-            var moveSpeedX = 0
-            var moveSpeedY = 0
-            physicsComp.nextActions.forEach {
-                when (it) {
-                    PhysicsComponent.NextActions.GO_LEFT -> moveSpeedX -= physicsComp.moveSpeed
-                    PhysicsComponent.NextActions.GO_RIGHT -> moveSpeedX += physicsComp.moveSpeed
-                    PhysicsComponent.NextActions.GO_UP -> moveSpeedY += physicsComp.moveSpeed
-                    PhysicsComponent.NextActions.GO_DOWN -> moveSpeedY -= physicsComp.moveSpeed
-                    PhysicsComponent.NextActions.GRAVITY -> moveSpeedY -= gravity
+                var moveSpeedX = 0
+                var moveSpeedY = 0
+                physicsComp.nextActions.forEach {
+                    when (it) {
+                        PhysicsComponent.NextActions.GO_LEFT -> moveSpeedX -= physicsComp.moveSpeed
+                        PhysicsComponent.NextActions.GO_RIGHT -> moveSpeedX += physicsComp.moveSpeed
+                        PhysicsComponent.NextActions.GO_UP -> moveSpeedY += physicsComp.moveSpeed
+                        PhysicsComponent.NextActions.GO_DOWN -> moveSpeedY -= physicsComp.moveSpeed
+                        PhysicsComponent.NextActions.GRAVITY -> moveSpeedY -= gravity
+                    }
                 }
+                if (physicsComp.smoothMove != null) { // Smooth mode
+                    physicsComp.smoothMove.targetMoveSpeedX = moveSpeedX
+                    physicsComp.smoothMove.targetMoveSpeedY = moveSpeedY
+
+                    physicsComp.smoothMove.actualMoveSpeedX = MathUtils.lerp(physicsComp.smoothMove.actualMoveSpeedX, physicsComp.smoothMove.targetMoveSpeedX.toFloat(), 0.5f)
+                    physicsComp.smoothMove.actualMoveSpeedY = MathUtils.lerp(physicsComp.smoothMove.actualMoveSpeedY, physicsComp.smoothMove.targetMoveSpeedY.toFloat(), 0.5f)
+
+                    tryMove(physicsComp.smoothMove.actualMoveSpeedX.toInt(), physicsComp.smoothMove.actualMoveSpeedY.toInt(), entity, transformComp)
+
+                } else { // NO smooth mode
+                    tryMove(moveSpeedX, moveSpeedY, entity, transformComp)
+                }
+
+                if (entity == level.player) {
+                    playerRect.setPosition(Math.max(0f, transformComp.rectangle.x - playerRect.width / 2 + transformComp.rectangle.width / 2), Math.max(0f, transformComp.rectangle.y - playerRect.height / 2 + transformComp.rectangle.height / 2))
+                    updateActiveCells()
+                }
+
+                physicsComp.nextActions.clear()
             }
-            if (physicsComp.smoothMove != null) { // Smooth mode
-                physicsComp.smoothMove.targetMoveSpeedX = moveSpeedX
-                physicsComp.smoothMove.targetMoveSpeedY = moveSpeedY
-
-                physicsComp.smoothMove.actualMoveSpeedX = MathUtils.lerp(physicsComp.smoothMove.actualMoveSpeedX, physicsComp.smoothMove.targetMoveSpeedX.toFloat(), 0.5f)
-                physicsComp.smoothMove.actualMoveSpeedY = MathUtils.lerp(physicsComp.smoothMove.actualMoveSpeedY, physicsComp.smoothMove.targetMoveSpeedY.toFloat(), 0.5f)
-
-                tryMove(physicsComp.smoothMove.actualMoveSpeedX.toInt(), physicsComp.smoothMove.actualMoveSpeedY.toInt(), entity, transformComp)
-
-            } else { // NO smooth mode
-                tryMove(moveSpeedX, moveSpeedY, entity, transformComp)
-            }
-
-            if (entity == level.player) {
-                playerRect.setPosition(Math.max(0f, transformComp.rectangle.x - playerRect.width / 2 + transformComp.rectangle.width / 2), Math.max(0f, transformComp.rectangle.y - playerRect.height / 2 + transformComp.rectangle.height / 2))
-                updateActiveCells()
-            }
-
-            physicsComp.nextActions.clear()
         }
     }
 
@@ -177,7 +179,7 @@ class PhysicsSystem(private val game: MtrGame, private val level: Level, private
         val cells = mutableListOf<GridCell>()
 
         fun rectContains(x: Int, y: Int): Boolean {
-            if ((x < 0 || y < 0) || (x >= matrixGrid.size || y >= matrixGrid.size)) {
+            if ((x < 0 || y < 0) || (x >= matrixSizeX || y >= matrixSizeY)) {
                 return false
             }
 

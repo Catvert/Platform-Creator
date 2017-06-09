@@ -38,7 +38,7 @@ class EntityFactory {
         }
 
         fun createPlayer(game: MtrGame, pos: Vector2): Entity {
-            val entity = createPhysicsSprite(Rectangle(pos.x, pos.y, 50f, 100f), game.assetManager.loadOnDemand<Texture>("game/maryo/small/stand_right.png").asset, PhysicsComponent(false, 10, true))
+            val entity = createPhysicsSprite(Rectangle(pos.x, pos.y, 50f, 100f), game.getTexture(Gdx.files.internal("game/maryo/small/stand_right.png")), PhysicsComponent(false, 10, true))
 
             val renderComp = entity.getComponent(RenderComponent::class.java)
             val physicsComp = entity.getComponent(PhysicsComponent::class.java)
