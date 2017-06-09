@@ -19,7 +19,7 @@ import ktx.app.use
  * Created by arno on 04/06/17.
  */
 
-class PhysicsSystem(private val level: Level, private val camera: Camera, val gravity: Int = 5) : EntityEventSystem() {
+class PhysicsSystem(private val game: MtrGame, private val level: Level, private val camera: Camera, val gravity: Int = 5) : EntityEventSystem() {
     private val shapeRenderer = ShapeRenderer()
 
     private val transformMapper = ComponentMapper.getFor(TransformComponent::class.java)
@@ -28,7 +28,7 @@ class PhysicsSystem(private val level: Level, private val camera: Camera, val gr
     private lateinit var entities: ImmutableArray<Entity>
 
     private val sizeGridCell = 200f
-    private val matrixSize = 20
+    private val matrixSize = 100
     private val matrixRect = Rectangle(0f, 0f, sizeGridCell * matrixSize, sizeGridCell * matrixSize)
     private val matrixGrid = matrix2d(10, 10, { row: Int, width: Int -> Array(width) { col -> Pair(mutableListOf<Entity>(), Rectangle(row.toFloat() * sizeGridCell, col.toFloat() * sizeGridCell, sizeGridCell, sizeGridCell)) } })
 
@@ -46,6 +46,7 @@ class PhysicsSystem(private val level: Level, private val camera: Camera, val gr
     override fun addedToEngine(engine: Engine?) {
         super.addedToEngine(engine)
         entities = getEngine().getEntitiesFor(Family.all(PhysicsComponent::class.java, TransformComponent::class.java).get())
+        // updateActiveCells()
     }
 
     override fun onEntityAdded(entity: Entity) { // Appelé lors de l'ajout d'entité APRES le chargement du niveau
@@ -57,16 +58,19 @@ class PhysicsSystem(private val level: Level, private val camera: Camera, val gr
     override fun update(deltaTime: Float) {
         super.update(deltaTime)
 
-        shapeRenderer.projectionMatrix = camera.combined
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
-        matrixGrid.forEach {
-            it.forEach {
-                shapeRenderer.rect(it.second.x, it.second.y, it.second.width, it.second.height)
+        game.batch.use {
+            game.mainFont.draw(game.batch, "BONJOUR", 100f, 100f)
+            shapeRenderer.projectionMatrix = camera.combined
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
+            matrixGrid.forEachIndexed { x, it ->
+                it.forEachIndexed { y, it ->
+                    game.mainFont.draw(game.batch, "{$x,$y}", it.second.x, it.second.y)
+                    shapeRenderer.rect(it.second.x, it.second.y, it.second.width, it.second.height)
+                }
             }
+            shapeRenderer.rect(playerRect.x, playerRect.y, playerRect.width, playerRect.height)
+            shapeRenderer.end()
         }
-        shapeRenderer.rect(playerRect.x, playerRect.y, playerRect.width, playerRect.height)
-        shapeRenderer.end()
-
         for (i in 0..entities.size() - 1) {
             val entity = entities[i]
             val physicsComp = physicsMapper[entity]
@@ -96,7 +100,7 @@ class PhysicsSystem(private val level: Level, private val camera: Camera, val gr
                     }
                 }
 
-                if(entity == level.player) {
+                if (entity == level.player) {
                     playerRect.setPosition(Math.max(0f, transformComp.rectangle.x - playerRect.width / 2 + transformComp.rectangle.width / 2), Math.max(0f, transformComp.rectangle.y - playerRect.height / 2 + transformComp.rectangle.height / 2))
                     updateActiveCells()
                 }
@@ -138,7 +142,7 @@ class PhysicsSystem(private val level: Level, private val camera: Camera, val gr
         newRect.setPosition(newRect.x + moveX, newRect.y + moveY)
 
         getRectCells(newRect).forEach {
-             matrixGrid[it.x][it.y].first.forEach matrixLoop@ {
+            matrixGrid[it.x][it.y].first.forEach matrixLoop@ {
                 val transformComponent = transformMapper[it]
 
                 if (transformComponent == transformTarget)
@@ -162,26 +166,27 @@ class PhysicsSystem(private val level: Level, private val camera: Camera, val gr
 
             return rect.overlaps(matrixGrid[x][y].second)
         }
-
-        if (matrixRect.contains(rect)) {
-            var x = (rect.x / sizeGridCell).toInt()
-            var y = (rect.y / sizeGridCell).toInt()
-
+        if (matrixRect.overlaps(rect)) {
+            var x = Math.max(0f, rect.x / sizeGridCell).toInt()
+            var y = Math.max(0f, rect.y / sizeGridCell).toInt()
             if (rectContains(x, y)) {
                 cells += GridCell(x, y)
+                val firstXCell = x
                 do {
-                    var nextRectFound = false
                     if (rectContains(x + 1, y)) {
                         ++x
-                        nextRectFound = true
-                    } else if (rectContains(x, y + 1)) {
-                        ++y
-                        nextRectFound = true
+                        cells += GridCell(x, y)
+                        continue
+                    }
+                    else {
+                        x = firstXCell
                     }
 
-                    if (nextRectFound) {
+                    if (rectContains(x, y + 1)) {
+                        ++y
                         cells += GridCell(x, y)
-                    } else
+                    }
+                    else
                         break
                 } while (true)
             }
@@ -213,14 +218,19 @@ class PhysicsSystem(private val level: Level, private val camera: Camera, val gr
 
     private fun updateActiveCells() {
         activeGridCells.forEach {
-            matrixGrid[it.x][it.y].first.forEach {
+            matrixGrid[it.x][it.y].first.forEach matrix@ {
+                if(it == level.player)
+                    return@matrix
                 it.components.filter { c -> c is BaseComponent }.forEach {
                     (it as BaseComponent).active = false
                 }
             }
         }
 
+        activeGridCells.clear()
+
         activeGridCells.addAll(getRectCells(playerRect))
+        println(activeGridCells.size)
         activeGridCells.forEach {
             matrixGrid[it.x][it.y].first.forEach {
                 it.components.filter { c -> c is BaseComponent }.forEach {

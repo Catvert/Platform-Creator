@@ -27,7 +27,7 @@ class GameScene(game: MtrGame, levelPath: String) : BaseScene(game, RenderingSys
     private val transformPlayer: TransformComponent
 
     init {
-        physicsSystem = PhysicsSystem(level, _camera)
+        physicsSystem = PhysicsSystem(_game, level, _camera)
         _engine.addSystem(physicsSystem)
 
         transformPlayer = level.player.getComponent(TransformComponent::class.java)

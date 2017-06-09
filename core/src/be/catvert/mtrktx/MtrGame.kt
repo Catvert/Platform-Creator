@@ -9,6 +9,7 @@ import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.scenes.scene2d.ui.Skin
@@ -19,6 +20,8 @@ import ktx.scene2d.Scene2DSkin
 class MtrGame : KtxGame<BaseScene>() {
     lateinit var batch: SpriteBatch
         private set
+    lateinit var mainFont: BitmapFont
+        private set
 
     val assetManager = AssetManager()
 
@@ -28,6 +31,7 @@ class MtrGame : KtxGame<BaseScene>() {
         GridCell(20, 20)
         batch = SpriteBatch()
         Scene2DSkin.defaultSkin = Skin(Gdx.files.internal("ui/sgx/skin/sgx-ui.json"))
+        mainFont = BitmapFont(Gdx.files.internal("fonts/mainFont.fnt"))
 
         addScreen(MainMenuScene(this))
         setScreen<MainMenuScene>()
