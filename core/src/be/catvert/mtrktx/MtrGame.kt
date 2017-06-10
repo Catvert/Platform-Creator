@@ -4,7 +4,6 @@ import be.catvert.mtrktx.ecs.EntityFactory
 import be.catvert.mtrktx.ecs.systems.physics.GridCell
 import be.catvert.mtrktx.scenes.BaseScene
 import be.catvert.mtrktx.scenes.MainMenuScene
-import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager

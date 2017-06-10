@@ -1,28 +1,26 @@
 package be.catvert.mtrktx.scenes
 
-import be.catvert.mtrktx.Level
 import be.catvert.mtrktx.MtrGame
-import be.catvert.mtrktx.ecs.EntityFactory
 import be.catvert.mtrktx.ecs.systems.RenderingSystem
-import be.catvert.mtrktx.plusAssign
+import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
-import ktx.app.KtxScreen
 import ktx.app.clearScreen
-import ktx.assets.loadOnDemand
-import ktx.scene2d.*
+import ktx.scene2d.textButton
+import ktx.scene2d.verticalGroup
+import ktx.scene2d.window
 
 /**
  * Created by arno on 03/06/17.
  */
 
 class MainMenuScene(game: MtrGame) : BaseScene(game, RenderingSystem(game)) {
+    override val entities: MutableList<Entity> = mutableListOf()
+
     init {
-        _engine += _game.getMainBackground()
-        _engine += _game.getLogo()
+        entities += _game.getMainBackground()
+        entities += _game.getLogo()
 
         _stage.addActor(window("Menu Principal") {
             setSize(200f, 200f)

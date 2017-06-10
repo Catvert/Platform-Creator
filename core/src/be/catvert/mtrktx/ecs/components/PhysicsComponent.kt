@@ -1,7 +1,6 @@
 package be.catvert.mtrktx.ecs.components
 
 import be.catvert.mtrktx.ecs.systems.physics.GridCell
-import com.badlogic.ashley.core.Component
 
 
 /**
