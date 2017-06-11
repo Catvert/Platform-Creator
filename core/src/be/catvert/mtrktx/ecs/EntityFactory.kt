@@ -5,6 +5,8 @@ import be.catvert.mtrktx.ecs.components.*
 import be.catvert.mtrktx.get
 import be.catvert.mtrktx.plusAssign
 import be.catvert.mtrktx.scenes.MainMenuScene
+import com.badlogic.ashley.core.Component
+import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
@@ -23,6 +25,9 @@ class EntityFactory {
     }
 
     companion object {
+        private val renderMapper = ComponentMapper.getFor(RenderComponent::class.java)
+        private val physicsMapper = ComponentMapper.getFor(PhysicsComponent::class.java)
+
         fun createSprite(rectangle: Rectangle, texture: Pair<FileHandle, Texture>): Entity {
             val entity = Entity()
             entity.flags = EntityType.Sprite.flag
@@ -46,36 +51,39 @@ class EntityFactory {
             entity.flags = EntityType.Player.flag
 
             val renderComp = entity.getComponent(RenderComponent::class.java)
+            renderComp.renderLayer = 1
             val physicsComp = entity.getComponent(PhysicsComponent::class.java)
             physicsComp.jumpData = JumpData(250)
 
-            entity += UpdateComponent(object : IUpdateable {
-                override fun update(deltaTime: Float) {
+            entity += UpdateComponent(entity, { delta, e ->
+                val render = renderMapper[e]
+                val physics = physicsMapper[e]
 
-                    if(Gdx.input.isKeyPressed(Input.Keys.D)) {
-                        renderComp.flipX = false
-                        physicsComp.nextActions += PhysicsComponent.NextActions.GO_RIGHT
-                    }
-                    if(Gdx.input.isKeyPressed(Input.Keys.Q)) {
-                        renderComp.flipX = true
-                        physicsComp.nextActions += PhysicsComponent.NextActions.GO_LEFT
-                    }
-                    if(Gdx.input.isKeyPressed(Input.Keys.Z)) {
-                        physicsComp.nextActions += PhysicsComponent.NextActions.GO_UP
-                    }
-                    if(Gdx.input.isKeyPressed(Input.Keys.S)) {
-                        physicsComp.nextActions += PhysicsComponent.NextActions.GO_DOWN
-                    }
-                    if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE))
-                        physicsComp.nextActions += PhysicsComponent.NextActions.JUMP
+                if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+                    render.flipX = false
+                    physics.nextActions += PhysicsComponent.NextActions.GO_RIGHT
                 }
+                if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
+                    render.flipX = true
+                    physics.nextActions += PhysicsComponent.NextActions.GO_LEFT
+                }
+                if (Gdx.input.isKeyPressed(Input.Keys.Z)) {
+                    physics.nextActions += PhysicsComponent.NextActions.GO_UP
+                }
+                if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+                    physics.nextActions += PhysicsComponent.NextActions.GO_DOWN
+                }
+                if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE))
+                    physics.nextActions += PhysicsComponent.NextActions.JUMP
             })
 
-            entity += LifeComponent(1, { hp -> // remove life event
-                if(hp == 0) {
+            entity += LifeComponent(entity, 1, { hp, e ->
+                // remove life event
+                if (hp == 0) {
                     game.setScene(MainMenuScene(game))
                 }
-            }, { hp -> // add life event
+            }, { hp, e ->
+                // add life event
 
             })
 

@@ -21,6 +21,16 @@ operator fun Entity.minusAssign(component: Class<out BaseComponent>) {
     this.remove(component)
 }
 
+fun Entity.copy(): Entity {
+    val entityCopy = Entity()
+    this.components.forEach {
+        if(it is BaseComponent) {
+            entityCopy += it.copy(entityCopy)
+        }
+    }
+    return entityCopy
+}
+
 operator fun <T: BaseComponent> Entity.get(component: Class<T>): T {
     return this.getComponent(component)
 }

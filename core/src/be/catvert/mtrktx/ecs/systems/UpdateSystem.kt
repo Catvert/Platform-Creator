@@ -26,8 +26,9 @@ class UpdateSystem() : BaseSystem() {
         super.update(deltaTime)
 
         entities.forEach {
-            if(updateMapper[it].active)
-                updateMapper[it].update(deltaTime)
+            val updateComp = updateMapper[it]
+            if(updateComp.active)
+                updateComp.update(deltaTime, updateComp.entity)
         }
     }
 }

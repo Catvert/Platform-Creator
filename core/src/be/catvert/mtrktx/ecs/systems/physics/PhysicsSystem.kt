@@ -84,14 +84,14 @@ class PhysicsSystem(private val level: Level, val gravity: Int = 15) : BaseSyste
                     }
                 }
             }
-            if (physicsComp.smoothMove != null) { // Smooth mode
-                physicsComp.smoothMove.targetMoveSpeedX = moveSpeedX
-                physicsComp.smoothMove.targetMoveSpeedY = moveSpeedY
+            if (physicsComp.smoothMoveData != null) { // Smooth mode
+                physicsComp.smoothMoveData.targetMoveSpeedX = moveSpeedX
+                physicsComp.smoothMoveData.targetMoveSpeedY = moveSpeedY
 
-                physicsComp.smoothMove.actualMoveSpeedX = MathUtils.lerp(physicsComp.smoothMove.actualMoveSpeedX, physicsComp.smoothMove.targetMoveSpeedX.toFloat(), 0.5f)
-                physicsComp.smoothMove.actualMoveSpeedY = MathUtils.lerp(physicsComp.smoothMove.actualMoveSpeedY, physicsComp.smoothMove.targetMoveSpeedY.toFloat(), 0.5f)
+                physicsComp.smoothMoveData.actualMoveSpeedX = MathUtils.lerp(physicsComp.smoothMoveData.actualMoveSpeedX, physicsComp.smoothMoveData.targetMoveSpeedX.toFloat(), 0.5f)
+                physicsComp.smoothMoveData.actualMoveSpeedY = MathUtils.lerp(physicsComp.smoothMoveData.actualMoveSpeedY, physicsComp.smoothMoveData.targetMoveSpeedY.toFloat(), 0.5f)
 
-                tryMove(physicsComp.smoothMove.actualMoveSpeedX.toInt(), physicsComp.smoothMove.actualMoveSpeedY.toInt(), entity)
+                tryMove(physicsComp.smoothMoveData.actualMoveSpeedX.toInt(), physicsComp.smoothMoveData.actualMoveSpeedY.toInt(), entity)
             } else { // NO smooth mode
                 tryMove(moveSpeedX, moveSpeedY, entity)
             }
