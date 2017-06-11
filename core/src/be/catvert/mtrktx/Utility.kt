@@ -4,13 +4,28 @@ import be.catvert.mtrktx.ecs.components.BaseComponent
 import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.core.EntitySystem
+import com.badlogic.gdx.files.FileHandle
 
 /**
  * Created by arno on 03/06/17.
  */
 
 class Utility() {
+    companion object {
+        fun getFilesRecursivly(dir: FileHandle, fileExt: String = ""): List<FileHandle> {
+            val files = mutableListOf<FileHandle>()
 
+            dir.list().forEach {
+                if(it.isDirectory)
+                    files += getFilesRecursivly(it)
+                else {
+                    if(fileExt.isBlank() || it.extension() == fileExt)
+                        files += it
+                }
+            }
+            return files
+        }
+    }
 }
 
 operator fun Entity.plusAssign(component: BaseComponent) {

@@ -27,6 +27,7 @@ class EntityFactory {
     companion object {
         private val renderMapper = ComponentMapper.getFor(RenderComponent::class.java)
         private val physicsMapper = ComponentMapper.getFor(PhysicsComponent::class.java)
+        private val transformMapper = ComponentMapper.getFor(TransformComponent::class.java)
 
         fun createSprite(rectangle: Rectangle, texture: Pair<FileHandle, Texture>): Entity {
             val entity = Entity()
@@ -47,12 +48,14 @@ class EntityFactory {
         }
 
         fun createPlayer(game: MtrGame, pos: Vector2): Entity {
-            val entity = createPhysicsSprite(Rectangle(pos.x, pos.y, 50f, 100f), game.getTexture(Gdx.files.internal("game/maryo/small/stand_right.png")), PhysicsComponent(false, 15, true))
+            val entity = createPhysicsSprite(Rectangle(pos.x, pos.y, 48f, 98f), game.getTexture(Gdx.files.internal("game/maryo/small/stand_right.png")), PhysicsComponent(false, 15, true))
             entity.flags = EntityType.Player.flag
 
-            val renderComp = entity.getComponent(RenderComponent::class.java)
+            transformMapper[entity].fixedSizeEditor = true
+
+            val renderComp = renderMapper[entity]
             renderComp.renderLayer = 1
-            val physicsComp = entity.getComponent(PhysicsComponent::class.java)
+            val physicsComp = physicsMapper[entity]
             physicsComp.jumpData = JumpData(250)
 
             entity += UpdateComponent(entity, { delta, e ->

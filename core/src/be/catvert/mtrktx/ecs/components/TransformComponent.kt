@@ -8,8 +8,8 @@ import com.badlogic.gdx.math.Rectangle
  * Created by arno on 03/06/17.
  */
 
-class TransformComponent(val rectangle: Rectangle, val gridCell: MutableList<GridCell> = mutableListOf()) : BaseComponent() {
+class TransformComponent(val rectangle: Rectangle, val gridCell: MutableList<GridCell> = mutableListOf(), var fixedSizeEditor: Boolean = false) : BaseComponent() {
     override fun copy(target: Entity): BaseComponent {
-        return TransformComponent(Rectangle(rectangle), mutableListOf())
+        return TransformComponent(Rectangle(rectangle), mutableListOf(), fixedSizeEditor)
     }
 }

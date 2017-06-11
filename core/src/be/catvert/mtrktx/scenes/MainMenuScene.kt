@@ -2,6 +2,7 @@ package be.catvert.mtrktx.scenes
 
 import be.catvert.mtrktx.LevelFactory
 import be.catvert.mtrktx.MtrGame
+import be.catvert.mtrktx.Utility
 import be.catvert.mtrktx.ecs.systems.RenderingSystem
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Gdx
@@ -51,9 +52,7 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, RenderingSystem(game)) {
                 return file.nameWithoutExtension()
             }
         }
-        val levelsPath = Gdx.files.internal("levels").list({ f -> f.isFile && f.extension == "mtrlvl"})
-
-        val levels = levelsPath.let {
+        val levelsPath = Utility.getFilesRecursivly(Gdx.files.internal("levels"), "mtrlvl").let {
             val list = mutableListOf<LevelItem>()
             it.forEach {
                 list += LevelItem(it)
@@ -62,7 +61,7 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, RenderingSystem(game)) {
         }
 
         val list = VisList<LevelItem>()
-        list.setItems(levels)
+        list.setItems(levelsPath)
 
         _stage.addActor(window("Sélection d'un niveau") window@ {
             isModal = true

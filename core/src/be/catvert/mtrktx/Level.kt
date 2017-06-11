@@ -15,7 +15,7 @@ import com.badlogic.gdx.math.Rectangle
  * Created by arno on 07/06/17.
  */
 
-class Level(var levelName: String, val player: Entity, val background: Pair<FileHandle, RenderComponent>, val levelFile: FileHandle, val loadedEntities: List<Entity>): IUpdateable {
+class Level(var levelName: String, val player: Entity, val background: Pair<FileHandle, RenderComponent>, val levelFile: FileHandle, val loadedEntities: MutableList<Entity>): IUpdateable {
     val camera: OrthographicCamera = OrthographicCamera()
 
     private val shapeRenderer = ShapeRenderer()
