@@ -20,12 +20,6 @@ class RenderingSystem(private val game: MtrGame) : BaseSystem() {
 
     private lateinit var entities: ImmutableArray<Entity>
 
-    override fun addedToEngine(engine: Engine?) {
-        super.addedToEngine(engine)
-        getEngine().createComponent(RenderComponent::class.java)
-        entities = getEngine().getEntitiesFor(Family.all(RenderComponent::class.java, TransformComponent::class.java).get())
-    }
-
     override fun update(deltaTime: Float) {
         super.update(deltaTime)
         entities = engine.getEntitiesFor(Family.all(RenderComponent::class.java, TransformComponent::class.java).get())
@@ -34,7 +28,7 @@ class RenderingSystem(private val game: MtrGame) : BaseSystem() {
                 if(transformMapper[it].active) {
                     val rect = transformMapper[it].rectangle
                     val renderComp = renderMapper[it]
-                    game.batch.draw(renderComp.texture, rect.x, rect.y, rect.width, rect.height, 0, 0, renderComp.texture.width, renderComp.texture.height, renderComp.flipX, renderComp.flipY)
+                    game.batch.draw(renderComp.texture.second, rect.x, rect.y, rect.width, rect.height, 0, 0, renderComp.texture.second.width, renderComp.texture.second.height, renderComp.flipX, renderComp.flipY)
                 }
             }
         }

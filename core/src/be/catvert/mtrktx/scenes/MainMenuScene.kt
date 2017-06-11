@@ -1,15 +1,18 @@
 package be.catvert.mtrktx.scenes
 
+import be.catvert.mtrktx.LevelFactory
 import be.catvert.mtrktx.MtrGame
 import be.catvert.mtrktx.ecs.systems.RenderingSystem
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.scenes.scene2d.InputEvent
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
+import com.kotcrab.vis.ui.widget.VisList
+import ktx.actors.onClick
 import ktx.app.clearScreen
-import ktx.scene2d.textButton
-import ktx.scene2d.verticalGroup
-import ktx.scene2d.window
+import ktx.collections.toGdxArray
+import ktx.vis.KVisTextButton
+import ktx.vis.window
 
 /**
  * Created by arno on 03/06/17.
@@ -30,29 +33,74 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, RenderingSystem(game)) {
                 space(10f)
 
                 textButton("Jouer") {
-                    addListener(object : ClickListener() {
-                        override fun clicked(event: InputEvent?, x: Float, y: Float) {
-                            super.clicked(event, x, y)
-                            _game.setScene(GameScene(_game, "levels/test.mtrlvl"))
-                        }
-                    })
+                    addListener(onClick { event: InputEvent, actor: KVisTextButton -> showSelectLevelsWindow() })
                 }
                 textButton("Options") {
 
                 }
                 textButton("Quitter") {
-                    addListener(object : ClickListener() {
-                        override fun clicked(event: InputEvent?, x: Float, y: Float) {
-                            super.clicked(event, x, y)
-                            Gdx.app.exit()
-                        }
-                    })
+                    addListener(onClick { event: InputEvent, actor: KVisTextButton -> Gdx.app.exit() })
                 }
             }
         })
     }
 
+    fun showSelectLevelsWindow() {
+        class LevelItem(val file: FileHandle) {
+            override fun toString(): String {
+                return file.nameWithoutExtension()
+            }
+        }
+        val levelsPath = Gdx.files.internal("levels").list({ f -> f.isFile && f.extension == "mtrlvl"})
 
+        val levels = levelsPath.let {
+            val list = mutableListOf<LevelItem>()
+            it.forEach {
+                list += LevelItem(it)
+            }
+            list.toGdxArray()
+        }
+
+        val list = VisList<LevelItem>()
+        list.setItems(levels)
+
+        _stage.addActor(window("Sélection d'un niveau") window@ {
+            isModal = true
+            setSize(400f, 400f)
+            setPosition(Gdx.graphics.width / 2f - width / 2, Gdx.graphics.height / 2f - height / 2)
+
+            horizontalGroup {
+                space(50f)
+                addActor(list)
+                verticalGroup {
+                    space(10f)
+                    textButton("Jouer") {
+                        addListener(onClick { event: InputEvent, actor: KVisTextButton ->
+                            if(list.selected != null) {
+                                val (success, level) = LevelFactory.loadLevel(_game, list.selected.file)
+                                if(success)
+                                    _game.setScene(GameScene(_game, level))
+                            }
+                        })
+                    }
+                    textButton("Éditer") {
+                        addListener(onClick { event: InputEvent, actor: KVisTextButton ->
+                            if(list.selected != null) {
+                                val (success, level) = LevelFactory.loadLevel(_game, list.selected.file)
+                                if(success)
+                                    _game.setScene(EditorScene(_game, level))
+                            }
+                        })
+                    }
+                    textButton("Fermer") {
+                        addListener(onClick { event: InputEvent, actor: KVisTextButton ->
+                            this@window.remove()
+                        })
+                    }
+                }
+            }
+        })
+    }
 
     override fun render(delta: Float) {
         clearScreen(186f/255f, 212f/255f, 1f)

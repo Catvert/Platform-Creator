@@ -1,6 +1,6 @@
 package be.catvert.mtrktx
 
-import com.badlogic.ashley.core.Component
+import be.catvert.mtrktx.ecs.components.BaseComponent
 import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.core.EntitySystem
@@ -13,12 +13,16 @@ class Utility() {
 
 }
 
-operator fun Entity.plusAssign(component: Component) {
+operator fun Entity.plusAssign(component: BaseComponent) {
     this.add(component)
 }
 
-operator fun Entity.minusAssign(component: Class<out Component>) {
+operator fun Entity.minusAssign(component: Class<out BaseComponent>) {
     this.remove(component)
+}
+
+operator fun <T: BaseComponent> Entity.get(component: Class<T>): T {
+    return this.getComponent(component)
 }
 
 operator fun Engine.plusAssign(entity: Entity) {

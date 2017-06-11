@@ -1,13 +1,12 @@
 package be.catvert.mtrktx
 
 import be.catvert.mtrktx.ecs.IUpdateable
-import be.catvert.mtrktx.ecs.components.BaseComponent
-import be.catvert.mtrktx.ecs.components.PhysicsComponent
-import be.catvert.mtrktx.ecs.components.TransformComponent
+import be.catvert.mtrktx.ecs.components.*
 import be.catvert.mtrktx.ecs.systems.physics.GridCell
 import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
@@ -16,8 +15,8 @@ import com.badlogic.gdx.math.Rectangle
  * Created by arno on 07/06/17.
  */
 
-class Level(var levelName: String, val player: Entity, loadedEntities: List<Entity>): IUpdateable {
-    val camera: OrthographicCamera
+class Level(var levelName: String, val player: Entity, val background: Pair<FileHandle, RenderComponent>, val levelFile: FileHandle, val loadedEntities: List<Entity>): IUpdateable {
+    val camera: OrthographicCamera = OrthographicCamera()
 
     private val shapeRenderer = ShapeRenderer()
 
@@ -26,26 +25,27 @@ class Level(var levelName: String, val player: Entity, loadedEntities: List<Enti
     private val sizeGridCell = 200f
 
     val matrixGrid = matrix2d(matrixSizeX, matrixSizeY, { row: Int, width: Int -> Array(width) { col -> Pair(mutableListOf<Entity>(), Rectangle(row.toFloat() * sizeGridCell, col.toFloat() * sizeGridCell, sizeGridCell, sizeGridCell)) } })
-    private val matrixRect = Rectangle(0f, 0f, sizeGridCell * matrixSizeX, sizeGridCell * matrixSizeY)
+    val matrixRect = Rectangle(0f, 0f, sizeGridCell * matrixSizeX, sizeGridCell * matrixSizeY)
 
     private val activeGridCells = mutableListOf<GridCell>()
     fun getActiveGridCells(): List<GridCell> = activeGridCells
 
-    val playerRect = Rectangle(player.getComponent(TransformComponent::class.java).rectangle)
+    val activeRect = Rectangle(player.getComponent(TransformComponent::class.java).rectangle)
 
     private val transformMapper = ComponentMapper.getFor(TransformComponent::class.java)
     private val physicsMapper = ComponentMapper.getFor(PhysicsComponent::class.java)
+    private val lifeMapper = ComponentMapper.getFor(LifeComponent::class.java)
 
     var drawDebugCells = false
-
     var followPlayerCamera = true
+    var killEntityUnderY = true
+    var applyGravity = true
 
     private val transformPlayer: TransformComponent = player.getComponent(TransformComponent::class.java)
 
     init {
-        camera = OrthographicCamera()
         camera.setToOrtho(false, 1280f, 720f)
-        playerRect.setSize(Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
+        activeRect.setSize(Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
 
         loadedEntities.forEach {
             setEntityGrid(it) // Besoin de setGrid car les entités n'ont pas encore été ajoutée à la matrix
@@ -66,12 +66,12 @@ class Level(var levelName: String, val player: Entity, loadedEntities: List<Enti
         if (drawDebugCells) {
             shapeRenderer.projectionMatrix = camera.combined
             shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
-            matrixGrid.forEachIndexed { x, it ->
-                it.forEachIndexed { y, it ->
+            matrixGrid.forEach {
+                it.forEach{
                     shapeRenderer.rect(it.second.x, it.second.y, it.second.width, it.second.height)
                 }
             }
-            shapeRenderer.rect(playerRect.x, playerRect.y, playerRect.width, playerRect.height)
+            shapeRenderer.rect(activeRect.x, activeRect.y, activeRect.width, activeRect.height)
             shapeRenderer.end()
         }
     }
@@ -89,12 +89,18 @@ class Level(var levelName: String, val player: Entity, loadedEntities: List<Enti
 
         activeGridCells.clear()
 
-        activeGridCells.addAll(getRectCells(playerRect))
+        activeGridCells.addAll(getRectCells(activeRect))
 
         activeGridCells.forEach {
-            matrixGrid[it.x][it.y].first.forEach {
-                it.components.filter { c -> c is BaseComponent }.forEach {
+            for(i in 0 until matrixGrid[it.x][it.y].first.size) {
+                val entity = matrixGrid[it.x][it.y].first[i]
+                entity.components.filter { c -> c is BaseComponent }.forEach {
                     (it as BaseComponent).active = true
+                    if(killEntityUnderY && it is TransformComponent && it.rectangle.y < 0) {
+                        if(lifeMapper.has(entity))
+                            lifeMapper[entity].killInstant()
+                        removeEntity(entity)
+                    }
                 }
             }
         }
@@ -146,20 +152,25 @@ class Level(var levelName: String, val player: Entity, loadedEntities: List<Enti
         }
     }
 
+    fun removeEntity(entity: Entity) {
+        transformMapper[entity].gridCell.forEach {
+            matrixGrid[it.x][it.y].first.remove(entity)
+        }
+    }
+
     fun setEntityGrid(entity: Entity) {
         val transformComp = transformMapper[entity]
-        val physicsComp = physicsMapper[entity]
 
         fun addEntityTo(cell: GridCell) {
             matrixGrid[cell.x][cell.y].first.add(entity)
-            physicsComp.gridCell.add(cell)
+            transformComp.gridCell.add(cell)
         }
 
-        physicsComp.gridCell.forEach {
+        transformComp.gridCell.forEach {
             matrixGrid[it.x][it.y].first.remove(entity)
         }
 
-        physicsComp.gridCell.clear()
+        transformComp.gridCell.clear()
 
         getRectCells(transformComp.rectangle).forEach {
             addEntityTo(it)

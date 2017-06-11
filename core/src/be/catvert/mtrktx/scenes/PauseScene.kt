@@ -7,9 +7,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import ktx.app.clearScreen
-import ktx.scene2d.textButton
-import ktx.scene2d.verticalGroup
-import ktx.scene2d.window
+import ktx.vis.window
 
 /**
  * Created by arno on 05/06/17.

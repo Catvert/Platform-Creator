@@ -69,7 +69,8 @@ abstract class BaseScene(protected val _game: MtrGame, vararg systems: EntitySys
 
     override fun dispose() {
         super.dispose()
-
+        _engine.removeAllEntities()
+        entities.clear()
         _stage.dispose()
     }
 
