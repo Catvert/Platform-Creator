@@ -12,7 +12,6 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
@@ -28,15 +27,10 @@ import com.kotcrab.vis.ui.widget.*
 import ktx.actors.contains
 import ktx.actors.onChange
 import ktx.actors.onClick
-import ktx.actors.plus
 import ktx.app.clearScreen
 import ktx.app.use
 import ktx.collections.toGdxArray
-import ktx.math.minus
-import ktx.math.unaryMinus
-import ktx.vis.KVisImageTextButton
 import ktx.vis.KVisTextButton
-import ktx.vis.stack
 import ktx.vis.window
 
 /**
@@ -45,10 +39,10 @@ import ktx.vis.window
 
 class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, RenderingSystem(game)) {
     private enum class EditorMode {
-        NoMode, SelectEntity, CopyEntity, Rectangle
+        NoMode, SelectEntity, CopyEntity
     }
 
-    private data class RectangleMode(var startPosition: Vector2, var endPosition: Vector2, var entities: List<Entity>, var rectangleStarted: Boolean = false, var movingEntities: Boolean = false) {
+    private data class RectangleMode(var startPosition: Vector2, var endPosition: Vector2, var rectangleStarted: Boolean = false) {
         fun getRectangle(): Rectangle {
             val minX = Math.min(startPosition.x, endPosition.x)
             val minY = Math.min(startPosition.y, endPosition.y)
@@ -70,17 +64,25 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
 
     private val maxEntitySize = 500f
 
-    private var selectEntity: Pair<Entity, TransformComponent>? = null
-        set(value) {
-            field = value
-            onSelectEntityChanged.dispatch(selectEntity)
+    private val selectEntities: MutableSet<Entity> = mutableSetOf()
 
-            if (value == null)
-                editorMode = EditorMode.NoMode
-            else
-                editorMode = EditorMode.SelectEntity
-        }
-    private var onSelectEntityChanged: Signal<Pair<Entity, TransformComponent>?> = Signal()
+    private fun addSelectEntity(entity: Entity) {
+        selectEntities += entity
+        if (selectEntities.size == 1) {
+            onSelectEntityChanged.dispatch(entity)
+        } else
+            onSelectEntityChanged.dispatch(null)
+
+        editorMode = EditorMode.SelectEntity
+    }
+
+    private fun clearSelectEntities() {
+        selectEntities.clear()
+        onSelectEntityChanged.dispatch(null)
+        editorMode = EditorMode.NoMode
+    }
+
+    private var onSelectEntityChanged: Signal<Entity?> = Signal()
     private var onSelectEntityMoved: Signal<TransformComponent> = Signal()
 
     private var copyEntity: Entity? = null
@@ -94,7 +96,7 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
         }
     private var deleteEntityAfterCopying = false
 
-    private val rectangleMode = RectangleMode(Vector2(), Vector2(), listOf())
+    private val rectangleMode = RectangleMode(Vector2(), Vector2())
 
     private var editorMode: EditorMode = EditorMode.NoMode
 
@@ -145,7 +147,7 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
         when (editorMode) {
             EditorScene.EditorMode.NoMode -> {
-                if(rectangleMode.rectangleStarted) {
+                if (rectangleMode.rectangleStarted) {
                     shapeRenderer.color = Color.BLUE
                     val rect = rectangleMode.getRectangle()
                     shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height)
@@ -153,19 +155,15 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
             }
             EditorScene.EditorMode.SelectEntity -> {
                 shapeRenderer.color = Color.RED
-                shapeRenderer.rect(selectEntity!!.second.rectangle.x, selectEntity!!.second.rectangle.y, selectEntity!!.second.rectangle.width, selectEntity!!.second.rectangle.height)
+                selectEntities.forEach {
+                    val transform = transformMapper[it]
+                    shapeRenderer.rect(transform.rectangle.x, transform.rectangle.y, transform.rectangle.width, transform.rectangle.height)
+                }
             }
             EditorScene.EditorMode.CopyEntity -> {
                 if (copyEntity != null) {
                     val transform = transformMapper[copyEntity]
                     shapeRenderer.color = Color.GREEN
-                    shapeRenderer.rect(transform.rectangle.x, transform.rectangle.y, transform.rectangle.width, transform.rectangle.height)
-                }
-            }
-            EditorScene.EditorMode.Rectangle -> {
-                shapeRenderer.color = Color.RED
-                rectangleMode.entities.forEach {
-                    val transform = transformMapper[it]
                     shapeRenderer.rect(transform.rectangle.x, transform.rectangle.y, transform.rectangle.width, transform.rectangle.height)
                 }
             }
@@ -215,49 +213,27 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
 
         if (!UIHover) {
 
-            if (Gdx.input.isKeyJustPressed(Input.Keys.DEL)) {
-                if(editorMode == EditorMode.Rectangle) {
-                    rectangleMode.entities.forEach {
-                        removeEntityFromLevel(it)
-                    }
-                    rectangleMode.entities = listOf()
-                }
-                else {
-                    val entity = findEntityUnderMouse()
-                    if (entity != null) {
-                        removeEntityFromLevel(entity)
-                    }
-                }
-            }
-
             when (editorMode) {
                 EditorScene.EditorMode.NoMode -> {
                     if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-                        if(latestLeftButtonClick) { // Rectangle
+                        if (latestLeftButtonClick) { // Rectangle
                             rectangleMode.endPosition = Vector2(mousePosInWorld.x, mousePosInWorld.y)
-                        }
-                        else { // Select
+                        } else { // Select
                             val entity = findEntityUnderMouse()
-                            if (entity != null) {
-                                val transform = transformMapper[entity]
-                                selectEntity = Pair(entity, transform)
-                            }
+                            if (entity != null)
+                                addSelectEntity(entity)
                             else { // Maybe rectangle
                                 rectangleMode.rectangleStarted = true
                                 rectangleMode.startPosition = Vector2(mousePosInWorld.x, mousePosInWorld.y)
                                 rectangleMode.endPosition = rectangleMode.startPosition
                             }
                         }
-                    }
-                    else if(latestLeftButtonClick) { // left button released on this frame
+                    } else if (latestLeftButtonClick && rectangleMode.rectangleStarted) { // left button released on this frame
                         rectangleMode.rectangleStarted = false
 
-                        val entities = level.getAllEntitiesInRect(rectangleMode.getRectangle(), false)
-                        if(entities.isNotEmpty()) {
-                            rectangleMode.entities = entities
-                            editorMode = EditorMode.Rectangle
+                        level.getAllEntitiesInRect(rectangleMode.getRectangle(), false).forEach {
+                            addSelectEntity(it)
                         }
-
                     }
 
                     if (Gdx.input.isKeyJustPressed(Input.Keys.C)) {
@@ -266,49 +242,86 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
                             copyEntity = entity
                         }
                     }
+
+                    if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
+                        val entity = findEntityUnderMouse()
+                        if (entity != null) {
+                            removeEntityFromLevel(entity)
+                        }
+                    }
                 }
                 EditorScene.EditorMode.SelectEntity -> {
+                    fun moveEntities(moveX: Float, moveY: Float) {
+                        if (selectEntities.let {
+                            var result = true
+                            it.forEach {
+                                val transform = transformMapper[it]
+                                if (!level.matrixRect.contains(Rectangle(transform.rectangle.x + moveX, transform.rectangle.y + moveY, transform.rectangle.width, transform.rectangle.height))) {
+                                    result = false
+                                }
+                            }
+                            result
+                        }) {
+                            selectEntities.forEach {
+                                val transform = transformMapper[it]
+                                transform.rectangle.x += moveX
+                                transform.rectangle.y += moveY
+                                level.setEntityGrid(it)
+                            }
+                            if(selectEntities.size == 1)
+                                onSelectEntityMoved.dispatch(transformMapper[selectEntities.elementAt(0)])
+                        }
+                    }
+
                     if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
                         if (!latestLeftButtonClick) {
                             val entity = findEntityUnderMouse()
-                            if (entity == null) selectEntity = null else selectEntity = Pair(entity, transformMapper[entity])
+                            if (entity == null) {
+                                clearSelectEntities()
+                            }
+                            else if(selectEntities.isEmpty() || Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT))
+                            {
+                                addSelectEntity(entity)
+                            }
+                            else if(!selectEntities.contains(entity)) {
+                                clearSelectEntities()
+                                addSelectEntity(entity)
+                            }
                         }
+                        else if(mousePos != latestMousePos) {
+                            val lastPosMouseInWorld = level.camera.unproject(Vector3(latestMousePos.x, latestMousePos.y, 0f))
 
-                        if (selectEntity != null && mousePos != latestMousePos) {
-                            val mousePosX = Math.min(level.matrixRect.width - selectEntity!!.second.rectangle.width, // Les min et max permettent de rester dans le cadre du matrix
-                                    Math.max(0f, mousePosInWorld.x - selectEntity!!.second.rectangle.width / 2))
-                            val mousePosY = Math.min(level.matrixRect.height - selectEntity!!.second.rectangle.height,
-                                    Math.max(0f, mousePosInWorld.y - selectEntity!!.second.rectangle.height / 2))
+                            val moveX = lastPosMouseInWorld.x - mousePosInWorld.x
+                            val moveY = lastPosMouseInWorld.y - mousePosInWorld.y
 
-                            selectEntity!!.second.rectangle.setPosition(mousePosX, mousePosY)
-
-                            level.setEntityGrid(selectEntity!!.first)
-                            onSelectEntityMoved.dispatch(selectEntity!!.second)
+                            moveEntities(-moveX, -moveY)
+                        }
+                    } else if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
+                        clearSelectEntities()
+                    } else {
+                        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+                            moveEntities(-1f, 0f)
+                        }
+                        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+                            moveEntities(1f, 0f)
+                        }
+                        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+                            moveEntities(0f, 1f)
+                        }
+                        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+                            moveEntities(0f, -1f)
                         }
                     }
-                    else if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
-                        selectEntity = null
-                    }
-                    else if(selectEntity != null){
-                        if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-                            selectEntity!!.second.rectangle.x--
-                        }
-                        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-                            selectEntity!!.second.rectangle.x++
-                        }
-                        if(Gdx.input.isKeyPressed(Input.Keys.UP)) {
-                            selectEntity!!.second.rectangle.y++
-                        }
-                        if(Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-                            selectEntity!!.second.rectangle.y--
-                        }
 
-                        level.setEntityGrid(selectEntity!!.first)
-                        onSelectEntityMoved.dispatch(selectEntity!!.second)
+                    if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
+                        selectEntities.forEach {
+                            removeEntityFromLevel(it)
+                        }
+                        clearSelectEntities()
                     }
                 }
                 EditorScene.EditorMode.CopyEntity -> {
-                    if(Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+                    if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
                         val entity = findEntityUnderMouse()
                         if (entity?.flags != EntityFactory.EntityType.Player.flag) {
                             copyEntity = entity
@@ -325,17 +338,13 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
 
                         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
                             posX -= transform.rectangle.width
-                        }
-                        else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+                        } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
                             posX += transform.rectangle.width
-                        }
-                        else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+                        } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
                             posY -= transform.rectangle.height
-                        }
-                        else if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+                        } else if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
                             posY += transform.rectangle.height
-                        }
-                        else {
+                        } else {
                             posX = Math.min(level.matrixRect.width - transform.rectangle.width, // Les min et max permettent de rester dans le cadre du matrix
                                     Math.max(0f, mousePosInWorld.x - transform.rectangle.width / 2))
                             posY = Math.min(level.matrixRect.height - transform.rectangle.height,
@@ -347,10 +356,10 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
                         transform.rectangle.setPosition(posX, posY)
                         addEntityToLevel(newEntity)
 
-                        if(moveToNextEntity)
+                        if (moveToNextEntity)
                             copyEntity = newEntity
 
-                        if(deleteEntityAfterCopying) {
+                        if (deleteEntityAfterCopying) {
                             removeEntityFromLevel(copyEntity!!)
                             copyEntity = null
                             deleteEntityAfterCopying = false
@@ -358,42 +367,6 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
                     } else if (Gdx.input.isKeyJustPressed(Input.Keys.C)) {
                         copyEntity = null
                     }
-                }
-                EditorScene.EditorMode.Rectangle -> {
-                    if(Gdx.input.isButtonPressed(Input.Buttons.RIGHT))
-                        editorMode = EditorMode.NoMode
-                    if(Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-                        if(latestLeftButtonClick && rectangleMode.movingEntities) {
-                            val lastPosMouseInWorld = level.camera.unproject(Vector3(latestMousePos.x, latestMousePos.y, 0f))
-
-                            val moveX = lastPosMouseInWorld.x - mousePosInWorld.x
-                            val moveY = lastPosMouseInWorld.y - mousePosInWorld.y
-
-                            if(rectangleMode.entities.let {
-                                var result = true
-                                it.forEach {
-                                    val transform = transformMapper[it]
-                                    if(!level.matrixRect.contains(Rectangle(transform.rectangle.x - moveX, transform.rectangle.y - moveY, transform.rectangle.width, transform.rectangle.height))) {
-                                        result = false
-                                    }
-                                }
-                                result
-                            }) {
-                                rectangleMode.entities.forEach {
-                                    val transform = transformMapper[it]
-                                    transform.rectangle.x -= moveX
-                                    transform.rectangle.y -= moveY
-
-                                    level.setEntityGrid(it)
-                                }
-                            }
-                        }
-                        else {
-                            val entityUnderMouse = findEntityUnderMouse()
-                            rectangleMode.movingEntities = entityUnderMouse != null && rectangleMode.entities.contains(entityUnderMouse) &&  mousePos != latestMousePos
-                        }
-                    }
-
                 }
             }
         }
@@ -409,7 +382,7 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
     }
 
     fun removeEntityFromLevel(entity: Entity) {
-        if(entity.flags != EntityFactory.EntityType.Player.flag) {
+        if (entity.flags != EntityFactory.EntityType.Player.flag) {
             level.loadedEntities -= entity
             level.removeEntity(entity)
         }
@@ -463,14 +436,14 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
                             table.add(image).size(50f, 50f).space(10f)
 
                             ++count
-                            if(count >= 5) {
+                            if (count >= 5) {
                                 table.row()
                                 count = 0
                             }
                         }
                     })
 
-                    if(items.size > 1) { // Permet de mettre a jour les acteurs pour créer l'entités
+                    if (items.size > 1) { // Permet de mettre a jour les acteurs pour créer l'entités
                         selectedIndex = 1
                         selectedIndex = 0
                     }
@@ -488,7 +461,7 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
 
                 textButton("Sélectionner") {
                     addListener(onClick { event: InputEvent, actor: KVisTextButton ->
-                        if(selectedImage.userObject != null) {
+                        if (selectedImage.userObject != null) {
                             onTextureSelected(selectedImage.userObject as Pair<FileHandle, Texture>)
                             this@window.remove()
                         }
@@ -650,17 +623,15 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
                 textButton("Supprimer l'entité sélectionnée") {
                     onSelectEntityChanged.add { signal, selectEntity ->
                         this.touchable =
-                                if (selectEntity == null || selectEntity.first.flags == EntityFactory.EntityType.Player.flag)
+                                if (selectEntity == null || selectEntity.flags == EntityFactory.EntityType.Player.flag)
                                     Touchable.disabled
                                 else
                                     Touchable.enabled
                     }
 
                     addListener(onClick { event: InputEvent, actor: KVisTextButton ->
-                        if (selectEntity != null) {
-                            removeEntityFromLevel(selectEntity!!.first)
-                            selectEntity = null
-                        }
+                        removeEntityFromLevel(selectEntities.elementAt(0))
+                        clearSelectEntities()
                     })
                 }
 
@@ -671,7 +642,7 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
                             if (selectEntity == null) {
                                 this.text = ""
                             } else {
-                                this.text = selectEntity.second.rectangle.x.toInt().toString()
+                                this.text = transformMapper[selectEntity].rectangle.x.toInt().toString()
                             }
 
                             this.isReadOnly = selectEntity == null
@@ -681,10 +652,10 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
                         }
 
                         addListener(onChange { event: ChangeListener.ChangeEvent, actor: VisTextField ->
-                            if (selectEntity != null) {
+                            if (!isReadOnly) {
                                 if (text.toIntOrNull() != null) {
                                     if (level.matrixRect.contains(text.toInt().toFloat(), 0f))
-                                        selectEntity!!.second.rectangle.x = text.toInt().toFloat()
+                                        transformMapper[selectEntities.elementAt(0)].rectangle.x = text.toInt().toFloat()
                                 }
                             }
                         })
@@ -697,7 +668,7 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
                             if (selectEntity == null) {
                                 this.text = ""
                             } else {
-                                this.text = selectEntity.second.rectangle.y.toInt().toString()
+                                this.text = transformMapper[selectEntity].rectangle.y.toInt().toString()
                             }
 
                             this.isReadOnly = selectEntity == null
@@ -707,10 +678,10 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
                         }
 
                         addListener(onChange { event: ChangeListener.ChangeEvent, actor: VisTextField ->
-                            if (selectEntity != null) {
+                            if (!isReadOnly) {
                                 if (text.toIntOrNull() != null) {
                                     if (level.matrixRect.contains(0f, text.toInt().toFloat()))
-                                        selectEntity!!.second.rectangle.y = text.toInt().toFloat()
+                                        transformMapper[selectEntities.elementAt(0)].rectangle.y = text.toInt().toFloat()
                                 }
                             }
                         })
@@ -723,17 +694,18 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
                             if (selectEntity == null) {
                                 this.text = ""
                             } else {
-                                this.text = selectEntity.second.rectangle.width.toInt().toString()
+                                this.text = transformMapper[selectEntity].rectangle.width.toInt().toString()
                             }
 
                             this.isReadOnly = selectEntity == null
                         }
 
                         addListener(onChange { event: ChangeListener.ChangeEvent, actor: VisTextField ->
-                            if (selectEntity != null && !selectEntity!!.second.fixedSizeEditor) {
+                            if (!this.isReadOnly) {
+                                val transform = transformMapper[selectEntities.elementAt(0)]
                                 val width = text.toIntOrNull()
-                                if (width != null && width > 0 && width <= maxEntitySize) {
-                                    selectEntity!!.second.rectangle.width = width.toFloat()
+                                if (width != null && width > 0 && width <= maxEntitySize && !transform.fixedSizeEditor) {
+                                    transform.rectangle.width = width.toFloat()
                                 }
                             }
                         })
@@ -746,17 +718,18 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
                             if (selectEntity == null) {
                                 this.text = ""
                             } else {
-                                this.text = selectEntity.second.rectangle.height.toInt().toString()
+                                this.text = transformMapper[selectEntity].rectangle.height.toInt().toString()
                             }
 
                             this.isReadOnly = selectEntity == null
                         }
 
                         addListener(onChange { event: ChangeListener.ChangeEvent, actor: VisTextField ->
-                            if (selectEntity != null && !selectEntity!!.second.fixedSizeEditor) {
+                            if (!this.isReadOnly) {
+                                val transform = transformMapper[selectEntities.elementAt(0)]
                                 val height = text.toIntOrNull()
-                                if (height != null && height > 0 && height <= maxEntitySize) {
-                                    selectEntity!!.second.rectangle.height = height.toFloat()
+                                if (height != null && height > 0 && height <= maxEntitySize && !transform.fixedSizeEditor) {
+                                    transform.rectangle.height = height.toFloat()
                                 }
                             }
                         })
