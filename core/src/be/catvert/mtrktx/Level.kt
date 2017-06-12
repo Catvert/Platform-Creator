@@ -9,6 +9,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.math.Intersector
 import com.badlogic.gdx.math.Rectangle
 
 /**
@@ -181,9 +182,28 @@ class Level(var levelName: String, val player: Entity, val background: Pair<File
     fun getAllEntitiesInCells(cells: List<GridCell>): List<Entity> {
         val list = mutableListOf<Entity>()
         cells.forEach {
-            list.addAll(matrixGrid[it.x][it.y].first)
+            list += matrixGrid[it.x][it.y].first
         }
         return list
+    }
+
+    fun getAllEntitiesInRect(rect: Rectangle, overlaps: Boolean = true): List<Entity> {
+        val list = mutableSetOf<Entity>()
+        val gridCells = getRectCells(rect)
+        gridCells.forEach {
+            matrixGrid[it.x][it.y].first.forEach {
+                if(overlaps) {
+                    if(rect.overlaps(transformMapper[it].rectangle))
+                        list += it
+                }
+                else {
+                    if(rect.contains(transformMapper[it].rectangle))
+                        list += it
+                }
+
+            }
+        }
+        return list.toList()
     }
 
 }
