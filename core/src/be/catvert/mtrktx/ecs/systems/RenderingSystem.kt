@@ -4,7 +4,6 @@ import be.catvert.mtrktx.MtrGame
 import be.catvert.mtrktx.ecs.components.RenderComponent
 import be.catvert.mtrktx.ecs.components.TransformComponent
 import com.badlogic.ashley.core.ComponentMapper
-import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.core.Family
 import com.badlogic.ashley.utils.ImmutableArray

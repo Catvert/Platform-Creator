@@ -19,7 +19,7 @@ import ktx.vis.window
  * Created by arno on 03/06/17.
  */
 
-class MainMenuScene(game: MtrGame) : BaseScene(game, RenderingSystem(game)) {
+class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(game)) {
     override val entities: MutableList<Entity> = mutableListOf()
 
     init {
@@ -76,18 +76,18 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, RenderingSystem(game)) {
                     textButton("Jouer") {
                         addListener(onClick { event: InputEvent, actor: KVisTextButton ->
                             if(list.selected != null) {
-                                val (success, level) = LevelFactory.loadLevel(_game, list.selected.file)
+                                val (success, level, entityEvent) = LevelFactory.loadLevel(_game, list.selected.file)
                                 if(success)
-                                    _game.setScene(GameScene(_game, level))
+                                    _game.setScene(GameScene(_game, entityEvent, level))
                             }
                         })
                     }
                     textButton("Éditer") {
                         addListener(onClick { event: InputEvent, actor: KVisTextButton ->
                             if(list.selected != null) {
-                                val (success, level) = LevelFactory.loadLevel(_game, list.selected.file)
+                                val (success, level, entityEvent) = LevelFactory.loadLevel(_game, list.selected.file)
                                 if(success)
-                                    _game.setScene(EditorScene(_game, level))
+                                    _game.setScene(EditorScene(_game, entityEvent, level))
                             }
                         })
                     }

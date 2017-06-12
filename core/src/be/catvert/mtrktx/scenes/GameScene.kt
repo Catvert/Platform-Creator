@@ -2,6 +2,7 @@ package be.catvert.mtrktx.scenes
 
 import be.catvert.mtrktx.Level
 import be.catvert.mtrktx.MtrGame
+import be.catvert.mtrktx.ecs.EntityEvent
 import be.catvert.mtrktx.ecs.components.TransformComponent
 import be.catvert.mtrktx.ecs.systems.RenderingSystem
 import be.catvert.mtrktx.ecs.systems.UpdateSystem
@@ -17,12 +18,17 @@ import ktx.app.use
  * Created by arno on 03/06/17.
  */
 
-class GameScene(game: MtrGame, private val level: Level) : BaseScene(game, RenderingSystem(game), UpdateSystem(), PhysicsSystem(level)) {
+class GameScene(game: MtrGame, entityEvent: EntityEvent, private val level: Level) : BaseScene(game, entityEvent, RenderingSystem(game), UpdateSystem(level), PhysicsSystem(level)) {
     override val entities: MutableList<Entity> = mutableListOf()
 
     private val cameraMoveSpeed = 10f
 
     private val transformPlayer = level.player.getComponent(TransformComponent::class.java)
+
+    init {
+        _entityEvent.onEntityAdded = { entity -> level.addEntity(entity) }
+        _entityEvent.onEntityRemoved = { entity -> level.removeEntity(entity) }
+    }
 
     override fun render(delta: Float) {
         clearScreen(186f/255f, 212f/255f, 1f)

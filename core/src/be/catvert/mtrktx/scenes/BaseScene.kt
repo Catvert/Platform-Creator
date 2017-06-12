@@ -1,11 +1,10 @@
 package be.catvert.mtrktx.scenes
 
 import be.catvert.mtrktx.MtrGame
+import be.catvert.mtrktx.ecs.EntityEvent
 import be.catvert.mtrktx.ecs.systems.BaseSystem
-import be.catvert.mtrktx.ecs.systems.EntityEventSystem
 import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
-import com.badlogic.ashley.core.EntityListener
 import com.badlogic.ashley.core.EntitySystem
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.Stage
@@ -17,11 +16,11 @@ import ktx.app.KtxScreen
  * Created by arno on 03/06/17.
  */
 
-abstract class BaseScene(protected val _game: MtrGame, vararg systems: EntitySystem) : KtxScreen {
+abstract class BaseScene(protected val _game: MtrGame, protected val _entityEvent: EntityEvent = EntityEvent(), vararg systems: EntitySystem) : KtxScreen {
+    protected val _engine: Engine = Engine()
+
     protected val _viewPort: Viewport
     protected val _stage: Stage
-
-    private val _engine = Engine()
 
     protected abstract val entities: MutableList<Entity>
 
@@ -30,22 +29,6 @@ abstract class BaseScene(protected val _game: MtrGame, vararg systems: EntitySys
         _stage = Stage(_viewPort, _game.batch)
 
         Gdx.input.inputProcessor = _stage
-
-        _engine.addEntityListener(object : EntityListener {
-            override fun entityAdded(entity: Entity?) {
-                _engine.systems.forEach {
-                    if(it is EntityEventSystem && entity != null)
-                        it.onEntityAdded(entity)
-                }
-            }
-
-            override fun entityRemoved(entity: Entity?) {
-                _engine.systems.forEach {
-                    if(it is EntityEventSystem && entity != null)
-                        it.onEntityRemoved(entity)
-                }
-            }
-        })
 
         for(system in systems)
             _engine.addSystem(system)
@@ -75,8 +58,4 @@ abstract class BaseScene(protected val _game: MtrGame, vararg systems: EntitySys
     }
 
     open fun updateInputs() {}
-
-    fun addSystem(system: BaseSystem) {
-        _engine.addSystem(system)
-    }
 }

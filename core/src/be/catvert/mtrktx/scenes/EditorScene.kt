@@ -1,7 +1,9 @@
 package be.catvert.mtrktx.scenes
 
 import be.catvert.mtrktx.*
+import be.catvert.mtrktx.ecs.EntityEvent
 import be.catvert.mtrktx.ecs.EntityFactory
+import be.catvert.mtrktx.ecs.components.EnemyType
 import be.catvert.mtrktx.ecs.components.PhysicsComponent
 import be.catvert.mtrktx.ecs.components.TransformComponent
 import be.catvert.mtrktx.ecs.systems.RenderingSystem
@@ -37,7 +39,7 @@ import ktx.vis.window
  * Created by arno on 10/06/17.
  */
 
-class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, RenderingSystem(game)) {
+class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Level) : BaseScene(game, entityEvent, systems = RenderingSystem(game)) {
     private enum class EditorMode {
         NoMode, SelectEntity, CopyEntity
     }
@@ -124,7 +126,7 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
                 UIHover = false
                 super.exit(event, x, y, pointer, toActor)
             }
-        })
+        }) // UI Hover
     }
 
     override fun render(delta: Float) {
@@ -206,6 +208,7 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
         if (Gdx.input.isKeyJustPressed(Input.Keys.F12)) {
             level.drawDebugCells = !level.drawDebugCells
         }
+
         level.camera.update()
 
         val mousePos = Vector2(Gdx.input.x.toFloat(), Gdx.input.y.toFloat())
@@ -268,7 +271,7 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
                                 transform.rectangle.y += moveY
                                 level.setEntityGrid(it)
                             }
-                            if(selectEntities.size == 1)
+                            if (selectEntities.size == 1)
                                 onSelectEntityMoved.dispatch(transformMapper[selectEntities.elementAt(0)])
                         }
                     }
@@ -278,17 +281,13 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
                             val entity = findEntityUnderMouse()
                             if (entity == null) {
                                 clearSelectEntities()
-                            }
-                            else if(selectEntities.isEmpty() || Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT))
-                            {
+                            } else if (selectEntities.isEmpty() || Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {
                                 addSelectEntity(entity)
-                            }
-                            else if(!selectEntities.contains(entity)) {
+                            } else if (!selectEntities.contains(entity)) {
                                 clearSelectEntities()
                                 addSelectEntity(entity)
                             }
-                        }
-                        else if(mousePos != latestMousePos) {
+                        } else if (mousePos != latestMousePos) {
                             val lastPosMouseInWorld = level.camera.unproject(Vector3(latestMousePos.x, latestMousePos.y, 0f))
 
                             val moveX = lastPosMouseInWorld.x - mousePosInWorld.x
@@ -488,7 +487,7 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
             isModal = true
             verticalGroup {
                 space(10f)
-                verticalGroup {
+                verticalGroup verticalSettingsGroup@ {
                     space(10f)
 
                     selectBox<EntityFactory.EntityType> {
@@ -501,7 +500,7 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
                             var widthField: VisTextField = VisTextField("50")
                             var heightField: VisTextField = VisTextField("50")
 
-                            this@verticalGroup.verticalGroup {
+                            this@verticalSettingsGroup.verticalGroup {
                                 space(10f)
 
                                 horizontalGroup {
@@ -518,7 +517,7 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
                         }
 
                         fun addSelectTexture(onTextureSelected: (Pair<FileHandle, Texture>) -> Unit) {
-                            this@verticalGroup.table {
+                            this@verticalSettingsGroup.table {
                                 val image = com.kotcrab.vis.ui.widget.VisImage()
                                 textButton("Sélectionner texture") {
                                     addListener(onClick { event: InputEvent, actor: KVisTextButton ->
@@ -554,8 +553,10 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
                         }
 
                         addListener(onChange { event: ChangeListener.ChangeEvent, actor: VisSelectBox<EntityFactory.EntityType> ->
-                            this@verticalGroup.clearChildren()
-                            this@verticalGroup.addActor(this)
+                            this@verticalSettingsGroup.clearChildren()
+                            this@verticalSettingsGroup.addActor(this)
+
+                            val addButton = VisTextButton("Ajouter !")
 
                             when (selected) {
                                 EntityFactory.EntityType.Sprite -> {
@@ -566,13 +567,11 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
                                         selectedTexture = texture
                                     })
 
-                                    this@verticalGroup.textButton("Ajouter !") {
-                                        addListener(onClick { event: InputEvent, actor: KVisTextButton ->
-                                            if (checkValidSize(width, height) && selectedTexture != null) {
-                                                finishEntityBuild(EntityFactory.createSprite(Rectangle(0f, 0f, width.text.toInt().toFloat(), height.text.toInt().toFloat()), selectedTexture!!))
-                                            }
-                                        })
-                                    }
+                                    addButton.addListener(addButton.onClick { event: InputEvent, actor: VisTextButton ->
+                                        if (checkValidSize(width, height) && selectedTexture != null) {
+                                            finishEntityBuild(EntityFactory.createSprite(Rectangle(0f, 0f, width.text.toInt().toFloat(), height.text.toInt().toFloat()), selectedTexture!!))
+                                        }
+                                    })
                                 }
                                 EntityFactory.EntityType.PhysicsSprite -> {
                                     val (width, height) = addSize()
@@ -582,15 +581,26 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
                                         selectedTexture = texture
                                     })
 
-                                    this@verticalGroup.textButton("Ajouter !") {
-                                        addListener(onClick { event: InputEvent, actor: KVisTextButton ->
-                                            if (checkValidSize(width, height) && selectedTexture != null) {
-                                                finishEntityBuild(EntityFactory.createPhysicsSprite(Rectangle(0f, 0f, width.text.toInt().toFloat(), height.text.toInt().toFloat()), selectedTexture!!, be.catvert.mtrktx.ecs.components.PhysicsComponent(true)))
-                                            }
-                                        })
-                                    }
+                                    addButton.addListener(addButton.onClick { event: InputEvent, actor: VisTextButton ->
+                                        if (checkValidSize(width, height) && selectedTexture != null) {
+                                            finishEntityBuild(EntityFactory.createPhysicsSprite(Rectangle(0f, 0f, width.text.toInt().toFloat(), height.text.toInt().toFloat()), selectedTexture!!, be.catvert.mtrktx.ecs.components.PhysicsComponent(true)))
+                                        }
+                                    })
+
                                 }
+                                EntityFactory.EntityType.Enemy -> {
+                                    val enemyType = this@verticalSettingsGroup.selectBox<EnemyType> {
+                                        items = EnemyType.values().toGdxArray()
+                                    }
+
+                                    addButton.addListener(addButton.onClick { event: InputEvent, actor: VisTextButton ->
+                                        finishEntityBuild(EntityFactory.createEnemy(_game, _entityEvent, enemyType.selected, Vector2(0f, 0f)))
+                                    })
+                                }
+                                EntityFactory.EntityType.Player -> {}
                             }
+
+                            this@verticalSettingsGroup.addActor(addButton)
                         })
 
                         if (this.items.size > 1) { // Permet de mettre a jour les acteurs pour créer l'entités
@@ -621,7 +631,7 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
                     addListener(onClick { event: InputEvent, actor: KVisTextButton -> showAddEntityWindow() })
                 }
                 textButton("Supprimer l'entité sélectionnée") {
-                    onSelectEntityChanged.add { signal, selectEntity ->
+                    onSelectEntityChanged.add { _, selectEntity ->
                         this.touchable =
                                 if (selectEntity == null || selectEntity.flags == EntityFactory.EntityType.Player.flag)
                                     Touchable.disabled
@@ -629,16 +639,24 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, Ren
                                     Touchable.enabled
                     }
 
-                    addListener(onClick { event: InputEvent, actor: KVisTextButton ->
+                    addListener(onClick { _: InputEvent, _: KVisTextButton ->
                         removeEntityFromLevel(selectEntities.elementAt(0))
                         clearSelectEntities()
                     })
                 }
 
+                label("Aucune entité sélectionnée") {
+                    onSelectEntityChanged.add { _, selectEntity ->
+                        if(selectEntity == null)
+                            setText("Aucune entité sélectionnée")
+                        else
+                            setText(EntityFactory.EntityType.values().first { entityType -> selectEntity.flags == entityType.flag }.name)
+                    }
+                }
                 horizontalGroup {
                     label("Position X : ")
                     textField("") {
-                        onSelectEntityChanged.add { signal, selectEntity ->
+                        onSelectEntityChanged.add { _, selectEntity ->
                             if (selectEntity == null) {
                                 this.text = ""
                             } else {

@@ -38,6 +38,8 @@ operator fun Entity.minusAssign(component: Class<out BaseComponent>) {
 
 fun Entity.copy(): Entity {
     val entityCopy = Entity()
+    entityCopy.flags = this.flags
+
     this.components.forEach {
         if(it is BaseComponent) {
             entityCopy += it.copy(entityCopy)

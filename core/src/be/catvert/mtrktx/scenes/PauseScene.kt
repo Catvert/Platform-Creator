@@ -13,7 +13,7 @@ import ktx.vis.window
  * Created by arno on 05/06/17.
  */
 
-class PauseScene(game: MtrGame) : BaseScene(game, RenderingSystem(game)) {
+class PauseScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(game)) {
     override val entities: MutableList<Entity> = mutableListOf()
 
     init {

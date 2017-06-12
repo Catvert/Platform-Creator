@@ -1,5 +1,6 @@
 package be.catvert.mtrktx.ecs.systems
 
+import be.catvert.mtrktx.Level
 import be.catvert.mtrktx.ecs.components.UpdateComponent
 import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Engine
@@ -11,7 +12,7 @@ import com.badlogic.ashley.utils.ImmutableArray
  * Created by arno on 04/06/17.
  */
 
-class UpdateSystem() : BaseSystem() {
+class UpdateSystem(private val level: Level) : BaseSystem() {
     private val updateMapper = ComponentMapper.getFor(UpdateComponent::class.java)
 
     private lateinit var entities: ImmutableArray<Entity>
@@ -28,7 +29,7 @@ class UpdateSystem() : BaseSystem() {
         entities.forEach {
             val updateComp = updateMapper[it]
             if(updateComp.active)
-                updateComp.update(deltaTime, updateComp.entity)
+                updateComp.update(deltaTime, updateComp.entity, level)
         }
     }
 }

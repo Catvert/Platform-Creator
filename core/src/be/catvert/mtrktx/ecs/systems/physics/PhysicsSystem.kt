@@ -1,9 +1,13 @@
 package be.catvert.mtrktx.ecs.systems.physics
 
 import be.catvert.mtrktx.Level
+import be.catvert.mtrktx.ecs.EntityFactory
+import be.catvert.mtrktx.ecs.components.CollisionSide
+import be.catvert.mtrktx.ecs.components.EnemyComponent
 import be.catvert.mtrktx.ecs.components.PhysicsComponent
 import be.catvert.mtrktx.ecs.components.TransformComponent
 import be.catvert.mtrktx.ecs.systems.BaseSystem
+import be.catvert.mtrktx.get
 import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.core.Family
@@ -148,8 +152,16 @@ class PhysicsSystem(private val level: Level, val gravity: Int = 15) : BaseSyste
                 if (transformComponent == transformTarget)
                     return@matrixLoop
 
-                if (newRect.overlaps(transformComponent.rectangle))
+                if (newRect.overlaps(transformComponent.rectangle)) {
+                    val side = if(moveX > 0) CollisionSide.OnRight else if(moveX < 0) CollisionSide.OnLeft else if(moveY > 0) CollisionSide.OnUp else if(moveY < 0) CollisionSide.OnDown else CollisionSide.Unknow
+                    if(entity.flags == EntityFactory.EntityType.Enemy.flag && it.flags == EntityFactory.EntityType.Player.flag)
+                        entity[EnemyComponent::class.java].onPlayerCollision?.invoke(entity, it, side)
+                    else if(entity.flags == EntityFactory.EntityType.Player.flag && it.flags == EntityFactory.EntityType.Enemy.flag)
+                        it[EnemyComponent::class.java].onPlayerCollision?.invoke(it, entity, -side) // - side to inverse the side
+                    else
+                        physicsMapper[entity].onCollisionWith?.invoke(entity, it, side)
                     return true
+                }
             }
         }
 

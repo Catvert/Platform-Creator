@@ -11,10 +11,27 @@ data class SmoothMoveData(var targetMoveSpeedX: Int = 0, var targetMoveSpeedY: I
 
 data class JumpData(var jumpHeight: Int, var isJumping: Boolean = false, var targetHeight: Int = 0, var startJumping: Boolean = false)
 
-class PhysicsComponent(var isStatic: Boolean, var moveSpeed: Int = 0, val smoothMove: Boolean = false, val collisionCallback: Boolean = false, var gravity: Boolean = !isStatic) : BaseComponent() {
+enum class CollisionSide {
+    OnLeft, OnRight, OnUp, OnDown, Unknow;
+
+    operator fun unaryMinus(): CollisionSide {
+        if(this == OnLeft)
+            return OnRight
+        else if(this == OnRight)
+            return OnLeft
+        else if(this == OnUp)
+            return OnDown
+        else if(this == OnDown)
+            return OnUp
+        return Unknow
+    }
+}
+
+class PhysicsComponent(var isStatic: Boolean, var moveSpeed: Int = 0, val smoothMove: Boolean = false, var gravity: Boolean = !isStatic) : BaseComponent() {
     override fun copy(target: Entity): BaseComponent {
-        val physicsComp =  PhysicsComponent(isStatic, moveSpeed, smoothMove, collisionCallback)
+        val physicsComp =  PhysicsComponent(isStatic, moveSpeed, smoothMove)
         physicsComp.jumpData = if(jumpData != null) JumpData(jumpData!!.jumpHeight) else null
+        physicsComp.onCollisionWith = onCollisionWith
         return physicsComp
     }
 
@@ -27,6 +44,8 @@ class PhysicsComponent(var isStatic: Boolean, var moveSpeed: Int = 0, val smooth
     val smoothMoveData: SmoothMoveData?
 
     var jumpData: JumpData? = null
+
+    var onCollisionWith: ((thisEntity: Entity, collisionEntity: Entity, side: CollisionSide) -> Unit)? = null
 
     init {
         if(smoothMove) this.smoothMoveData = SmoothMoveData() else this.smoothMoveData = null
