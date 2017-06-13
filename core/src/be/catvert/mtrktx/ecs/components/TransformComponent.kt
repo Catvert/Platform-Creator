@@ -5,8 +5,8 @@ import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.math.Rectangle
 
 /**
- * Created by arno on 03/06/17.
- */
+* Created by Catvert on 03/06/17.
+*/
 
 class TransformComponent(val rectangle: Rectangle, val gridCell: MutableList<GridCell> = mutableListOf(), var fixedSizeEditor: Boolean = false) : BaseComponent() {
     override fun copy(target: Entity): BaseComponent {

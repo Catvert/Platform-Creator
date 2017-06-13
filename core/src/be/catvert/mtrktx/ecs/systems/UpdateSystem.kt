@@ -9,8 +9,8 @@ import com.badlogic.ashley.core.Family
 import com.badlogic.ashley.utils.ImmutableArray
 
 /**
- * Created by arno on 04/06/17.
- */
+* Created by Catvert on 04/06/17.
+*/
 
 class UpdateSystem(private val level: Level) : BaseSystem() {
     private val updateMapper = ComponentMapper.getFor(UpdateComponent::class.java)

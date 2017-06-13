@@ -9,15 +9,14 @@ import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
-import com.badlogic.gdx.LifecycleListener
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 
 /**
- * Created by arno on 03/06/17.
- */
+* Created by Catvert on 03/06/17.
+*/
 
 class EntityFactory {
     enum class EntityType(val flag: Int) {
@@ -57,10 +56,10 @@ class EntityFactory {
             renderComp.renderLayer = 1
             val physicsComp = physicsMapper[entity]
             physicsComp.jumpData = JumpData(250)
-            physicsComp.onCollisionWith = { thisEntity, collisionEntity, side ->
-            }
 
-            entity += UpdateComponent(entity, { delta, e, lvl ->
+            // physicsComp.onCollisionWith = { thisEntity, collisionEntity, side -> }
+
+            entity += UpdateComponent(entity, { _, e, _ ->
                 val render = renderMapper[e]
                 val physics = physicsMapper[e]
 
@@ -82,7 +81,7 @@ class EntityFactory {
                     physics.nextActions += PhysicsComponent.NextActions.JUMP
             })
 
-            entity += LifeComponent(entity, 1, { _, _ ->}, { e, hp -> // remove life event
+            entity += LifeComponent(entity, 1, { _, _ ->}, { _, hp -> // remove life event
                 if (hp == 0) {
                     game.setScene(MainMenuScene(game))
                 }
@@ -91,81 +90,127 @@ class EntityFactory {
             return entity
         }
 
-        fun createEnemy(game: MtrGame, entityEvent: EntityEvent, enemyType: EnemyType, pos: Vector2): Entity {
-            val sizeX: Int
-            val sizeY: Int
-            val texture: Pair<FileHandle, Texture>
-            val moveSpeed: Int
-            val initialHP: Int
-            when(enemyType) {
-                EnemyType.Turtle -> {
-                    sizeX = 48
-                    sizeY = 98
-                    texture = game.getTexture(Gdx.files.internal("game/enemy/turtle/green/walk_0.png"))
-                    moveSpeed = 10
-                    initialHP = 1
-                }
-            }
-
-            val entity = createPhysicsSprite(Rectangle(pos.x, pos.y, sizeX.toFloat(), sizeY.toFloat()), texture, PhysicsComponent(false, moveSpeed, true))
+        private fun createEnemy(enemyType: EnemyType, texture: Pair<FileHandle, Texture>, rect: Rectangle, moveSpeed: Int): Pair<Entity, EnemyComponent> {
+            val entity = createPhysicsSprite(rect, texture, PhysicsComponent(false, moveSpeed, true))
             entity.flags = EntityType.Enemy.flag
 
             val enemyComp = EnemyComponent(enemyType)
             entity += enemyComp
 
-            val onAddLife: (entity: Entity, hp: Int) -> Unit
-            val onRemoveLife: (entity: Entity, hp: Int) -> Unit
+            return Pair(entity, enemyComp)
+        }
 
+        fun createEnemyWithType(game: MtrGame, enemyType: EnemyType, entityEvent: EntityEvent, pos: Vector2): Entity {
             when(enemyType) {
-                EnemyType.Turtle -> {
-                    onAddLife = {_, _ ->}
-                    onRemoveLife = { e, hp ->
-                        if (hp <= 0)
-                            entityEvent.onEntityRemoved?.invoke(e)
-                    }
+                EnemyType.Turtle -> return createTurtleEnemy(game, entityEvent, pos)
+                EnemyType.Furball -> return createFurballEnemy(game, entityEvent, pos)
+            }
+        }
+
+        fun createFurballEnemy(game: MtrGame, entityEvent: EntityEvent, pos: Vector2): Entity {
+            val entity = createEnemy(EnemyType.Furball, game.getTexture(Gdx.files.internal("game/enemy/furball/brown/walk_1.png")), Rectangle(pos.x, pos.y, 48f, 48f), 5)
+            var goRight = false
+
+            entity.first += UpdateComponent(entity.first, { _, e, _ ->
+                val physics = physicsMapper[e]
+                val render = renderMapper[e]
+
+                if(goRight) {
+                    physics.nextActions += PhysicsComponent.NextActions.GO_RIGHT
+                    render.flipX = true
+                }
+                else {
+                    physics.nextActions += PhysicsComponent.NextActions.GO_LEFT
+                    render.flipX = false
+                }
+            })
+
+            val lifeComp = LifeComponent(entity.first, 2, null, { entity, hp ->
+                if(hp <= 0) {
+                    entityEvent.onEntityRemoved?.invoke(entity)
+                }
+            })
+            entity.first += lifeComp
+
+            physicsMapper[entity.first].onCollisionWith = { _, _, collisionSide ->
+                if(collisionSide == CollisionSide.OnLeft)
+                    goRight = true
+                else if(collisionSide == CollisionSide.OnRight)
+                    goRight = false
+            }
+
+            entity.second.onPlayerCollision = { thisEntity, player, side ->
+                if(side == CollisionSide.OnUp) {
+                    thisEntity[LifeComponent::class.java].removeLife(1)
+                }
+                else {
+                    player[LifeComponent::class.java].removeLife(1)
                 }
             }
 
-            val lifeComp = LifeComponent(entity, initialHP, onAddLife, onRemoveLife)
-            entity += lifeComp
+            return entity.first
+        }
 
-            when(enemyType) {
-                EnemyType.Turtle -> {
-                    var goRight = false
+        fun createTurtleEnemy(game: MtrGame, entityEvent: EntityEvent, pos: Vector2): Entity {
+            val entity = createEnemy(EnemyType.Turtle, game.getTexture(Gdx.files.internal("game/enemy/turtle/green/walk_0.png")), Rectangle(pos.x, pos.y, 48f, 98f), 5)
 
-                    entity += UpdateComponent(entity, { delta, e, lvl ->
-                        val physics = physicsMapper[e]
-                        val render = renderMapper[e]
+            var goRight = false
 
-                        if(goRight) {
-                            physics.nextActions += PhysicsComponent.NextActions.GO_RIGHT
-                            render.flipX = true
-                        }
-                        else {
-                            physics.nextActions += PhysicsComponent.NextActions.GO_LEFT
-                            render.flipX = false
-                        }
-                    })
+            entity.first += UpdateComponent(entity.first, { _, e, _ ->
+                val physics = physicsMapper[e]
+                val render = renderMapper[e]
 
-                    physicsMapper[entity].onCollisionWith = { thisEntity, collisionEntity, collisionSide ->
-                        if(collisionSide == CollisionSide.OnLeft)
-                            goRight = true
-                        else if(collisionSide == CollisionSide.OnRight)
-                            goRight = false
+                if(goRight) {
+                    physics.nextActions += PhysicsComponent.NextActions.GO_RIGHT
+                    render.flipX = true
+                }
+                else {
+                    physics.nextActions += PhysicsComponent.NextActions.GO_LEFT
+                    render.flipX = false
+                }
+            })
+
+            var state = 0
+
+            val lifeComp = LifeComponent(entity.first, 2, null, { entity, hp ->
+               if(hp < 2) {
+                   state = 1
+                   renderMapper[entity].texture = game.getTexture(Gdx.files.internal("game/enemy/turtle/green/shell_front.png"))
+                   transformMapper[entity].rectangle.setSize(48f, 48f)
+                   physicsMapper[entity].moveSpeed = 10
+               }
+            })
+            entity.first += lifeComp
+
+            physicsMapper[entity.first].onCollisionWith = { _, collisionEntity, collisionSide ->
+                if(state == 1 && collisionEntity.flags == EntityType.Enemy.flag) {
+                    if(collisionEntity.getComponent(LifeComponent::class.java) != null) {
+                        entityEvent.onEntityRemoved?.invoke(collisionEntity)
                     }
-
-                    enemyComp.onPlayerCollision = { thisEnemy, player, side ->
-                        if(side == CollisionSide.OnUp) {
-                            lifeComp.removeLife(1)
-                        }
-                        else {
-                            player[LifeComponent::class.java].removeLife(1)
-                        }
-                    }
+                }
+                else {
+                    if(collisionSide == CollisionSide.OnLeft)
+                        goRight = true
+                    else if(collisionSide == CollisionSide.OnRight)
+                        goRight = false
                 }
             }
 
-            return entity
+            entity.second.onPlayerCollision = { _, player, side ->
+                if(side == CollisionSide.OnUp) {
+                    if(state == 0) {
+                        lifeComp.removeLife(1)
+                    }
+                    else {
+                        physicsMapper[player].jumpData?.forceJumping = true
+                    }
+                }
+                else {
+                    player[LifeComponent::class.java].removeLife(1)
+                }
+            }
+
+            return entity.first
         }
     }
 }

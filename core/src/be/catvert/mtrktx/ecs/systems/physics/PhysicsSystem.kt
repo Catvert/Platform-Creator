@@ -16,14 +16,16 @@ import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Rectangle
 
 /**
- * Created by arno on 04/06/17.
- */
+* Created by Catvert on 04/06/17.
+*/
 
 class PhysicsSystem(private val level: Level, val gravity: Int = 15) : BaseSystem() {
     private lateinit var entities: ImmutableArray<Entity>
 
     private val transformMapper = ComponentMapper.getFor(TransformComponent::class.java)
     private val physicsMapper = ComponentMapper.getFor(PhysicsComponent::class.java)
+
+
 
     override fun update(deltaTime: Float) {
         super.update(deltaTime)
@@ -38,6 +40,10 @@ class PhysicsSystem(private val level: Level, val gravity: Int = 15) : BaseSyste
 
             if (physicsComp.gravity && level.applyGravity)
                 physicsComp.nextActions += PhysicsComponent.NextActions.GRAVITY
+
+            if(physicsComp.jumpData?.forceJumping ?:false) {
+                physicsComp.nextActions += PhysicsComponent.NextActions.JUMP
+            }
 
             var moveSpeedX = 0
             var moveSpeedY = 0
@@ -61,8 +67,14 @@ class PhysicsSystem(private val level: Level, val gravity: Int = 15) : BaseSyste
                         val jumpData = physicsComp.jumpData!!
 
                         if(!jumpData.isJumping) {
-                            if(!collideOnMove(0, -1, entity))
-                                return@action
+                            if(!jumpData.forceJumping) {
+                                if(!checkIsOnGround(entity)) {
+                                    return@action
+                                }
+                            }
+                            else {
+                                jumpData.forceJumping = false
+                            }
                             jumpData.isJumping = true
                             jumpData.targetHeight = transformComp.rectangle.y.toInt() + jumpData.jumpHeight
                             jumpData.startJumping = true
@@ -76,7 +88,6 @@ class PhysicsSystem(private val level: Level, val gravity: Int = 15) : BaseSyste
                             if(transformComp.rectangle.y >= jumpData.targetHeight || collideOnMove(0, gravity, entity)) {
                                 physicsComp.gravity = true
                                 jumpData.isJumping = false
-
                             }
                             else {
 
@@ -139,6 +150,8 @@ class PhysicsSystem(private val level: Level, val gravity: Int = 15) : BaseSyste
         }
     }
 
+    fun checkIsOnGround(entity: Entity) = collideOnMove(0, -1, entity)
+
     private fun collideOnMove(moveX: Int, moveY: Int, entity: Entity): Boolean {
         val transformTarget = transformMapper[entity]
 
@@ -149,7 +162,7 @@ class PhysicsSystem(private val level: Level, val gravity: Int = 15) : BaseSyste
            level.matrixGrid[it.x][it.y].first.forEach matrixLoop@ {
                 val transformComponent = transformMapper[it]
 
-                if (transformComponent == transformTarget)
+                if (transformComponent == transformTarget || !physicsMapper.has(it))
                     return@matrixLoop
 
                 if (newRect.overlaps(transformComponent.rectangle)) {

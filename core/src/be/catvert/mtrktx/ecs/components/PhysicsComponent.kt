@@ -4,12 +4,12 @@ import com.badlogic.ashley.core.Entity
 
 
 /**
- * Created by arno on 04/06/17.
- */
+* Created by Catvert on 04/06/17.
+*/
 
 data class SmoothMoveData(var targetMoveSpeedX: Int = 0, var targetMoveSpeedY: Int = 0, var actualMoveSpeedX: Float = 0f, var actualMoveSpeedY: Float = 0f)
 
-data class JumpData(var jumpHeight: Int, var isJumping: Boolean = false, var targetHeight: Int = 0, var startJumping: Boolean = false)
+data class JumpData(var jumpHeight: Int, var isJumping: Boolean = false, var targetHeight: Int = 0, var startJumping: Boolean = false, var forceJumping: Boolean = false)
 
 enum class CollisionSide {
     OnLeft, OnRight, OnUp, OnDown, Unknow;

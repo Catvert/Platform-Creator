@@ -4,7 +4,6 @@ import be.catvert.mtrktx.*
 import be.catvert.mtrktx.ecs.EntityEvent
 import be.catvert.mtrktx.ecs.EntityFactory
 import be.catvert.mtrktx.ecs.components.EnemyType
-import be.catvert.mtrktx.ecs.components.PhysicsComponent
 import be.catvert.mtrktx.ecs.components.TransformComponent
 import be.catvert.mtrktx.ecs.systems.RenderingSystem
 import com.badlogic.ashley.core.ComponentMapper
@@ -23,21 +22,19 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.kotcrab.vis.ui.widget.*
 import ktx.actors.contains
 import ktx.actors.onChange
 import ktx.actors.onClick
 import ktx.app.clearScreen
-import ktx.app.use
 import ktx.collections.toGdxArray
 import ktx.vis.KVisTextButton
 import ktx.vis.window
 
 /**
- * Created by arno on 10/06/17.
- */
+* Created by Catvert on 10/06/17.
+*/
 
 class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Level) : BaseScene(game, entityEvent, systems = RenderingSystem(game)) {
     private enum class EditorMode {
@@ -60,7 +57,6 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
     private val shapeRenderer = ShapeRenderer()
 
     private val transformMapper = ComponentMapper.getFor(TransformComponent::class.java)
-    private val physicsMapper = ComponentMapper.getFor(PhysicsComponent::class.java)
 
     private val cameraMoveSpeed = 10f
 
@@ -132,20 +128,16 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
     override fun render(delta: Float) {
         clearScreen(186f / 255f, 212f / 255f, 1f)
 
-        _game.batch.projectionMatrix = _game.defaultProjection
-        _game.batch.use {
-            _game.batch.draw(level.background.second.texture.second, 0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
-        }
-        _game.batch.projectionMatrix = level.camera.combined
+        drawHUD(level.background.texture.second, 0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
 
-        level.activeRect.setPosition(Math.max(0f, level.camera.position.x - level.activeRect.width / 2), Math.max(0f, level.camera.position.y - level.activeRect.height / 2))
+        level.activeRect.setPosition(Math.max(0f, _camera.position.x - level.activeRect.width / 2), Math.max(0f, _camera.position.y - level.activeRect.height / 2))
 
         level.update(delta)
 
         entities.clear()
         entities.addAll(level.getAllEntitiesInCells(level.getActiveGridCells()))
 
-        shapeRenderer.projectionMatrix = level.camera.combined
+        shapeRenderer.projectionMatrix = _camera.combined
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
         when (editorMode) {
             EditorScene.EditorMode.NoMode -> {
@@ -184,35 +176,35 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.P)) {
-            level.camera.zoom -= 0.02f
+            _camera.zoom -= 0.02f
         }
         if (Gdx.input.isKeyPressed(Input.Keys.M)) {
-            level.camera.zoom += 0.02f
+            _camera.zoom += 0.02f
         }
         if (Gdx.input.isKeyPressed(Input.Keys.L)) {
-            level.camera.zoom = 1f
+            _camera.zoom = 1f
         }
         if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-            level.camera.position.x -= cameraMoveSpeed
+            _camera.position.x -= cameraMoveSpeed
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            level.camera.position.x += cameraMoveSpeed
+            _camera.position.x += cameraMoveSpeed
         }
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            level.camera.position.y -= cameraMoveSpeed
+            _camera.position.y -= cameraMoveSpeed
         }
         if (Gdx.input.isKeyPressed(Input.Keys.Z)) {
-            level.camera.position.y += cameraMoveSpeed
+            _camera.position.y += cameraMoveSpeed
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.F12)) {
             level.drawDebugCells = !level.drawDebugCells
         }
 
-        level.camera.update()
+        _camera.update()
 
         val mousePos = Vector2(Gdx.input.x.toFloat(), Gdx.input.y.toFloat())
-        val mousePosInWorld = level.camera.unproject(Vector3(mousePos, 0f))
+        val mousePosInWorld = _camera.unproject(Vector3(mousePos, 0f))
 
         if (!UIHover) {
 
@@ -288,7 +280,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                                 addSelectEntity(entity)
                             }
                         } else if (mousePos != latestMousePos) {
-                            val lastPosMouseInWorld = level.camera.unproject(Vector3(latestMousePos.x, latestMousePos.y, 0f))
+                            val lastPosMouseInWorld = _camera.unproject(Vector3(latestMousePos.x, latestMousePos.y, 0f))
 
                             val moveX = lastPosMouseInWorld.x - mousePosInWorld.x
                             val moveY = lastPosMouseInWorld.y - mousePosInWorld.y
@@ -388,7 +380,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
     }
 
     fun findEntityUnderMouse(): Entity? {
-        val mousePosInWorld = level.camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f))
+        val mousePosInWorld = _camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f))
 
         entities.forEach {
             val transform = transformMapper[it]
@@ -406,6 +398,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
             setSize(400f, 400f)
             setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
             isModal = true
+            addCloseButton()
 
             table {
                 val table = VisTable()
@@ -416,7 +409,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                 selectBox<FileHandle> {
                     items = folders.toGdxArray()
 
-                    addListener(onChange { event: ChangeListener.ChangeEvent, actor: VisSelectBox<FileHandle> ->
+                    addListener(onChange { _, _ ->
                         table.clearChildren()
 
                         var count = 0
@@ -427,7 +420,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
 
                             image.userObject = texture
 
-                            image.addListener(image.onClick { event, actor ->
+                            image.addListener(image.onClick { _, _ ->
                                 selectedImage.drawable = image.drawable
                                 selectedImage.userObject = image.userObject
                             })
@@ -459,25 +452,15 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                 row()
 
                 textButton("Sélectionner") {
-                    addListener(onClick { event: InputEvent, actor: KVisTextButton ->
-                        if (selectedImage.userObject != null) {
+                    addListener(onClick { _: InputEvent, _: KVisTextButton ->
+                        if (selectedImage.userObject != null && selectedImage.userObject is Pair<*, *>) {
                             onTextureSelected(selectedImage.userObject as Pair<FileHandle, Texture>)
                             this@window.remove()
                         }
                     })
                 }
-
-                row()
-
-                textButton("Fermer") {
-                    addListener(onClick { event, actor ->
-                        this@window.remove()
-                    })
-                }
             }
         })
-
-        onTextureSelected(_game.getTexture(Gdx.files.internal("game/logo.png")))
     }
 
     fun showAddEntityWindow() {
@@ -485,6 +468,8 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
             setSize(250f, 400f)
             setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
             isModal = true
+            addCloseButton()
+
             verticalGroup {
                 space(10f)
                 verticalGroup verticalSettingsGroup@ {
@@ -497,8 +482,8 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                         }
 
                         fun addSize(): Pair<VisTextField, VisTextField> {
-                            var widthField: VisTextField = VisTextField("50")
-                            var heightField: VisTextField = VisTextField("50")
+                            val widthField: VisTextField = VisTextField("50")
+                            val heightField: VisTextField = VisTextField("50")
 
                             this@verticalSettingsGroup.verticalGroup {
                                 space(10f)
@@ -520,7 +505,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                             this@verticalSettingsGroup.table {
                                 val image = com.kotcrab.vis.ui.widget.VisImage()
                                 textButton("Sélectionner texture") {
-                                    addListener(onClick { event: InputEvent, actor: KVisTextButton ->
+                                    addListener(onClick { _, _ ->
                                         showSelectTextureWindow({ texture ->
                                             onTextureSelected(texture)
                                             image.setDrawable(texture.second)
@@ -533,11 +518,11 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                             }
                         }
 
-                        fun checkValidSize(width: VisTextField, height: VisTextField): Boolean {
-                            if (width.text.toIntOrNull() == null || height.text.toIntOrNull() == null)
+                        fun checkValidSize(widthField: VisTextField, heightField: VisTextField): Boolean {
+                            if (widthField.text.toIntOrNull() == null || heightField.text.toIntOrNull() == null)
                                 return false
-                            val width = width.text.toInt()
-                            val height = height.text.toInt()
+                            val width = widthField.text.toInt()
+                            val height = heightField.text.toInt()
 
                             return (width > 0 && width < maxEntitySize) && (height > 0 && height < maxEntitySize)
                         }
@@ -552,52 +537,55 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                             UIHover = false
                         }
 
-                        addListener(onChange { event: ChangeListener.ChangeEvent, actor: VisSelectBox<EntityFactory.EntityType> ->
+                        addListener(onChange { _, _ ->
                             this@verticalSettingsGroup.clearChildren()
                             this@verticalSettingsGroup.addActor(this)
 
                             val addButton = VisTextButton("Ajouter !")
 
-                            when (selected) {
-                                EntityFactory.EntityType.Sprite -> {
-                                    val (width, height) = addSize()
+                            if (selected != null) {
+                                when (selected!!) {
+                                    EntityFactory.EntityType.Sprite -> {
+                                        val (width, height) = addSize()
 
-                                    var selectedTexture: Pair<FileHandle, Texture>? = null
-                                    addSelectTexture({ texture ->
-                                        selectedTexture = texture
-                                    })
+                                        var selectedTexture: Pair<FileHandle, Texture>? = null
+                                        addSelectTexture({ texture ->
+                                            selectedTexture = texture
+                                        })
 
-                                    addButton.addListener(addButton.onClick { event: InputEvent, actor: VisTextButton ->
-                                        if (checkValidSize(width, height) && selectedTexture != null) {
-                                            finishEntityBuild(EntityFactory.createSprite(Rectangle(0f, 0f, width.text.toInt().toFloat(), height.text.toInt().toFloat()), selectedTexture!!))
-                                        }
-                                    })
-                                }
-                                EntityFactory.EntityType.PhysicsSprite -> {
-                                    val (width, height) = addSize()
-
-                                    var selectedTexture: Pair<FileHandle, Texture>? = null
-                                    addSelectTexture({ texture ->
-                                        selectedTexture = texture
-                                    })
-
-                                    addButton.addListener(addButton.onClick { event: InputEvent, actor: VisTextButton ->
-                                        if (checkValidSize(width, height) && selectedTexture != null) {
-                                            finishEntityBuild(EntityFactory.createPhysicsSprite(Rectangle(0f, 0f, width.text.toInt().toFloat(), height.text.toInt().toFloat()), selectedTexture!!, be.catvert.mtrktx.ecs.components.PhysicsComponent(true)))
-                                        }
-                                    })
-
-                                }
-                                EntityFactory.EntityType.Enemy -> {
-                                    val enemyType = this@verticalSettingsGroup.selectBox<EnemyType> {
-                                        items = EnemyType.values().toGdxArray()
+                                        addButton.addListener(addButton.onClick { _, _ ->
+                                            if (checkValidSize(width, height) && selectedTexture != null) {
+                                                finishEntityBuild(EntityFactory.createSprite(Rectangle(0f, 0f, width.text.toInt().toFloat(), height.text.toInt().toFloat()), selectedTexture!!))
+                                            }
+                                        })
                                     }
+                                    EntityFactory.EntityType.PhysicsSprite -> {
+                                        val (width, height) = addSize()
 
-                                    addButton.addListener(addButton.onClick { event: InputEvent, actor: VisTextButton ->
-                                        finishEntityBuild(EntityFactory.createEnemy(_game, _entityEvent, enemyType.selected, Vector2(0f, 0f)))
-                                    })
+                                        var selectedTexture: Pair<FileHandle, Texture>? = null
+                                        addSelectTexture({ texture ->
+                                            selectedTexture = texture
+                                        })
+
+                                        addButton.addListener(addButton.onClick { _, _ ->
+                                            if (checkValidSize(width, height) && selectedTexture != null) {
+                                                finishEntityBuild(EntityFactory.createPhysicsSprite(Rectangle(0f, 0f, width.text.toInt().toFloat(), height.text.toInt().toFloat()), selectedTexture!!, be.catvert.mtrktx.ecs.components.PhysicsComponent(true)))
+                                            }
+                                        })
+
+                                    }
+                                    EntityFactory.EntityType.Enemy -> {
+                                        val enemyType = this@verticalSettingsGroup.selectBox<EnemyType> {
+                                            items = EnemyType.values().toGdxArray()
+                                        }
+
+                                        addButton.addListener(addButton.onClick { _, _ ->
+                                            finishEntityBuild(EntityFactory.createEnemyWithType(_game, enemyType.selected, _entityEvent, Vector2(0f, 0f)))
+                                        })
+                                    }
+                                    EntityFactory.EntityType.Player -> {
+                                    }
                                 }
-                                EntityFactory.EntityType.Player -> {}
                             }
 
                             this@verticalSettingsGroup.addActor(addButton)
@@ -609,12 +597,6 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                         }
 
                     }
-                }
-                textButton("Fermer") {
-                    addListener(onClick { event: InputEvent, actor: KVisTextButton ->
-                        this@window.remove()
-                        UIHover = false
-                    })
                 }
             }
         })
@@ -628,7 +610,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                 space(10f)
 
                 textButton("Ajouter une entité") {
-                    addListener(onClick { event: InputEvent, actor: KVisTextButton -> showAddEntityWindow() })
+                    addListener(onClick { _, _ -> showAddEntityWindow() })
                 }
                 textButton("Supprimer l'entité sélectionnée") {
                     onSelectEntityChanged.add { _, selectEntity ->
@@ -647,7 +629,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
 
                 label("Aucune entité sélectionnée") {
                     onSelectEntityChanged.add { _, selectEntity ->
-                        if(selectEntity == null)
+                        if (selectEntity == null)
                             setText("Aucune entité sélectionnée")
                         else
                             setText(EntityFactory.EntityType.values().first { entityType -> selectEntity.flags == entityType.flag }.name)
@@ -665,11 +647,11 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
 
                             this.isReadOnly = selectEntity == null
                         }
-                        onSelectEntityMoved.add { signal, transform ->
+                        onSelectEntityMoved.add { _, transform ->
                             text = transform.rectangle.x.toInt().toString()
                         }
 
-                        addListener(onChange { event: ChangeListener.ChangeEvent, actor: VisTextField ->
+                        addListener(onChange { _, _ ->
                             if (!isReadOnly) {
                                 if (text.toIntOrNull() != null) {
                                     if (level.matrixRect.contains(text.toInt().toFloat(), 0f))
@@ -682,7 +664,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                 horizontalGroup {
                     label("Position Y : ")
                     textField("") {
-                        onSelectEntityChanged.add { signal, selectEntity ->
+                        onSelectEntityChanged.add { _, selectEntity ->
                             if (selectEntity == null) {
                                 this.text = ""
                             } else {
@@ -691,11 +673,11 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
 
                             this.isReadOnly = selectEntity == null
                         }
-                        onSelectEntityMoved.add { signal, transform ->
+                        onSelectEntityMoved.add { _, transform ->
                             text = transform.rectangle.y.toInt().toString()
                         }
 
-                        addListener(onChange { event: ChangeListener.ChangeEvent, actor: VisTextField ->
+                        addListener(onChange { _, _ ->
                             if (!isReadOnly) {
                                 if (text.toIntOrNull() != null) {
                                     if (level.matrixRect.contains(0f, text.toInt().toFloat()))
@@ -708,7 +690,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                 horizontalGroup {
                     label("Largeur : ")
                     textField("") {
-                        onSelectEntityChanged.add { signal, selectEntity ->
+                        onSelectEntityChanged.add { _, selectEntity ->
                             if (selectEntity == null) {
                                 this.text = ""
                             } else {
@@ -718,7 +700,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                             this.isReadOnly = selectEntity == null
                         }
 
-                        addListener(onChange { event: ChangeListener.ChangeEvent, actor: VisTextField ->
+                        addListener(onChange { _, _ ->
                             if (!this.isReadOnly) {
                                 val transform = transformMapper[selectEntities.elementAt(0)]
                                 val width = text.toIntOrNull()
@@ -732,7 +714,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                 horizontalGroup {
                     label("Hauteur : ")
                     textField("") {
-                        onSelectEntityChanged.add { signal, selectEntity ->
+                        onSelectEntityChanged.add { _, selectEntity ->
                             if (selectEntity == null) {
                                 this.text = ""
                             } else {
@@ -742,7 +724,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                             this.isReadOnly = selectEntity == null
                         }
 
-                        addListener(onChange { event: ChangeListener.ChangeEvent, actor: VisTextField ->
+                        addListener(onChange { _, _ ->
                             if (!this.isReadOnly) {
                                 val transform = transformMapper[selectEntities.elementAt(0)]
                                 val height = text.toIntOrNull()
@@ -760,11 +742,13 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
     fun showExitWindow() {
         _stage.addActor(window("Quitter") {
             setPosition(Gdx.graphics.width / 2f - width / 2, Gdx.graphics.height / 2f - height / 2)
+            addCloseButton()
+
             verticalGroup {
                 space(10f)
 
                 textButton("Sauvegarder") {
-                    addListener(onClick { event: InputEvent, actor: KVisTextButton ->
+                    addListener(onClick { _, _ ->
                         try {
                             LevelFactory.saveLevel(level)
                             this@window.remove()
@@ -774,7 +758,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                     })
                 }
                 textButton("Quitter") {
-                    addListener(onClick { event: InputEvent, actor: KVisTextButton -> _game.setScene(MainMenuScene(_game)) })
+                    addListener(onClick { _, _ -> _game.setScene(MainMenuScene(_game)) })
                 }
             }
         })

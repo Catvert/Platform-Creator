@@ -3,10 +3,10 @@ package be.catvert.mtrktx.ecs
 import com.badlogic.ashley.core.Entity
 
 /**
- * Created by arno on 12/06/17.
- */
+* Created by Catvert on 12/06/17.
+*/
 
-class EntityEvent() {
+class EntityEvent {
     var onEntityRemoved: ((entity: Entity) -> Unit)? = null
     var onEntityAdded: ((entity: Entity) -> Unit)? = null
 }

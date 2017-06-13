@@ -15,11 +15,17 @@ import java.io.FileReader
 import java.io.FileWriter
 
 /**
- * Created by arno on 07/06/17.
- */
+* Created by Catvert on 07/06/17.
+*/
 
-class LevelFactory() {
+class LevelFactory {
     companion object {
+        fun createEmptyLevel(game: MtrGame, levelName: String, levelPath: FileHandle): Pair<Level, EntityEvent> {
+            val player = EntityFactory.createPlayer(game, Vector2(100f, 100f))
+            val defaultBackground = game.getTexture(Gdx.files.internal("game/background/green_hills_2.png"))
+            return Pair(Level(game, levelName, player, RenderComponent(defaultBackground), levelPath, mutableListOf(player)), EntityEvent())
+        }
+
         fun loadLevel(game:MtrGame, levelPath: FileHandle): Triple<Boolean, Level, EntityEvent> { // NOTE A SOIS MEME, SI UN ENTITE DOIT CREER UNE AUTRE ENTITE, IL FAUT PASSER LEVEL.ADDENTITY ET PAS LA LISTE ICI
             val entities = mutableListOf<Entity>()
             val entityEvent = EntityEvent()
@@ -72,7 +78,7 @@ class LevelFactory() {
                         }
                         EntityFactory.EntityType.Enemy.name -> {
                             val enemyType = EnemyType.valueOf(it["enemyType"].asString())
-                            addEntity(EntityFactory.createEnemy(game, entityEvent, enemyType, Vector2(x.toFloat(), y.toFloat())))
+                            addEntity(EntityFactory.createEnemyWithType(game, enemyType, entityEvent, Vector2(x.toFloat(), y.toFloat())))
                         }
                     }
                 }
@@ -81,7 +87,7 @@ class LevelFactory() {
                 println("Erreur lors du chargement du niveau ! Erreur : $e")
             }
 
-            return Triple(!errorInLevel, Level(levelName, player, Pair(backgroundPath, RenderComponent(game.getTexture(backgroundPath))), levelPath, entities), entityEvent)
+            return Triple(!errorInLevel, Level(game, levelName, player, RenderComponent(game.getTexture(backgroundPath)), levelPath, entities), entityEvent)
         }
 
         fun saveLevel(level: Level) {
@@ -108,7 +114,7 @@ class LevelFactory() {
 
             writer.`object`()
             writer.name("levelName").value(level.levelName)
-            writer.name("background").value(level.background.first)
+            writer.name("background").value(level.background.texture.first)
 
             writer.array("entities")
             level.loadedEntities.forEach {

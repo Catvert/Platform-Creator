@@ -3,11 +3,11 @@ package be.catvert.mtrktx.ecs.components
 import com.badlogic.ashley.core.Entity
 
 /**
- * Created by arno on 12/06/17.
- */
+* Created by Catvert on 12/06/17.
+*/
 
 enum class EnemyType {
-    Turtle
+    Turtle, Furball
 }
 
 class EnemyComponent(val enemyType: EnemyType): BaseComponent() {

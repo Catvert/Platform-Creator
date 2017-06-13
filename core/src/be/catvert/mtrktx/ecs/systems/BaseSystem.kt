@@ -4,10 +4,10 @@ import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.core.EntitySystem
 
 /**
- * Created by arno on 10/06/17.
- */
+* Created by Catvert on 10/06/17.
+*/
 
-abstract class BaseSystem() : EntitySystem() {
+abstract class BaseSystem : EntitySystem() {
     init {
     }
 

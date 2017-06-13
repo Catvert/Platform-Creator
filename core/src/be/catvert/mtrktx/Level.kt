@@ -7,17 +7,14 @@ import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
-import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
 
 /**
- * Created by arno on 07/06/17.
- */
+* Created by Catvert on 07/06/17.
+*/
 
-class Level(var levelName: String, val player: Entity, val background: Pair<FileHandle, RenderComponent>, val levelFile: FileHandle, val loadedEntities: MutableList<Entity>): IUpdateable {
-    val camera: OrthographicCamera = OrthographicCamera()
-
+class Level(private val _game: MtrGame, var levelName: String, val player: Entity, val background: RenderComponent, val levelFile: FileHandle, val loadedEntities: MutableList<Entity>): IUpdateable {
     private val shapeRenderer = ShapeRenderer()
 
     private val matrixSizeX = 300
@@ -33,7 +30,6 @@ class Level(var levelName: String, val player: Entity, val background: Pair<File
     val activeRect = Rectangle(player.getComponent(TransformComponent::class.java).rectangle)
 
     private val transformMapper = ComponentMapper.getFor(TransformComponent::class.java)
-    private val physicsMapper = ComponentMapper.getFor(PhysicsComponent::class.java)
     private val lifeMapper = ComponentMapper.getFor(LifeComponent::class.java)
 
     var drawDebugCells = false
@@ -41,10 +37,7 @@ class Level(var levelName: String, val player: Entity, val background: Pair<File
     var killEntityUnderY = true
     var applyGravity = true
 
-    private val transformPlayer: TransformComponent = player.getComponent(TransformComponent::class.java)
-
     init {
-        camera.setToOrtho(false, 1280f, 720f)
         activeRect.setSize(Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
 
         loadedEntities.forEach {
@@ -60,11 +53,8 @@ class Level(var levelName: String, val player: Entity, val background: Pair<File
     override fun update(deltaTime: Float) {
         updateActiveCells()
 
-        if(followPlayerCamera)
-            camera.position.set(Math.max(0f + camera.viewportWidth / 2, transformPlayer.rectangle.x + transformPlayer.rectangle.width / 2), Math.max(0f + camera.viewportHeight / 2, transformPlayer.rectangle.y + transformPlayer.rectangle.height / 2), 0f)
-
         if (drawDebugCells) {
-            shapeRenderer.projectionMatrix = camera.combined
+            shapeRenderer.projectionMatrix = _game.batch.projectionMatrix
             shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
             matrixGrid.forEach {
                 it.forEach{

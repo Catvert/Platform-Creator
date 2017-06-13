@@ -10,15 +10,15 @@ import ktx.app.clearScreen
 import ktx.vis.window
 
 /**
- * Created by arno on 05/06/17.
- */
+* Created by Catvert on 05/06/17.
+*/
 
 class PauseScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(game)) {
     override val entities: MutableList<Entity> = mutableListOf()
 
     init {
-        entities += _game.getMainBackground()
-        entities += _game.getLogo()
+        entities += game.getMainBackground()
+        entities += game.getLogo()
 
         _stage.addActor(window("Pause") {
             setSize(200f, 200f)
