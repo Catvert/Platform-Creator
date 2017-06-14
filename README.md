@@ -1,7 +1,6 @@
 # Maryo The Return
 
 ## Description du jeu
---------------------------------------
 MTR est un jeu de plateformes reprenant les mêmes idées et les resources de Secret Maryo Chronicles. Le jeu n'est pas encore *utilisable* et de nombreux changements vont arriver.
 
 ![Menu principal](FAQ/mainmenu.png)
@@ -11,8 +10,6 @@ MTR est un jeu de plateformes reprenant les mêmes idées et les resources de Se
 ![Editeur de niveau](FAQ/editor.png)
 
 ## Licence
-
----------------------------------------
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
