@@ -14,6 +14,7 @@ import com.badlogic.gdx.Input
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
@@ -28,6 +29,7 @@ import ktx.actors.contains
 import ktx.actors.onChange
 import ktx.actors.onClick
 import ktx.app.clearScreen
+import ktx.app.use
 import ktx.collections.toGdxArray
 import ktx.vis.KVisTextButton
 import ktx.vis.window
@@ -63,10 +65,12 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
     private val maxEntitySize = 500f
 
     private val selectEntities: MutableSet<Entity> = mutableSetOf()
+    private var selectMoveEntity: Entity? = null
 
     private fun addSelectEntity(entity: Entity) {
         selectEntities += entity
         if (selectEntities.size == 1) {
+            selectMoveEntity = entity
             onSelectEntityChanged.dispatch(entity)
         } else
             onSelectEntityChanged.dispatch(null)
@@ -76,6 +80,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
 
     private fun clearSelectEntities() {
         selectEntities.clear()
+        selectMoveEntity = null
         onSelectEntityChanged.dispatch(null)
         editorMode = EditorMode.NoMode
     }
@@ -104,10 +109,12 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
 
     private var UIHover = false
 
+    private val editorFont = BitmapFont(Gdx.files.internal("fonts/editorFont.fnt"))
+
     init {
         showInfoEntityWindow()
 
-        level.activeRect.setSize(Gdx.graphics.width.toFloat() * 4, Gdx.graphics.height.toFloat() * 4)
+        level.activeRect.setSize(Gdx.graphics.width.toFloat() * 3, Gdx.graphics.height.toFloat() * 3)
         level.followPlayerCamera = false
         level.drawDebugCells = true
         level.killEntityUnderY = false
@@ -123,6 +130,12 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                 super.exit(event, x, y, pointer, toActor)
             }
         }) // UI Hover
+    }
+
+    override fun dispose() {
+        super.dispose()
+
+        editorFont.dispose()
     }
 
     override fun render(delta: Float) {
@@ -148,10 +161,18 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                 }
             }
             EditorScene.EditorMode.SelectEntity -> {
-                shapeRenderer.color = Color.RED
                 selectEntities.forEach {
+                    shapeRenderer.color = Color.RED
+                    if(it == selectMoveEntity) {
+                        shapeRenderer.color = Color.CORAL
+                    }
                     val transform = transformMapper[it]
                     shapeRenderer.rect(transform.rectangle.x, transform.rectangle.y, transform.rectangle.width, transform.rectangle.height)
+                }
+
+                _game.batch.use { gameBatch ->
+                    val transform = transformMapper[selectEntities.elementAt(0)]
+                    editorFont.draw(gameBatch, "(${transform.rectangle.x.toInt()}, ${transform.rectangle.y.toInt()})", transform.rectangle.x, transform.rectangle.y + transform.rectangle.height + 20)
                 }
             }
             EditorScene.EditorMode.CopyEntity -> {
@@ -219,7 +240,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                                 addSelectEntity(entity)
                             else { // Maybe rectangle
                                 rectangleMode.rectangleStarted = true
-                                rectangleMode.startPosition = Vector2(mousePosInWorld.x, mousePosInWorld.y)
+                                rectangleMode.startPosition = Vector2(mousePosInWorld.x.toInt().toFloat(), mousePosInWorld.y.toInt().toFloat())
                                 rectangleMode.endPosition = rectangleMode.startPosition
                             }
                         }
@@ -263,8 +284,8 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                                 transform.rectangle.y += moveY
                                 level.setEntityGrid(it)
                             }
-                            if (selectEntities.size == 1)
-                                onSelectEntityMoved.dispatch(transformMapper[selectEntities.elementAt(0)])
+                            if (selectEntities.size == 1 && selectMoveEntity != null)
+                                onSelectEntityMoved.dispatch(transformMapper[selectMoveEntity])
                         }
                     }
 
@@ -275,15 +296,18 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                                 clearSelectEntities()
                             } else if (selectEntities.isEmpty() || Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {
                                 addSelectEntity(entity)
-                            } else if (!selectEntities.contains(entity)) {
+                            } else if (selectEntities.contains(entity)) {
+                                selectMoveEntity = entity
+                            }
+                            else {
                                 clearSelectEntities()
                                 addSelectEntity(entity)
                             }
-                        } else if (mousePos != latestMousePos) {
-                            val lastPosMouseInWorld = _camera.unproject(Vector3(latestMousePos.x, latestMousePos.y, 0f))
+                        } else if (selectMoveEntity != null) {
+                            val transformMoveEntity = transformMapper[selectMoveEntity]
 
-                            val moveX = lastPosMouseInWorld.x - mousePosInWorld.x
-                            val moveY = lastPosMouseInWorld.y - mousePosInWorld.y
+                            val moveX = transformMoveEntity.rectangle.x + transformMoveEntity.rectangle.width / 2 - mousePosInWorld.x
+                            val moveY = transformMoveEntity.rectangle.y + transformMoveEntity.rectangle.height / 2 - mousePosInWorld.y
 
                             moveEntities(-moveX, -moveY)
                         }
@@ -380,6 +404,8 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
     }
 
     fun findEntityUnderMouse(): Entity? {
+        _stage.keyboardFocus = null // Enlève le focus sur la fenêtre active permettant d'utiliser par exemple les touches de déplacement même si le joueur était dans un textField l'étape avant
+
         val mousePosInWorld = _camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f))
 
         entities.forEach {
@@ -605,7 +631,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
     fun showInfoEntityWindow() {
         _stage.addActor(window("Réglages des entités") {
             setSize(250f, 400f)
-            setPosition(0f, 0f)
+            setPosition(Gdx.graphics.width - width, Gdx.graphics.height - height)
             verticalGroup {
                 space(10f)
 

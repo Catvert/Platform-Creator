@@ -62,7 +62,7 @@ abstract class BaseScene(protected val _game: MtrGame, protected val _entityEven
     fun drawHUD(texture: Texture, posX: Float, posY: Float, width: Float, height: Float) {
         _game.batch.projectionMatrix = _game.defaultProjection
         _game.batch.use {
-            _game.batch.draw(texture, posX, posY, width, height)
+             it.draw(texture, posX, posY, width, height)
         }
         _game.batch.projectionMatrix = _camera.combined
     }

@@ -7,11 +7,13 @@ import be.catvert.mtrktx.ecs.systems.RenderingSystem
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
+import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.kotcrab.vis.ui.widget.VisList
 import com.kotcrab.vis.ui.widget.VisTextButton
 import com.kotcrab.vis.ui.widget.VisTextField
 import ktx.actors.onClick
 import ktx.app.clearScreen
+import ktx.app.use
 import ktx.collections.GdxArray
 import ktx.collections.toGdxArray
 import ktx.vis.window
@@ -26,6 +28,8 @@ import java.nio.file.StandardCopyOption
 
 class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(game)) {
     override val entities: MutableList<Entity> = mutableListOf()
+
+    private val glyphCreatedBy = GlyphLayout(_game.mainFont, "par Catvert")
 
     init {
         entities += _game.getMainBackground()
@@ -209,6 +213,9 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
 
         super.render(delta)
 
+        _game.batch.use {
+            _game.mainFont.draw(it, glyphCreatedBy, Gdx.graphics.width - glyphCreatedBy.width, glyphCreatedBy.height)
+        }
     }
 
 }
