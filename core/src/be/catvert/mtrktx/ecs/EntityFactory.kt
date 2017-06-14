@@ -1,6 +1,7 @@
 package be.catvert.mtrktx.ecs
 
 import be.catvert.mtrktx.MtrGame
+import be.catvert.mtrktx.TextureInfo
 import be.catvert.mtrktx.ecs.components.*
 import be.catvert.mtrktx.get
 import be.catvert.mtrktx.plusAssign
@@ -28,7 +29,7 @@ class EntityFactory {
         private val physicsMapper = ComponentMapper.getFor(PhysicsComponent::class.java)
         private val transformMapper = ComponentMapper.getFor(TransformComponent::class.java)
 
-        fun createSprite(rectangle: Rectangle, texture: Pair<FileHandle, Texture>): Entity {
+        fun createSprite(rectangle: Rectangle, texture: TextureInfo): Entity {
             val entity = Entity()
             entity.flags = EntityType.Sprite.flag
 
@@ -38,7 +39,7 @@ class EntityFactory {
             return entity
         }
 
-        fun createPhysicsSprite(rectangle: Rectangle, texture: Pair<FileHandle, Texture>, physComp: PhysicsComponent): Entity {
+        fun createPhysicsSprite(rectangle: Rectangle, texture: TextureInfo, physComp: PhysicsComponent): Entity {
             val entity = createSprite(rectangle, texture)
             entity.flags = EntityType.PhysicsSprite.flag
             entity += physComp
@@ -47,7 +48,7 @@ class EntityFactory {
         }
 
         fun createPlayer(game: MtrGame, pos: Vector2): Entity {
-            val entity = createPhysicsSprite(Rectangle(pos.x, pos.y, 48f, 98f), game.getTexture(Gdx.files.internal("game/maryo/small/stand_right.png")), PhysicsComponent(false, 15, true))
+            val entity = createPhysicsSprite(Rectangle(pos.x, pos.y, 48f, 98f), game.getGameTexture(Gdx.files.internal("game/maryo/small/stand_right.png")), PhysicsComponent(false, 15, true))
             entity.flags = EntityType.Player.flag
 
             transformMapper[entity].fixedSizeEditor = true
@@ -90,7 +91,7 @@ class EntityFactory {
             return entity
         }
 
-        private fun createEnemy(enemyType: EnemyType, texture: Pair<FileHandle, Texture>, rect: Rectangle, moveSpeed: Int): Pair<Entity, EnemyComponent> {
+        private fun createEnemy(enemyType: EnemyType, texture: TextureInfo, rect: Rectangle, moveSpeed: Int): Pair<Entity, EnemyComponent> {
             val entity = createPhysicsSprite(rect, texture, PhysicsComponent(false, moveSpeed, true))
             entity.flags = EntityType.Enemy.flag
 
@@ -108,7 +109,7 @@ class EntityFactory {
         }
 
         fun createFurballEnemy(game: MtrGame, entityEvent: EntityEvent, pos: Vector2): Entity {
-            val entity = createEnemy(EnemyType.Furball, game.getTexture(Gdx.files.internal("game/enemy/furball/brown/walk_1.png")), Rectangle(pos.x, pos.y, 48f, 48f), 5)
+            val entity = createEnemy(EnemyType.Furball, game.getGameTexture(Gdx.files.internal("game/enemy/furball/brown/walk_1.png")), Rectangle(pos.x, pos.y, 48f, 48f), 5)
             var goRight = false
 
             entity.first += UpdateComponent(entity.first, { _, e, _ ->
@@ -152,7 +153,7 @@ class EntityFactory {
         }
 
         fun createTurtleEnemy(game: MtrGame, entityEvent: EntityEvent, pos: Vector2): Entity {
-            val entity = createEnemy(EnemyType.Turtle, game.getTexture(Gdx.files.internal("game/enemy/turtle/green/walk_0.png")), Rectangle(pos.x, pos.y, 48f, 98f), 5)
+            val entity = createEnemy(EnemyType.Turtle, game.getGameTexture(Gdx.files.internal("game/enemy/turtle/green/walk_0.png")), Rectangle(pos.x, pos.y, 48f, 98f), 5)
 
             var goRight = false
 
@@ -175,7 +176,7 @@ class EntityFactory {
             val lifeComp = LifeComponent(entity.first, 2, null, { entity, hp ->
                if(hp < 2) {
                    state = 1
-                   renderMapper[entity].texture = game.getTexture(Gdx.files.internal("game/enemy/turtle/green/shell_front.png"))
+                   renderMapper[entity].texture = game.getGameTexture(Gdx.files.internal("game/enemy/turtle/green/shell_front.png"))
                    transformMapper[entity].rectangle.setSize(48f, 48f)
                    physicsMapper[entity].moveSpeed = 10
                }

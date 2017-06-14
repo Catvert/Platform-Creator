@@ -1,0 +1,81 @@
+alienYellow.png
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+alienYellow
+  rotate: false
+  xy: 69, 255
+  size: 66, 82
+  orig: 66, 82
+  offset: 0, 0
+  index: -1
+alienYellow_climb1
+  rotate: false
+  xy: 69, 173
+  size: 66, 82
+  orig: 66, 82
+  offset: 0, 0
+  index: -1
+alienYellow_climb2
+  rotate: false
+  xy: 70, 0
+  size: 66, 82
+  orig: 66, 82
+  offset: 0, 0
+  index: -1
+alienYellow_duck
+  rotate: false
+  xy: 0, 422
+  size: 68, 67
+  orig: 68, 67
+  offset: 0, 0
+  index: -1
+alienYellow_hurt
+  rotate: false
+  xy: 0, 258
+  size: 69, 81
+  orig: 69, 81
+  offset: 0, 0
+  index: -1
+alienYellow_jump
+  rotate: false
+  xy: 68, 339
+  size: 67, 83
+  orig: 67, 83
+  offset: 0, 0
+  index: -1
+alienYellow_stand
+  rotate: false
+  xy: 68, 422
+  size: 66, 82
+  orig: 66, 82
+  offset: 0, 0
+  index: -1
+alienYellow_swim1
+  rotate: false
+  xy: 0, 173
+  size: 69, 85
+  orig: 69, 85
+  offset: 0, 0
+  index: -1
+alienYellow_swim2
+  rotate: false
+  xy: 0, 86
+  size: 70, 87
+  orig: 70, 87
+  offset: 0, 0
+  index: -1
+alienYellow_walk1
+  rotate: false
+  xy: 0, 339
+  size: 68, 83
+  orig: 68, 83
+  offset: 0, 0
+  index: -1
+alienYellow_walk2
+  rotate: false
+  xy: 0, 0
+  size: 70, 86
+  orig: 70, 86
+  offset: 0, 0
+  index: -1

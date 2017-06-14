@@ -22,7 +22,7 @@ class LevelFactory {
     companion object {
         fun createEmptyLevel(game: MtrGame, levelName: String, levelPath: FileHandle): Pair<Level, EntityEvent> {
             val player = EntityFactory.createPlayer(game, Vector2(100f, 100f))
-            val defaultBackground = game.getTexture(Gdx.files.internal("game/background/green_hills_2.png"))
+            val defaultBackground = game.getGameTexture(Gdx.files.internal("game/background/green_hills_2.png"))
             return Pair(Level(game, levelName, player, RenderComponent(defaultBackground), levelPath, mutableListOf(player)), EntityEvent())
         }
 
@@ -54,8 +54,8 @@ class LevelFactory {
                     return Pair(it["size"]["x"].asInt(), it["size"]["y"].asInt())
                 }
 
-                fun getTexture(it: JsonValue): String {
-                    return it["texture"].asString()
+                fun getSpriteSheetTexture(it: JsonValue): Pair<String, String> { // First is the sprite sheet, second is the texture name
+                    return Pair(it["spritesheet"].asString(), it["texture_name"].asString())
                 }
 
                 root["entities"].forEach {
@@ -64,13 +64,13 @@ class LevelFactory {
                     when(type) {
                         EntityFactory.EntityType.Sprite.name -> {
                             val (width, height) = getSize(it)
-                            val texture = getTexture(it)
-                            addEntity(EntityFactory.createSprite(Rectangle(x.toFloat(), y.toFloat(), width.toFloat(), height.toFloat()), game.getTexture(Gdx.files.internal(texture))))
+                            val texture = getSpriteSheetTexture(it)
+                            addEntity(EntityFactory.createSprite(Rectangle(x.toFloat(), y.toFloat(), width.toFloat(), height.toFloat()), game.getSpriteSheetTexture(texture.first, texture.second)))
                         }
                         EntityFactory.EntityType.PhysicsSprite.name -> {
                             val (width, height) = getSize(it)
-                            val texture = getTexture(it)
-                            addEntity(EntityFactory.createPhysicsSprite(Rectangle(x.toFloat(), y.toFloat(), width.toFloat(), height.toFloat()), game.getTexture(Gdx.files.internal(texture)), PhysicsComponent(true)))
+                            val texture = getSpriteSheetTexture(it)
+                            addEntity(EntityFactory.createPhysicsSprite(Rectangle(x.toFloat(), y.toFloat(), width.toFloat(), height.toFloat()), game.getSpriteSheetTexture(texture.first, texture.second), PhysicsComponent(true)))
                         }
                         EntityFactory.EntityType.Player.name -> {
                             player = EntityFactory.createPlayer(game, Vector2(x.toFloat(), y.toFloat()))
@@ -87,7 +87,7 @@ class LevelFactory {
                 println("Erreur lors du chargement du niveau ! Erreur : $e")
             }
 
-            return Triple(!errorInLevel, Level(game, levelName, player, RenderComponent(game.getTexture(backgroundPath)), levelPath, entities), entityEvent)
+            return Triple(!errorInLevel, Level(game, levelName, player, RenderComponent(game.getGameTexture(backgroundPath)), levelPath, entities), entityEvent)
         }
 
         fun saveLevel(level: Level) {
@@ -109,12 +109,13 @@ class LevelFactory {
             }
 
             fun saveTexture(renderComponent: RenderComponent) {
-                writer.name("texture").value(renderComponent.texture.first.path())
+                writer.name("spritesheet").value(renderComponent.texture.spriteSheet)
+                writer.name("texture_name").value(renderComponent.texture.textureName)
             }
 
             writer.`object`()
             writer.name("levelName").value(level.levelName)
-            writer.name("background").value(level.background.texture.first)
+            writer.name("background").value(level.background.texture.texturePath)
 
             writer.array("entities")
             level.loadedEntities.forEach {

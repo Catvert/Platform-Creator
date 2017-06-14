@@ -1,0 +1,256 @@
+spritesheet_hud.png
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+hud0
+  rotate: false
+  xy: 128, 768
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hud1
+  rotate: false
+  xy: 128, 640
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hud2
+  rotate: false
+  xy: 128, 512
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hud3
+  rotate: false
+  xy: 128, 384
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hud4
+  rotate: false
+  xy: 128, 256
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hud5
+  rotate: false
+  xy: 128, 128
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hud6
+  rotate: false
+  xy: 128, 0
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hud7
+  rotate: false
+  xy: 0, 896
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hud8
+  rotate: false
+  xy: 0, 768
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hud9
+  rotate: false
+  xy: 0, 640
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hudCoin
+  rotate: false
+  xy: 0, 512
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hudHeart_empty
+  rotate: false
+  xy: 0, 384
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hudHeart_full
+  rotate: false
+  xy: 0, 256
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hudHeart_half
+  rotate: false
+  xy: 0, 128
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hudJewel_blue
+  rotate: false
+  xy: 0, 0
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hudJewel_blue_empty
+  rotate: false
+  xy: 256, 128
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hudJewel_green
+  rotate: false
+  xy: 512, 256
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hudJewel_green_empty
+  rotate: false
+  xy: 512, 128
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hudJewel_red
+  rotate: false
+  xy: 512, 0
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hudJewel_red_empty
+  rotate: false
+  xy: 384, 896
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hudJewel_yellow
+  rotate: false
+  xy: 384, 768
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hudJewel_yellow_empty
+  rotate: false
+  xy: 384, 640
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hudKey_blue
+  rotate: false
+  xy: 384, 512
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hudKey_blue_empty
+  rotate: false
+  xy: 384, 384
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hudKey_green
+  rotate: false
+  xy: 384, 256
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hudKey_green_empty
+  rotate: false
+  xy: 384, 128
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hudKey_red
+  rotate: false
+  xy: 384, 0
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hudKey_red_empty
+  rotate: false
+  xy: 256, 896
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hudKey_yellow
+  rotate: false
+  xy: 256, 768
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hudKey_yellow_empty
+  rotate: false
+  xy: 256, 640
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hudPlayer_beige
+  rotate: false
+  xy: 256, 512
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hudPlayer_blue
+  rotate: false
+  xy: 256, 384
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hudPlayer_green
+  rotate: false
+  xy: 256, 256
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hudPlayer_pink
+  rotate: false
+  xy: 512, 384
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hudPlayer_yellow
+  rotate: false
+  xy: 256, 0
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+hudX
+  rotate: false
+  xy: 128, 896
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1

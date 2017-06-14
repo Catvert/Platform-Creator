@@ -7,6 +7,9 @@ import com.badlogic.ashley.core.EntitySystem
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g2d.TextureAtlas
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Rectangle
 
 /**
@@ -43,8 +46,15 @@ fun Entity.copy(): Entity {
     return entityCopy
 }
 
-fun <B : Batch> B.draw(texture: Texture, rect: Rectangle, flipX: Boolean = false, flipY: Boolean = false) {
-    this.draw(texture, rect.x, rect.y, rect.width, rect.height, 0, 0, texture.width, texture.height, flipX, flipY)
+fun <B : Batch> B.draw(texture: TextureAtlas.AtlasRegion, rect: Rectangle, flipX: Boolean = false, flipY: Boolean = true) {
+    if(flipX && !texture.isFlipX || !flipX && texture.isFlipX) {
+        texture.flip(true, false)
+    }
+    if(flipY && !texture.isFlipY || !flipY && texture.isFlipY){
+        texture.flip(false, true)
+    }
+
+    this.draw(texture, rect.x, rect.y, rect.width, rect.height)
 }
 
 operator fun Entity.plusAssign(component: BaseComponent) {

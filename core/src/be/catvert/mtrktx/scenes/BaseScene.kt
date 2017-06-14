@@ -9,6 +9,7 @@ import com.badlogic.ashley.core.EntitySystem
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -59,7 +60,7 @@ abstract class BaseScene(protected val _game: MtrGame, protected val _entityEven
         _stage.draw()
     }
 
-    fun drawHUD(texture: Texture, posX: Float, posY: Float, width: Float, height: Float) {
+    fun drawHUD(texture: TextureAtlas.AtlasRegion, posX: Float, posY: Float, width: Float, height: Float) {
         _game.batch.projectionMatrix = _game.defaultProjection
         _game.batch.use {
              it.draw(texture, posX, posY, width, height)

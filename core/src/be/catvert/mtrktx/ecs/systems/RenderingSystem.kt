@@ -30,7 +30,7 @@ class RenderingSystem(private val game: MtrGame) : BaseSystem() {
                     val rect = transformMapper[it].rectangle
                     val renderComp = renderMapper[it]
 
-                    batch.draw(renderComp.texture.second, rect, renderComp.flipX, renderComp.flipY)
+                    batch.draw(renderComp.texture.texture, rect, renderComp.flipX, renderComp.flipY)
                 }
             }
         }

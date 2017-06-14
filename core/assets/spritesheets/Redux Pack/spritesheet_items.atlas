@@ -1,0 +1,172 @@
+spritesheet_items.png
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+coinBronze
+  rotate: false
+  xy: 384, 0
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+coinGold
+  rotate: false
+  xy: 640, 384
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+coinSilver
+  rotate: false
+  xy: 256, 256
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+flagBlue1
+  rotate: false
+  xy: 256, 0
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+flagBlue2
+  rotate: false
+  xy: 128, 384
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+flagBlue_down
+  rotate: false
+  xy: 256, 128
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+flagGreen1
+  rotate: false
+  xy: 128, 128
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+flagGreen2
+  rotate: false
+  xy: 128, 0
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+flagGreen_down
+  rotate: false
+  xy: 128, 256
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+flagRed1
+  rotate: false
+  xy: 0, 256
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+flagRed2
+  rotate: false
+  xy: 0, 128
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+flagRed_down
+  rotate: false
+  xy: 0, 384
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+flagYellow1
+  rotate: false
+  xy: 256, 384
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+flagYellow2
+  rotate: false
+  xy: 640, 256
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+flagYellow_down
+  rotate: false
+  xy: 0, 0
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+gemBlue
+  rotate: false
+  xy: 640, 128
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+gemGreen
+  rotate: false
+  xy: 640, 0
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+gemRed
+  rotate: false
+  xy: 512, 384
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+gemYellow
+  rotate: false
+  xy: 512, 256
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+keyBlue
+  rotate: false
+  xy: 512, 128
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+keyGreen
+  rotate: false
+  xy: 512, 0
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+keyRed
+  rotate: false
+  xy: 384, 384
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+keyYellow
+  rotate: false
+  xy: 384, 256
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+star
+  rotate: false
+  xy: 384, 128
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1

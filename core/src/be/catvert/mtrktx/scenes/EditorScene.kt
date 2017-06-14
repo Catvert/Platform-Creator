@@ -13,8 +13,8 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
@@ -35,8 +35,8 @@ import ktx.vis.KVisTextButton
 import ktx.vis.window
 
 /**
-* Created by Catvert on 10/06/17.
-*/
+ * Created by Catvert on 10/06/17.
+ */
 
 class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Level) : BaseScene(game, entityEvent, systems = RenderingSystem(game)) {
     private enum class EditorMode {
@@ -141,7 +141,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
     override fun render(delta: Float) {
         clearScreen(186f / 255f, 212f / 255f, 1f)
 
-        drawHUD(level.background.texture.second, 0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
+        drawHUD(level.background.texture.texture, 0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
 
         level.activeRect.setPosition(Math.max(0f, _camera.position.x - level.activeRect.width / 2), Math.max(0f, _camera.position.y - level.activeRect.height / 2))
 
@@ -163,7 +163,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
             EditorScene.EditorMode.SelectEntity -> {
                 selectEntities.forEach {
                     shapeRenderer.color = Color.RED
-                    if(it == selectMoveEntity) {
+                    if (it == selectMoveEntity) {
                         shapeRenderer.color = Color.CORAL
                     }
                     val transform = transformMapper[it]
@@ -298,8 +298,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                                 addSelectEntity(entity)
                             } else if (selectEntities.contains(entity)) {
                                 selectMoveEntity = entity
-                            }
-                            else {
+                            } else {
                                 clearSelectEntities()
                                 addSelectEntity(entity)
                             }
@@ -417,8 +416,12 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
         return null
     }
 
-    fun showSelectTextureWindow(onTextureSelected: (Pair<FileHandle, Texture>) -> Unit) {
-        val folders = Gdx.files.internal("levelObjects").list()
+    fun showSelectTextureWindow(onTextureSelected: (TextureInfo) -> Unit) {
+        data class TextureAtlasSelect(val textureAtlas: TextureAtlas, val file: FileHandle) {
+            override fun toString(): String {
+                return file.parent().nameWithoutExtension() + file.nameWithoutExtension()
+            }
+        }
 
         _stage.addActor(window("Sélectionner une texture") {
             setSize(400f, 400f)
@@ -432,19 +435,26 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
 
                 val selectedImage = VisImage()
 
-                selectBox<FileHandle> {
-                    items = folders.toGdxArray()
+                selectBox<TextureAtlasSelect> {
+                    items = _game.getTextureAtlasList().let {
+                        val list = mutableListOf<TextureAtlasSelect>()
+
+                        it.forEach {
+                            list += TextureAtlasSelect(it.first, it.second)
+                        }
+
+                        list.toGdxArray()
+                    }
 
                     addListener(onChange { _, _ ->
                         table.clearChildren()
 
                         var count = 0
+                        selected.textureAtlas.regions.forEach {
+                            val textureInfo = it
+                            val image = VisImage(textureInfo)
 
-                        Utility.getFilesRecursivly(selected, "png").forEach {
-                            val texture = _game.getTexture(it)
-                            val image = VisImage(texture.second)
-
-                            image.userObject = texture
+                            image.userObject = TextureInfo(it, selected.file.toString(), it.name)
 
                             image.addListener(image.onClick { _, _ ->
                                 selectedImage.drawable = image.drawable
@@ -479,8 +489,8 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
 
                 textButton("Sélectionner") {
                     addListener(onClick { _: InputEvent, _: KVisTextButton ->
-                        if (selectedImage.userObject != null && selectedImage.userObject is Pair<*, *>) {
-                            onTextureSelected(selectedImage.userObject as Pair<FileHandle, Texture>)
+                        if (selectedImage.userObject != null && selectedImage.userObject is TextureInfo) {
+                            onTextureSelected(selectedImage.userObject as TextureInfo)
                             this@window.remove()
                         }
                     })
@@ -508,8 +518,8 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                         }
 
                         fun addSize(): Pair<VisTextField, VisTextField> {
-                            val widthField: VisTextField = VisTextField("50")
-                            val heightField: VisTextField = VisTextField("50")
+                            val widthField: VisTextField = VisTextField()
+                            val heightField: VisTextField = VisTextField()
 
                             this@verticalSettingsGroup.verticalGroup {
                                 space(10f)
@@ -527,14 +537,17 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                             return Pair(widthField, heightField)
                         }
 
-                        fun addSelectTexture(onTextureSelected: (Pair<FileHandle, Texture>) -> Unit) {
+                        fun addSelectTexture(onTextureSelected: (TextureInfo) -> Unit, widthField: VisTextField, heightField: VisTextField) {
                             this@verticalSettingsGroup.table {
                                 val image = com.kotcrab.vis.ui.widget.VisImage()
                                 textButton("Sélectionner texture") {
                                     addListener(onClick { _, _ ->
                                         showSelectTextureWindow({ texture ->
+                                            widthField.text = texture.texture.regionWidth.toString()
+                                            heightField.text = texture.texture.regionHeight.toString()
+
                                             onTextureSelected(texture)
-                                            image.setDrawable(texture.second)
+                                            image.drawable = com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable(texture.texture)
                                             if (!this@table.contains(image)) {
                                                 this@table.add(image).size(this.height, this.height).spaceLeft(10f)
                                             }
@@ -574,10 +587,10 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                                     EntityFactory.EntityType.Sprite -> {
                                         val (width, height) = addSize()
 
-                                        var selectedTexture: Pair<FileHandle, Texture>? = null
+                                        var selectedTexture: TextureInfo? = null
                                         addSelectTexture({ texture ->
                                             selectedTexture = texture
-                                        })
+                                        }, width, height)
 
                                         addButton.addListener(addButton.onClick { _, _ ->
                                             if (checkValidSize(width, height) && selectedTexture != null) {
@@ -588,10 +601,10 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                                     EntityFactory.EntityType.PhysicsSprite -> {
                                         val (width, height) = addSize()
 
-                                        var selectedTexture: Pair<FileHandle, Texture>? = null
+                                        var selectedTexture: TextureInfo? = null
                                         addSelectTexture({ texture ->
                                             selectedTexture = texture
-                                        })
+                                        }, width, height)
 
                                         addButton.addListener(addButton.onClick { _, _ ->
                                             if (checkValidSize(width, height) && selectedTexture != null) {
