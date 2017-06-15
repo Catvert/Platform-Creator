@@ -9,14 +9,14 @@ alienBlue
   orig: 66, 92
   offset: 0, 0
   index: -1
-alienBlue_climb1
+alienBlue_climb_0
   rotate: false
   xy: 69, 97
   size: 66, 92
   orig: 66, 92
   offset: 0, 0
   index: -1
-alienBlue_climb2
+alienBlue_climb_1
   rotate: false
   xy: 133, 189
   size: 66, 92
@@ -51,28 +51,28 @@ alienBlue_stand
   orig: 66, 92
   offset: 0, 0
   index: -1
-alienBlue_swim1
+alienBlue_swim_0
   rotate: false
   xy: 0, 97
   size: 69, 95
   orig: 69, 95
   offset: 0, 0
   index: -1
-alienBlue_swim2
+alienBlue_swim_1
   rotate: false
   xy: 0, 0
   size: 70, 97
   orig: 70, 97
   offset: 0, 0
   index: -1
-alienBlue_walk1
+alienBlue_walk_0
   rotate: false
   xy: 67, 285
   size: 66, 93
   orig: 66, 93
   offset: 0, 0
   index: -1
-alienBlue_walk2
+alienBlue_walk_1
   rotate: false
   xy: 0, 356
   size: 67, 96

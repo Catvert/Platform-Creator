@@ -3,6 +3,7 @@ package be.catvert.mtrktx
 import be.catvert.mtrktx.ecs.EntityEvent
 import be.catvert.mtrktx.ecs.EntityFactory
 import be.catvert.mtrktx.ecs.components.*
+import be.catvert.mtrktx.ecs.components.render.RenderComponent
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
@@ -23,7 +24,7 @@ class LevelFactory {
         fun createEmptyLevel(game: MtrGame, levelName: String, levelPath: FileHandle): Pair<Level, EntityEvent> {
             val player = EntityFactory.createPlayer(game, Vector2(100f, 100f))
             val defaultBackground = game.getGameTexture(Gdx.files.internal("game/background/green_hills_2.png"))
-            return Pair(Level(game, levelName, player, RenderComponent(defaultBackground), levelPath, mutableListOf(player)), EntityEvent())
+            return Pair(Level(game, levelName, player, RenderComponent(listOf(defaultBackground)), levelPath, mutableListOf(player)), EntityEvent())
         }
 
         fun loadLevel(game:MtrGame, levelPath: FileHandle): Triple<Boolean, Level, EntityEvent> { // NOTE A SOIS MEME, SI UN ENTITE DOIT CREER UNE AUTRE ENTITE, IL FAUT PASSER LEVEL.ADDENTITY ET PAS LA LISTE ICI
@@ -65,12 +66,12 @@ class LevelFactory {
                         EntityFactory.EntityType.Sprite.name -> {
                             val (width, height) = getSize(it)
                             val texture = getSpriteSheetTexture(it)
-                            addEntity(EntityFactory.createSprite(Rectangle(x.toFloat(), y.toFloat(), width.toFloat(), height.toFloat()), game.getSpriteSheetTexture(texture.first, texture.second)))
+                            addEntity(EntityFactory.createSprite(Rectangle(x.toFloat(), y.toFloat(), width.toFloat(), height.toFloat()), RenderComponent(listOf(game.getSpriteSheetTexture(texture.first, texture.second)))))
                         }
                         EntityFactory.EntityType.PhysicsSprite.name -> {
                             val (width, height) = getSize(it)
                             val texture = getSpriteSheetTexture(it)
-                            addEntity(EntityFactory.createPhysicsSprite(Rectangle(x.toFloat(), y.toFloat(), width.toFloat(), height.toFloat()), game.getSpriteSheetTexture(texture.first, texture.second), PhysicsComponent(true)))
+                            addEntity(EntityFactory.createPhysicsSprite(Rectangle(x.toFloat(), y.toFloat(), width.toFloat(), height.toFloat()), RenderComponent(listOf(game.getSpriteSheetTexture(texture.first, texture.second))), PhysicsComponent(true)))
                         }
                         EntityFactory.EntityType.Player.name -> {
                             player = EntityFactory.createPlayer(game, Vector2(x.toFloat(), y.toFloat()))
@@ -87,7 +88,7 @@ class LevelFactory {
                 println("Erreur lors du chargement du niveau ! Erreur : $e")
             }
 
-            return Triple(!errorInLevel, Level(game, levelName, player, RenderComponent(game.getGameTexture(backgroundPath)), levelPath, entities), entityEvent)
+            return Triple(!errorInLevel, Level(game, levelName, player, RenderComponent(listOf(game.getGameTexture(backgroundPath))), levelPath, entities), entityEvent)
         }
 
         fun saveLevel(level: Level) {
@@ -109,13 +110,13 @@ class LevelFactory {
             }
 
             fun saveTexture(renderComponent: RenderComponent) {
-                writer.name("spritesheet").value(renderComponent.texture.spriteSheet)
-                writer.name("texture_name").value(renderComponent.texture.textureName)
+                writer.name("spritesheet").value(renderComponent.textureInfoList[0].spriteSheet)
+                writer.name("texture_name").value(renderComponent.textureInfoList[0].textureName)
             }
 
             writer.`object`()
             writer.name("levelName").value(level.levelName)
-            writer.name("background").value(level.background.texture.texturePath)
+            writer.name("background").value(level.background.textureInfoList[0].texturePath)
 
             writer.array("entities")
             level.loadedEntities.forEach {

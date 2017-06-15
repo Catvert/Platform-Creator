@@ -2,6 +2,7 @@ package be.catvert.mtrktx
 
 import be.catvert.mtrktx.ecs.IUpdateable
 import be.catvert.mtrktx.ecs.components.*
+import be.catvert.mtrktx.ecs.components.render.RenderComponent
 import be.catvert.mtrktx.ecs.systems.physics.GridCell
 import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity

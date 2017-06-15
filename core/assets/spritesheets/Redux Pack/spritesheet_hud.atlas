@@ -2,70 +2,70 @@ spritesheet_hud.png
 format: RGBA8888
 filter: Linear,Linear
 repeat: none
-hud0
+hud_-1
   rotate: false
   xy: 128, 768
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-hud1
+hud_0
   rotate: false
   xy: 128, 640
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-hud2
+hud_1
   rotate: false
   xy: 128, 512
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-hud3
+hud_2
   rotate: false
   xy: 128, 384
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-hud4
+hud_3
   rotate: false
   xy: 128, 256
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-hud5
+hud_4
   rotate: false
   xy: 128, 128
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-hud6
+hud_5
   rotate: false
   xy: 128, 0
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-hud7
+hud_6
   rotate: false
   xy: 0, 896
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-hud8
+hud_7
   rotate: false
   xy: 0, 768
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-hud9
+hud_8
   rotate: false
   xy: 0, 640
   size: 128, 128

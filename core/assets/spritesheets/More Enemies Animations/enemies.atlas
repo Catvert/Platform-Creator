@@ -604,14 +604,14 @@ spider_hit
   orig: 71, 45
   offset: 0, 0
   index: -1
-spider_walk1
+spider_walk_0
   rotate: false
   xy: 0, 90
   size: 72, 51
   orig: 72, 51
   offset: 0, 0
   index: -1
-spider_walk2
+spider_walk_1
   rotate: false
   xy: 0, 37
   size: 77, 53

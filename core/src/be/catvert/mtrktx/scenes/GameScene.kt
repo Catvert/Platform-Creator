@@ -11,7 +11,6 @@ import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import ktx.app.clearScreen
-import ktx.app.use
 
 
 /**
@@ -33,7 +32,7 @@ class GameScene(game: MtrGame, entityEvent: EntityEvent, private val level: Leve
     override fun render(delta: Float) {
         clearScreen(186f/255f, 212f/255f, 1f)
 
-        drawHUD(level.background.texture.texture, 0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
+        drawHUD(level.background.getActualAtlasRegion(), 0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
 
         level.activeRect.setPosition(Math.max(0f, transformPlayer.rectangle.x - level.activeRect.width / 2 + transformPlayer.rectangle.width / 2), Math.max(0f, transformPlayer.rectangle.y - level.activeRect.height / 2 + transformPlayer.rectangle.height / 2))
 

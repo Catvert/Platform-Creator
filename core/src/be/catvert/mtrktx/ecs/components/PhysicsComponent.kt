@@ -1,6 +1,7 @@
 package be.catvert.mtrktx.ecs.components
 
 import com.badlogic.ashley.core.Entity
+import com.sun.xml.internal.ws.api.pipe.NextAction
 
 
 /**
@@ -46,6 +47,8 @@ class PhysicsComponent(var isStatic: Boolean, var moveSpeed: Int = 0, val smooth
     var jumpData: JumpData? = null
 
     var onCollisionWith: ((thisEntity: Entity, collisionEntity: Entity, side: CollisionSide) -> Unit)? = null
+
+    var onMove: ((thisEntity: Entity, moveX: Int, moveY: Int) -> Unit)? = null
 
     init {
         if(smoothMove) this.smoothMoveData = SmoothMoveData() else this.smoothMoveData = null

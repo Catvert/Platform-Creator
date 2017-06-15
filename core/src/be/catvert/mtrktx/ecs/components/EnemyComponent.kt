@@ -7,7 +7,6 @@ import com.badlogic.ashley.core.Entity
 */
 
 enum class EnemyType {
-    Turtle, Furball
 }
 
 class EnemyComponent(val enemyType: EnemyType): BaseComponent() {

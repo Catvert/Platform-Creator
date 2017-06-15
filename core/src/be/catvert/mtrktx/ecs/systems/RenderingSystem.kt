@@ -2,7 +2,7 @@ package be.catvert.mtrktx.ecs.systems
 
 import be.catvert.mtrktx.MtrGame
 import be.catvert.mtrktx.draw
-import be.catvert.mtrktx.ecs.components.RenderComponent
+import be.catvert.mtrktx.ecs.components.render.RenderComponent
 import be.catvert.mtrktx.ecs.components.TransformComponent
 import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
@@ -30,7 +30,14 @@ class RenderingSystem(private val game: MtrGame) : BaseSystem() {
                     val rect = transformMapper[it].rectangle
                     val renderComp = renderMapper[it]
 
-                    batch.draw(renderComp.texture.texture, rect, renderComp.flipX, renderComp.flipY)
+                    val atlas = renderComp.getActualAtlasRegion()
+
+                    if(renderComp.autoResizeWithAtlas) {
+                        rect.width = atlas.regionWidth.toFloat()
+                        rect.height = atlas.regionHeight.toFloat()
+                    }
+
+                    batch.draw(atlas, rect, renderComp.flipX, renderComp.flipY)
                 }
             }
         }

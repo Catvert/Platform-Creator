@@ -5,6 +5,7 @@ import be.catvert.mtrktx.ecs.EntityEvent
 import be.catvert.mtrktx.ecs.EntityFactory
 import be.catvert.mtrktx.ecs.components.EnemyType
 import be.catvert.mtrktx.ecs.components.TransformComponent
+import be.catvert.mtrktx.ecs.components.render.RenderComponent
 import be.catvert.mtrktx.ecs.systems.RenderingSystem
 import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
@@ -141,7 +142,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
     override fun render(delta: Float) {
         clearScreen(186f / 255f, 212f / 255f, 1f)
 
-        drawHUD(level.background.texture.texture, 0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
+        drawHUD(level.background.getActualAtlasRegion(), 0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
 
         level.activeRect.setPosition(Math.max(0f, _camera.position.x - level.activeRect.width / 2), Math.max(0f, _camera.position.y - level.activeRect.height / 2))
 
@@ -417,9 +418,9 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
     }
 
     fun showSelectTextureWindow(onTextureSelected: (TextureInfo) -> Unit) {
-        data class TextureAtlasSelect(val textureAtlas: TextureAtlas, val file: FileHandle) {
+        data class TextureAtlasSelect(val textureAtlas: TextureAtlas, val atlasName: String) {
             override fun toString(): String {
-                return file.parent().nameWithoutExtension() + file.nameWithoutExtension()
+                return atlasName
             }
         }
 
@@ -454,7 +455,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                             val textureInfo = it
                             val image = VisImage(textureInfo)
 
-                            image.userObject = TextureInfo(it, selected.file.toString(), it.name)
+                            image.userObject = TextureInfo(it, selected.atlasName, it.name)
 
                             image.addListener(image.onClick { _, _ ->
                                 selectedImage.drawable = image.drawable
@@ -594,7 +595,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
 
                                         addButton.addListener(addButton.onClick { _, _ ->
                                             if (checkValidSize(width, height) && selectedTexture != null) {
-                                                finishEntityBuild(EntityFactory.createSprite(Rectangle(0f, 0f, width.text.toInt().toFloat(), height.text.toInt().toFloat()), selectedTexture!!))
+                                                finishEntityBuild(EntityFactory.createSprite(Rectangle(0f, 0f, width.text.toInt().toFloat(), height.text.toInt().toFloat()), RenderComponent(listOf(selectedTexture!!))))
                                             }
                                         })
                                     }
@@ -608,7 +609,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
 
                                         addButton.addListener(addButton.onClick { _, _ ->
                                             if (checkValidSize(width, height) && selectedTexture != null) {
-                                                finishEntityBuild(EntityFactory.createPhysicsSprite(Rectangle(0f, 0f, width.text.toInt().toFloat(), height.text.toInt().toFloat()), selectedTexture!!, be.catvert.mtrktx.ecs.components.PhysicsComponent(true)))
+                                                finishEntityBuild(EntityFactory.createPhysicsSprite(Rectangle(0f, 0f, width.text.toInt().toFloat(), height.text.toInt().toFloat()), RenderComponent(listOf(selectedTexture!!)), be.catvert.mtrktx.ecs.components.PhysicsComponent(true)))
                                             }
                                         })
 

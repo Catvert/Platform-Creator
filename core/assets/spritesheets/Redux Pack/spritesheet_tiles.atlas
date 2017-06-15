@@ -443,14 +443,14 @@ switchYellow_pressed
   orig: 128, 128
   offset: 0, 0
   index: -1
-torch1
+torch_0
   rotate: false
   xy: 128, 512
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-torch2
+torch_1
   rotate: false
   xy: 128, 384
   size: 128, 128

@@ -65,14 +65,14 @@ bunny1_stand
   orig: 120, 201
   offset: 0, 0
   index: -1
-bunny1_walk1
+bunny_0_walk_0
   rotate: false
   xy: 678, 860
   size: 120, 201
   orig: 120, 201
   offset: 0, 0
   index: -1
-bunny1_walk2
+bunny1_walk_1
   rotate: false
   xy: 692, 1458
   size: 120, 207
@@ -107,14 +107,14 @@ bunny2_stand
   orig: 121, 201
   offset: 0, 0
   index: -1
-bunny2_walk1
+bunny2_walk_0
   rotate: false
   xy: 584, 203
   size: 121, 201
   orig: 121, 201
   offset: 0, 0
   index: -1
-bunny2_walk2
+bunny_1_walk_1
   rotate: false
   xy: 678, 651
   size: 121, 207
@@ -254,28 +254,28 @@ gold_4
   orig: 15, 84
   offset: 0, 0
   index: -1
-grass1
+grass_0
   rotate: false
   xy: 868, 1877
   size: 58, 57
   orig: 58, 57
   offset: 0, 0
   index: -1
-grass2
+grass_1
   rotate: false
   xy: 784, 1931
   size: 82, 70
   orig: 82, 70
   offset: 0, 0
   index: -1
-grass_brown1
+grass_brown_0
   rotate: false
   xy: 534, 1063
   size: 58, 57
   orig: 58, 57
   offset: 0, 0
   index: -1
-grass_brown2
+grass_brown_1
   rotate: false
   xy: 801, 752
   size: 82, 70
@@ -653,7 +653,7 @@ smoke
   orig: 51, 48
   offset: 0, 0
   index: -1
-spikeBall1
+spikeBall_0
   rotate: false
   xy: 534, 763
   size: 142, 148
@@ -681,14 +681,14 @@ spikeMan_stand
   orig: 90, 155
   offset: 0, 0
   index: -1
-spikeMan_walk1
+spikeMan_walk_0
   rotate: false
   xy: 704, 1256
   size: 120, 159
   orig: 120, 159
   offset: 0, 0
   index: -1
-spikeMan_walk2
+spikeMan_walk_1
   rotate: false
   xy: 812, 296
   size: 90, 155
@@ -758,49 +758,49 @@ spring_out
   orig: 145, 110
   offset: 0, 0
   index: -1
-sun1
+sun_0
   rotate: false
   xy: 534, 913
   size: 142, 148
   orig: 142, 148
   offset: 0, 0
   index: -1
-sun2
+sun_1
   rotate: false
   xy: 421, 1390
   size: 148, 142
   orig: 148, 142
   offset: 0, 0
   index: -1
-wingMan1
+wingMan_0
   rotate: false
   xy: 382, 635
   size: 174, 126
   orig: 174, 126
   offset: 0, 0
   index: -1
-wingMan2
+wingMan_1
   rotate: false
   xy: 0, 1879
   size: 206, 107
   orig: 206, 107
   offset: 0, 0
   index: -1
-wingMan3
+wingMan_2
   rotate: false
   xy: 0, 1559
   size: 216, 101
   orig: 216, 101
   offset: 0, 0
   index: -1
-wingMan4
+wingMan_3
   rotate: false
   xy: 0, 1456
   size: 216, 101
   orig: 216, 101
   offset: 0, 0
   index: -1
-wingMan5
+wingMan_4
   rotate: false
   xy: 382, 510
   size: 182, 123

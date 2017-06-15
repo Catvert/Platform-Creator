@@ -9,14 +9,14 @@ alienBeige
   orig: 66, 92
   offset: 0, 0
   index: -1
-alienBeige_climb1
+alienBeige_climb_0
   rotate: false
   xy: 478, 175
   size: 66, 95
   orig: 66, 95
   offset: 0, 0
   index: -1
-alienBeige_climb2
+alienBeige_climb_1
   rotate: false
   xy: 610, 368
   size: 66, 95
@@ -51,28 +51,28 @@ alienBeige_stand
   orig: 66, 92
   offset: 0, 0
   index: -1
-alienBeige_swim1
+alienBeige_swim_0
   rotate: false
   xy: 209, 95
   size: 69, 98
   orig: 69, 98
   offset: 0, 0
   index: -1
-alienBeige_swim2
+alienBeige_swim_1
   rotate: false
   xy: 70, 0
   size: 70, 100
   orig: 70, 100
   offset: 0, 0
   index: -1
-alienBeige_walk1
+alienBeige_walk_0
   rotate: false
   xy: 209, 193
   size: 68, 93
   orig: 68, 93
   offset: 0, 0
   index: -1
-alienBeige_walk2
+alienBeige_walk_1
   rotate: false
   xy: 70, 284
   size: 70, 96
@@ -86,14 +86,14 @@ alienBlue
   orig: 66, 92
   offset: 0, 0
   index: -1
-alienBlue_climb1
+alienBlue_climb_0
   rotate: false
   xy: 412, 359
   size: 66, 92
   orig: 66, 92
   offset: 0, 0
   index: -1
-alienBlue_climb2
+alienBlue_climb_1
   rotate: false
   xy: 412, 267
   size: 66, 92
@@ -128,28 +128,28 @@ alienBlue_stand
   orig: 66, 92
   offset: 0, 0
   index: -1
-alienBlue_swim1
+alienBlue_swim_0
   rotate: false
   xy: 139, 380
   size: 69, 95
   orig: 69, 95
   offset: 0, 0
   index: -1
-alienBlue_swim2
+alienBlue_swim_1
   rotate: false
   xy: 70, 100
   size: 70, 97
   orig: 70, 97
   offset: 0, 0
   index: -1
-alienBlue_walk1
+alienBlue_walk_0
   rotate: false
   xy: 544, 267
   size: 66, 93
   orig: 66, 93
   offset: 0, 0
   index: -1
-alienBlue_walk2
+alienBlue_walk_1
   rotate: false
   xy: 345, 175
   size: 67, 96
@@ -163,14 +163,14 @@ alienGreen
   orig: 66, 92
   offset: 0, 0
   index: -1
-alienGreen_climb1
+alienGreen_climb_0
   rotate: false
   xy: 611, 0
   size: 66, 92
   orig: 66, 92
   offset: 0, 0
   index: -1
-alienGreen_climb2
+alienGreen_climb_1
   rotate: false
   xy: 676, 92
   size: 66, 92
@@ -205,28 +205,28 @@ alienGreen_stand
   orig: 66, 92
   offset: 0, 0
   index: -1
-alienGreen_swim1
+alienGreen_swim_0
   rotate: false
   xy: 209, 0
   size: 69, 95
   orig: 69, 95
   offset: 0, 0
   index: -1
-alienGreen_swim2
+alienGreen_swim_1
   rotate: false
   xy: 0, 193
   size: 70, 97
   orig: 70, 97
   offset: 0, 0
   index: -1
-alienGreen_walk1
+alienGreen_walk_0
   rotate: false
   xy: 277, 276
   size: 68, 93
   orig: 68, 93
   offset: 0, 0
   index: -1
-alienGreen_walk2
+alienGreen_walk_1
   rotate: false
   xy: 0, 290
   size: 70, 96
@@ -240,14 +240,14 @@ alienPink
   orig: 66, 92
   offset: 0, 0
   index: -1
-alienPink_climb1
+alienPink_climb_0
   rotate: false
   xy: 610, 92
   size: 66, 92
   orig: 66, 92
   offset: 0, 0
   index: -1
-alienPink_climb2
+alienPink_climb_1
   rotate: false
   xy: 545, 0
   size: 66, 92
@@ -282,28 +282,28 @@ alienPink_stand
   orig: 66, 92
   offset: 0, 0
   index: -1
-alienPink_swim1
+alienPink_swim_0
   rotate: false
   xy: 140, 0
   size: 69, 95
   orig: 69, 95
   offset: 0, 0
   index: -1
-alienPink_swim2
+alienPink_swim_1
   rotate: false
   xy: 0, 0
   size: 70, 97
   orig: 70, 97
   offset: 0, 0
   index: -1
-alienPink_walk1
+alienPink_walk_0
   rotate: false
   xy: 277, 369
   size: 68, 93
   orig: 68, 93
   offset: 0, 0
   index: -1
-alienPink_walk2
+alienPink_walk_1
   rotate: false
   xy: 0, 97
   size: 70, 96
@@ -317,14 +317,14 @@ alienYellow
   orig: 66, 82
   offset: 0, 0
   index: -1
-alienYellow_climb1
+alienYellow_climb_0
   rotate: false
   xy: 544, 360
   size: 66, 82
   orig: 66, 82
   offset: 0, 0
   index: -1
-alienYellow_climb2
+alienYellow_climb_1
   rotate: false
   xy: 544, 185
   size: 66, 82
@@ -359,28 +359,28 @@ alienYellow_stand
   orig: 66, 82
   offset: 0, 0
   index: -1
-alienYellow_swim1
+alienYellow_swim_0
   rotate: false
   xy: 140, 95
   size: 69, 85
   orig: 69, 85
   offset: 0, 0
   index: -1
-alienYellow_swim2
+alienYellow_swim_1
   rotate: false
   xy: 70, 197
   size: 70, 87
   orig: 70, 87
   offset: 0, 0
   index: -1
-alienYellow_walk1
+alienYellow_walk_0
   rotate: false
   xy: 277, 193
   size: 68, 83
   orig: 68, 83
   offset: 0, 0
   index: -1
-alienYellow_walk2
+alienYellow_walk_1
   rotate: false
   xy: 0, 386
   size: 70, 86

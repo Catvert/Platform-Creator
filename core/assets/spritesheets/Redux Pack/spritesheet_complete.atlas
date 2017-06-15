@@ -2,14 +2,14 @@ spritesheet_complete.png
 format: RGBA8888
 filter: Linear,Linear
 repeat: none
-alienBeige_climb1
+alienBeige_climb_0
   rotate: false
   xy: 910, 1290
   size: 128, 256
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienBeige_climb2
+alienBeige_climb_1
   rotate: false
   xy: 910, 1032
   size: 128, 256
@@ -51,42 +51,42 @@ alienBeige_stand
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienBeige_swim1
+alienBeige_swim_0
   rotate: false
   xy: 780, 1290
   size: 128, 256
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienBeige_swim2
+alienBeige_swim_1
   rotate: false
   xy: 780, 1032
   size: 128, 256
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienBeige_walk1
+alienBeige_walk_0
   rotate: false
   xy: 780, 774
   size: 128, 256
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienBeige_walk2
+alienBeige_walk_1
   rotate: false
   xy: 780, 516
   size: 128, 256
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienBlue_climb1
+alienBlue_climb_0
   rotate: false
   xy: 780, 258
   size: 128, 256
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienBlue_climb2
+alienBlue_climb_1
   rotate: false
   xy: 780, 0
   size: 128, 256
@@ -128,42 +128,42 @@ alienBlue_stand
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienBlue_swim1
+alienBlue_swim_0
   rotate: false
   xy: 650, 258
   size: 128, 256
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienBlue_swim2
+alienBlue_swim_1
   rotate: false
   xy: 650, 0
   size: 128, 256
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienBlue_walk1
+alienBlue_walk_0
   rotate: false
   xy: 520, 1548
   size: 128, 256
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienBlue_walk2
+alienBlue_walk_1
   rotate: false
   xy: 520, 1290
   size: 128, 256
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienGreen_climb1
+alienGreen_climb_0
   rotate: false
   xy: 520, 1032
   size: 128, 256
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienGreen_climb2
+alienGreen_climb_1
   rotate: false
   xy: 520, 774
   size: 128, 256
@@ -205,42 +205,42 @@ alienGreen_stand
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienGreen_swim1
+alienGreen_swim_0
   rotate: false
   xy: 390, 1032
   size: 128, 256
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienGreen_swim2
+alienGreen_swim_1
   rotate: false
   xy: 390, 774
   size: 128, 256
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienGreen_walk1
+alienGreen_walk_0
   rotate: false
   xy: 390, 516
   size: 128, 256
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienGreen_walk2
+alienGreen_walk_1
   rotate: false
   xy: 390, 258
   size: 128, 256
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienPink_climb1
+alienPink_climb_0
   rotate: false
   xy: 390, 0
   size: 128, 256
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienPink_climb2
+alienPink_climb_1
   rotate: false
   xy: 260, 1548
   size: 128, 256
@@ -282,42 +282,42 @@ alienPink_stand
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienPink_swim1
+alienPink_swim_0
   rotate: false
   xy: 260, 0
   size: 128, 256
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienPink_swim2
+alienPink_swim_1
   rotate: false
   xy: 130, 1548
   size: 128, 256
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienPink_walk1
+alienPink_walk_0
   rotate: false
   xy: 130, 1290
   size: 128, 256
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienPink_walk2
+alienPink_walk_1
   rotate: false
   xy: 130, 1032
   size: 128, 256
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienYellow_climb1
+alienYellow_climb_0
   rotate: false
   xy: 130, 774
   size: 128, 256
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienYellow_climb2
+alienYellow_climb_1
   rotate: false
   xy: 130, 516
   size: 128, 256
@@ -359,28 +359,28 @@ alienYellow_stand
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienYellow_swim1
+alienYellow_swim_0
   rotate: false
   xy: 0, 774
   size: 128, 256
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienYellow_swim2
+alienYellow_swim_1
   rotate: false
   xy: 0, 516
   size: 128, 256
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienYellow_walk1
+alienYellow_walk_0
   rotate: false
   xy: 0, 258
   size: 128, 256
   orig: 128, 256
   offset: 0, 0
   index: -1
-alienYellow_walk2
+alienYellow_walk_1
   rotate: false
   xy: 0, 0
   size: 128, 256
@@ -870,14 +870,14 @@ fishPink_move
   orig: 128, 128
   offset: 0, 0
   index: -1
-flagBlue1
+flagBlue_0
   rotate: false
   xy: 2600, 1690
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-flagBlue2
+flagBlue_1
   rotate: false
   xy: 2600, 1560
   size: 128, 128
@@ -891,14 +891,14 @@ flagBlue_down
   orig: 128, 128
   offset: 0, 0
   index: -1
-flagGreen1
+flagGreen_0
   rotate: false
   xy: 2600, 1300
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-flagGreen2
+flagGreen_1
   rotate: false
   xy: 2600, 1170
   size: 128, 128
@@ -912,14 +912,14 @@ flagGreen_down
   orig: 128, 128
   offset: 0, 0
   index: -1
-flagRed1
+flagRed_0
   rotate: false
   xy: 2600, 910
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-flagRed2
+flagRed_1
   rotate: false
   xy: 2600, 780
   size: 128, 128
@@ -933,14 +933,14 @@ flagRed_down
   orig: 128, 128
   offset: 0, 0
   index: -1
-flagYellow1
+flagYellow_0
   rotate: false
   xy: 2600, 520
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-flagYellow2
+flagYellow_1
   rotate: false
   xy: 2600, 390
   size: 128, 128
@@ -1157,70 +1157,70 @@ grassRight
   orig: 128, 128
   offset: 0, 0
   index: -1
-hud0
+hud_-1
   rotate: false
   xy: 2990, 910
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-hud1
+hud_0
   rotate: false
   xy: 2990, 650
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-hud2
+hud_1
   rotate: false
   xy: 2470, 910
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-hud3
+hud_2
   rotate: false
   xy: 2990, 520
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-hud4
+hud_3
   rotate: false
   xy: 2990, 390
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-hud5
+hud_4
   rotate: false
   xy: 2990, 260
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-hud6
+hud_5
   rotate: false
   xy: 2990, 130
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-hud7
+hud_6
   rotate: false
   xy: 2990, 0
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-hud8
+hud_7
   rotate: false
   xy: 2860, 1820
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-hud9
+hud_8
   rotate: false
   xy: 2860, 1690
   size: 128, 128
@@ -2382,14 +2382,14 @@ switchYellow_pressed
   orig: 128, 128
   offset: 0, 0
   index: -1
-torch1
+torch_0
   rotate: false
   xy: 1950, 130
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-torch2
+torch_1
   rotate: false
   xy: 1950, 0
   size: 128, 128

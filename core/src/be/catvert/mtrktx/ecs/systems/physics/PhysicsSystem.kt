@@ -14,6 +14,7 @@ import com.badlogic.ashley.core.Family
 import com.badlogic.ashley.utils.ImmutableArray
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Rectangle
+import com.sun.xml.internal.ws.api.pipe.NextAction
 
 /**
 * Created by Catvert on 04/06/17.
@@ -120,6 +121,7 @@ class PhysicsSystem(private val level: Level, val gravity: Int = 15) : BaseSyste
 
     private fun tryMove(moveX: Int, moveY: Int, entity: Entity) {
         val transformTarget = transformMapper[entity]
+        val physicsTarget = physicsMapper[entity]
 
         if (moveX != 0 || moveY != 0) {
             var newMoveX = moveX
@@ -128,11 +130,13 @@ class PhysicsSystem(private val level: Level, val gravity: Int = 15) : BaseSyste
             if (!collideOnMove(moveX, 0, entity)) {
                 transformTarget.rectangle.x = Math.max(0f, transformTarget.rectangle.x + moveX)
                 level.setEntityGrid(entity)
+                physicsTarget.onMove?.invoke(entity, if(transformTarget.rectangle.x == 0f) 0 else moveX, moveY) // TODO voir ici pour amélioration
                 newMoveX = 0
             }
             if (!collideOnMove(0, moveY, entity)) {
                 transformTarget.rectangle.y += moveY
                 level.setEntityGrid(entity)
+                physicsTarget.onMove?.invoke(entity, moveX, moveY)
                 newMoveY = 0
             }
 

@@ -1052,84 +1052,84 @@ playerBlue_stand
   orig: 45, 54
   offset: 0, 0
   index: -1
-playerBlue_swim1
+playerBlue_swim_0
   rotate: false
   xy: 805, 545
   size: 44, 53
   orig: 44, 53
   offset: 0, 0
   index: -1
-playerBlue_swim2
+playerBlue_swim_1
   rotate: false
   xy: 764, 0
   size: 44, 54
   orig: 44, 54
   offset: 0, 0
   index: -1
-playerBlue_switch1
+playerBlue_switch_0
   rotate: false
   xy: 650, 895
   size: 54, 54
   orig: 54, 54
   offset: 0, 0
   index: -1
-playerBlue_switch2
+playerBlue_switch_1
   rotate: false
   xy: 650, 950
   size: 53, 54
   orig: 53, 54
   offset: 0, 0
   index: -1
-playerBlue_up1
+playerBlue_up_0
   rotate: false
   xy: 760, 435
   size: 45, 54
   orig: 45, 54
   offset: 0, 0
   index: -1
-playerBlue_up2
+playerBlue_up_1
   rotate: false
   xy: 759, 556
   size: 45, 50
   orig: 45, 50
   offset: 0, 0
   index: -1
-playerBlue_up3
+playerBlue_up_2
   rotate: false
   xy: 758, 771
   size: 46, 40
   orig: 46, 40
   offset: 0, 0
   index: -1
-playerBlue_walk1
+playerBlue_walk_0
   rotate: false
   xy: 759, 812
   size: 45, 54
   orig: 45, 54
   offset: 0, 0
   index: -1
-playerBlue_walk2
+playerBlue_walk_1
   rotate: false
   xy: 760, 380
   size: 45, 54
   orig: 45, 54
   offset: 0, 0
   index: -1
-playerBlue_walk3
+playerBlue_walk_2
   rotate: false
   xy: 759, 503
   size: 45, 52
   orig: 45, 52
   offset: 0, 0
   index: -1
-playerBlue_walk4
+playerBlue_walk_3
   rotate: false
   xy: 713, 157
   size: 49, 45
   orig: 49, 45
   offset: 0, 0
   index: -1
-playerBlue_walk5
+playerBlue_walk_4
   rotate: false
   xy: 585, 779
   size: 64, 40
@@ -1178,84 +1178,84 @@ playerGreen_stand
   orig: 38, 50
   offset: 0, 0
   index: -1
-playerGreen_swim1
+playerGreen_swim_0
   rotate: false
   xy: 849, 823
   size: 40, 53
   orig: 40, 53
   offset: 0, 0
   index: -1
-playerGreen_swim2
+playerGreen_swim_1
   rotate: false
   xy: 808, 92
   size: 41, 54
   orig: 41, 54
   offset: 0, 0
   index: -1
-playerGreen_switch1
+playerGreen_switch_0
   rotate: false
   xy: 707, 508
   size: 51, 50
   orig: 51, 50
   offset: 0, 0
   index: -1
-playerGreen_switch2
+playerGreen_switch_1
   rotate: false
   xy: 707, 654
   size: 50, 50
   orig: 50, 50
   offset: 0, 0
   index: -1
-playerGreen_up1
+playerGreen_up_0
   rotate: false
   xy: 890, 51
   size: 38, 50
   orig: 38, 50
   offset: 0, 0
   index: -1
-playerGreen_up2
+playerGreen_up_1
   rotate: false
   xy: 849, 877
   size: 38, 43
   orig: 38, 43
   offset: 0, 0
   index: -1
-playerGreen_up3
+playerGreen_up_2
   rotate: false
   xy: 849, 429
   size: 40, 39
   orig: 40, 39
   offset: 0, 0
   index: -1
-playerGreen_walk1
+playerGreen_walk_0
   rotate: false
   xy: 890, 366
   size: 38, 50
   orig: 38, 50
   offset: 0, 0
   index: -1
-playerGreen_walk2
+playerGreen_walk_1
   rotate: false
   xy: 889, 963
   size: 38, 48
   orig: 38, 48
   offset: 0, 0
   index: -1
-playerGreen_walk3
+playerGreen_walk_2
   rotate: false
   xy: 889, 877
   size: 38, 48
   orig: 38, 48
   offset: 0, 0
   index: -1
-playerGreen_walk4
+playerGreen_walk_3
   rotate: false
   xy: 713, 259
   size: 48, 43
   orig: 48, 43
   offset: 0, 0
   index: -1
-playerGreen_walk5
+playerGreen_walk_4
   rotate: false
   xy: 455, 642
   size: 64, 39
@@ -1304,84 +1304,84 @@ playerGrey_stand
   orig: 36, 45
   offset: 0, 0
   index: -1
-playerGrey_swim1
+playerGrey_swim_0
   rotate: false
   xy: 805, 823
   size: 43, 41
   orig: 43, 41
   offset: 0, 0
   index: -1
-playerGrey_swim2
+playerGrey_swim_1
   rotate: false
   xy: 805, 656
   size: 44, 42
   orig: 44, 42
   offset: 0, 0
   index: -1
-playerGrey_switch1
+playerGrey_switch_0
   rotate: false
   xy: 707, 705
   size: 50, 45
   orig: 50, 45
   offset: 0, 0
   index: -1
-playerGrey_switch2
+playerGrey_switch_1
   rotate: false
   xy: 707, 608
   size: 50, 45
   orig: 50, 45
   offset: 0, 0
   index: -1
-playerGrey_up1
+playerGrey_up_0
   rotate: false
   xy: 927, 578
   size: 36, 45
   orig: 36, 45
   offset: 0, 0
   index: -1
-playerGrey_up2
+playerGrey_up_1
   rotate: false
   xy: 890, 537
   size: 37, 40
   orig: 37, 40
   offset: 0, 0
   index: -1
-playerGrey_up3
+playerGrey_up_2
   rotate: false
   xy: 764, 55
   size: 44, 36
   orig: 44, 36
   offset: 0, 0
   index: -1
-playerGrey_walk1
+playerGrey_walk_0
   rotate: false
   xy: 927, 791
   size: 36, 45
   orig: 36, 45
   offset: 0, 0
   index: -1
-playerGrey_walk2
+playerGrey_walk_1
   rotate: false
   xy: 890, 417
   size: 37, 43
   orig: 37, 43
   offset: 0, 0
   index: -1
-playerGrey_walk3
+playerGrey_walk_2
   rotate: false
   xy: 890, 494
   size: 37, 42
   orig: 37, 42
   offset: 0, 0
   index: -1
-playerGrey_walk4
+playerGrey_walk_3
   rotate: false
   xy: 713, 343
   size: 48, 36
   orig: 48, 36
   offset: 0, 0
   index: -1
-playerGrey_walk5
+playerGrey_walk_4
   rotate: false
   xy: 455, 682
   size: 64, 36
@@ -1430,84 +1430,84 @@ playerRed_stand
   orig: 39, 48
   offset: 0, 0
   index: -1
-playerRed_swim1
+playerRed_swim_0
   rotate: false
   xy: 757, 925
   size: 47, 50
   orig: 47, 50
   offset: 0, 0
   index: -1
-playerRed_swim2
+playerRed_swim_1
   rotate: false
   xy: 715, 56
   size: 48, 51
   orig: 48, 51
   offset: 0, 0
   index: -1
-playerRed_switch1
+playerRed_switch_0
   rotate: false
   xy: 704, 950
   size: 52, 48
   orig: 52, 48
   offset: 0, 0
   index: -1
-playerRed_switch2
+playerRed_switch_1
   rotate: false
   xy: 707, 559
   size: 51, 48
   orig: 51, 48
   offset: 0, 0
   index: -1
-playerRed_up1
+playerRed_up_0
   rotate: false
   xy: 850, 469
   size: 39, 48
   orig: 39, 48
   offset: 0, 0
   index: -1
-playerRed_up2
+playerRed_up_1
   rotate: false
   xy: 850, 0
   size: 39, 46
   orig: 39, 46
   offset: 0, 0
   index: -1
-playerRed_up3
+playerRed_up_2
   rotate: false
   xy: 650, 685
   size: 56, 38
   orig: 56, 38
   offset: 0, 0
   index: -1
-playerRed_walk1
+playerRed_walk_0
   rotate: false
   xy: 850, 47
   size: 39, 48
   orig: 39, 48
   offset: 0, 0
   index: -1
-playerRed_walk2
+playerRed_walk_1
   rotate: false
   xy: 850, 96
   size: 39, 45
   orig: 39, 45
   offset: 0, 0
   index: -1
-playerRed_walk3
+playerRed_walk_2
   rotate: false
   xy: 849, 251
   size: 39, 45
   orig: 39, 45
   offset: 0, 0
   index: -1
-playerRed_walk4
+playerRed_walk_3
   rotate: false
   xy: 710, 384
   size: 49, 42
   orig: 49, 42
   offset: 0, 0
   index: -1
-playerRed_walk5
+playerRed_walk_4
   rotate: false
   xy: 130, 975
   size: 64, 38

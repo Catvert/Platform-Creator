@@ -23,14 +23,14 @@ coinSilver
   orig: 128, 128
   offset: 0, 0
   index: -1
-flagBlue1
+flagBlue_0
   rotate: false
   xy: 256, 0
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-flagBlue2
+flagBlue_1
   rotate: false
   xy: 128, 384
   size: 128, 128
@@ -44,14 +44,14 @@ flagBlue_down
   orig: 128, 128
   offset: 0, 0
   index: -1
-flagGreen1
+flagGreen_0
   rotate: false
   xy: 128, 128
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-flagGreen2
+flagGreen_1
   rotate: false
   xy: 128, 0
   size: 128, 128
@@ -65,14 +65,14 @@ flagGreen_down
   orig: 128, 128
   offset: 0, 0
   index: -1
-flagRed1
+flagRed_0
   rotate: false
   xy: 0, 256
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-flagRed2
+flagRed_1
   rotate: false
   xy: 0, 128
   size: 128, 128
@@ -86,14 +86,14 @@ flagRed_down
   orig: 128, 128
   offset: 0, 0
   index: -1
-flagYellow1
+flagYellow_0
   rotate: false
   xy: 256, 384
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-flagYellow2
+flagYellow_1
   rotate: false
   xy: 640, 256
   size: 128, 128
