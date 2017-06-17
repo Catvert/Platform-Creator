@@ -15,6 +15,12 @@ import ktx.app.KtxScreen
 * Created by Catvert on 03/06/17.
 */
 
+/**
+ * Classe abstraite permettant de créer une scène
+ * game : L'objet du jeu
+ * entityEvent : Permet d'implémenter la méthode d'ajout et de suppression d'entité utilisé par les entités
+ * systems : Permet de spécifier les systèmes à ajouter à la scène
+ */
 abstract class BaseScene(protected val _game: MtrGame, protected val _entityEvent: EntityEvent = EntityEvent(), vararg systems: EntitySystem) : KtxScreen {
     protected val _viewPort: Viewport
     protected val _stage: Stage

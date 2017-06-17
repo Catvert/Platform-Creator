@@ -13,6 +13,9 @@ import ktx.vis.window
 * Created by Catvert on 05/06/17.
 */
 
+/**
+ * Scène pause appelé lorsque le joueur appuie sur échap en partie
+ */
 class PauseScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(game)) {
     override val entities: MutableList<Entity> = mutableListOf()
 

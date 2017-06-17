@@ -16,18 +16,38 @@ import java.io.FileReader
 import java.io.FileWriter
 
 /**
- * Created by Catvert on 07/06/17.
- */
+* Created by Catvert on 07/06/17.
+*/
 
+/**
+ * Factory permettant de créer un niveau, de charger un niveau ou de le sauvegarder
+ */
 class LevelFactory(private val game: MtrGame) {
     private val entityFactory = game.entityFactory
 
+    /**
+     * Crée un niveau vide contenant juste le joueur et un fond d'écran par défaut.
+     */
     fun createEmptyLevel(levelName: String, levelPath: FileHandle): Pair<Level, EntityEvent> {
+        val loadedEntities = mutableListOf<Entity>()
+
         val player = entityFactory.createPlayer(game, Vector2(100f, 100f))
-        val defaultBackground = game.getGameTexture(Gdx.files.internal("game/background/green_hills_2.png"))
-        return Pair(Level(game, levelName, player, RenderComponent(listOf(defaultBackground)), levelPath, mutableListOf(player)), EntityEvent())
+        val defaultBackground = game.getGameTexture(Gdx.files.internal("game/background/background-4.png"))
+
+        loadedEntities += player
+
+       /* for(x in 0..300) { // large amount of entity test
+            for(y in 0..50) {
+                loadedEntities += entityFactory.createPhysicsSprite(Rectangle(500 + 50f*x, 500 + 50f *y, 50f, 50f), RenderComponent(listOf(game.getSpriteSheetTexture("sheet", "slice03_03"))), PhysicsComponent(true))
+            }
+        }*/
+
+        return Pair(Level(game, levelName, player, RenderComponent(listOf(defaultBackground)), levelPath, loadedEntities), EntityEvent())
     }
 
+    /**
+     * Charge un niveau
+     */
     fun loadLevel(levelPath: FileHandle): Triple<Boolean, Level, EntityEvent> { // NOTE A SOIS MEME, SI UN ENTITE DOIT CREER UNE AUTRE ENTITE, IL FAUT PASSER LEVEL.ADDENTITY ET PAS LA LISTE ICI
         val entities = mutableListOf<Entity>()
         val entityEvent = EntityEvent()
@@ -92,6 +112,9 @@ class LevelFactory(private val game: MtrGame) {
         return Triple(!errorInLevel, Level(game, levelName, player, RenderComponent(listOf(game.getGameTexture(backgroundPath))), levelPath, entities), entityEvent)
     }
 
+    /**
+     * Sauvegarde un niveau
+     */
     fun saveLevel(level: Level) {
         val writer = JsonWriter(FileWriter(level.levelFile.path()))
         writer.setOutputType(JsonWriter.OutputType.json)

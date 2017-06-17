@@ -2,10 +2,13 @@ package be.catvert.mtrktx.ecs.systems
 
 import be.catvert.mtrktx.MtrGame
 import be.catvert.mtrktx.draw
+import be.catvert.mtrktx.ecs.EntityFactory
 import be.catvert.mtrktx.ecs.components.RenderComponent
+import be.catvert.mtrktx.ecs.components.ResizeMode
 import be.catvert.mtrktx.ecs.components.TransformComponent
 import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
+import com.badlogic.ashley.core.EntitySystem
 import com.badlogic.ashley.core.Family
 import com.badlogic.ashley.utils.ImmutableArray
 import ktx.app.use
@@ -14,7 +17,10 @@ import ktx.app.use
 * Created by Catvert on 03/06/17.
 */
 
-class RenderingSystem(private val game: MtrGame) : BaseSystem() {
+/**
+ * Ce système permet de dessiner les entités ayant un transformComponent et un renderComponent
+ */
+class RenderingSystem(private val game: MtrGame) : EntitySystem() {
     private val renderMapper = ComponentMapper.getFor(RenderComponent::class.java)
     private val transformMapper = ComponentMapper.getFor(TransformComponent::class.java)
 
@@ -33,9 +39,21 @@ class RenderingSystem(private val game: MtrGame) : BaseSystem() {
 
                     val atlas = renderComp.getActualAtlasRegion()
 
-                    if(renderComp.autoResizeWithAtlas) {
-                        rect.width = atlas.regionWidth.toFloat()
-                        rect.height = atlas.regionHeight.toFloat()
+                    when(renderComp.resizeMode) {
+                        ResizeMode.NO_RESIZE -> {}
+                        ResizeMode.ACTUAL_REGION -> {
+                            rect.width = atlas.regionWidth.toFloat()
+                            rect.height = atlas.regionHeight.toFloat()
+                        }
+                        ResizeMode.FIXED_SIZE -> {
+                            if(renderComp.fixedResize != null) {
+                                rect.width = renderComp.fixedResize!!.x
+                                rect.height = renderComp.fixedResize!!.y
+                            }
+                            else {
+                                println("L'entité utilise le resizeMode : FIXED_SIZE mais n'a pas défini la taille")
+                            }
+                        }
                     }
 
                     batch.draw(atlas, rect, renderComp.flipX, renderComp.flipY)

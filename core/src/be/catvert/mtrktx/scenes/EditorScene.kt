@@ -4,6 +4,7 @@ import be.catvert.mtrktx.*
 import be.catvert.mtrktx.ecs.EntityEvent
 import be.catvert.mtrktx.ecs.EntityFactory
 import be.catvert.mtrktx.ecs.components.EnemyType
+import be.catvert.mtrktx.ecs.components.PhysicsComponent
 import be.catvert.mtrktx.ecs.components.TransformComponent
 import be.catvert.mtrktx.ecs.components.RenderComponent
 import be.catvert.mtrktx.ecs.systems.RenderingSystem
@@ -37,11 +38,20 @@ import ktx.vis.window
  * Created by Catvert on 10/06/17.
  */
 
+/**
+ * Scène de l'éditeur de niveau
+ */
 class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Level) : BaseScene(game, entityEvent, systems = RenderingSystem(game)) {
+    /**
+     * Enum représentant les différents modes de l'éditeur(sélection d'entités, copie ..)
+     */
     private enum class EditorMode {
         NoMode, SelectEntity, CopyEntity
     }
 
+    /**
+     * Classe de donnée permettant de créer le rectangle de sélection
+     */
     private data class RectangleMode(var startPosition: Vector2, var endPosition: Vector2, var rectangleStarted: Boolean = false) {
         fun getRectangle(): Rectangle {
             val minX = Math.min(startPosition.x, endPosition.x)
@@ -53,21 +63,13 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
         }
     }
 
-    override val entities: MutableList<Entity> = mutableListOf()
-
     private val shapeRenderer = ShapeRenderer()
-
     private val transformMapper = ComponentMapper.getFor(TransformComponent::class.java)
-
     private val cameraMoveSpeed = 10f
-
     private val maxEntitySize = 500f
-
     private val selectEntities: MutableSet<Entity> = mutableSetOf()
     private var selectMoveEntity: Entity? = null
-
     private val entityFactory = _game.entityFactory
-
     private fun addSelectEntity(entity: Entity) {
         selectEntities += entity
         if (selectEntities.size == 1) {
@@ -78,17 +80,14 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
 
         editorMode = EditorMode.SelectEntity
     }
-
     private fun clearSelectEntities() {
         selectEntities.clear()
         selectMoveEntity = null
         onSelectEntityChanged.dispatch(null)
         editorMode = EditorMode.NoMode
     }
-
     private var onSelectEntityChanged: Signal<Entity?> = Signal()
     private var onSelectEntityMoved: Signal<TransformComponent> = Signal()
-
     private var copyEntity: Entity? = null
         set(value) {
             field = value
@@ -99,18 +98,15 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                 editorMode = EditorMode.CopyEntity
         }
     private var deleteEntityAfterCopying = false
-
     private val rectangleMode = RectangleMode(Vector2(), Vector2())
-
     private var editorMode: EditorMode = EditorMode.NoMode
-
     private var latestLeftButtonClick = false
     private var latestRightButtonClick = false
     private var latestMousePos = Vector2()
-
     private var UIHover = false
-
     private val editorFont = BitmapFont(Gdx.files.internal("fonts/editorFont.fnt"))
+
+    override val entities: MutableList<Entity> = mutableListOf()
 
     init {
         _game.background = level.background
@@ -263,7 +259,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                         }
                     }
 
-                    if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
+                    if (Gdx.input.isKeyJustPressed(Input.Keys.DEL)) {
                         val entity = findEntityUnderMouse()
                         if (entity != null) {
                             removeEntityFromLevel(entity)
@@ -346,7 +342,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                         }
                     }
                     if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && !latestRightButtonClick) {
-                        val newEntity = copyEntity!!.copy()
+                        val newEntity = copyEntity!!.copy(entityFactory, _entityEvent)
                         val transform = transformMapper[newEntity]
 
                         var posX = transform.rectangle.x
@@ -394,19 +390,28 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
         latestMousePos = mousePos
     }
 
-    fun addEntityToLevel(entity: Entity) {
+    /**
+     * Permet d'ajouter une entité au niveau
+     */
+    private fun addEntityToLevel(entity: Entity) {
         level.loadedEntities += entity
         level.addEntity(entity)
     }
 
-    fun removeEntityFromLevel(entity: Entity) {
+    /**
+     * Permet de supprimer une entité du niveau
+     */
+    private fun removeEntityFromLevel(entity: Entity) {
         if (entity.flags != EntityFactory.EntityType.Player.flag) {
             level.loadedEntities -= entity
             level.removeEntity(entity)
         }
     }
 
-    fun findEntityUnderMouse(): Entity? {
+    /**
+     * Permet de retourner l'entité sous le pointeur
+     */
+    private fun findEntityUnderMouse(): Entity? {
         _stage.keyboardFocus = null // Enlève le focus sur la fenêtre active permettant d'utiliser par exemple les touches de déplacement même si le joueur était dans un textField l'étape avant
 
         val mousePosInWorld = camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f))
@@ -420,7 +425,10 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
         return null
     }
 
-    fun showSelectTextureWindow(onTextureSelected: (TextureInfo) -> Unit) {
+    /**
+     * Permet d'afficher la fenêtre pour sélectionner une texture
+     */
+    private fun showSelectTextureWindow(onTextureSelected: (TextureInfo) -> Unit) {
         data class TextureAtlasSelect(val textureAtlas: TextureAtlas, val atlasName: String) {
             override fun toString(): String {
                 return atlasName
@@ -503,7 +511,10 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
         })
     }
 
-    fun showAddEntityWindow() {
+    /**
+     * Permet d'afficher la fenêtre pour créer une entité
+     */
+    private fun showAddEntityWindow() {
         _stage.addActor(window("Ajouter une entité") {
             setSize(250f, 400f)
             setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
@@ -612,7 +623,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
 
                                         addButton.addListener(addButton.onClick {
                                             if (checkValidSize(width, height) && selectedTexture != null) {
-                                                finishEntityBuild(entityFactory.createPhysicsSprite(Rectangle(0f, 0f, width.text.toInt().toFloat(), height.text.toInt().toFloat()), RenderComponent(listOf(selectedTexture!!)), be.catvert.mtrktx.ecs.components.PhysicsComponent(true)))
+                                                finishEntityBuild(entityFactory.createPhysicsSprite(Rectangle(0f, 0f, width.text.toInt().toFloat(), height.text.toInt().toFloat()), RenderComponent(listOf(selectedTexture!!)), PhysicsComponent(true)))
                                             }
                                         })
 
@@ -645,7 +656,10 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
         })
     }
 
-    fun showInfoEntityWindow() {
+    /**
+     * Permet d'afficher la fenêtre comportant les informations de l'entité sélectionnée
+     */
+    private fun showInfoEntityWindow() {
         _stage.addActor(window("Réglages des entités") {
             setSize(250f, 400f)
             setPosition(Gdx.graphics.width - width, Gdx.graphics.height - height)
@@ -782,7 +796,10 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
         })
     }
 
-    fun showExitWindow() {
+    /**
+     * Permet d'afficher la fenêtre permettant de sauvegarder et quitter l'éditeur
+     */
+    private fun showExitWindow() {
         _stage.addActor(window("Quitter") {
             setPosition(Gdx.graphics.width / 2f - width / 2, Gdx.graphics.height / 2f - height / 2)
             addCloseButton()

@@ -17,6 +17,9 @@ import com.badlogic.gdx.math.MathUtils
  * Created by arno on 03/06/17.
  */
 
+/**
+ * Scène du jeu
+ */
 class GameScene(game: MtrGame, entityEvent: EntityEvent, private val level: Level) : BaseScene(game, entityEvent, RenderingSystem(game), UpdateSystem(level), PhysicsSystem(level)) {
     override val entities: MutableList<Entity> = mutableListOf()
 

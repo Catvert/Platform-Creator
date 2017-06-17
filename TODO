@@ -11,7 +11,6 @@ Fonctionnalitées à venir {
 }
 
 Bugs {
-    - Lorsqu'on bouge une entité avec la souris dans l'éditeur et qu'on bouge la caméra en même temps, il y a un décalage signifiant
     - Lorsqu'on ouvre une fenêtre dans l'éditeur, il ya des chances que tout ce fige car UI Hover est tjr a true alors que l'utilisateur n'est plus sur le stage
     - [Pas spécialement un bug] Quand par exemple, la turtle se rapproche du bord des activeCells [grid] alors elle change de direction
 }

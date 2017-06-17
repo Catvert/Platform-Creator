@@ -7,8 +7,12 @@ import com.badlogic.ashley.core.Entity
 * Created by Catvert on 04/06/17.
 */
 
-class UpdateComponent(val entity: Entity, val update: (delta: Float, entity: Entity, level: Level) -> Unit) : BaseComponent() {
-    override fun copy(target: Entity): BaseComponent {
-        return UpdateComponent(target, update)
+/**
+ * Ce component permet d'ajouter une méthode à l'entité qui sera appelée à chaque frame
+ * update : La méthode appelée à chaque frame
+ */
+class UpdateComponent(val update: (delta: Float, entity: Entity, level: Level) -> Unit) : BaseComponent<UpdateComponent>() {
+    override fun copy(): UpdateComponent {
+        return UpdateComponent(update)
     }
 }

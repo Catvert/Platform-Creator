@@ -9,17 +9,18 @@ import be.catvert.mtrktx.scenes.MainMenuScene
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
-import com.badlogic.gdx.LifecycleListener
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import ktx.ashley.mapperFor
 import ktx.collections.gdxArrayOf
-import kotlin.coroutines.experimental.EmptyCoroutineContext.plus
 
 /**
- * Created by Catvert on 03/06/17.
- */
+* Created by Catvert on 03/06/17.
+*/
 
+/**
+ * Ce factory permet de créer une entité spécifique
+ */
 class EntityFactory(private val game: MtrGame) {
     enum class EntityType(val flag: Int) {
         Sprite(0), PhysicsSprite(1), Player(2), Enemy(3)
@@ -29,6 +30,32 @@ class EntityFactory(private val game: MtrGame) {
     private val physicsMapper = mapperFor<PhysicsComponent>()
     private val transformMapper = mapperFor<TransformComponent>()
 
+    /**
+     * Permet de copier une entité
+     */
+    fun copyEntity(copy: Entity, entityEvent: EntityEvent): Entity {
+        val transformComp = transformMapper[copy]
+        val renderComp = renderMapper[copy]
+
+        when(EntityType.values().first { it.flag == copy.flags }) {
+            EntityFactory.EntityType.Sprite -> {
+                return createSprite(Rectangle(transformComp.rectangle), renderComp.copy())
+            }
+            EntityFactory.EntityType.PhysicsSprite -> {
+                return createPhysicsSprite(Rectangle(transformComp.rectangle), renderComp.copy(), physicsMapper[copy].copy())
+            }
+            EntityFactory.EntityType.Player -> {
+                return createPlayer(game, Vector2(transformComp.rectangle.x, transformComp.rectangle.y))
+            }
+            EntityFactory.EntityType.Enemy -> {
+                return createEnemyWithType(game, mapperFor<EnemyComponent>()[copy].enemyType, entityEvent, Vector2(transformComp.rectangle.x, transformComp.rectangle.y))
+            }
+        }
+    }
+
+    /**
+     * Permet de créer un sprite
+     */
     fun createSprite(rectangle: Rectangle, renderComponent: RenderComponent): Entity {
         val entity = game.engine.createEntity()
         entity += TransformComponent(rectangle)
@@ -39,6 +66,9 @@ class EntityFactory(private val game: MtrGame) {
         return entity
     }
 
+    /**
+     * Permet de créer un sprite ayant des propriétés physique
+     */
     fun createPhysicsSprite(rectangle: Rectangle, renderComponent: RenderComponent, physComp: PhysicsComponent): Entity {
         val entity = createSprite(rectangle, renderComponent)
         entity.flags = EntityType.PhysicsSprite.flag
@@ -47,6 +77,9 @@ class EntityFactory(private val game: MtrGame) {
         return entity
     }
 
+    /**
+     * Permet de créer le joueur
+     */
     fun createPlayer(game: MtrGame, pos: Vector2): Entity {
         val entity = createPhysicsSprite(Rectangle(pos.x, pos.y, 0f, 0f),
                 RenderComponent(
@@ -54,20 +87,24 @@ class EntityFactory(private val game: MtrGame) {
                                 game.getSpriteSheetTexture("alienGreen", "alienGreen_stand"),
                                 game.getSpriteSheetTexture("alienGreen", "alienGreen_jump")),
                         listOf(
-                                game.getAnimation("alienGreen_walk", 0.3f)), autoResizeWithAtlas = true),
+                                game.getAnimation("alienGreen_walk", 0.3f)), resizeMode = ResizeMode.FIXED_SIZE),
                 PhysicsComponent(false, 15, true))
         entity.flags = EntityType.Player.flag
 
         transformMapper[entity].fixedSizeEditor = true
 
         val renderComp = renderMapper[entity]
+        val stand = renderComp.textureInfoList[0].texture
+        renderComp.fixedResize = Vector2(stand.regionWidth.toFloat(), stand.regionHeight.toFloat())
+
         renderComp.renderLayer = 1
+
         val physicsComp = physicsMapper[entity]
-        physicsComp.jumpData = JumpData(250)
+        physicsComp.jumpData = JumpData(300)
 
         var lastState = 0
 
-        entity += UpdateComponent(entity, { _, e, _ ->
+        entity += UpdateComponent({ _, e, _ ->
             val renderComp = renderMapper[e]
             val physics = physicsMapper[e]
 
@@ -75,28 +112,28 @@ class EntityFactory(private val game: MtrGame) {
 
             if (Gdx.input.isKeyPressed(Input.Keys.D)) {
                 renderComp.flipX = false
-                physics.nextActions += PhysicsComponent.NextActions.GO_RIGHT
+                physics.nextActions += NextActions.GO_RIGHT
                 state = 1
             }
             if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
                 renderComp.flipX = true
-                physics.nextActions += PhysicsComponent.NextActions.GO_LEFT
+                physics.nextActions += NextActions.GO_LEFT
                 state = 1
             }
             if (Gdx.input.isKeyPressed(Input.Keys.Z)) {
-                physics.nextActions += PhysicsComponent.NextActions.GO_UP
+                physics.nextActions += NextActions.GO_UP
                 state = 1
             }
             if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-                physics.nextActions += PhysicsComponent.NextActions.GO_DOWN
+                physics.nextActions += NextActions.GO_DOWN
                 state = 1
             }
 
             if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
-                physics.nextActions += PhysicsComponent.NextActions.JUMP
+                physics.nextActions += NextActions.JUMP
             }
 
-            if (physics.jumpData?.isJumping ?: false)
+            if(!physics.isOnGround)
                 state = 2
 
             if (state != lastState) {
@@ -127,8 +164,13 @@ class EntityFactory(private val game: MtrGame) {
         return entity
     }
 
-    private fun createEnemy(enemyType: EnemyType, renderComponent: RenderComponent, rect: Rectangle, moveSpeed: Int): Pair<Entity, EnemyComponent> {
-        val entity = createPhysicsSprite(rect, renderComponent, PhysicsComponent(false, moveSpeed, true))
+    /**
+     * Permet de créer un ennemi (méthode utilisée par les sous-ennemis)
+     */
+    private fun createEnemy(enemyType: EnemyType, renderComponent: RenderComponent, rect: Rectangle, isStatic: Boolean, moveSpeed: Int, fixedSizeEditor: Boolean = true): Pair<Entity, EnemyComponent> {
+        val entity = createPhysicsSprite(rect, renderComponent, PhysicsComponent(isStatic, moveSpeed, true))
+
+        transformMapper[entity].fixedSizeEditor = fixedSizeEditor
 
         entity.flags = EntityType.Enemy.flag
 
@@ -138,6 +180,9 @@ class EntityFactory(private val game: MtrGame) {
         return Pair(entity, enemyComp)
     }
 
+    /**
+     * Permet de créer un ennemi spécifique
+     */
     fun createEnemyWithType(game: MtrGame, enemyType: EnemyType, entityEvent: EntityEvent, pos: Vector2): Entity {
         when (enemyType) {
             EnemyType.Spinner -> return createSpinner(game, pos)
@@ -145,14 +190,14 @@ class EntityFactory(private val game: MtrGame) {
         }
     }
 
+    /**
+     * Permet de créer l'ennemi spinner
+     */
     fun createSpinner(game: MtrGame, pos: Vector2): Entity {
         val entity = createEnemy(EnemyType.Spinner, RenderComponent(
                 listOf(
                         game.getSpriteSheetTexture("enemies", "spinner")),
-                listOf(game.createAnimationFromRegions(gdxArrayOf(game.getSpriteSheetTexture("enemies", "spinner").texture, game.getSpriteSheetTexture("enemies", "spinner_spin").texture), 0.1f)), useAnimation = true, autoResizeWithAtlas = true), Rectangle(pos.x, pos.y, 0f, 0f), 0)
-
-
-        physicsMapper[entity.first].gravity = false
+                listOf(game.createAnimationFromRegions(gdxArrayOf(game.getSpriteSheetTexture("enemies", "spinner").texture, game.getSpriteSheetTexture("enemies", "spinner_spin").texture), 0.1f)), useAnimation = true, resizeMode = ResizeMode.ACTUAL_REGION), Rectangle(pos.x, pos.y, 0f, 0f), true, 0)
 
         entity.second.onPlayerCollision = { _, player, _ ->
             player[LifeComponent::class.java].removeLife(1)
@@ -161,10 +206,13 @@ class EntityFactory(private val game: MtrGame) {
         return entity.first
     }
 
+    /**
+     * Permet de créer l'ennemi spider
+     */
     fun createSpider(game: MtrGame, entityEvent: EntityEvent, pos: Vector2): Entity {
         val entity = createEnemy(EnemyType.Spider, RenderComponent(
                 listOf(game.getSpriteSheetTexture("enemies", "spider")),
-                listOf(game.getAnimation("spider_walk", 0.3f)), useAnimation = true, autoResizeWithAtlas = true), Rectangle(pos.x, pos.y, 0f, 0f), 10)
+                listOf(game.getAnimation("spider_walk", 0.3f)), useAnimation = true, resizeMode = ResizeMode.ACTUAL_REGION), Rectangle(pos.x, pos.y, 0f, 0f), false, 10)
 
         entity.second.onPlayerCollision = { thisEntity, player, side ->
             if(side == CollisionSide.OnUp)
@@ -175,16 +223,16 @@ class EntityFactory(private val game: MtrGame) {
 
         var goRight = false
 
-        entity.first += UpdateComponent(entity.first, { _, entity, _ ->
+        entity.first += UpdateComponent({ _, entity, _ ->
             val phys = physicsMapper[entity]
             val render = renderMapper[entity]
 
             render.flipX = goRight
 
             if(!goRight)
-                phys.nextActions += PhysicsComponent.NextActions.GO_LEFT
+                phys.nextActions +=NextActions.GO_LEFT
             else
-                phys.nextActions += PhysicsComponent.NextActions.GO_RIGHT
+                phys.nextActions += NextActions.GO_RIGHT
         } )
 
         physicsMapper[entity.first].onCollisionWith = { thisEntity, collisionEntity, side ->

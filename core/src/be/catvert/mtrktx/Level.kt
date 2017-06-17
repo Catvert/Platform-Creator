@@ -15,6 +15,15 @@ import com.badlogic.gdx.math.Rectangle
 * Created by Catvert on 07/06/17.
 */
 
+/**
+ * Classe représantant le niveau en cour
+ * game : l'objet du jeu
+ * levelName : Le nom du niveau
+ * player : L'entité du joueur
+ * background : Le fond d'écran du niveau
+ * levelFile : Le fichier utilisé pour charger le niveau
+ * loadedEntities : Les entités chargés et à sauvegarder dans le fichier du niveau
+ */
 class Level(private val _game: MtrGame, var levelName: String, val player: Entity, val background: RenderComponent, val levelFile: FileHandle, val loadedEntities: MutableList<Entity>): IUpdateable {
     private val shapeRenderer = ShapeRenderer()
 
@@ -45,8 +54,8 @@ class Level(private val _game: MtrGame, var levelName: String, val player: Entit
             setEntityGrid(it) // Besoin de setGrid car les entités n'ont pas encore été ajoutée à la matrix
             if (it == player)
                 return@forEach
-            it.components.filter { c -> c is BaseComponent }.forEach {
-                (it as BaseComponent).active = false
+            it.components.filter { c -> c is BaseComponent<*> }.forEach {
+                (it as BaseComponent<*>).active = false
             }
         }
     }
@@ -67,13 +76,16 @@ class Level(private val _game: MtrGame, var levelName: String, val player: Entit
         }
     }
 
+    /**
+     * Permet de mettre à jour les cellules actives
+     */
     private fun updateActiveCells() {
         activeGridCells.forEach {
             matrixGrid[it.x][it.y].first.forEach matrix@ {
                 if (it == player)
                     return@matrix
-                it.components.filter { c -> c is BaseComponent }.forEach {
-                    (it as BaseComponent).active = false
+                it.components.filter { c -> c is BaseComponent<*> }.forEach {
+                    (it as BaseComponent<*>).active = false
                 }
             }
         }
@@ -83,10 +95,10 @@ class Level(private val _game: MtrGame, var levelName: String, val player: Entit
         activeGridCells.addAll(getRectCells(activeRect))
 
         activeGridCells.forEach {
-            for(i in 0 until matrixGrid[it.x][it.y].first.size) {
+            for(i in 0..matrixGrid[it.x][it.y].first.size - 1) {
                 val entity = matrixGrid[it.x][it.y].first[i]
-                entity.components.filter { c -> c is BaseComponent }.forEach {
-                    (it as BaseComponent).active = true
+                entity.components.filter { c -> c is BaseComponent<*> }.forEach {
+                    (it as BaseComponent<*>).active = true
                     if(killEntityUnderY && it is TransformComponent && it.rectangle.y < 0) {
                         if(lifeMapper.has(entity))
                             lifeMapper[entity].killInstant()
@@ -97,6 +109,9 @@ class Level(private val _game: MtrGame, var levelName: String, val player: Entit
         }
     }
 
+    /**
+     * Permet de retourner les cellules présentes dans le rectangle spécifié
+     */
     fun getRectCells(rect: Rectangle): List<GridCell> {
         val cells = mutableListOf<GridCell>()
 
@@ -135,27 +150,31 @@ class Level(private val _game: MtrGame, var levelName: String, val player: Entit
         return cells
     }
 
+    /**
+     * Permet d'ajouter une entité au niveau (ne l'ajoute pas dans loadedEntities)
+     */
     fun addEntity(entity: Entity) {
         setEntityGrid(entity)
 
-        entity.components.filter { c -> c is BaseComponent }.forEach {
-            (it as BaseComponent).active = false
+        entity.components.filter { c -> c is BaseComponent<*> }.forEach {
+            (it as BaseComponent<*>).active = false
         }
     }
 
+    /**
+     * Permet de supprimer une entité du niveau (ne la supprime pas de loadedEntities)
+     */
     fun removeEntity(entity: Entity) {
         transformMapper[entity].gridCell.forEach {
             matrixGrid[it.x][it.y].first.remove(entity)
         }
     }
 
+    /**
+     * Permet de mettre à jour la liste des cellules où l'entité se trouve
+     */
     fun setEntityGrid(entity: Entity) {
         val transformComp = transformMapper[entity]
-
-        fun addEntityTo(cell: GridCell) {
-            matrixGrid[cell.x][cell.y].first.add(entity)
-            transformComp.gridCell.add(cell)
-        }
 
         transformComp.gridCell.forEach {
             matrixGrid[it.x][it.y].first.remove(entity)
@@ -164,11 +183,14 @@ class Level(private val _game: MtrGame, var levelName: String, val player: Entit
         transformComp.gridCell.clear()
 
         getRectCells(transformComp.rectangle).forEach {
-            addEntityTo(it)
+            matrixGrid[it.x][it.y].first.add(entity)
+            transformComp.gridCell.add(it)
         }
-
     }
 
+    /**
+     * Permet de retourner les entités présentent dans les cellules spécifiées
+     */
     fun getAllEntitiesInCells(cells: List<GridCell>): List<Entity> {
         val list = mutableListOf<Entity>()
         cells.forEach {
@@ -177,6 +199,9 @@ class Level(private val _game: MtrGame, var levelName: String, val player: Entit
         return list
     }
 
+    /**
+     * Permet de retourné les entités présentent dans le rectangle spécifiés
+     */
     fun getAllEntitiesInRect(rect: Rectangle, overlaps: Boolean = true): List<Entity> {
         val list = mutableSetOf<Entity>()
         val gridCells = getRectCells(rect)

@@ -26,6 +26,9 @@ import java.nio.file.StandardCopyOption
 * Created by Catvert on 03/06/17.
 */
 
+/**
+ * Scène du menu principal
+ */
 class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(game)) {
     override val entities: MutableList<Entity> = mutableListOf()
 

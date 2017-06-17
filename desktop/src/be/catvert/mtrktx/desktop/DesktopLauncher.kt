@@ -20,6 +20,7 @@ object DesktopLauncher {
         config.vSyncEnabled = vsync
         config.fullscreen = fullscreen
         config.title = "Maryo The Return KTX"
+        config.resizable = false
 
         LwjglApplication(MtrGame(), config)
     }
