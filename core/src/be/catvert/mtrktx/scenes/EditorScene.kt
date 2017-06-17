@@ -5,18 +5,18 @@ import be.catvert.mtrktx.ecs.EntityEvent
 import be.catvert.mtrktx.ecs.EntityFactory
 import be.catvert.mtrktx.ecs.components.EnemyType
 import be.catvert.mtrktx.ecs.components.TransformComponent
-import be.catvert.mtrktx.ecs.components.render.RenderComponent
+import be.catvert.mtrktx.ecs.components.RenderComponent
 import be.catvert.mtrktx.ecs.systems.RenderingSystem
 import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.signals.Signal
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
-import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
@@ -29,10 +29,8 @@ import com.kotcrab.vis.ui.widget.*
 import ktx.actors.contains
 import ktx.actors.onChange
 import ktx.actors.onClick
-import ktx.app.clearScreen
 import ktx.app.use
 import ktx.collections.toGdxArray
-import ktx.vis.KVisTextButton
 import ktx.vis.window
 
 /**
@@ -67,6 +65,8 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
 
     private val selectEntities: MutableSet<Entity> = mutableSetOf()
     private var selectMoveEntity: Entity? = null
+
+    private val entityFactory = _game.entityFactory
 
     private fun addSelectEntity(entity: Entity) {
         selectEntities += entity
@@ -113,6 +113,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
     private val editorFont = BitmapFont(Gdx.files.internal("fonts/editorFont.fnt"))
 
     init {
+        _game.background = level.background
         showInfoEntityWindow()
 
         level.activeRect.setSize(Gdx.graphics.width.toFloat() * 3, Gdx.graphics.height.toFloat() * 3)
@@ -140,18 +141,14 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
     }
 
     override fun render(delta: Float) {
-        clearScreen(186f / 255f, 212f / 255f, 1f)
-
-        drawHUD(level.background.getActualAtlasRegion(), 0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
-
-        level.activeRect.setPosition(Math.max(0f, _camera.position.x - level.activeRect.width / 2), Math.max(0f, _camera.position.y - level.activeRect.height / 2))
+        level.activeRect.setPosition(Math.max(0f, camera.position.x - level.activeRect.width / 2), Math.max(0f, camera.position.y - level.activeRect.height / 2))
 
         level.update(delta)
 
         entities.clear()
         entities.addAll(level.getAllEntitiesInCells(level.getActiveGridCells()))
 
-        shapeRenderer.projectionMatrix = _camera.combined
+        shapeRenderer.projectionMatrix = camera.combined
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
         when (editorMode) {
             EditorScene.EditorMode.NoMode -> {
@@ -197,36 +194,42 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
             showExitWindow()
         }
 
+        var moveCameraX = 0f
+        var moveCameraY = 0f
         if (Gdx.input.isKeyPressed(Input.Keys.P)) {
-            _camera.zoom -= 0.02f
+            camera.zoom -= 0.02f
         }
         if (Gdx.input.isKeyPressed(Input.Keys.M)) {
-            _camera.zoom += 0.02f
+            camera.zoom += 0.02f
         }
         if (Gdx.input.isKeyPressed(Input.Keys.L)) {
-            _camera.zoom = 1f
+            camera.zoom = 1f
         }
         if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-            _camera.position.x -= cameraMoveSpeed
+            moveCameraX -= cameraMoveSpeed
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            _camera.position.x += cameraMoveSpeed
+            moveCameraX += cameraMoveSpeed
         }
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            _camera.position.y -= cameraMoveSpeed
+            moveCameraY -= cameraMoveSpeed
         }
         if (Gdx.input.isKeyPressed(Input.Keys.Z)) {
-            _camera.position.y += cameraMoveSpeed
+            moveCameraY += cameraMoveSpeed
         }
+
+        val x = MathUtils.lerp(camera.position.x, camera.position.x + moveCameraX, 0.5f)
+        val y = MathUtils.lerp(camera.position.y, camera.position.y + moveCameraY, 0.5f)
+        camera.position.set(x, y, 0f)
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.F12)) {
             level.drawDebugCells = !level.drawDebugCells
         }
 
-        _camera.update()
+        camera.update()
 
         val mousePos = Vector2(Gdx.input.x.toFloat(), Gdx.input.y.toFloat())
-        val mousePosInWorld = _camera.unproject(Vector3(mousePos, 0f))
+        val mousePosInWorld = camera.unproject(Vector3(mousePos, 0f))
 
         if (!UIHover) {
 
@@ -406,7 +409,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
     fun findEntityUnderMouse(): Entity? {
         _stage.keyboardFocus = null // Enlève le focus sur la fenêtre active permettant d'utiliser par exemple les touches de déplacement même si le joueur était dans un textField l'étape avant
 
-        val mousePosInWorld = _camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f))
+        val mousePosInWorld = camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f))
 
         entities.forEach {
             val transform = transformMapper[it]
@@ -447,7 +450,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                         list.toGdxArray()
                     }
 
-                    addListener(onChange { _, _ ->
+                    addListener(onChange {
                         table.clearChildren()
 
                         var count = 0
@@ -457,7 +460,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
 
                             image.userObject = TextureInfo(it, selected.atlasName, it.name)
 
-                            image.addListener(image.onClick { _, _ ->
+                            image.addListener(image.onClick {
                                 selectedImage.drawable = image.drawable
                                 selectedImage.userObject = image.userObject
                             })
@@ -489,7 +492,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                 row()
 
                 textButton("Sélectionner") {
-                    addListener(onClick { _: InputEvent, _: KVisTextButton ->
+                    addListener(onClick {
                         if (selectedImage.userObject != null && selectedImage.userObject is TextureInfo) {
                             onTextureSelected(selectedImage.userObject as TextureInfo)
                             this@window.remove()
@@ -542,7 +545,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                             this@verticalSettingsGroup.table {
                                 val image = com.kotcrab.vis.ui.widget.VisImage()
                                 textButton("Sélectionner texture") {
-                                    addListener(onClick { _, _ ->
+                                    addListener(onClick {
                                         showSelectTextureWindow({ texture ->
                                             widthField.text = texture.texture.regionWidth.toString()
                                             heightField.text = texture.texture.regionHeight.toString()
@@ -577,7 +580,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                             UIHover = false
                         }
 
-                        addListener(onChange { _, _ ->
+                        addListener(onChange {
                             this@verticalSettingsGroup.clearChildren()
                             this@verticalSettingsGroup.addActor(this)
 
@@ -593,9 +596,9 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                                             selectedTexture = texture
                                         }, width, height)
 
-                                        addButton.addListener(addButton.onClick { _, _ ->
+                                        addButton.addListener(addButton.onClick {
                                             if (checkValidSize(width, height) && selectedTexture != null) {
-                                                finishEntityBuild(EntityFactory.createSprite(Rectangle(0f, 0f, width.text.toInt().toFloat(), height.text.toInt().toFloat()), RenderComponent(listOf(selectedTexture!!))))
+                                                finishEntityBuild(entityFactory.createSprite(Rectangle(0f, 0f, width.text.toInt().toFloat(), height.text.toInt().toFloat()), RenderComponent(listOf(selectedTexture!!))))
                                             }
                                         })
                                     }
@@ -607,9 +610,9 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                                             selectedTexture = texture
                                         }, width, height)
 
-                                        addButton.addListener(addButton.onClick { _, _ ->
+                                        addButton.addListener(addButton.onClick {
                                             if (checkValidSize(width, height) && selectedTexture != null) {
-                                                finishEntityBuild(EntityFactory.createPhysicsSprite(Rectangle(0f, 0f, width.text.toInt().toFloat(), height.text.toInt().toFloat()), RenderComponent(listOf(selectedTexture!!)), be.catvert.mtrktx.ecs.components.PhysicsComponent(true)))
+                                                finishEntityBuild(entityFactory.createPhysicsSprite(Rectangle(0f, 0f, width.text.toInt().toFloat(), height.text.toInt().toFloat()), RenderComponent(listOf(selectedTexture!!)), be.catvert.mtrktx.ecs.components.PhysicsComponent(true)))
                                             }
                                         })
 
@@ -619,8 +622,8 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                                             items = EnemyType.values().toGdxArray()
                                         }
 
-                                        addButton.addListener(addButton.onClick { _, _ ->
-                                            finishEntityBuild(EntityFactory.createEnemyWithType(_game, enemyType.selected, _entityEvent, Vector2(0f, 0f)))
+                                        addButton.addListener(addButton.onClick {
+                                            finishEntityBuild(entityFactory.createEnemyWithType(_game, enemyType.selected, _entityEvent, Vector2(0f, 0f)))
                                         })
                                     }
                                     EntityFactory.EntityType.Player -> {
@@ -650,7 +653,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                 space(10f)
 
                 textButton("Ajouter une entité") {
-                    addListener(onClick { _, _ -> showAddEntityWindow() })
+                    addListener(onClick { showAddEntityWindow() })
                 }
                 textButton("Supprimer l'entité sélectionnée") {
                     onSelectEntityChanged.add { _, selectEntity ->
@@ -661,7 +664,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                                     Touchable.enabled
                     }
 
-                    addListener(onClick { _: InputEvent, _: KVisTextButton ->
+                    addListener(onClick {
                         removeEntityFromLevel(selectEntities.elementAt(0))
                         clearSelectEntities()
                     })
@@ -691,7 +694,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                             text = transform.rectangle.x.toInt().toString()
                         }
 
-                        addListener(onChange { _, _ ->
+                        addListener(onChange {
                             if (!isReadOnly) {
                                 if (text.toIntOrNull() != null) {
                                     if (level.matrixRect.contains(text.toInt().toFloat(), 0f))
@@ -717,7 +720,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                             text = transform.rectangle.y.toInt().toString()
                         }
 
-                        addListener(onChange { _, _ ->
+                        addListener(onChange {
                             if (!isReadOnly) {
                                 if (text.toIntOrNull() != null) {
                                     if (level.matrixRect.contains(0f, text.toInt().toFloat()))
@@ -740,7 +743,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                             this.isReadOnly = selectEntity == null
                         }
 
-                        addListener(onChange { _, _ ->
+                        addListener(onChange {
                             if (!this.isReadOnly) {
                                 val transform = transformMapper[selectEntities.elementAt(0)]
                                 val width = text.toIntOrNull()
@@ -764,7 +767,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                             this.isReadOnly = selectEntity == null
                         }
 
-                        addListener(onChange { _, _ ->
+                        addListener(onChange {
                             if (!this.isReadOnly) {
                                 val transform = transformMapper[selectEntities.elementAt(0)]
                                 val height = text.toIntOrNull()
@@ -788,9 +791,9 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                 space(10f)
 
                 textButton("Sauvegarder") {
-                    addListener(onClick { _, _ ->
+                    addListener(onClick {
                         try {
-                            LevelFactory.saveLevel(level)
+                            LevelFactory(_game).saveLevel(level)
                             this@window.remove()
                         } catch(e: Exception) {
                             println("Erreur lors de l'enregistrement du niveau ! Erreur : $e")
@@ -798,7 +801,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                     })
                 }
                 textButton("Quitter") {
-                    addListener(onClick { _, _ -> _game.setScene(MainMenuScene(_game)) })
+                    addListener(onClick { _game.setScene(MainMenuScene(_game)) })
                 }
             }
         })

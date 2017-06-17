@@ -10,7 +10,7 @@ import be.catvert.mtrktx.ecs.systems.physics.PhysicsSystem
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
-import ktx.app.clearScreen
+import com.badlogic.gdx.math.MathUtils
 
 
 /**
@@ -25,26 +25,28 @@ class GameScene(game: MtrGame, entityEvent: EntityEvent, private val level: Leve
     private val transformPlayer = level.player.getComponent(TransformComponent::class.java)
 
     init {
+        _game.background = level.background
         _entityEvent.onEntityAdded = { entity -> level.addEntity(entity) }
         _entityEvent.onEntityRemoved = { entity -> level.removeEntity(entity) }
+
+        entities.addAll(level.loadedEntities)
     }
 
     override fun render(delta: Float) {
-        clearScreen(186f/255f, 212f/255f, 1f)
-
-        drawHUD(level.background.getActualAtlasRegion(), 0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
+        super.render(delta)
 
         level.activeRect.setPosition(Math.max(0f, transformPlayer.rectangle.x - level.activeRect.width / 2 + transformPlayer.rectangle.width / 2), Math.max(0f, transformPlayer.rectangle.y - level.activeRect.height / 2 + transformPlayer.rectangle.height / 2))
 
-        if(level.followPlayerCamera)
-           _camera.position.set(Math.max(0f + _camera.viewportWidth / 2, transformPlayer.rectangle.x + transformPlayer.rectangle.width / 2), Math.max(0f + _camera.viewportHeight / 2, transformPlayer.rectangle.y + transformPlayer.rectangle.height / 2), 0f)
+        if(level.followPlayerCamera) {
+            val x = MathUtils.lerp(camera.position.x, Math.max(0f + camera.viewportWidth / 2, transformPlayer.rectangle.x + transformPlayer.rectangle.width / 2), 0.1f)
+            val y = MathUtils.lerp(camera.position.y, Math.max(0f + camera.viewportHeight / 2, transformPlayer.rectangle.y + transformPlayer.rectangle.height / 2), 0.1f)
+            camera.position.set(x, y, 0f)
+        }
 
         level.update(delta)
 
         entities.clear()
         entities.addAll(level.getAllEntitiesInCells(level.getActiveGridCells()))
-
-        super.render(delta)
     }
 
     override fun updateInputs() {
@@ -55,29 +57,29 @@ class GameScene(game: MtrGame, entityEvent: EntityEvent, private val level: Leve
         }
 
         if(Gdx.input.isKeyPressed(Input.Keys.P)) {
-            _camera.zoom -= 0.02f
+            camera.zoom -= 0.02f
         }
         if(Gdx.input.isKeyPressed(Input.Keys.M)) {
-            _camera.zoom += 0.02f
+            camera.zoom += 0.02f
         }
         if(Gdx.input.isKeyPressed(Input.Keys.L)) {
-            _camera.zoom = 1f
+            camera.zoom = 1f
         }
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.C)) {
             level.followPlayerCamera = !level.followPlayerCamera
         }
         if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            _camera.position.x -= cameraMoveSpeed
+            camera.position.x -= cameraMoveSpeed
         }
         if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            _camera.position.x += cameraMoveSpeed
+            camera.position.x += cameraMoveSpeed
         }
         if(Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            _camera.position.y -= cameraMoveSpeed
+            camera.position.y -= cameraMoveSpeed
         }
         if(Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            _camera.position.y += cameraMoveSpeed
+            camera.position.y += cameraMoveSpeed
         }
 
         if( Gdx.input.isKeyJustPressed(Input.Keys.F12)) {
@@ -87,6 +89,6 @@ class GameScene(game: MtrGame, entityEvent: EntityEvent, private val level: Leve
             level.applyGravity = !level.applyGravity
         }
 
-       _camera.update()
+       camera.update()
     }
 }

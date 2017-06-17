@@ -2,7 +2,7 @@ package be.catvert.mtrktx.ecs.systems
 
 import be.catvert.mtrktx.MtrGame
 import be.catvert.mtrktx.draw
-import be.catvert.mtrktx.ecs.components.render.RenderComponent
+import be.catvert.mtrktx.ecs.components.RenderComponent
 import be.catvert.mtrktx.ecs.components.TransformComponent
 import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
@@ -22,7 +22,8 @@ class RenderingSystem(private val game: MtrGame) : BaseSystem() {
 
     override fun update(deltaTime: Float) {
         super.update(deltaTime)
-        entities = engine.getEntitiesFor(Family.all(RenderComponent::class.java, TransformComponent::class.java).get())
+
+        entities =  engine.getEntitiesFor(Family.all(RenderComponent::class.java, TransformComponent::class.java).get())
 
         game.batch.use { batch ->
             entities.sortedWith(compareBy { renderMapper[it].renderLayer }).forEach {

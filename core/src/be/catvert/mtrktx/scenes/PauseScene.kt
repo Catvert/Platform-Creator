@@ -17,7 +17,7 @@ class PauseScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(game
     override val entities: MutableList<Entity> = mutableListOf()
 
     init {
-        entities += game.getMainBackground()
+        _game.background = _game.getMainBackground()
         entities += game.getLogo()
 
         _stage.addActor(window("Pause") {
@@ -46,11 +46,5 @@ class PauseScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(game
                 }
             }
         })
-    }
-
-    override fun render(delta: Float) {
-        clearScreen(186f/255f, 212f/255f, 1f)
-
-        super.render(delta)
     }
 }

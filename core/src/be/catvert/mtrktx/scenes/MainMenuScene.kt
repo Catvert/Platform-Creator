@@ -31,8 +31,10 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
 
     private val glyphCreatedBy = GlyphLayout(_game.mainFont, "par Catvert")
 
+    private val levelFactory = LevelFactory(game)
+
     init {
-        entities += _game.getMainBackground()
+        _game.background = _game.getMainBackground()
         entities += _game.getLogo()
 
         _stage.addActor(window("Menu Principal") {
@@ -43,13 +45,13 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
                 space(10f)
 
                 textButton("Jouer") {
-                    addListener(onClick { _, _ -> showSelectLevelsWindow() })
+                    addListener(onClick { showSelectLevelsWindow() })
                 }
                 textButton("Options") {
 
                 }
                 textButton("Quitter") {
-                    addListener(onClick { _, _ -> Gdx.app.exit() })
+                    addListener(onClick { Gdx.app.exit() })
                 }
             }
         })
@@ -73,7 +75,7 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
                     addActor(textFieldName)
                 }
                 textButton("Confirmer") {
-                    addListener(onClick { _, _ ->
+                    addListener(onClick { ->
                         if(!textFieldName.text.isBlank()) {
                             onNameSelected(textFieldName.text)
                             this@window.remove()
@@ -103,7 +105,7 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
                     space(10f)
                     buttons.forEachIndexed { i, it ->
                         addActor(it)
-                        it.addListener(it.onClick { _, _ ->
+                        it.addListener(it.onClick {
                             this@window.remove()
                             onClose(i)
                         })
@@ -144,33 +146,33 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
                 verticalGroup {
                     space(10f)
                     textButton("Jouer") {
-                        addListener(onClick { _, _ ->
+                        addListener(onClick {
                             if(list.selected != null) {
-                                val (success, level, entityEvent) = LevelFactory.loadLevel(_game, list.selected.file)
+                                val (success, level, entityEvent) = levelFactory.loadLevel(list.selected.file)
                                 if(success)
                                     _game.setScene(GameScene(_game, entityEvent, level))
                             }
                         })
                     }
                     textButton("Éditer") {
-                        addListener(onClick { _, _ ->
+                        addListener(onClick {
                             if(list.selected != null) {
-                                val (success, level, entityEvent) = LevelFactory.loadLevel(_game, list.selected.file)
+                                val (success, level, entityEvent) = levelFactory.loadLevel(list.selected.file)
                                 if(success)
                                     _game.setScene(EditorScene(_game, entityEvent, level))
                             }
                         })
                     }
                     textButton("Nouveau") {
-                        addListener(onClick { _, _ ->
+                        addListener(onClick {
                             showSetNameLevelWindow { name ->
-                                val (level, entityEvent) = LevelFactory.createEmptyLevel(_game, name, Gdx.files.internal("levels/$name.mtrlvl"))
+                                val (level, entityEvent) = levelFactory.createEmptyLevel(name, Gdx.files.internal("levels/$name.mtrlvl"))
                                 _game.setScene(EditorScene(_game, entityEvent, level))
                             }
                         })
                     }
                     textButton("Copier") {
-                        addListener(onClick { _, _ ->
+                        addListener(onClick {
                             if(list.selected != null) {
                                 showSetNameLevelWindow { name ->
                                     try {
@@ -186,7 +188,7 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
                         })
                     }
                     textButton("Supprimer") {
-                        addListener(onClick { _, _ ->
+                        addListener(onClick {
                             if(list.selected != null) {
                                 showDialog("Supprimer le niveau ?", "Etes-vous sur de vouloir supprimer ${list.selected} ?", listOf(VisTextButton("Oui"), VisTextButton("Non")), { button ->
                                     if(button == 0) {
@@ -209,8 +211,6 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
     }
 
     override fun render(delta: Float) {
-        clearScreen(186f/255f, 212f/255f, 1f)
-
         super.render(delta)
 
         _game.batch.use {

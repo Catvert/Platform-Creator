@@ -28,11 +28,12 @@ enum class CollisionSide {
     }
 }
 
-class PhysicsComponent(var isStatic: Boolean, var moveSpeed: Int = 0, val smoothMove: Boolean = false, var gravity: Boolean = !isStatic) : BaseComponent() {
+class PhysicsComponent(var isStatic: Boolean, var moveSpeed: Int = 0, var smoothMove: Boolean = false, var gravity: Boolean = !isStatic) : BaseComponent() {
     override fun copy(target: Entity): BaseComponent {
         val physicsComp =  PhysicsComponent(isStatic, moveSpeed, smoothMove)
         physicsComp.jumpData = if(jumpData != null) JumpData(jumpData!!.jumpHeight) else null
         physicsComp.onCollisionWith = onCollisionWith
+        physicsComp.onMove = onMove
         return physicsComp
     }
 

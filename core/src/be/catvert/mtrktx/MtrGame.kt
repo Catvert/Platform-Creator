@@ -1,9 +1,11 @@
 package be.catvert.mtrktx
 
 import be.catvert.mtrktx.ecs.EntityFactory
-import be.catvert.mtrktx.ecs.components.render.RenderComponent
+import be.catvert.mtrktx.ecs.components.RenderComponent
+import be.catvert.mtrktx.ecs.systems.BaseSystem
 import be.catvert.mtrktx.scenes.BaseScene
 import be.catvert.mtrktx.scenes.MainMenuScene
+import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
@@ -19,8 +21,10 @@ import ktx.assets.loadOnDemand
 import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.FileVisitResult
-import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
+import ktx.app.clearScreen
+import ktx.app.use
+import ktx.collections.GdxArray
 import ktx.collections.toGdxArray
 
 
@@ -34,12 +38,18 @@ class MtrGame : KtxGame<BaseScene>() {
     lateinit var defaultProjection: Matrix4
         private set
 
+    val assetManager = AssetManager()
+    val entityFactory = EntityFactory(this)
+
+    var clearScreenColor = Triple(186f/255f, 212f/255f, 1f)
+    val engine = Engine()
+
+    lateinit var background: RenderComponent
+
     private val textureAtlasList = mutableListOf<Pair<TextureAtlas, String>>()
     fun getTextureAtlasList(): List<Pair<TextureAtlas, String>> = textureAtlasList
 
     private val animationsList = mutableListOf<Pair<Animation<TextureAtlas.AtlasRegion>, String>>()
-
-    val assetManager = AssetManager()
 
     override fun create() {
         VisUI.load(Gdx.files.internal("ui/tinted/x1/tinted.json"))
@@ -53,15 +63,50 @@ class MtrGame : KtxGame<BaseScene>() {
         loadGameResources()
         loadAnimations()
 
-        addScreen(MainMenuScene(this))
-        setScreen<MainMenuScene>()
+        background = getMainBackground()
+
+        setScene(MainMenuScene(this))
     }
 
     inline fun <reified T : BaseScene> setScene(scene: T) {
-        shownScreen.dispose()
+        if(shownScreen is BaseScene)
+            shownScreen.dispose()
         removeSceneSafely<T>()
+
+        engine.removeAllEntities()
+        (engine.systems.size() - 1 downTo 0).asSequence().forEach {
+            engine.removeSystem(engine.systems[it])
+        }
+
+        for (system in scene.addedSystems)
+            engine.addSystem(system)
+
+        scene.entities.forEach {
+            if(!engine.entities.contains(it))
+                engine.addEntity(it)
+        }
+
         addScreen(scene)
         setScreen<T>()
+    }
+
+
+    override fun render(delta: Float) {
+        clearScreen(clearScreenColor.first, clearScreenColor.second, clearScreenColor.third)
+
+        batch.projectionMatrix = defaultProjection
+        batch.use {
+            batch.draw(background.getActualAtlasRegion(), 0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
+        }
+        batch.projectionMatrix = shownScreen.camera.combined
+
+        (0..engine.systems.size() - 1).asSequence().forEach {
+            (engine.systems[it] as BaseSystem).processEntities(shownScreen.entities)
+        }
+
+        engine.update(delta)
+
+        super.render(delta)
     }
 
     inline fun <reified T : BaseScene> removeSceneSafely() {
@@ -71,17 +116,17 @@ class MtrGame : KtxGame<BaseScene>() {
 
     fun getLogo(): Entity {
         val (logoWidth, logoHeight) = Pair(Gdx.graphics.width.toFloat() / 3 * 2, Gdx.graphics.height.toFloat() / 4)
-        return EntityFactory.createSprite(Rectangle(Gdx.graphics.width / 2f - logoWidth / 2f , Gdx.graphics.height - logoHeight, logoWidth, logoHeight), RenderComponent(listOf(getGameTexture(Gdx.files.internal("game/logo.png")))))
+        return entityFactory.createSprite(Rectangle(Gdx.graphics.width / 2f - logoWidth / 2f , Gdx.graphics.height - logoHeight, logoWidth, logoHeight), RenderComponent(listOf(getGameTexture(Gdx.files.internal("game/logo.png")))))
     }
 
-    fun getMainBackground(): Entity {
-        return EntityFactory.createSprite(Rectangle(0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat()), RenderComponent(listOf(getGameTexture(Gdx.files.internal("game/mainmenu.png")))))
+    fun getMainBackground(): RenderComponent {
+        return RenderComponent(listOf(getGameTexture(Gdx.files.internal("game/mainmenu.png"))))
     }
 
     private fun loadAnimations() {
         val loadedAnimName = mutableListOf<String>()
-        textureAtlasList.forEach { atlas ->
-            atlas.first.regions.forEach {
+        textureAtlasList.forEach { (first) ->
+            first.regions.forEach {
                 /* les animations de Kenney finissent par une lettre puis par exemple 1 donc -> alienGreen_walk1 puis alienGreen_walk2
                 mais des autres textures normale tel que foliagePack_001 existe donc on doit vérifier si le nombre avant 1 fini bien par une lettre
                 */
@@ -90,7 +135,7 @@ class MtrGame : KtxGame<BaseScene>() {
 
                     var count = 1
                     do {
-                        if(atlas.first.findRegion(name + "_" + count) == null) {
+                        if(first.findRegion(name + "_" + count) == null) {
                             break
                         }
                         ++count
@@ -98,14 +143,20 @@ class MtrGame : KtxGame<BaseScene>() {
 
                     val frameList = mutableListOf<TextureAtlas.AtlasRegion>()
 
+                    val initialRegion = first.findRegion(name + "_0")
+
                     for (i in 0..count - 1) {
                         val nameNextFrame = name + "_" + i
-                        frameList.add(atlas.first.findRegion(nameNextFrame))
+                        val region = first.findRegion(nameNextFrame)
+                        region.regionWidth = initialRegion.regionWidth
+                        region.regionHeight = initialRegion.regionHeight
+                        frameList.add(region)
                     }
 
                     animationsList += Pair(Animation<TextureAtlas.AtlasRegion>(0.33f, frameList.toGdxArray()), it.name.removeSuffix("_0"))
                     loadedAnimName += it.name
                 }
+                it.texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest)
             }
         }
     }
@@ -155,16 +206,23 @@ class MtrGame : KtxGame<BaseScene>() {
         return TextureInfo(TextureAtlas.AtlasRegion(Texture(1, 1, Pixmap.Format.Alpha), 0, 0, 1, 1))
     }
 
-    fun getAnimation(animationName: String): Animation<TextureAtlas.AtlasRegion> {
+    fun getAnimation(animationName: String, frameDuration: Float): Animation<TextureAtlas.AtlasRegion> {
         try {
-            return animationsList.first { (it.second == animationName) }.first
+            val anim = animationsList.first { (it.second == animationName) }.first
+            anim.frameDuration = frameDuration
+            return anim
         } catch(e: NoSuchElementException) {
             throw Exception("Impossible de trouver l'animation portant le nom : $animationName")
         }
     }
 
+    fun createAnimationFromRegions(regions: GdxArray<out TextureAtlas.AtlasRegion>, frameDuration: Float): Animation<TextureAtlas.AtlasRegion> {
+        return Animation(frameDuration, regions)
+    }
+
     override fun dispose() {
         batch.dispose()
+        engine.removeAllEntities()
         assetManager.dispose()
         mainFont.dispose()
         VisUI.dispose()

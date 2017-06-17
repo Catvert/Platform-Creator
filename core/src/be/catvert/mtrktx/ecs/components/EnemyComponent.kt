@@ -7,9 +7,10 @@ import com.badlogic.ashley.core.Entity
 */
 
 enum class EnemyType {
+    Spinner, Spider
 }
 
-class EnemyComponent(val enemyType: EnemyType): BaseComponent() {
+class EnemyComponent(var enemyType: EnemyType): BaseComponent() {
     override fun copy(target: Entity): BaseComponent {
         val enemyComp = EnemyComponent(enemyType)
         enemyComp.onPlayerCollision = onPlayerCollision
