@@ -40,7 +40,7 @@ class GameScene(game: MtrGame, entityEvent: EntityEvent, private val level: Leve
 
         level.activeRect.setPosition(Math.max(0f, transformPlayer.rectangle.x - level.activeRect.width / 2 + transformPlayer.rectangle.width / 2), Math.max(0f, transformPlayer.rectangle.y - level.activeRect.height / 2 + transformPlayer.rectangle.height / 2))
 
-        if(level.followPlayerCamera) {
+        if (level.followPlayerCamera) {
             val x = MathUtils.lerp(camera.position.x, Math.max(0f + camera.viewportWidth / 2, transformPlayer.rectangle.x + transformPlayer.rectangle.width / 2), 0.1f)
             val y = MathUtils.lerp(camera.position.y, Math.max(0f + camera.viewportHeight / 2, transformPlayer.rectangle.y + transformPlayer.rectangle.height / 2), 0.1f)
             camera.position.set(x, y, 0f)
@@ -55,43 +55,43 @@ class GameScene(game: MtrGame, entityEvent: EntityEvent, private val level: Leve
     override fun updateInputs() {
         super.updateInputs()
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             _game.setScene(PauseScene(_game))
         }
 
-        if(Gdx.input.isKeyPressed(Input.Keys.P)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.P)) {
             camera.zoom -= 0.02f
         }
-        if(Gdx.input.isKeyPressed(Input.Keys.M)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.M)) {
             camera.zoom += 0.02f
         }
-        if(Gdx.input.isKeyPressed(Input.Keys.L)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.L)) {
             camera.zoom = 1f
         }
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.C)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.C)) {
             level.followPlayerCamera = !level.followPlayerCamera
         }
-        if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             camera.position.x -= cameraMoveSpeed
         }
-        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             camera.position.x += cameraMoveSpeed
         }
-        if(Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
             camera.position.y -= cameraMoveSpeed
         }
-        if(Gdx.input.isKeyPressed(Input.Keys.UP)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
             camera.position.y += cameraMoveSpeed
         }
 
-        if( Gdx.input.isKeyJustPressed(Input.Keys.F12)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F12)) {
             level.drawDebugCells = !level.drawDebugCells
         }
-        if( Gdx.input.isKeyJustPressed(Input.Keys.G)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.G)) {
             level.applyGravity = !level.applyGravity
         }
 
-       camera.update()
+        camera.update()
     }
 }

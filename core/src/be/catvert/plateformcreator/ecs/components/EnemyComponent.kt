@@ -3,8 +3,8 @@ package be.catvert.plateformcreator.ecs.components
 import com.badlogic.ashley.core.Entity
 
 /**
-* Created by Catvert on 12/06/17.
-*/
+ * Created by Catvert on 12/06/17.
+ */
 
 enum class EnemyType {
     Spinner, Spider
@@ -13,7 +13,7 @@ enum class EnemyType {
 /**
  * Ce component permet d'identifier l'ennemi ainsi que de permettre à l'ennemi d'avoir un callback lors d'une collision avec le joueur
  */
-class EnemyComponent(var enemyType: EnemyType): BaseComponent<EnemyComponent>() {
+class EnemyComponent(var enemyType: EnemyType) : BaseComponent<EnemyComponent>() {
     override fun copy(): EnemyComponent {
         val enemyComp = EnemyComponent(enemyType)
 

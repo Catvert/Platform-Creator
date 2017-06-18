@@ -1,7 +1,7 @@
-# Maryo The Return
+# Plateform Creator
 
 ## Description du jeu
-MTR est un jeu de plateformes reprenant les mêmes idées et les resources de Secret Maryo Chronicles. Le jeu n'est pas encore *utilisable* et de nombreux changements vont arriver.
+Plateform creator est un jeu de plateformes utilisant les resources de Kenney. Le jeu n'est pas encore **totalement utilisable** et de nombreux changements vont arriver.
 
 ![Menu principal](FAQ/mainmenu.png)
 

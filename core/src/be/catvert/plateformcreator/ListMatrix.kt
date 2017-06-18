@@ -1,8 +1,8 @@
 package be.catvert.plateformcreator
 
 /**
-* Created by Catvert on 06/06/17.
-*/
+ * Created by Catvert on 06/06/17.
+ */
 
 /**
  * Classe permettant de créer une matrix en kotlin, source : https://stackoverflow.com/questions/41941102/instantiating-generic-array-in-kotlin

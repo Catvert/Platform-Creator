@@ -1,8 +1,10 @@
 package be.catvert.plateformcreator
 
 import be.catvert.plateformcreator.ecs.IUpdateable
-import be.catvert.plateformcreator.ecs.components.*
+import be.catvert.plateformcreator.ecs.components.BaseComponent
+import be.catvert.plateformcreator.ecs.components.LifeComponent
 import be.catvert.plateformcreator.ecs.components.RenderComponent
+import be.catvert.plateformcreator.ecs.components.TransformComponent
 import be.catvert.plateformcreator.ecs.systems.physics.GridCell
 import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
@@ -12,8 +14,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
 
 /**
-* Created by Catvert on 07/06/17.
-*/
+ * Created by Catvert on 07/06/17.
+ */
 
 /**
  * Classe représantant le niveau en cour
@@ -24,7 +26,7 @@ import com.badlogic.gdx.math.Rectangle
  * levelFile : Le fichier utilisé pour charger le niveau
  * loadedEntities : Les entités chargés et à sauvegarder dans le fichier du niveau
  */
-class Level(private val _game: MtrGame, var levelName: String, val player: Entity, val background: RenderComponent, val levelFile: FileHandle, val loadedEntities: MutableList<Entity>): IUpdateable {
+class Level(private val _game: MtrGame, var levelName: String, val player: Entity, val background: RenderComponent, val levelFile: FileHandle, val loadedEntities: MutableList<Entity>) : IUpdateable {
     private val shapeRenderer = ShapeRenderer()
 
     private val matrixSizeX = 300
@@ -67,7 +69,7 @@ class Level(private val _game: MtrGame, var levelName: String, val player: Entit
             shapeRenderer.projectionMatrix = _game.batch.projectionMatrix
             shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
             matrixGrid.forEach {
-                it.forEach{
+                it.forEach {
                     shapeRenderer.rect(it.second.x, it.second.y, it.second.width, it.second.height)
                 }
             }
@@ -95,12 +97,12 @@ class Level(private val _game: MtrGame, var levelName: String, val player: Entit
         activeGridCells.addAll(getRectCells(activeRect))
 
         activeGridCells.forEach {
-            for(i in 0..matrixGrid[it.x][it.y].first.size - 1) {
+            for (i in 0..matrixGrid[it.x][it.y].first.size - 1) {
                 val entity = matrixGrid[it.x][it.y].first[i]
                 entity.components.filter { c -> c is BaseComponent<*> }.forEach {
                     (it as BaseComponent<*>).active = true
-                    if(killEntityUnderY && it is TransformComponent && it.rectangle.y < 0) {
-                        if(lifeMapper.has(entity))
+                    if (killEntityUnderY && it is TransformComponent && it.rectangle.y < 0) {
+                        if (lifeMapper.has(entity))
                             lifeMapper[entity].killInstant()
                         removeEntity(entity)
                     }
@@ -207,12 +209,11 @@ class Level(private val _game: MtrGame, var levelName: String, val player: Entit
         val gridCells = getRectCells(rect)
         gridCells.forEach {
             matrixGrid[it.x][it.y].first.forEach {
-                if(overlaps) {
-                    if(rect.overlaps(transformMapper[it].rectangle))
+                if (overlaps) {
+                    if (rect.overlaps(transformMapper[it].rectangle))
                         list += it
-                }
-                else {
-                    if(rect.contains(transformMapper[it].rectangle))
+                } else {
+                    if (rect.contains(transformMapper[it].rectangle))
                         list += it
                 }
 

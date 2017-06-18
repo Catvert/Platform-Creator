@@ -2,12 +2,15 @@ package be.catvert.plateformcreator.ecs.systems
 
 import be.catvert.plateformcreator.Level
 import be.catvert.plateformcreator.ecs.components.UpdateComponent
-import com.badlogic.ashley.core.*
+import com.badlogic.ashley.core.ComponentMapper
+import com.badlogic.ashley.core.Entity
+import com.badlogic.ashley.core.EntitySystem
+import com.badlogic.ashley.core.Family
 import com.badlogic.ashley.utils.ImmutableArray
 
 /**
-* Created by Catvert on 04/06/17.
-*/
+ * Created by Catvert on 04/06/17.
+ */
 
 /**
  * Ce système permet d'appeler la méthode de mise a jour des entités ayant un updateComponent
@@ -24,7 +27,7 @@ class UpdateSystem(private val level: Level) : EntitySystem() {
 
         entities.forEach {
             val updateComp = updateMapper[it]
-            if(updateComp.active)
+            if (updateComp.active)
                 updateComp.update(deltaTime, it, level)
         }
     }

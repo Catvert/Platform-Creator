@@ -5,8 +5,8 @@ import be.catvert.plateformcreator.ecs.EntityEvent
 import be.catvert.plateformcreator.ecs.EntityFactory
 import be.catvert.plateformcreator.ecs.components.EnemyType
 import be.catvert.plateformcreator.ecs.components.PhysicsComponent
-import be.catvert.plateformcreator.ecs.components.TransformComponent
 import be.catvert.plateformcreator.ecs.components.RenderComponent
+import be.catvert.plateformcreator.ecs.components.TransformComponent
 import be.catvert.plateformcreator.ecs.systems.RenderingSystem
 import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
@@ -26,7 +26,10 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
-import com.kotcrab.vis.ui.widget.*
+import com.kotcrab.vis.ui.widget.VisImage
+import com.kotcrab.vis.ui.widget.VisTable
+import com.kotcrab.vis.ui.widget.VisTextButton
+import com.kotcrab.vis.ui.widget.VisTextField
 import ktx.actors.contains
 import ktx.actors.onChange
 import ktx.actors.onClick
@@ -80,12 +83,14 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
 
         editorMode = EditorMode.SelectEntity
     }
+
     private fun clearSelectEntities() {
         selectEntities.clear()
         selectMoveEntity = null
         onSelectEntityChanged.dispatch(null)
         editorMode = EditorMode.NoMode
     }
+
     private var onSelectEntityChanged: Signal<Entity?> = Signal()
     private var onSelectEntityMoved: Signal<TransformComponent> = Signal()
     private var copyEntity: Entity? = null

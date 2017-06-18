@@ -12,8 +12,8 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.Rectangle
 
 /**
-* Created by Catvert on 03/06/17.
-*/
+ * Created by Catvert on 03/06/17.
+ */
 
 /**
  * Classe static utilitaire
@@ -28,10 +28,10 @@ class Utility {
             val files = mutableListOf<FileHandle>()
 
             dir.list().forEach {
-                if(it.isDirectory)
+                if (it.isDirectory)
                     files += getFilesRecursivly(it, fileExt)
                 else {
-                    if(fileExt.isBlank() || it.extension() == fileExt)
+                    if (fileExt.isBlank() || it.extension() == fileExt)
                         files += it
                 }
             }
@@ -51,10 +51,10 @@ fun Entity.copy(entityFactory: EntityFactory, entityEvent: EntityEvent): Entity 
  * Méthode d'extension permettant de dessiner une entité à partir d'une région et d'un rectangle
  */
 fun <B : Batch> B.draw(texture: TextureAtlas.AtlasRegion, rect: Rectangle, flipX: Boolean = false, flipY: Boolean = true) {
-    if(flipX && !texture.isFlipX || !flipX && texture.isFlipX) {
+    if (flipX && !texture.isFlipX || !flipX && texture.isFlipX) {
         texture.flip(true, false)
     }
-    if(flipY && !texture.isFlipY || !flipY && texture.isFlipY){
+    if (flipY && !texture.isFlipY || !flipY && texture.isFlipY) {
         texture.flip(false, true)
     }
 
@@ -69,7 +69,7 @@ operator fun Entity.minusAssign(component: Class<out BaseComponent<*>>) {
     this.remove(component)
 }
 
-operator fun <T: BaseComponent<*>> Entity.get(component: Class<T>): T {
+operator fun <T : BaseComponent<*>> Entity.get(component: Class<T>): T {
     return this.getComponent(component)
 }
 

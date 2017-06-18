@@ -4,8 +4,8 @@ import be.catvert.plateformcreator.ecs.systems.physics.GridCell
 import com.badlogic.gdx.math.Rectangle
 
 /**
-* Created by Catvert on 03/06/17.
-*/
+ * Created by Catvert on 03/06/17.
+ */
 
 /**
  * Ce component permet d'ajouter un système de positionnement à l'entité

@@ -12,8 +12,8 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.app.KtxScreen
 
 /**
-* Created by Catvert on 03/06/17.
-*/
+ * Created by Catvert on 03/06/17.
+ */
 
 /**
  * Classe abstraite permettant de créer une scène

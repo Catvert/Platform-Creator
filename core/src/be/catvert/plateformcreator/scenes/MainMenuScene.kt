@@ -22,8 +22,8 @@ import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 
 /**
-* Created by Catvert on 03/06/17.
-*/
+ * Created by Catvert on 03/06/17.
+ */
 
 /**
  * Scène du menu principal
@@ -78,7 +78,7 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
                 }
                 textButton("Confirmer") {
                     addListener(onClick { ->
-                        if(!textFieldName.text.isBlank()) {
+                        if (!textFieldName.text.isBlank()) {
                             onNameSelected(textFieldName.text)
                             this@window.remove()
                         }
@@ -125,13 +125,13 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
         }
 
         fun getLevels(): GdxArray<LevelItem> =
-            Utility.getFilesRecursivly(Gdx.files.internal("levels"), "mtrlvl").let {
-                val list = mutableListOf<LevelItem>()
-                it.forEach {
-                    list += LevelItem(it)
+                Utility.getFilesRecursivly(Gdx.files.internal("levels"), "mtrlvl").let {
+                    val list = mutableListOf<LevelItem>()
+                    it.forEach {
+                        list += LevelItem(it)
+                    }
+                    list.toGdxArray()
                 }
-                list.toGdxArray()
-            }
 
         val list = VisList<LevelItem>()
         list.setItems(getLevels())
@@ -149,18 +149,18 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
                     space(10f)
                     textButton("Jouer") {
                         addListener(onClick {
-                            if(list.selected != null) {
+                            if (list.selected != null) {
                                 val (success, level, entityEvent) = levelFactory.loadLevel(list.selected.file)
-                                if(success)
+                                if (success)
                                     _game.setScene(GameScene(_game, entityEvent, level))
                             }
                         })
                     }
                     textButton("Éditer") {
                         addListener(onClick {
-                            if(list.selected != null) {
+                            if (list.selected != null) {
                                 val (success, level, entityEvent) = levelFactory.loadLevel(list.selected.file)
-                                if(success)
+                                if (success)
                                     _game.setScene(EditorScene(_game, entityEvent, level))
                             }
                         })
@@ -175,7 +175,7 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
                     }
                     textButton("Copier") {
                         addListener(onClick {
-                            if(list.selected != null) {
+                            if (list.selected != null) {
                                 showSetNameLevelWindow { name ->
                                     try {
                                         Files.copy(Paths.get(list.selected.file.path()), Paths.get(list.selected.file.parent().path() + "/$name.mtrlvl"), StandardCopyOption.REPLACE_EXISTING)
@@ -191,9 +191,9 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
                     }
                     textButton("Supprimer") {
                         addListener(onClick {
-                            if(list.selected != null) {
+                            if (list.selected != null) {
                                 showDialog("Supprimer le niveau ?", "Etes-vous sur de vouloir supprimer ${list.selected} ?", listOf(VisTextButton("Oui"), VisTextButton("Non")), { button ->
-                                    if(button == 0) {
+                                    if (button == 0) {
                                         try {
                                             Files.delete(Paths.get(list.selected.file.path()))
                                             list.setItems(getLevels())

@@ -1,8 +1,8 @@
 package be.catvert.plateformcreator.ecs
 
 /**
-* Created by Catvert on 04/06/17.
-*/
+ * Created by Catvert on 04/06/17.
+ */
 
 /**
  * Interface permettant d'implémenter une méthode de mise à jour

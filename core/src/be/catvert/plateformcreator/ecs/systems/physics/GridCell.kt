@@ -7,4 +7,4 @@ package be.catvert.plateformcreator.ecs.systems.physics
 /**
  * Cette classe permet de représenter une cellule contenant des entités avec une position x et y
  */
-data class GridCell(var x: Int, var y:Int)
+data class GridCell(var x: Int, var y: Int)

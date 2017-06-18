@@ -3,7 +3,6 @@ package be.catvert.plateformcreator
 import be.catvert.plateformcreator.ecs.EntityEvent
 import be.catvert.plateformcreator.ecs.EntityFactory
 import be.catvert.plateformcreator.ecs.components.*
-import be.catvert.plateformcreator.ecs.components.RenderComponent
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
@@ -16,8 +15,8 @@ import java.io.FileReader
 import java.io.FileWriter
 
 /**
-* Created by Catvert on 07/06/17.
-*/
+ * Created by Catvert on 07/06/17.
+ */
 
 /**
  * Factory permettant de créer un niveau, de charger un niveau ou de le sauvegarder
@@ -36,11 +35,11 @@ class LevelFactory(private val game: MtrGame) {
 
         loadedEntities += player
 
-       /* for(x in 0..300) { // large amount of entity test
-            for(y in 0..50) {
-                loadedEntities += entityFactory.createPhysicsSprite(Rectangle(500 + 50f*x, 500 + 50f *y, 50f, 50f), RenderComponent(listOf(game.getSpriteSheetTexture("sheet", "slice03_03"))), PhysicsComponent(true))
-            }
-        }*/
+        /* for(x in 0..300) { // large amount of entity test
+             for(y in 0..50) {
+                 loadedEntities += entityFactory.createPhysicsSprite(Rectangle(500 + 50f*x, 500 + 50f *y, 50f, 50f), RenderComponent(listOf(game.getSpriteSheetTexture("sheet", "slice03_03"))), PhysicsComponent(true))
+             }
+         }*/
 
         return Pair(Level(game, levelName, player, RenderComponent(listOf(defaultBackground)), levelPath, loadedEntities), EntityEvent())
     }

@@ -7,8 +7,8 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.Vector2
 
 /**
-* Created by Catvert on 05/06/17.
-*/
+ * Created by Catvert on 05/06/17.
+ */
 
 /**
  * Enum permettant de spécifier comment la taille de l'entité doit changer
@@ -35,7 +35,7 @@ class RenderComponent(val textureInfoList: List<TextureInfo> = listOf(),
                       var renderLayer: Int = 0,
                       var resizeMode: ResizeMode = ResizeMode.NO_RESIZE) : BaseComponent<RenderComponent>() {
     override fun copy(): RenderComponent {
-       return RenderComponent(textureInfoList, animationList, useAnimation, initialFlipX, initialFlipY, renderLayer, resizeMode)
+        return RenderComponent(textureInfoList, animationList, useAnimation, initialFlipX, initialFlipY, renderLayer, resizeMode)
     }
 
     private var stateTime = 0f

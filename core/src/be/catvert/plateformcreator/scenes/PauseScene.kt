@@ -9,8 +9,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import ktx.vis.window
 
 /**
-* Created by Catvert on 05/06/17.
-*/
+ * Created by Catvert on 05/06/17.
+ */
 
 /**
  * Scène pause appelé lorsque le joueur appuie sur échap en partie

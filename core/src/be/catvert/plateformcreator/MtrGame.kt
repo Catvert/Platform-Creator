@@ -11,15 +11,17 @@ import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.*
+import com.badlogic.gdx.graphics.g2d.Animation
+import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.Matrix4
 import com.badlogic.gdx.math.Rectangle
 import com.kotcrab.vis.ui.VisUI
 import ktx.app.KtxGame
-import ktx.assets.loadOnDemand
-import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import ktx.app.clearScreen
 import ktx.app.use
+import ktx.assets.loadOnDemand
 import ktx.collections.GdxArray
 import ktx.collections.toGdxArray
 
@@ -39,7 +41,7 @@ class MtrGame : KtxGame<BaseScene>() {
     val assetManager = AssetManager()
     val entityFactory = EntityFactory(this)
 
-    var clearScreenColor = Triple(186f/255f, 212f/255f, 1f)
+    var clearScreenColor = Triple(186f / 255f, 212f / 255f, 1f)
 
     val engine = Engine()
 
@@ -78,7 +80,7 @@ class MtrGame : KtxGame<BaseScene>() {
 
         engine.removeAllEntities()
         shownScreen.entities.forEach {
-            if(!engine.entities.contains(it))
+            if (!engine.entities.contains(it))
                 engine.addEntity(it)
         }
 
@@ -101,7 +103,7 @@ class MtrGame : KtxGame<BaseScene>() {
      * Supprime les entités chargées dans la scène précédante
      */
     inline fun <reified T : BaseScene> setScene(scene: T) {
-        if(shownScreen is BaseScene)
+        if (shownScreen is BaseScene)
             shownScreen.dispose()
         removeSceneSafely<T>()
 
@@ -114,7 +116,7 @@ class MtrGame : KtxGame<BaseScene>() {
             engine.addSystem(system)
 
         scene.entities.forEach {
-            if(!engine.entities.contains(it))
+            if (!engine.entities.contains(it))
                 engine.addEntity(it)
         }
 
@@ -132,16 +134,16 @@ class MtrGame : KtxGame<BaseScene>() {
                 /* les animations de Kenney finissent par une lettre puis par exemple 1 donc -> alienGreen_walk1 puis alienGreen_walk2
                 mais des autres textures normale tel que foliagePack_001 existe donc on doit vérifier si le nombre avant 1 fini bien par une lettre
                 */
-                if(!loadedAnimName.contains(it.name) && it.name.endsWith("_0")) {
+                if (!loadedAnimName.contains(it.name) && it.name.endsWith("_0")) {
                     val name = it.name.removeSuffix("_0")
 
                     var count = 1
                     do {
-                        if(first.findRegion(name + "_" + count) == null) {
+                        if (first.findRegion(name + "_" + count) == null) {
                             break
                         }
                         ++count
-                    } while(true)
+                    } while (true)
 
                     val frameList = mutableListOf<TextureAtlas.AtlasRegion>()
 
@@ -176,7 +178,7 @@ class MtrGame : KtxGame<BaseScene>() {
      * Permet de supprimer une scène en vérifiant si la scène était bien chargée.
      */
     inline fun <reified T : BaseScene> removeSceneSafely() {
-        if(containsScreen<T>())
+        if (containsScreen<T>())
             removeScreen<T>()
     }
 
@@ -185,7 +187,7 @@ class MtrGame : KtxGame<BaseScene>() {
      */
     fun getLogo(): Entity {
         val (logoWidth, logoHeight) = Pair(Gdx.graphics.width.toFloat() / 3 * 2, Gdx.graphics.height.toFloat() / 4)
-        return entityFactory.createSprite(Rectangle(Gdx.graphics.width / 2f - logoWidth / 2f , Gdx.graphics.height - logoHeight, logoWidth, logoHeight), RenderComponent(listOf(getGameTexture(Gdx.files.internal("game/logo.png")))))
+        return entityFactory.createSprite(Rectangle(Gdx.graphics.width / 2f - logoWidth / 2f, Gdx.graphics.height - logoHeight, logoWidth, logoHeight), RenderComponent(listOf(getGameTexture(Gdx.files.internal("game/logo.png")))))
     }
 
     /**
@@ -200,13 +202,12 @@ class MtrGame : KtxGame<BaseScene>() {
      */
     fun getGameTexture(path: FileHandle): TextureInfo {
         try {
-            if(!path.exists())
+            if (!path.exists())
                 throw Exception("La chemin n'existe pas")
-            if(assetManager.isLoaded(path.path())) {
+            if (assetManager.isLoaded(path.path())) {
                 val texture = assetManager.get(path.path(), Texture::class.java)
                 return TextureInfo(TextureAtlas.AtlasRegion(texture, 0, 0, texture.width, texture.height), texturePath = path.path())
-            }
-            else {
+            } else {
                 val texture = assetManager.loadOnDemand<Texture>(path.path()).asset
                 return TextureInfo(TextureAtlas.AtlasRegion(texture, 0, 0, texture.width, texture.height), texturePath = path.path())
             }

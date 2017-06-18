@@ -2,7 +2,6 @@ package be.catvert.plateformcreator.ecs
 
 import be.catvert.plateformcreator.MtrGame
 import be.catvert.plateformcreator.ecs.components.*
-import be.catvert.plateformcreator.ecs.components.RenderComponent
 import be.catvert.plateformcreator.get
 import be.catvert.plateformcreator.plusAssign
 import be.catvert.plateformcreator.scenes.MainMenuScene
@@ -15,8 +14,8 @@ import ktx.ashley.mapperFor
 import ktx.collections.gdxArrayOf
 
 /**
-* Created by Catvert on 03/06/17.
-*/
+ * Created by Catvert on 03/06/17.
+ */
 
 /**
  * Ce factory permet de créer une entité spécifique
@@ -37,7 +36,7 @@ class EntityFactory(private val game: MtrGame) {
         val transformComp = transformMapper[copy]
         val renderComp = renderMapper[copy]
 
-        when(EntityType.values().first { it.flag == copy.flags }) {
+        when (EntityType.values().first { it.flag == copy.flags }) {
             EntityFactory.EntityType.Sprite -> {
                 return createSprite(Rectangle(transformComp.rectangle), renderComp.copy())
             }
@@ -105,6 +104,7 @@ class EntityFactory(private val game: MtrGame) {
         var lastState = 0
 
         entity += UpdateComponent({ _, e, _ ->
+            @Suppress("NAME_SHADOWING")
             val renderComp = renderMapper[e]
             val physics = physicsMapper[e]
 
@@ -133,7 +133,7 @@ class EntityFactory(private val game: MtrGame) {
                 physics.nextActions += NextActions.JUMP
             }
 
-            if(!physics.isOnGround)
+            if (!physics.isOnGround)
                 state = 2
 
             if (state != lastState) {
@@ -215,7 +215,7 @@ class EntityFactory(private val game: MtrGame) {
                 listOf(game.getAnimation("spider_walk", 0.3f)), useAnimation = true, resizeMode = ResizeMode.ACTUAL_REGION), Rectangle(pos.x, pos.y, 0f, 0f), false, 10)
 
         entity.second.onPlayerCollision = { thisEntity, player, side ->
-            if(side == CollisionSide.OnUp)
+            if (side == CollisionSide.OnUp)
                 entityEvent.onEntityRemoved?.invoke(thisEntity)
             else
                 player[LifeComponent::class.java].removeLife(1)
@@ -229,16 +229,16 @@ class EntityFactory(private val game: MtrGame) {
 
             render.flipX = goRight
 
-            if(!goRight)
-                phys.nextActions +=NextActions.GO_LEFT
+            if (!goRight)
+                phys.nextActions += NextActions.GO_LEFT
             else
                 phys.nextActions += NextActions.GO_RIGHT
-        } )
+        })
 
-        physicsMapper[entity.first].onCollisionWith = { thisEntity, collisionEntity, side ->
-            if(side == CollisionSide.OnLeft)
+        physicsMapper[entity.first].onCollisionWith = { _, _, side ->
+            if (side == CollisionSide.OnLeft)
                 goRight = true
-            else if(side == CollisionSide.OnRight)
+            else if (side == CollisionSide.OnRight)
                 goRight = false
         }
 

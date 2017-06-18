@@ -1,10 +1,10 @@
 package be.catvert.plateformcreator.desktop
 
+import be.catvert.plateformcreator.MtrGame
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration
-import be.catvert.plateformcreator.MtrGame
-import java.io.FileReader
 import com.badlogic.gdx.utils.JsonReader
+import java.io.FileReader
 
 object DesktopLauncher {
 
@@ -24,7 +24,7 @@ object DesktopLauncher {
         LwjglApplication(MtrGame(), config)
     }
 
-    private fun loadConfig() : GameConfig {
+    private fun loadConfig(): GameConfig {
         try {
             val root = JsonReader().parse(FileReader("config.json"))
 
@@ -35,7 +35,7 @@ object DesktopLauncher {
 
             return GameConfig(screenWidth, screenHeight, vsync, fullscreen)
         } catch (e: Exception) {
-           System.err.println("Erreur lors du chargement de la configuration du jeu ! Erreur : ${e.message}")
+            System.err.println("Erreur lors du chargement de la configuration du jeu ! Erreur : ${e.message}")
         }
 
         return GameConfig(1280, 720, false, false)
