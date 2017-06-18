@@ -1,3 +1,3 @@
 Manifest-Version: 1.0
-Main-Class: be.catvert.mtrktx.desktop.DesktopLauncher
+Main-Class: be.catvert.plateformcreator.desktop.DesktopLauncher
 

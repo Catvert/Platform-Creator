@@ -1,0 +1,81 @@
+alienBlue.png
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+alienBlue
+  rotate: false
+  xy: 70, 0
+  size: 66, 92
+  orig: 66, 92
+  offset: 0, 0
+  index: -1
+alienBlue_climb_0
+  rotate: false
+  xy: 69, 97
+  size: 66, 92
+  orig: 66, 92
+  offset: 0, 0
+  index: -1
+alienBlue_climb_1
+  rotate: false
+  xy: 133, 189
+  size: 66, 92
+  orig: 66, 92
+  offset: 0, 0
+  index: -1
+alienBlue_duck
+  rotate: false
+  xy: 0, 284
+  size: 67, 72
+  orig: 67, 72
+  offset: 0, 0
+  index: -1
+alienBlue_hurt
+  rotate: false
+  xy: 0, 192
+  size: 67, 92
+  orig: 67, 92
+  offset: 0, 0
+  index: -1
+alienBlue_jump
+  rotate: false
+  xy: 67, 192
+  size: 66, 93
+  orig: 66, 93
+  offset: 0, 0
+  index: -1
+alienBlue_stand
+  rotate: false
+  xy: 67, 378
+  size: 66, 92
+  orig: 66, 92
+  offset: 0, 0
+  index: -1
+alienBlue_swim_0
+  rotate: false
+  xy: 0, 97
+  size: 69, 95
+  orig: 69, 95
+  offset: 0, 0
+  index: -1
+alienBlue_swim_1
+  rotate: false
+  xy: 0, 0
+  size: 70, 97
+  orig: 70, 97
+  offset: 0, 0
+  index: -1
+alienBlue_walk_0
+  rotate: false
+  xy: 67, 285
+  size: 66, 93
+  orig: 66, 93
+  offset: 0, 0
+  index: -1
+alienBlue_walk_1
+  rotate: false
+  xy: 0, 356
+  size: 67, 96
+  orig: 67, 96
+  offset: 0, 0
+  index: -1
