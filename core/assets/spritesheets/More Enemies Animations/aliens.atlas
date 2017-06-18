@@ -1,0 +1,389 @@
+aliens.png
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+alienBeige
+  rotate: false
+  xy: 478, 363
+  size: 66, 92
+  orig: 66, 92
+  offset: 0, 0
+  index: -1
+alienBeige_climb_0
+  rotate: false
+  xy: 478, 175
+  size: 66, 95
+  orig: 66, 95
+  offset: 0, 0
+  index: -1
+alienBeige_climb_1
+  rotate: false
+  xy: 610, 368
+  size: 66, 95
+  orig: 66, 95
+  offset: 0, 0
+  index: -1
+alienBeige_duck
+  rotate: false
+  xy: 278, 92
+  size: 67, 72
+  orig: 67, 72
+  offset: 0, 0
+  index: -1
+alienBeige_hurt
+  rotate: false
+  xy: 278, 0
+  size: 67, 92
+  orig: 67, 92
+  offset: 0, 0
+  index: -1
+alienBeige_jump
+  rotate: false
+  xy: 479, 0
+  size: 66, 93
+  orig: 66, 93
+  offset: 0, 0
+  index: -1
+alienBeige_stand
+  rotate: false
+  xy: 676, 276
+  size: 66, 92
+  orig: 66, 92
+  offset: 0, 0
+  index: -1
+alienBeige_swim_0
+  rotate: false
+  xy: 209, 95
+  size: 69, 98
+  orig: 69, 98
+  offset: 0, 0
+  index: -1
+alienBeige_swim_1
+  rotate: false
+  xy: 70, 0
+  size: 70, 100
+  orig: 70, 100
+  offset: 0, 0
+  index: -1
+alienBeige_walk_0
+  rotate: false
+  xy: 209, 193
+  size: 68, 93
+  orig: 68, 93
+  offset: 0, 0
+  index: -1
+alienBeige_walk_1
+  rotate: false
+  xy: 70, 284
+  size: 70, 96
+  orig: 70, 96
+  offset: 0, 0
+  index: -1
+alienBlue
+  rotate: false
+  xy: 412, 175
+  size: 66, 92
+  orig: 66, 92
+  offset: 0, 0
+  index: -1
+alienBlue_climb_0
+  rotate: false
+  xy: 412, 359
+  size: 66, 92
+  orig: 66, 92
+  offset: 0, 0
+  index: -1
+alienBlue_climb_1
+  rotate: false
+  xy: 412, 267
+  size: 66, 92
+  orig: 66, 92
+  offset: 0, 0
+  index: -1
+alienBlue_duck
+  rotate: false
+  xy: 345, 271
+  size: 67, 72
+  orig: 67, 72
+  offset: 0, 0
+  index: -1
+alienBlue_hurt
+  rotate: false
+  xy: 345, 0
+  size: 67, 92
+  orig: 67, 92
+  offset: 0, 0
+  index: -1
+alienBlue_jump
+  rotate: false
+  xy: 478, 270
+  size: 66, 93
+  orig: 66, 93
+  offset: 0, 0
+  index: -1
+alienBlue_stand
+  rotate: false
+  xy: 676, 368
+  size: 66, 92
+  orig: 66, 92
+  offset: 0, 0
+  index: -1
+alienBlue_swim_0
+  rotate: false
+  xy: 139, 380
+  size: 69, 95
+  orig: 69, 95
+  offset: 0, 0
+  index: -1
+alienBlue_swim_1
+  rotate: false
+  xy: 70, 100
+  size: 70, 97
+  orig: 70, 97
+  offset: 0, 0
+  index: -1
+alienBlue_walk_0
+  rotate: false
+  xy: 544, 267
+  size: 66, 93
+  orig: 66, 93
+  offset: 0, 0
+  index: -1
+alienBlue_walk_1
+  rotate: false
+  xy: 345, 175
+  size: 67, 96
+  orig: 67, 96
+  offset: 0, 0
+  index: -1
+alienGreen
+  rotate: false
+  xy: 610, 276
+  size: 66, 92
+  orig: 66, 92
+  offset: 0, 0
+  index: -1
+alienGreen_climb_0
+  rotate: false
+  xy: 611, 0
+  size: 66, 92
+  orig: 66, 92
+  offset: 0, 0
+  index: -1
+alienGreen_climb_1
+  rotate: false
+  xy: 676, 92
+  size: 66, 92
+  orig: 66, 92
+  offset: 0, 0
+  index: -1
+alienGreen_duck
+  rotate: false
+  xy: 208, 424
+  size: 69, 71
+  orig: 69, 71
+  offset: 0, 0
+  index: -1
+alienGreen_hurt
+  rotate: false
+  xy: 140, 261
+  size: 69, 92
+  orig: 69, 92
+  offset: 0, 0
+  index: -1
+alienGreen_jump
+  rotate: false
+  xy: 345, 343
+  size: 67, 93
+  orig: 67, 93
+  offset: 0, 0
+  index: -1
+alienGreen_stand
+  rotate: false
+  xy: 676, 184
+  size: 66, 92
+  orig: 66, 92
+  offset: 0, 0
+  index: -1
+alienGreen_swim_0
+  rotate: false
+  xy: 209, 0
+  size: 69, 95
+  orig: 69, 95
+  offset: 0, 0
+  index: -1
+alienGreen_swim_1
+  rotate: false
+  xy: 0, 193
+  size: 70, 97
+  orig: 70, 97
+  offset: 0, 0
+  index: -1
+alienGreen_walk_0
+  rotate: false
+  xy: 277, 276
+  size: 68, 93
+  orig: 68, 93
+  offset: 0, 0
+  index: -1
+alienGreen_walk_1
+  rotate: false
+  xy: 0, 290
+  size: 70, 96
+  orig: 70, 96
+  offset: 0, 0
+  index: -1
+alienPink
+  rotate: false
+  xy: 610, 184
+  size: 66, 92
+  orig: 66, 92
+  offset: 0, 0
+  index: -1
+alienPink_climb_0
+  rotate: false
+  xy: 610, 92
+  size: 66, 92
+  orig: 66, 92
+  offset: 0, 0
+  index: -1
+alienPink_climb_1
+  rotate: false
+  xy: 545, 0
+  size: 66, 92
+  orig: 66, 92
+  offset: 0, 0
+  index: -1
+alienPink_duck
+  rotate: false
+  xy: 208, 353
+  size: 69, 71
+  orig: 69, 71
+  offset: 0, 0
+  index: -1
+alienPink_hurt
+  rotate: false
+  xy: 70, 380
+  size: 69, 92
+  orig: 69, 92
+  offset: 0, 0
+  index: -1
+alienPink_jump
+  rotate: false
+  xy: 412, 0
+  size: 67, 93
+  orig: 67, 93
+  offset: 0, 0
+  index: -1
+alienPink_stand
+  rotate: false
+  xy: 544, 93
+  size: 66, 92
+  orig: 66, 92
+  offset: 0, 0
+  index: -1
+alienPink_swim_0
+  rotate: false
+  xy: 140, 0
+  size: 69, 95
+  orig: 69, 95
+  offset: 0, 0
+  index: -1
+alienPink_swim_1
+  rotate: false
+  xy: 0, 0
+  size: 70, 97
+  orig: 70, 97
+  offset: 0, 0
+  index: -1
+alienPink_walk_0
+  rotate: false
+  xy: 277, 369
+  size: 68, 93
+  orig: 68, 93
+  offset: 0, 0
+  index: -1
+alienPink_walk_1
+  rotate: false
+  xy: 0, 97
+  size: 70, 96
+  orig: 70, 96
+  offset: 0, 0
+  index: -1
+alienYellow
+  rotate: false
+  xy: 478, 93
+  size: 66, 82
+  orig: 66, 82
+  offset: 0, 0
+  index: -1
+alienYellow_climb_0
+  rotate: false
+  xy: 544, 360
+  size: 66, 82
+  orig: 66, 82
+  offset: 0, 0
+  index: -1
+alienYellow_climb_1
+  rotate: false
+  xy: 544, 185
+  size: 66, 82
+  orig: 66, 82
+  offset: 0, 0
+  index: -1
+alienYellow_duck
+  rotate: false
+  xy: 209, 286
+  size: 68, 67
+  orig: 68, 67
+  offset: 0, 0
+  index: -1
+alienYellow_hurt
+  rotate: false
+  xy: 140, 180
+  size: 69, 81
+  orig: 69, 81
+  offset: 0, 0
+  index: -1
+alienYellow_jump
+  rotate: false
+  xy: 345, 92
+  size: 67, 83
+  orig: 67, 83
+  offset: 0, 0
+  index: -1
+alienYellow_stand
+  rotate: false
+  xy: 412, 93
+  size: 66, 82
+  orig: 66, 82
+  offset: 0, 0
+  index: -1
+alienYellow_swim_0
+  rotate: false
+  xy: 140, 95
+  size: 69, 85
+  orig: 69, 85
+  offset: 0, 0
+  index: -1
+alienYellow_swim_1
+  rotate: false
+  xy: 70, 197
+  size: 70, 87
+  orig: 70, 87
+  offset: 0, 0
+  index: -1
+alienYellow_walk_0
+  rotate: false
+  xy: 277, 193
+  size: 68, 83
+  orig: 68, 83
+  offset: 0, 0
+  index: -1
+alienYellow_walk_1
+  rotate: false
+  xy: 0, 386
+  size: 70, 86
+  orig: 70, 86
+  offset: 0, 0
+  index: -1

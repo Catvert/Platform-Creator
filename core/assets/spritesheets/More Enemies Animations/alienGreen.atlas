@@ -1,0 +1,81 @@
+alienGreen.png
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+alienGreen
+  rotate: false
+  xy: 70, 92
+  size: 66, 92
+  orig: 66, 92
+  offset: 0, 0
+  index: -1
+alienGreen_climb_0
+  rotate: false
+  xy: 70, 0
+  size: 66, 92
+  orig: 66, 92
+  offset: 0, 0
+  index: -1
+alienGreen_climb_1
+  rotate: false
+  xy: 135, 379
+  size: 66, 92
+  orig: 66, 92
+  offset: 0, 0
+  index: -1
+alienGreen_duck
+  rotate: false
+  xy: 0, 380
+  size: 69, 71
+  orig: 69, 71
+  offset: 0, 0
+  index: -1
+alienGreen_hurt
+  rotate: false
+  xy: 0, 288
+  size: 69, 92
+  orig: 69, 92
+  offset: 0, 0
+  index: -1
+alienGreen_jump
+  rotate: false
+  xy: 69, 286
+  size: 67, 93
+  orig: 67, 93
+  offset: 0, 0
+  index: -1
+alienGreen_stand
+  rotate: false
+  xy: 69, 379
+  size: 66, 92
+  orig: 66, 92
+  offset: 0, 0
+  index: -1
+alienGreen_swim_0
+  rotate: false
+  xy: 0, 193
+  size: 69, 95
+  orig: 69, 95
+  offset: 0, 0
+  index: -1
+alienGreen_swim_1
+  rotate: false
+  xy: 0, 96
+  size: 70, 97
+  orig: 70, 97
+  offset: 0, 0
+  index: -1
+alienGreen_walk_0
+  rotate: false
+  xy: 69, 193
+  size: 68, 93
+  orig: 68, 93
+  offset: 0, 0
+  index: -1
+alienGreen_walk_1
+  rotate: false
+  xy: 0, 0
+  size: 70, 96
+  orig: 70, 96
+  offset: 0, 0
+  index: -1
