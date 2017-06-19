@@ -1,5 +1,6 @@
 package be.catvert.plateformcreator.desktop
 
+import be.catvert.plateformcreator.GameKeys
 import be.catvert.plateformcreator.MtrGame
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration
@@ -13,6 +14,8 @@ object DesktopLauncher {
     @JvmStatic fun main(arg: Array<String>) {
         val (width, height, vsync, fullscreen) = loadConfig()
 
+        loadKeysConfig()
+
         val config = LwjglApplicationConfiguration()
         config.width = width
         config.height = height
@@ -21,7 +24,22 @@ object DesktopLauncher {
         config.title = "Plateform Creator"
         config.resizable = false
 
-        LwjglApplication(MtrGame(), config)
+        LwjglApplication(MtrGame(vsync), config)
+    }
+
+    private fun loadKeysConfig() {
+        try {
+            val root = JsonReader().parse(FileReader("keysConfig.json"))
+
+            root["keys"].forEach {
+                val name = it.getString("name")
+                val key = it.getInt("key")
+
+                GameKeys.valueOf(name).key = key
+            }
+        } catch (e: Exception) {
+            System.err.println("Erreur lors du chargement du fichier de configuration des touches du jeu ! Erreur : ${e.message}")
+        }
     }
 
     private fun loadConfig(): GameConfig {

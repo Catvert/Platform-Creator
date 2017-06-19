@@ -1,5 +1,6 @@
 package be.catvert.plateformcreator.scenes
 
+import be.catvert.plateformcreator.GameKeys
 import be.catvert.plateformcreator.Level
 import be.catvert.plateformcreator.MtrGame
 import be.catvert.plateformcreator.ecs.EntityEvent
@@ -59,36 +60,36 @@ class GameScene(game: MtrGame, entityEvent: EntityEvent, private val level: Leve
             _game.setScene(PauseScene(_game))
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.P)) {
+        if (Gdx.input.isKeyPressed(GameKeys.CAMERA_ZOOM_UP.key)) {
             camera.zoom -= 0.02f
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.M)) {
+        if (Gdx.input.isKeyPressed(GameKeys.CAMERA_ZOOM_DOWN.key)) {
             camera.zoom += 0.02f
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.L)) {
+        if (Gdx.input.isKeyPressed(GameKeys.CAMERA_ZOOM_RESET.key)) {
             camera.zoom = 1f
         }
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.C)) {
+        if (Gdx.input.isKeyJustPressed(GameKeys.GAME_FOLLOW_CAMERA_PLAYER.key)) {
             level.followPlayerCamera = !level.followPlayerCamera
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+        if (Gdx.input.isKeyPressed(GameKeys.GAME_CAMERA_LEFT.key)) {
             camera.position.x -= cameraMoveSpeed
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+        if (Gdx.input.isKeyPressed(GameKeys.GAME_CAMERA_RIGHT.key)) {
             camera.position.x += cameraMoveSpeed
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+        if (Gdx.input.isKeyPressed(GameKeys.GAME_CAMERA_DOWN.key)) {
             camera.position.y -= cameraMoveSpeed
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+        if (Gdx.input.isKeyPressed(GameKeys.GAME_CAMERA_UP.key)) {
             camera.position.y += cameraMoveSpeed
         }
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F12)) {
+        if (Gdx.input.isKeyJustPressed(GameKeys.DEBUG_MODE.key)) {
             level.drawDebugCells = !level.drawDebugCells
         }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.G)) {
+        if (Gdx.input.isKeyJustPressed(GameKeys.GAME_SWITCH_GRAVITY.key)) {
             level.applyGravity = !level.applyGravity
         }
 

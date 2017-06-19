@@ -122,7 +122,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
         level.drawDebugCells = true
         level.killEntityUnderY = false
 
-        _stage.addListener(object : ClickListener() {
+        stage.addListener(object : ClickListener() {
             override fun enter(event: InputEvent?, x: Float, y: Float, pointer: Int, fromActor: Actor?) {
                 UIHover = true
                 super.enter(event, x, y, pointer, fromActor)
@@ -197,25 +197,25 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
 
         var moveCameraX = 0f
         var moveCameraY = 0f
-        if (Gdx.input.isKeyPressed(Input.Keys.P)) {
+        if (Gdx.input.isKeyPressed(GameKeys.CAMERA_ZOOM_UP.key)) {
             camera.zoom -= 0.02f
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.M)) {
+        if (Gdx.input.isKeyPressed(GameKeys.CAMERA_ZOOM_DOWN.key)) {
             camera.zoom += 0.02f
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.L)) {
+        if (Gdx.input.isKeyPressed(GameKeys.CAMERA_ZOOM_RESET.key)) {
             camera.zoom = 1f
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
+        if (Gdx.input.isKeyPressed(GameKeys.EDITOR_CAMERA_LEFT.key)) {
             moveCameraX -= cameraMoveSpeed
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+        if (Gdx.input.isKeyPressed(GameKeys.EDITOR_CAMERA_RIGHT.key)) {
             moveCameraX += cameraMoveSpeed
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+        if (Gdx.input.isKeyPressed(GameKeys.EDITOR_CAMERA_DOWN.key)) {
             moveCameraY -= cameraMoveSpeed
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.Z)) {
+        if (Gdx.input.isKeyPressed(GameKeys.EDITOR_CAMERA_UP.key)) {
             moveCameraY += cameraMoveSpeed
         }
 
@@ -223,7 +223,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
         val y = MathUtils.lerp(camera.position.y, camera.position.y + moveCameraY, 0.5f)
         camera.position.set(x, y, 0f)
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F12)) {
+        if (Gdx.input.isKeyJustPressed(GameKeys.DEBUG_MODE.key)) {
             level.drawDebugCells = !level.drawDebugCells
         }
 
@@ -233,7 +233,6 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
         val mousePosInWorld = camera.unproject(Vector3(mousePos, 0f))
 
         if (!UIHover) {
-
             when (editorMode) {
                 EditorScene.EditorMode.NoMode -> {
                     if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
@@ -257,14 +256,14 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                         }
                     }
 
-                    if (Gdx.input.isKeyJustPressed(Input.Keys.C)) {
+                    if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_COPY_MODE.key)) {
                         val entity = findEntityUnderMouse()
                         if (entity != null && entity.flags != EntityFactory.EntityType.Player.flag) {
                             copyEntity = entity
                         }
                     }
 
-                    if (Gdx.input.isKeyJustPressed(Input.Keys.DEL)) {
+                    if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_REMOVE_ENTITY.key)) {
                         val entity = findEntityUnderMouse()
                         if (entity != null) {
                             removeEntityFromLevel(entity)
@@ -299,7 +298,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                             val entity = findEntityUnderMouse()
                             if (entity == null) {
                                 clearSelectEntities()
-                            } else if (selectEntities.isEmpty() || Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {
+                            } else if (selectEntities.isEmpty() || Gdx.input.isKeyPressed(GameKeys.EDITOR_APPEND_SELECT_ENTITIES.key)) {
                                 addSelectEntity(entity)
                             } else if (selectEntities.contains(entity)) {
                                 selectMoveEntity = entity
@@ -332,7 +331,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                         }
                     }
 
-                    if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
+                    if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_REMOVE_ENTITY.key)) {
                         selectEntities.forEach {
                             removeEntityFromLevel(it)
                         }
@@ -355,13 +354,13 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
 
                         var moveToNextEntity = true
 
-                        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+                        if (Gdx.input.isKeyPressed(GameKeys.EDITOR_SMARTCOPY_LEFT.key)) {
                             posX -= transform.rectangle.width
-                        } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+                        } else if (Gdx.input.isKeyPressed(GameKeys.EDITOR_SMARTCOPY_RIGHT.key)) {
                             posX += transform.rectangle.width
-                        } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+                        } else if (Gdx.input.isKeyPressed(GameKeys.EDITOR_SMARTCOPY_DOWN.key)) {
                             posY -= transform.rectangle.height
-                        } else if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+                        } else if (Gdx.input.isKeyPressed(GameKeys.EDITOR_SMARTCOPY_UP.key)) {
                             posY += transform.rectangle.height
                         } else {
                             posX = Math.min(level.matrixRect.width - transform.rectangle.width, // Les min et max permettent de rester dans le cadre du matrix
@@ -383,7 +382,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                             copyEntity = null
                             deleteEntityAfterCopying = false
                         }
-                    } else if (Gdx.input.isKeyJustPressed(Input.Keys.C)) {
+                    } else if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_COPY_MODE.key)) {
                         copyEntity = null
                     }
                 }
@@ -417,7 +416,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
      * Permet de retourner l'entité sous le pointeur
      */
     private fun findEntityUnderMouse(): Entity? {
-        _stage.keyboardFocus = null // Enlève le focus sur la fenêtre active permettant d'utiliser par exemple les touches de déplacement même si le joueur était dans un textField l'étape avant
+        stage.keyboardFocus = null // Enlève le focus sur la fenêtre active permettant d'utiliser par exemple les touches de déplacement même si le joueur était dans un textField l'étape avant
 
         val mousePosInWorld = camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f))
 
@@ -440,7 +439,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
             }
         }
 
-        _stage.addActor(window("Sélectionner une texture") {
+        stage.addActor(window("Sélectionner une texture") {
             setSize(400f, 400f)
             setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
             isModal = true
@@ -520,7 +519,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
      * Permet d'afficher la fenêtre pour créer une entité
      */
     private fun showAddEntityWindow() {
-        _stage.addActor(window("Ajouter une entité") {
+        stage.addActor(window("Ajouter une entité") {
             setSize(250f, 400f)
             setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
             isModal = true
@@ -665,7 +664,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
      * Permet d'afficher la fenêtre comportant les informations de l'entité sélectionnée
      */
     private fun showInfoEntityWindow() {
-        _stage.addActor(window("Réglages des entités") {
+        stage.addActor(window("Réglages des entités") {
             setSize(250f, 400f)
             setPosition(Gdx.graphics.width - width, Gdx.graphics.height - height)
             verticalGroup {
@@ -805,7 +804,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
      * Permet d'afficher la fenêtre permettant de sauvegarder et quitter l'éditeur
      */
     private fun showExitWindow() {
-        _stage.addActor(window("Quitter") {
+        stage.addActor(window("Quitter") {
             setPosition(Gdx.graphics.width / 2f - width / 2, Gdx.graphics.height / 2f - height / 2)
             addCloseButton()
 

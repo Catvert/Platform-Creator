@@ -17,6 +17,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.Matrix4
 import com.badlogic.gdx.math.Rectangle
+import com.badlogic.gdx.utils.JsonWriter
 import com.kotcrab.vis.ui.VisUI
 import ktx.app.KtxGame
 import ktx.app.clearScreen
@@ -24,11 +25,13 @@ import ktx.app.use
 import ktx.assets.loadOnDemand
 import ktx.collections.GdxArray
 import ktx.collections.toGdxArray
+import java.io.FileWriter
+import java.io.IOException
 
 /**
  * Classe du jeu
  */
-class MtrGame : KtxGame<BaseScene>() {
+class MtrGame(vsync: Boolean) : KtxGame<BaseScene>() {
     lateinit var batch: SpriteBatch
         private set
     lateinit var stageBatch: SpriteBatch
@@ -37,6 +40,12 @@ class MtrGame : KtxGame<BaseScene>() {
         private set
     lateinit var defaultProjection: Matrix4
         private set
+
+    var vsync = vsync
+        set(value) {
+            field = value
+            Gdx.graphics.setVSync(vsync)
+        }
 
     val assetManager = AssetManager()
     val entityFactory = EntityFactory(this)
@@ -87,6 +96,15 @@ class MtrGame : KtxGame<BaseScene>() {
         engine.update(delta)
 
         super.render(delta)
+    }
+
+    override fun resize(width: Int, height: Int) {
+        super.resize(width, height)
+
+        shownScreen.stage.viewport.update(width, height)
+        shownScreen.viewport.update(width, height)
+        shownScreen.camera.setToOrtho(false, width.toFloat(), height.toFloat())
+        defaultProjection.setToOrtho2D(0f, 0f, width.toFloat(), height.toFloat())
     }
 
     override fun dispose() {
@@ -186,8 +204,15 @@ class MtrGame : KtxGame<BaseScene>() {
      * Permet de retourner le logo du jeu
      */
     fun getLogo(): Entity {
-        val (logoWidth, logoHeight) = Pair(Gdx.graphics.width.toFloat() / 3 * 2, Gdx.graphics.height.toFloat() / 4)
+        val (logoWidth, logoHeight) = getLogoSize()
         return entityFactory.createSprite(Rectangle(Gdx.graphics.width / 2f - logoWidth / 2f, Gdx.graphics.height - logoHeight, logoWidth, logoHeight), RenderComponent(listOf(getGameTexture(Gdx.files.internal("game/logo.png")))))
+    }
+
+    /**
+     * Permet de retourner la taille du logo au cas où la taille de l'écran changerait.
+     */
+    fun getLogoSize(): Pair<Float, Float> {
+        return Pair(Gdx.graphics.width.toFloat() / 3 * 2, Gdx.graphics.height.toFloat() / 4)
     }
 
     /**
@@ -249,5 +274,73 @@ class MtrGame : KtxGame<BaseScene>() {
      */
     fun createAnimationFromRegions(regions: GdxArray<out TextureAtlas.AtlasRegion>, frameDuration: Float): Animation<TextureAtlas.AtlasRegion> {
         return Animation(frameDuration, regions)
+    }
+
+    /**
+     * Permet de sauvegarder la configuration des touches
+     */
+    fun saveKeysConfig(): Boolean  {
+        try {
+            val writer = JsonWriter(FileWriter(Gdx.files.internal("keysConfig.json").path(), false))
+            writer.setOutputType(JsonWriter.OutputType.json)
+
+            writer.`object`()
+            writer.array("keys")
+
+            GameKeys.values().forEach {
+                writer.`object`()
+
+                writer.name("name")
+                writer.value(it.name)
+
+                writer.name("key")
+                writer.value(it.key)
+
+                writer.pop()
+            }
+
+            writer.pop()
+            writer.pop()
+
+            writer.flush()
+            writer.close()
+
+            return true
+        } catch (e: IOException) {
+            return false
+        }
+    }
+
+    /**
+     * Permet de sauvegarder la configuration du jeu
+     */
+    fun saveGameConfig(): Boolean {
+        try {
+            val writer = JsonWriter(FileWriter(Gdx.files.internal("config.json").path(), false))
+            writer.setOutputType(JsonWriter.OutputType.json)
+
+            writer.`object`()
+
+            writer.name("width")
+            writer.value(Gdx.graphics.width)
+
+            writer.name("height")
+            writer.value(Gdx.graphics.height)
+
+            writer.name("vsync")
+            writer.value(vsync)
+
+            writer.name("fullscreen")
+            writer.value(Gdx.graphics.isFullscreen)
+
+            writer.pop()
+
+            writer.flush()
+            writer.close()
+
+            return true
+        } catch (e: IOException) {
+            return false
+        }
     }
 }

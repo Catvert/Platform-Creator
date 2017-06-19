@@ -22,7 +22,7 @@ class PauseScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(game
         _game.background = _game.getMainBackground()
         entities += game.getLogo()
 
-        _stage.addActor(window("Pause") {
+        stage.addActor(window("Pause") {
             setSize(200f, 200f)
             setPosition(Gdx.graphics.width / 2f - width / 2, Gdx.graphics.height / 2f - height / 2)
 

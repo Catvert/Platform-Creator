@@ -1,17 +1,19 @@
 package be.catvert.plateformcreator.scenes
 
-import be.catvert.plateformcreator.LevelFactory
-import be.catvert.plateformcreator.MtrGame
-import be.catvert.plateformcreator.Utility
+import be.catvert.plateformcreator.*
+import be.catvert.plateformcreator.ecs.components.TransformComponent
 import be.catvert.plateformcreator.ecs.systems.RenderingSystem
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Graphics
+import com.badlogic.gdx.Input
 import com.badlogic.gdx.files.FileHandle
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
-import com.kotcrab.vis.ui.widget.VisList
-import com.kotcrab.vis.ui.widget.VisTextButton
-import com.kotcrab.vis.ui.widget.VisTextField
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane
+import com.kotcrab.vis.ui.widget.*
 import ktx.actors.onClick
+import ktx.actors.plus
 import ktx.app.use
 import ktx.collections.GdxArray
 import ktx.collections.toGdxArray
@@ -20,6 +22,7 @@ import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
+
 
 /**
  * Created by Catvert on 03/06/17.
@@ -35,11 +38,18 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
 
     private val levelFactory = LevelFactory(game)
 
+    private var logo = _game.getLogo()
+        set(value) {
+            entities -= logo
+            field = value
+            entities += logo
+        }
+
     init {
         _game.background = _game.getMainBackground()
-        entities += _game.getLogo()
+        entities += logo
 
-        _stage.addActor(window("Menu Principal") {
+        stage.addActor(window("Menu Principal") {
             setSize(200f, 200f)
             setPosition(Gdx.graphics.width / 2f - width / 2, Gdx.graphics.height / 2f - height / 2)
 
@@ -50,7 +60,7 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
                     addListener(onClick { showSelectLevelsWindow() })
                 }
                 textButton("Options") {
-
+                    addListener(onClick { showSettingsWindows() })
                 }
                 textButton("Quitter") {
                     addListener(onClick { Gdx.app.exit() })
@@ -59,8 +69,19 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
         })
     }
 
+    override fun render(delta: Float) {
+        super.render(delta)
+
+        _game.batch.use {
+            _game.mainFont.draw(it, glyphCreatedBy, Gdx.graphics.width - glyphCreatedBy.width, glyphCreatedBy.height)
+        }
+    }
+
+    /**
+     * Affiche une fenêtre pour sélectionner le nom du niveau
+     */
     fun showSetNameLevelWindow(onNameSelected: (name: String) -> Unit) {
-        _stage.addActor(window("Choisissez un nom pour le niveau") {
+        stage.addActor(window("Choisissez un nom pour le niveau") {
             isModal = true
             setSize(300f, 150f)
             setPosition(Gdx.graphics.width / 2f - width / 2, Gdx.graphics.height / 2f - height / 2)
@@ -88,12 +109,25 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
         })
     }
 
+    /**
+     * Affiche un dialogue simple
+     * title : Le titre
+     * content : Le contenu du dialogue
+     * onClose : Fonction appelée quand l'utilisateur a appuié sur le bouton fermer
+     */
     fun showDialog(title: String, content: String, onClose: (() -> Unit)? = null) {
         showDialog(title, content, listOf(VisTextButton("Fermer")), { _ -> onClose?.invoke() })
     }
 
+    /**
+     * Affiche un dialogue complexe
+     * title : Le titre
+     * content : Le contenu du dialogue
+     * buttons : Les boutons disponibles dans le dialogue
+     * onClose : Fonction appelée quand l'utilisateur a appuié sur un bouton
+     */
     fun showDialog(title: String, content: String, buttons: List<VisTextButton>, onClose: ((button: Int) -> Unit)) {
-        _stage.addActor(window(title) {
+        stage.addActor(window(title) {
             isModal = true
             setSize(400f, 150f)
             setPosition(Gdx.graphics.width / 2f - width / 2, Gdx.graphics.height / 2f - height / 2)
@@ -117,6 +151,9 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
         })
     }
 
+    /**
+     * Affiche la fenêtre de sélection de niveau
+     */
     fun showSelectLevelsWindow() {
         class LevelItem(val file: FileHandle) {
             override fun toString(): String {
@@ -136,7 +173,7 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
         val list = VisList<LevelItem>()
         list.setItems(getLevels())
 
-        _stage.addActor(window("Sélection d'un niveau") window@ {
+        stage.addActor(window("Sélection d'un niveau") window@ {
             addCloseButton()
             isModal = true
             setSize(400f, 400f)
@@ -212,12 +249,130 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
         })
     }
 
-    override fun render(delta: Float) {
-        super.render(delta)
+    /**
+     * Affiche la fenêtre de configuration du jeu et des touches
+     */
+    fun showSettingsWindows() {
+        stage + window("Options du jeu") {
+            addCloseButton()
+            setSize(300f, 275f)
+            setPosition(Gdx.graphics.width / 2f - width - 1, Gdx.graphics.height / 2f - height / 2)
 
-        _game.batch.use {
-            _game.mainFont.draw(it, glyphCreatedBy, Gdx.graphics.width - glyphCreatedBy.width, glyphCreatedBy.height)
+            val widthArea = VisTextArea(Gdx.graphics.width.toString())
+            val heightArea = VisTextArea(Gdx.graphics.height.toString())
+            verticalGroup {
+                space(10f)
+                horizontalGroup {
+                    label("Largeur de l'écran : ")
+                    addActor(widthArea)
+                }
+                horizontalGroup {
+                    label("Hauteur de l'écran : ")
+                    addActor(heightArea)
+                }
+
+                val fullscreen = checkBox("Plein écran") {
+                    isChecked = Gdx.graphics.isFullscreen
+                }
+                val vsync = checkBox("VSync") {
+                    isChecked = _game.vsync
+                }
+
+                textButton("Appliquer") {
+                    addListener(onClick {
+                        var success = true
+                        if(widthArea.text.toIntOrNull() == null) {
+                            widthArea.color = Color.RED
+                            success = false
+                        }
+                        if(heightArea.text.toIntOrNull() == null) {
+                            heightArea.color = Color.RED
+                            success = false
+                        }
+                        if(success) {
+                            widthArea.color = Color.WHITE
+                            heightArea.color = Color.WHITE
+
+                            _game.vsync = vsync.isChecked
+
+                            if(fullscreen.isChecked)
+                                Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
+                            else
+                                Gdx.graphics.setWindowedMode(widthArea.text.toInt(), heightArea.text.toInt())
+
+                            logo = _game.getLogo() // Met à jour le logo
+
+                            if(_game.saveGameConfig())
+                                showDialog("Sauvegarde effectuée !", "La sauvegarde de la config du jeu c'est correctement effectuée !")
+                            else
+                                showDialog("Erreur lors de la sauvegarde !", "Une erreur est survenue lors de la sauvegarde de la config du jeu !")
+                        }
+                    })
+                }
+            }
+        }
+
+        stage + window("Configuration des touches") {
+            addCloseButton()
+            setSize(325f, 275f)
+            setPosition(Gdx.graphics.width / 2f + 1, Gdx.graphics.height / 2f - height / 2)
+
+            val keyAreaList = mutableListOf<VisTextArea>()
+
+            val pane = ScrollPane(table {
+                GameKeys.values().forEach { key ->
+                    add(VisLabel(key.description))
+
+                    val keyArea = VisTextArea(Input.Keys.toString(key.key))
+                    keyArea.userObject = key
+                    keyAreaList += keyArea
+
+                    add(keyArea).width(50f)
+
+                    row()
+                }
+            })
+            pane.setScrollingDisabled(true, false)
+
+            table {
+                add(pane)
+                row()
+
+                val saveButton = VisTextButton("Appliquer")
+                saveButton.addListener(saveButton.onClick {
+                    var success = true
+
+                    keyAreaList.forEach {
+                        val gameKey = it.userObject as GameKeys
+                        if(it.text.isBlank()) {
+                            success = false
+                            it.color = Color.RED
+                            return@forEach
+                        }
+
+                        val newKey = Input.Keys.valueOf(it.text)
+                        if(newKey == -1) {
+                            success = false
+                            it.color = Color.RED
+                        }
+                        else
+                            gameKey.key = newKey
+                    }
+
+                    if(success) {
+                        keyAreaList.forEach { it.color = Color.WHITE }
+                        if(_game.saveKeysConfig())
+                            showDialog("Sauvegarde effectuée !", "La sauvegarde des touches c'est correctement effectuée !")
+                        else
+                            showDialog("Erreur lors de la sauvegarde", "Une erreur est survenue lors de la sauvegarde du jeu !")
+                    }
+                    else {
+                        showDialog("Erreur lors de la sauvegarde !", "Une ou plusieurs touches sont invalides !")
+                    }
+                })
+
+                add(saveButton)
+            }
         }
     }
-
 }

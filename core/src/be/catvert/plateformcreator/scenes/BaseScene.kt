@@ -22,8 +22,8 @@ import ktx.app.KtxScreen
  * systems : Permet de spécifier les systèmes à ajouter à la scène
  */
 abstract class BaseScene(protected val _game: MtrGame, protected val _entityEvent: EntityEvent = EntityEvent(), vararg systems: EntitySystem) : KtxScreen {
-    protected val _viewPort: Viewport
-    protected val _stage: Stage
+    val viewport: Viewport
+    val stage: Stage
 
     val camera = OrthographicCamera()
 
@@ -34,10 +34,10 @@ abstract class BaseScene(protected val _game: MtrGame, protected val _entityEven
     init {
         camera.setToOrtho(false, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
 
-        _viewPort = ScreenViewport()
-        _stage = Stage(_viewPort, _game.stageBatch)
+        viewport = ScreenViewport()
+        stage = Stage(viewport, _game.stageBatch)
 
-        Gdx.input.inputProcessor = _stage
+        Gdx.input.inputProcessor = stage
     }
 
     override fun render(delta: Float) {
@@ -47,14 +47,14 @@ abstract class BaseScene(protected val _game: MtrGame, protected val _entityEven
 
         updateInputs()
 
-        _stage.act(delta)
-        _stage.draw()
+        stage.act(delta)
+        stage.draw()
     }
 
     override fun dispose() {
         super.dispose()
         entities.clear()
-        _stage.dispose()
+        stage.dispose()
     }
 
     open fun updateInputs() {}
