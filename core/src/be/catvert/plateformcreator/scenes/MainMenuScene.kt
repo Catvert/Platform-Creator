@@ -32,7 +32,7 @@ import java.nio.file.StandardCopyOption
  * Scène du menu principal
  */
 class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(game)) {
-    override val entities: MutableList<Entity> = mutableListOf()
+    override val entities: MutableSet<Entity> = mutableSetOf()
 
     private val glyphCreatedBy = GlyphLayout(_game.mainFont, "par Catvert")
 

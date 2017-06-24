@@ -10,7 +10,7 @@ buildscript {
 }
 
 buildscript {
-    ext.kotlinVersion = '1.1.2-5'
+    ext.kotlinVersion = '1.1.3'
 
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
@@ -59,19 +59,19 @@ project(":core") {
     apply plugin: "kotlin"
     dependencies {
         compile "com.badlogicgames.ashley:ashley:1.7.3"
-        compile group: 'io.github.libktx', name: 'ktx-app', version: '1.9.6-b5'
-        compile group: 'io.github.libktx', name: 'ktx-actors', version: '1.9.6-b5'
-        compile group: 'io.github.libktx', name: 'ktx-assets', version: '1.9.6-b5'
-        compile group: 'io.github.libktx', name: 'ktx-async', version: '1.9.6-b5'
-        compile group: 'io.github.libktx', name: 'ktx-collections', version: '1.9.6-b5'
-        compile group: 'io.github.libktx', name: 'ktx-inject', version: '1.9.6-b5'
-        compile group: 'io.github.libktx', name: 'ktx-log', version: '1.9.6-b5'
-        compile group: 'io.github.libktx', name: 'ktx-math', version: '1.9.6-b5'
-        compile group: 'io.github.libktx', name: 'ktx-scene2d', version: '1.9.6-b5'
-        compile group: 'io.github.libktx', name: 'ktx-style', version: '1.9.6-b5'
-        compile group: 'io.github.libktx', name: 'ktx-vis', version: '1.9.6-b5'
-        compile group: 'io.github.libktx', name: 'ktx-vis-style', version: '1.9.6-b5'
-        compile group: 'io.github.libktx', name: 'ktx-ashley', version: '1.9.6-b5'
+        compile group: 'io.github.libktx', name: 'ktx-app', version: '1.9.6-b6'
+        compile group: 'io.github.libktx', name: 'ktx-actors', version: '1.9.6-b6'
+        compile group: 'io.github.libktx', name: 'ktx-assets', version: '1.9.6-b6'
+        compile group: 'io.github.libktx', name: 'ktx-async', version: '1.9.6-b6'
+        compile group: 'io.github.libktx', name: 'ktx-collections', version: '1.9.6-b6'
+        compile group: 'io.github.libktx', name: 'ktx-inject', version: '1.9.6-b6'
+        compile group: 'io.github.libktx', name: 'ktx-log', version: '1.9.6-b6'
+        compile group: 'io.github.libktx', name: 'ktx-math', version: '1.9.6-b6'
+        compile group: 'io.github.libktx', name: 'ktx-scene2d', version: '1.9.6-b6'
+        compile group: 'io.github.libktx', name: 'ktx-style', version: '1.9.6-b6'
+        compile group: 'io.github.libktx', name: 'ktx-vis', version: '1.9.6-b6'
+        compile group: 'io.github.libktx', name: 'ktx-vis-style', version: '1.9.6-b6'
+        compile group: 'io.github.libktx', name: 'ktx-ashley', version: '1.9.6-b6'
         compile "com.kotcrab.vis:vis-ui:$visuiVersion"
         compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"

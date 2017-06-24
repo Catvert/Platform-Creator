@@ -17,6 +17,10 @@ enum class ResizeMode {
     NO_RESIZE, ACTUAL_REGION, FIXED_SIZE
 }
 
+enum class Layer(val layer: Int) {
+    LAYER_0(0), LAYER_1(1), LAYER_2(2), LAYER_MOVABLE_ENT(3), LAYER_4(4), LAYER_5(5), LAYER_HUD(6)
+}
+
 /**
  * Ce component permet d'ajouter une/des textures et/ou une/des animations à l'entité
  * textureInfoList : Liste des textures que dispose l'entité
@@ -32,7 +36,7 @@ class RenderComponent(val textureInfoList: List<TextureInfo> = listOf(),
                       var useAnimation: Boolean = false,
                       var flipX: Boolean = false,
                       var flipY: Boolean = false,
-                      var renderLayer: Int = 0,
+                      var renderLayer: Layer = Layer.LAYER_0,
                       var resizeMode: ResizeMode = ResizeMode.NO_RESIZE) : BaseComponent<RenderComponent>() {
     override fun copy(): RenderComponent {
         return RenderComponent(textureInfoList, animationList, useAnimation, initialFlipX, initialFlipY, renderLayer, resizeMode)

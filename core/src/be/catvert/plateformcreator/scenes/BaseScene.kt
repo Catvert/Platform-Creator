@@ -27,7 +27,7 @@ abstract class BaseScene(protected val _game: MtrGame, protected val _entityEven
 
     val camera = OrthographicCamera()
 
-    abstract val entities: MutableList<Entity>
+    abstract val entities: MutableSet<Entity>
 
     val addedSystems = systems
 

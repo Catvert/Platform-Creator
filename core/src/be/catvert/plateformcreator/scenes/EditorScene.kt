@@ -3,10 +3,7 @@ package be.catvert.plateformcreator.scenes
 import be.catvert.plateformcreator.*
 import be.catvert.plateformcreator.ecs.EntityEvent
 import be.catvert.plateformcreator.ecs.EntityFactory
-import be.catvert.plateformcreator.ecs.components.EnemyType
-import be.catvert.plateformcreator.ecs.components.PhysicsComponent
-import be.catvert.plateformcreator.ecs.components.RenderComponent
-import be.catvert.plateformcreator.ecs.components.TransformComponent
+import be.catvert.plateformcreator.ecs.components.*
 import be.catvert.plateformcreator.ecs.systems.RenderingSystem
 import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
@@ -111,7 +108,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
     private var UIHover = false
     private val editorFont = BitmapFont(Gdx.files.internal("fonts/editorFont.fnt"))
 
-    override val entities: MutableList<Entity> = mutableListOf()
+    override val entities: MutableSet<Entity> = mutableSetOf()
 
     init {
         _game.background = level.background
@@ -231,6 +228,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
 
         val mousePos = Vector2(Gdx.input.x.toFloat(), Gdx.input.y.toFloat())
         val mousePosInWorld = camera.unproject(Vector3(mousePos, 0f))
+        val latestMousePosInWorld = camera.unproject(Vector3(latestMousePos, 0f))
 
         if (!UIHover) {
             when (editorMode) {
@@ -306,7 +304,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                                 clearSelectEntities()
                                 addSelectEntity(entity)
                             }
-                        } else if (selectMoveEntity != null) {
+                        } else if (selectMoveEntity != null && latestMousePos != mousePos) {
                             val transformMoveEntity = transformMapper[selectMoveEntity]
 
                             val moveX = transformMoveEntity.rectangle.x + transformMoveEntity.rectangle.width / 2 - mousePosInWorld.x
@@ -553,7 +551,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                                 }
                             }
 
-                            return Pair(widthField, heightField)
+                            return widthField to heightField
                         }
 
                         fun addSelectTexture(onTextureSelected: (TextureInfo) -> Unit, widthField: VisTextField, heightField: VisTextField) {
@@ -638,7 +636,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                                         }
 
                                         addButton.addListener(addButton.onClick {
-                                            finishEntityBuild(entityFactory.createEnemyWithType(_game, enemyType.selected, _entityEvent, Vector2(0f, 0f)))
+                                            finishEntityBuild(entityFactory.createEnemyWithType(enemyType.selected, _entityEvent, Vector2(0f, 0f)))
                                         })
                                     }
                                     EntityFactory.EntityType.Player -> {
@@ -674,6 +672,8 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                     addListener(onClick { showAddEntityWindow() })
                 }
                 textButton("Supprimer l'entité sélectionnée") {
+                    touchable = Touchable.disabled
+
                     onSelectEntityChanged.add { _, selectEntity ->
                         this.touchable =
                                 if (selectEntity == null || selectEntity.flags == EntityFactory.EntityType.Player.flag)
@@ -699,6 +699,8 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                 horizontalGroup {
                     label("Position X : ")
                     textField("") {
+                        isReadOnly = true
+
                         onSelectEntityChanged.add { _, selectEntity ->
                             if (selectEntity == null) {
                                 this.text = ""
@@ -725,6 +727,8 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                 horizontalGroup {
                     label("Position Y : ")
                     textField("") {
+                        isReadOnly = true
+
                         onSelectEntityChanged.add { _, selectEntity ->
                             if (selectEntity == null) {
                                 this.text = ""
@@ -751,6 +755,8 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                 horizontalGroup {
                     label("Largeur : ")
                     textField("") {
+                        isReadOnly = true
+
                         onSelectEntityChanged.add { _, selectEntity ->
                             if (selectEntity == null) {
                                 this.text = ""
@@ -775,6 +781,8 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                 horizontalGroup {
                     label("Hauteur : ")
                     textField("") {
+                        isReadOnly = true
+
                         onSelectEntityChanged.add { _, selectEntity ->
                             if (selectEntity == null) {
                                 this.text = ""
@@ -792,6 +800,33 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                                 if (height != null && height > 0 && height <= maxEntitySize && !transform.fixedSizeEditor) {
                                     transform.rectangle.height = height.toFloat()
                                 }
+                            }
+                        })
+                    }
+                }
+
+                horizontalGroup {
+                    label("Layer : ")
+                    selectBox<Layer> {
+                        items = Layer.values().filterNot { it == Layer.LAYER_HUD }.toGdxArray()
+
+                        touchable = Touchable.disabled
+
+                        onSelectEntityChanged.add { _, selectEntity ->
+                            if(selectEntity == null) {
+                                touchable = Touchable.disabled
+                                selectedIndex = 0
+                            }
+                            else {
+                                touchable = Touchable.enabled
+                                selected = selectEntity[RenderComponent::class.java].renderLayer
+                            }
+                        }
+
+                        addListener(onChange {
+                            if(this.isTouchable) {
+                                val selectEntity = selectEntities.elementAt(0)
+                                selectEntity[RenderComponent::class.java].renderLayer = selected
                             }
                         })
                     }

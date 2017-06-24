@@ -31,7 +31,7 @@ class RenderingSystem(private val game: MtrGame) : EntitySystem() {
         entities = engine.getEntitiesFor(Family.all(RenderComponent::class.java, TransformComponent::class.java).get())
 
         game.batch.use { batch ->
-            entities.sortedWith(compareBy { renderMapper[it].renderLayer }).forEach {
+            entities.sortedWith(compareBy { renderMapper[it].renderLayer.layer }).forEach {
                 if (transformMapper[it].active) {
                     val rect = transformMapper[it].rectangle
                     val renderComp = renderMapper[it]

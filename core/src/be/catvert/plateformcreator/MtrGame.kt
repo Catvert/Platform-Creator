@@ -19,6 +19,7 @@ import com.badlogic.gdx.math.Matrix4
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.utils.JsonWriter
 import com.kotcrab.vis.ui.VisUI
+import com.sun.org.apache.xpath.internal.operations.Bool
 import ktx.app.KtxGame
 import ktx.app.clearScreen
 import ktx.app.use
@@ -120,10 +121,9 @@ class MtrGame(vsync: Boolean) : KtxGame<BaseScene>() {
      * Dispose la scène précédament chargée
      * Supprime les entités chargées dans la scène précédante
      */
-    inline fun <reified T : BaseScene> setScene(scene: T) {
-        if (shownScreen is BaseScene)
-            shownScreen.dispose()
-        removeSceneSafely<T>()
+    inline fun <reified T : BaseScene> setScene(scene: T, removeLastScene: Boolean = true) {
+        if(scene is BaseScene)
+            removeSceneSafely<T>(removeLastScene)
 
         engine.removeAllEntities()
         (engine.systems.size() - 1 downTo 0).asSequence().forEach {
@@ -195,9 +195,11 @@ class MtrGame(vsync: Boolean) : KtxGame<BaseScene>() {
     /**
      * Permet de supprimer une scène en vérifiant si la scène était bien chargée.
      */
-    inline fun <reified T : BaseScene> removeSceneSafely() {
-        if (containsScreen<T>())
+    inline fun <reified T : BaseScene> removeSceneSafely(disposeScene: Boolean = true) {
+        if (containsScreen<T>()) {
+            getScreen<T>().dispose()
             removeScreen<T>()
+        }
     }
 
     /**

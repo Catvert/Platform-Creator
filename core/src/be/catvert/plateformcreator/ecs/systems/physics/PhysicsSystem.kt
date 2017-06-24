@@ -45,8 +45,8 @@ class PhysicsSystem(private val level: Level, val gravity: Int = 15) : EntitySys
                 physicsComp.nextActions += NextActions.JUMP
             }
 
-            var moveSpeedX = 0
-            var moveSpeedY = 0
+            var moveSpeedX = 0f
+            var moveSpeedY = 0f
             var addJumpAfterClear = false
 
             physicsComp.nextActions.forEach action@ {
@@ -57,7 +57,6 @@ class PhysicsSystem(private val level: Level, val gravity: Int = 15) : EntitySys
                     NextActions.GO_DOWN -> moveSpeedY -= physicsComp.moveSpeed
                     NextActions.GRAVITY -> if (physicsComp.gravity) moveSpeedY -= gravity
                     NextActions.JUMP -> {
-
                         if (physicsComp.jumpData == null) {
                             println("L'entité ne contient pas de jumpData")
                             return@action
@@ -79,7 +78,7 @@ class PhysicsSystem(private val level: Level, val gravity: Int = 15) : EntitySys
 
                             physicsComp.gravity = false
 
-                            moveSpeedY = gravity
+                            moveSpeedY = gravity.toFloat()
                             addJumpAfterClear = true
                         } else {
                             if (transformComp.rectangle.y >= jumpData.targetHeight || collideOnMove(0, gravity, entity)) {
@@ -87,7 +86,7 @@ class PhysicsSystem(private val level: Level, val gravity: Int = 15) : EntitySys
                                 jumpData.isJumping = false
                             } else {
 
-                                moveSpeedY = gravity
+                                moveSpeedY = gravity.toFloat()
                                 addJumpAfterClear = true
                             }
                             jumpData.startJumping = false
@@ -95,17 +94,16 @@ class PhysicsSystem(private val level: Level, val gravity: Int = 15) : EntitySys
                     }
                 }
             }
-            if (physicsComp.smoothMoveData != null) { // Smooth mode
-                physicsComp.smoothMoveData.targetMoveSpeedX = moveSpeedX
-                physicsComp.smoothMoveData.targetMoveSpeedY = moveSpeedY
 
-                physicsComp.smoothMoveData.actualMoveSpeedX = MathUtils.lerp(physicsComp.smoothMoveData.actualMoveSpeedX, physicsComp.smoothMoveData.targetMoveSpeedX.toFloat(), 0.5f)
-                physicsComp.smoothMoveData.actualMoveSpeedY = MathUtils.lerp(physicsComp.smoothMoveData.actualMoveSpeedY, physicsComp.smoothMoveData.targetMoveSpeedY.toFloat(), 0.5f)
-
-                tryMove(physicsComp.smoothMoveData.actualMoveSpeedX.toInt(), physicsComp.smoothMoveData.actualMoveSpeedY.toInt(), entity)
-            } else { // NO smooth mode
-                tryMove(moveSpeedX, moveSpeedY, entity)
+            if (physicsComp.movementType == MovementType.SMOOTH) {
+                moveSpeedX = MathUtils.lerp(physicsComp.actualMoveSpeedX, moveSpeedX, 0.2f)
+                moveSpeedY = MathUtils.lerp(physicsComp.actualMoveSpeedY, moveSpeedY, 0.2f)
             }
+
+            physicsComp.actualMoveSpeedX = moveSpeedX
+            physicsComp.actualMoveSpeedY = moveSpeedY
+
+            tryMove(moveSpeedX.toInt(), moveSpeedY.toInt(), entity) // move l'entité
 
             physicsComp.nextActions.clear()
 
@@ -168,26 +166,28 @@ class PhysicsSystem(private val level: Level, val gravity: Int = 15) : EntitySys
      *
      */
     private fun collideOnMove(moveX: Int, moveY: Int, entity: Entity): Boolean {
+        val physicsTarget = physicsMapper[entity]
         val transformTarget = transformMapper[entity]
 
         val newRect = Rectangle(transformTarget.rectangle)
         newRect.setPosition(newRect.x + moveX, newRect.y + moveY)
 
         level.getRectCells(newRect).forEach {
-            level.matrixGrid[it.x][it.y].first.forEach matrixLoop@ {
+            level.matrixGrid[it.x][it.y].first.filter { // On parcourt toute les entités avec la condition en-dessous
+                transformMapper[it] != transformTarget && physicsMapper.has(it) && (physicsMapper[it].maskCollision == physicsTarget.maskCollision)
+            }.forEach {
                 val transformComponent = transformMapper[it]
-
-                if (transformComponent == transformTarget || !physicsMapper.has(it))
-                    return@matrixLoop
 
                 if (newRect.overlaps(transformComponent.rectangle)) {
                     val side = if (moveX > 0) CollisionSide.OnRight else if (moveX < 0) CollisionSide.OnLeft else if (moveY > 0) CollisionSide.OnUp else if (moveY < 0) CollisionSide.OnDown else CollisionSide.Unknow
+
                     if (entity.flags == EntityFactory.EntityType.Enemy.flag && it.flags == EntityFactory.EntityType.Player.flag)
                         entity[EnemyComponent::class.java].onPlayerCollision?.invoke(entity, it, side)
                     else if (entity.flags == EntityFactory.EntityType.Player.flag && it.flags == EntityFactory.EntityType.Enemy.flag)
                         it[EnemyComponent::class.java].onPlayerCollision?.invoke(it, entity, -side) // - side to inverse the side
                     else
                         physicsMapper[entity].onCollisionWith?.invoke(entity, it, side)
+
                     return true
                 }
             }

@@ -26,7 +26,7 @@ import com.badlogic.gdx.math.Rectangle
  * levelFile : Le fichier utilisé pour charger le niveau
  * loadedEntities : Les entités chargés et à sauvegarder dans le fichier du niveau
  */
-class Level(private val _game: MtrGame, var levelName: String, val player: Entity, val background: RenderComponent, val levelFile: FileHandle, val loadedEntities: MutableList<Entity>) : IUpdateable {
+class Level(private val _game: MtrGame, var levelName: String, val levelFile: FileHandle, val player: Entity, val background: RenderComponent, val loadedEntities: MutableList<Entity>) : IUpdateable {
     private val shapeRenderer = ShapeRenderer()
 
     private val matrixSizeX = 300

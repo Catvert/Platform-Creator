@@ -15,8 +15,8 @@ import ktx.vis.window
 /**
  * Scène pause appelé lorsque le joueur appuie sur échap en partie
  */
-class PauseScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(game)) {
-    override val entities: MutableList<Entity> = mutableListOf()
+class PauseScene(game: MtrGame, gameScene: GameScene) : BaseScene(game, systems = RenderingSystem(game)) {
+    override val entities: MutableSet<Entity> = mutableSetOf()
 
     init {
         _game.background = _game.getMainBackground()
@@ -33,7 +33,7 @@ class PauseScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(game
                     addListener(object : ClickListener() {
                         override fun clicked(event: InputEvent?, x: Float, y: Float) {
                             super.clicked(event, x, y)
-                            _game.setScreen(GameScene::class.java)
+                            _game.setScene(gameScene)
                         }
                     })
                 }

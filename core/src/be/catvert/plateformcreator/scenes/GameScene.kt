@@ -1,8 +1,6 @@
 package be.catvert.plateformcreator.scenes
 
-import be.catvert.plateformcreator.GameKeys
-import be.catvert.plateformcreator.Level
-import be.catvert.plateformcreator.MtrGame
+import be.catvert.plateformcreator.*
 import be.catvert.plateformcreator.ecs.EntityEvent
 import be.catvert.plateformcreator.ecs.components.TransformComponent
 import be.catvert.plateformcreator.ecs.systems.RenderingSystem
@@ -22,7 +20,7 @@ import com.badlogic.gdx.math.MathUtils
  * Scène du jeu
  */
 class GameScene(game: MtrGame, entityEvent: EntityEvent, private val level: Level) : BaseScene(game, entityEvent, RenderingSystem(game), UpdateSystem(level), PhysicsSystem(level)) {
-    override val entities: MutableList<Entity> = mutableListOf()
+    override val entities: MutableSet<Entity> = mutableSetOf()
 
     private val cameraMoveSpeed = 10f
 
@@ -57,7 +55,7 @@ class GameScene(game: MtrGame, entityEvent: EntityEvent, private val level: Leve
         super.updateInputs()
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            _game.setScene(PauseScene(_game))
+            _game.setScene(PauseScene(_game, this), false)
         }
 
         if (Gdx.input.isKeyPressed(GameKeys.CAMERA_ZOOM_UP.key)) {

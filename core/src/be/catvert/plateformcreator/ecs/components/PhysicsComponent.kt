@@ -7,14 +7,10 @@ import com.badlogic.ashley.core.Entity
  * Created by Catvert on 04/06/17.
  */
 
-/**
- * Classe de données permettant de gérer les déplacements "fluides" avec un lerp
- * targetMoveSpeedX : La vitesse x a atteindre par lerp
- * targetMoveSpeedY : La vitesse y a atteindre par lerp
- * actualMoveSpeedX : La vitesse x actuelle
- * actualMoveSpeedY : La vitesse y actuelle
- */
-data class SmoothMoveData(var targetMoveSpeedX: Int = 0, var targetMoveSpeedY: Int = 0, var actualMoveSpeedX: Float = 0f, var actualMoveSpeedY: Float = 0f)
+
+enum class MovementType {
+    SMOOTH, LINEAR
+}
 
 /**
  * Classe de données permettant de gérer les sauts notament en définissant la hauteur du saut
@@ -52,6 +48,10 @@ enum class NextActions {
     GO_LEFT, GO_RIGHT, GO_UP, GO_DOWN, GRAVITY, JUMP
 }
 
+enum class MaskCollision {
+    ALL, ONLY_PLAYER, ONLY_ENEMY, SENSOR
+}
+
 /**
  * Ce component permet d'ajouter à l'entité des propriétés physique tel que la gravité, vitesse de déplacement ...
  * Une entité contenant ce component ne pourra pas être traversé par une autre entité ayant également ce component
@@ -60,9 +60,9 @@ enum class NextActions {
  * smoothMove : Permet d'inclure ou non le déplacement "fluide" à l'entité
  * gravity : Permet de spécifier si la gravité est appliquée à l'entité
  */
-class PhysicsComponent(var isStatic: Boolean, var moveSpeed: Int = 0, var smoothMove: Boolean = false, var gravity: Boolean = !isStatic) : BaseComponent<PhysicsComponent>() {
+class PhysicsComponent(var isStatic: Boolean, var moveSpeed: Int = 0, var movementType: MovementType = MovementType.LINEAR, var gravity: Boolean = !isStatic, var maskCollision: MaskCollision = MaskCollision.ALL) : BaseComponent<PhysicsComponent>() {
     override fun copy(): PhysicsComponent {
-        val physicsComp = PhysicsComponent(isStatic, moveSpeed, smoothMove)
+        val physicsComp = PhysicsComponent(isStatic, moveSpeed, movementType, maskCollision = maskCollision)
 
         physicsComp.jumpData = if (jumpData != null) JumpData(jumpData!!.jumpHeight) else null
         physicsComp.onCollisionWith = onCollisionWith
@@ -73,8 +73,13 @@ class PhysicsComponent(var isStatic: Boolean, var moveSpeed: Int = 0, var smooth
 
     val nextActions = mutableSetOf<NextActions>()
 
-    val smoothMoveData: SmoothMoveData?
     var jumpData: JumpData? = null
+
+    /**
+     * ActualMoveSpeed permet de connaître la vitesse actuelle de l'entité
+     */
+    var actualMoveSpeedX = 0f
+    var actualMoveSpeedY = 0f
 
     /**
      * Appelé lorsque une entité ayant ce component touche cette entité
@@ -90,9 +95,4 @@ class PhysicsComponent(var isStatic: Boolean, var moveSpeed: Int = 0, var smooth
      * Permet à l'entité de savoir si elle est sur le sol ou non
      */
     var isOnGround = false
-
-    init {
-        if (smoothMove) this.smoothMoveData = SmoothMoveData() else this.smoothMoveData = null
-    }
-
 }
