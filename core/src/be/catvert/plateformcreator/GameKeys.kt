@@ -22,6 +22,11 @@ enum class GameKeys(var key: Int, val description: String) {
     EDITOR_SMARTCOPY_RIGHT(Input.Keys.RIGHT, "Editor smart copy right"),
     EDITOR_SMARTCOPY_UP(Input.Keys.UP, "Editor smart copy up"),
     EDITOR_SMARTCOPY_DOWN(Input.Keys.DOWN, "Editor smart copy down"),
+    EDITOR_FLIPX_0(Input.Keys.LEFT, "Editor flip x"),
+    EDITOR_FLIPX_1(Input.Keys.RIGHT, "Editor flip x[1]"),
+    EDITOR_FLIPY_0(Input.Keys.UP, "Editor flip y"),
+    EDITOR_FLIPY_1(Input.Keys.DOWN, "Editor flip y[1]"),
+
 
     DEBUG_MODE(Input.Keys.F12, "Debug Mode"),
 

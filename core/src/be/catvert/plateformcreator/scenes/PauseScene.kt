@@ -19,7 +19,8 @@ class PauseScene(game: MtrGame, gameScene: GameScene) : BaseScene(game, systems 
     override val entities: MutableSet<Entity> = mutableSetOf()
 
     init {
-        _game.background = _game.getMainBackground()
+        background = game.getMainBackground()
+
         entities += game.getLogo()
 
         stage.addActor(window("Pause") {
@@ -41,7 +42,8 @@ class PauseScene(game: MtrGame, gameScene: GameScene) : BaseScene(game, systems 
                     addListener(object : ClickListener() {
                         override fun clicked(event: InputEvent?, x: Float, y: Float) {
                             super.clicked(event, x, y)
-                            _game.removeSceneSafely<GameScene>()
+
+                            gameScene.dispose()
                             _game.setScene(MainMenuScene(_game))
                         }
                     })

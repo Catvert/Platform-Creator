@@ -2,10 +2,13 @@ package be.catvert.plateformcreator
 
 import be.catvert.plateformcreator.ecs.EntityFactory
 import be.catvert.plateformcreator.ecs.components.RenderComponent
+import be.catvert.plateformcreator.ecs.components.TransformComponent
+import be.catvert.plateformcreator.ecs.components.renderComponent
 import be.catvert.plateformcreator.scenes.BaseScene
 import be.catvert.plateformcreator.scenes.MainMenuScene
 import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
+import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.files.FileHandle
@@ -19,20 +22,23 @@ import com.badlogic.gdx.math.Matrix4
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.utils.JsonWriter
 import com.kotcrab.vis.ui.VisUI
-import com.sun.org.apache.xpath.internal.operations.Bool
-import ktx.app.KtxGame
 import ktx.app.clearScreen
 import ktx.app.use
 import ktx.assets.loadOnDemand
 import ktx.collections.GdxArray
 import ktx.collections.toGdxArray
+import ktx.log.error
+import ktx.log.info
 import java.io.FileWriter
 import java.io.IOException
+
 
 /**
  * Classe du jeu
  */
-class MtrGame(vsync: Boolean) : KtxGame<BaseScene>() {
+class MtrGame(vsync: Boolean) : Game() {
+    private val UISkinPath: String = "ui/tinted/x1/tinted.json"
+
     lateinit var batch: SpriteBatch
         private set
     lateinit var stageBatch: SpriteBatch
@@ -41,6 +47,8 @@ class MtrGame(vsync: Boolean) : KtxGame<BaseScene>() {
         private set
     lateinit var defaultProjection: Matrix4
         private set
+
+    private lateinit var currentScene: BaseScene
 
     var vsync = vsync
         set(value) {
@@ -55,15 +63,23 @@ class MtrGame(vsync: Boolean) : KtxGame<BaseScene>() {
 
     val engine = Engine()
 
-    lateinit var background: RenderComponent
-
     private val textureAtlasList = mutableListOf<Pair<TextureAtlas, String>>()
     fun getTextureAtlasList(): List<Pair<TextureAtlas, String>> = textureAtlasList
 
     private val animationsList = mutableListOf<Pair<Animation<TextureAtlas.AtlasRegion>, String>>()
 
     override fun create() {
-        VisUI.load(Gdx.files.internal("ui/tinted/x1/tinted.json"))
+        info {
+            "Loading game with" +
+                    "\n - Screen width : ${Gdx.graphics.width}" +
+                    "\n - Screen height : ${Gdx.graphics.height}" +
+                    "\n - VSync : $vsync" +
+                    "\n - Fullscreen : ${Gdx.graphics.isFullscreen}"
+        }
+
+        info { "Loading skin ui : $UISkinPath" }
+        VisUI.load(Gdx.files.internal(UISkinPath))
+
         batch = SpriteBatch()
         defaultProjection = batch.projectionMatrix.cpy()
 
@@ -74,43 +90,51 @@ class MtrGame(vsync: Boolean) : KtxGame<BaseScene>() {
         loadGameResources()
         loadAnimations()
 
-        background = getMainBackground()
-
-        setScene(MainMenuScene(this))
+        setScene(MainMenuScene(this), false)
     }
 
-    override fun render(delta: Float) {
+    override fun render() {
+        super.render()
+
+        val delta = Gdx.graphics.deltaTime
+
         clearScreen(clearScreenColor.first, clearScreenColor.second, clearScreenColor.third)
 
+        /**
+         * Draw the background
+         */
         batch.projectionMatrix = defaultProjection
         batch.use {
-            batch.draw(background.getActualAtlasRegion(), 0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
+            batch.draw(currentScene.background.getActualAtlasRegion(), 0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
         }
-        batch.projectionMatrix = shownScreen.camera.combined
+        batch.projectionMatrix = currentScene.camera.combined
 
+        /**
+         * Draw the scene and ui
+         */
         engine.removeAllEntities()
-        shownScreen.entities.forEach {
-            if (!engine.entities.contains(it))
+        currentScene.entities.forEach {
+            if (it !in engine.entities)
                 engine.addEntity(it)
         }
 
         engine.update(delta)
-
-        super.render(delta)
+        currentScene.render(delta)
     }
 
     override fun resize(width: Int, height: Int) {
         super.resize(width, height)
 
-        shownScreen.stage.viewport.update(width, height)
-        shownScreen.viewport.update(width, height)
-        shownScreen.camera.setToOrtho(false, width.toFloat(), height.toFloat())
+        info { "Resizing window to $width x $height" }
         defaultProjection.setToOrtho2D(0f, 0f, width.toFloat(), height.toFloat())
+
+        currentScene.resize(width, height)
     }
 
     override fun dispose() {
+        info { "Closing.." }
+
         batch.dispose()
-        engine.removeAllEntities()
         assetManager.dispose()
         mainFont.dispose()
         VisUI.dispose()
@@ -121,9 +145,11 @@ class MtrGame(vsync: Boolean) : KtxGame<BaseScene>() {
      * Dispose la scène précédament chargée
      * Supprime les entités chargées dans la scène précédante
      */
-    inline fun <reified T : BaseScene> setScene(scene: T, removeLastScene: Boolean = true) {
-        if(scene is BaseScene)
-            removeSceneSafely<T>(removeLastScene)
+    fun <T : BaseScene> setScene(scene: T, removeLastScene: Boolean = true) {
+        if (removeLastScene) {
+            info { "Disposing scene : ${currentScene.className()}" }
+            currentScene.dispose()
+        }
 
         engine.removeAllEntities()
         (engine.systems.size() - 1 downTo 0).asSequence().forEach {
@@ -134,12 +160,12 @@ class MtrGame(vsync: Boolean) : KtxGame<BaseScene>() {
             engine.addSystem(system)
 
         scene.entities.forEach {
-            if (!engine.entities.contains(it))
+            if (it !in engine.entities)
                 engine.addEntity(it)
         }
 
-        addScreen(scene)
-        setScreen<T>()
+        info { "Current scene : ${scene.className()}" }
+        currentScene = scene
     }
 
     /**
@@ -152,7 +178,7 @@ class MtrGame(vsync: Boolean) : KtxGame<BaseScene>() {
                 /* les animations de Kenney finissent par une lettre puis par exemple 1 donc -> alienGreen_walk1 puis alienGreen_walk2
                 mais des autres textures normale tel que foliagePack_001 existe donc on doit vérifier si le nombre avant 1 fini bien par une lettre
                 */
-                if (!loadedAnimName.contains(it.name) && it.name.endsWith("_0")) {
+                if (it.name !in loadedAnimName && it.name.endsWith("_0")) {
                     val name = it.name.removeSuffix("_0")
 
                     var count = 1
@@ -175,7 +201,7 @@ class MtrGame(vsync: Boolean) : KtxGame<BaseScene>() {
                         frameList.add(region)
                     }
 
-                    animationsList += Pair(Animation<TextureAtlas.AtlasRegion>(0.33f, frameList.toGdxArray()), it.name.removeSuffix("_0"))
+                    animationsList += Animation<TextureAtlas.AtlasRegion>(0.33f, frameList.toGdxArray()) to it.name.removeSuffix("_0")
                     loadedAnimName += it.name
                 }
                 it.texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest)
@@ -188,17 +214,7 @@ class MtrGame(vsync: Boolean) : KtxGame<BaseScene>() {
      */
     private fun loadGameResources() {
         Utility.getFilesRecursivly(Gdx.files.internal("spritesheets"), "atlas").forEach {
-            textureAtlasList += Pair(assetManager.loadOnDemand<TextureAtlas>(it.toString()).asset, it.file().nameWithoutExtension)
-        }
-    }
-
-    /**
-     * Permet de supprimer une scène en vérifiant si la scène était bien chargée.
-     */
-    inline fun <reified T : BaseScene> removeSceneSafely(disposeScene: Boolean = true) {
-        if (containsScreen<T>()) {
-            getScreen<T>().dispose()
-            removeScreen<T>()
+            textureAtlasList += assetManager.loadOnDemand<TextureAtlas>(it.toString()).asset to it.file().nameWithoutExtension
         }
     }
 
@@ -207,21 +223,21 @@ class MtrGame(vsync: Boolean) : KtxGame<BaseScene>() {
      */
     fun getLogo(): Entity {
         val (logoWidth, logoHeight) = getLogoSize()
-        return entityFactory.createSprite(Rectangle(Gdx.graphics.width / 2f - logoWidth / 2f, Gdx.graphics.height - logoHeight, logoWidth, logoHeight), RenderComponent(listOf(getGameTexture(Gdx.files.internal("game/logo.png")))))
+        return entityFactory.createSprite(TransformComponent(Rectangle(Gdx.graphics.width / 2f - logoWidth / 2f, Gdx.graphics.height - logoHeight, logoWidth, logoHeight)), renderComponent { textures, _ -> textures += getGameTexture(Gdx.files.internal("game/logo.png")) })
     }
 
     /**
      * Permet de retourner la taille du logo au cas où la taille de l'écran changerait.
      */
     fun getLogoSize(): Pair<Float, Float> {
-        return Pair(Gdx.graphics.width.toFloat() / 3 * 2, Gdx.graphics.height.toFloat() / 4)
+        return Gdx.graphics.width.toFloat() / 3 * 2 to Gdx.graphics.height.toFloat() / 4
     }
 
     /**
      * Permet de retourner le fond d'écran principal
      */
     fun getMainBackground(): RenderComponent {
-        return RenderComponent(listOf(getGameTexture(Gdx.files.internal("game/mainmenu.png"))))
+        return renderComponent { textures, _ -> textures += getGameTexture(Gdx.files.internal("game/mainmenu.png")) }
     }
 
     /**
@@ -239,7 +255,7 @@ class MtrGame(vsync: Boolean) : KtxGame<BaseScene>() {
                 return TextureInfo(TextureAtlas.AtlasRegion(texture, 0, 0, texture.width, texture.height), texturePath = path.path())
             }
         } catch(e: Exception) {
-            println("Erreur lors du chargement de la texture : $path : $e")
+            error(e, message = { "Erreur lors du chargement de la texture : $path" })
         }
 
         return TextureInfo(TextureAtlas.AtlasRegion(Texture(1, 1, Pixmap.Format.Alpha), 0, 0, 1, 1))
@@ -281,7 +297,7 @@ class MtrGame(vsync: Boolean) : KtxGame<BaseScene>() {
     /**
      * Permet de sauvegarder la configuration des touches
      */
-    fun saveKeysConfig(): Boolean  {
+    fun saveKeysConfig(): Boolean {
         try {
             val writer = JsonWriter(FileWriter(Gdx.files.internal("keysConfig.json").path(), false))
             writer.setOutputType(JsonWriter.OutputType.json)

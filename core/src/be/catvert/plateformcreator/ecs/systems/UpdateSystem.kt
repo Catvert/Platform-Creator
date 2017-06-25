@@ -2,6 +2,7 @@ package be.catvert.plateformcreator.ecs.systems
 
 import be.catvert.plateformcreator.Level
 import be.catvert.plateformcreator.ecs.components.UpdateComponent
+import be.catvert.plateformcreator.ecs.components.UpdateListener
 import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.core.EntitySystem
@@ -28,7 +29,7 @@ class UpdateSystem(private val level: Level) : EntitySystem() {
         entities.forEach {
             val updateComp = updateMapper[it]
             if (updateComp.active)
-                updateComp.update(deltaTime, it, level)
+                updateComp.update.dispatch(UpdateListener(deltaTime, it, level))
         }
     }
 }

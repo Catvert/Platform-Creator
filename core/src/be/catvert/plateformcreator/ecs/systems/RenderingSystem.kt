@@ -50,7 +50,7 @@ class RenderingSystem(private val game: MtrGame) : EntitySystem() {
                                 rect.width = renderComp.fixedResize!!.x
                                 rect.height = renderComp.fixedResize!!.y
                             } else {
-                                println("L'entité utilise le resizeMode : FIXED_SIZE mais n'a pas défini la taille")
+                                ktx.log.error { "L'entité utilise le resizeMode : FIXED_SIZE mais n'a pas défini la taille" }
                             }
                         }
                     }

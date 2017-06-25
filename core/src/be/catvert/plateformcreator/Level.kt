@@ -33,7 +33,7 @@ class Level(private val _game: MtrGame, var levelName: String, val levelFile: Fi
     private val matrixSizeY = 100
     private val sizeGridCell = 200f
 
-    val matrixGrid = matrix2d(matrixSizeX, matrixSizeY, { row: Int, width: Int -> Array(width) { col -> Pair(mutableListOf<Entity>(), Rectangle(row.toFloat() * sizeGridCell, col.toFloat() * sizeGridCell, sizeGridCell, sizeGridCell)) } })
+    val matrixGrid = matrix2d(matrixSizeX, matrixSizeY, { row: Int, width: Int -> Array(width) { col -> mutableListOf<Entity>() to Rectangle(row.toFloat() * sizeGridCell, col.toFloat() * sizeGridCell, sizeGridCell, sizeGridCell) } })
     val matrixRect = Rectangle(0f, 0f, sizeGridCell * matrixSizeX, sizeGridCell * matrixSizeY)
 
     private val activeGridCells = mutableListOf<GridCell>()
@@ -213,7 +213,7 @@ class Level(private val _game: MtrGame, var levelName: String, val levelFile: Fi
                     if (rect.overlaps(transformMapper[it].rectangle))
                         list += it
                 } else {
-                    if (rect.contains(transformMapper[it].rectangle))
+                    if (transformMapper[it].rectangle in rect)
                         list += it
                 }
 

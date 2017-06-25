@@ -1,10 +1,17 @@
 package be.catvert.plateformcreator.ecs.components
 
 import com.badlogic.ashley.core.Entity
+import com.badlogic.ashley.signals.Listener
+import com.badlogic.ashley.signals.Signal
 
 /**
  * Created by Catvert on 11/06/17.
  */
+
+/**
+ * Listener lorsque la vie de l'entité change
+ */
+data class LifeListener(val entity: Entity, val hp: Int)
 
 /**
  * Ce component permet d'ajouter un système de point de vie à l'entité
@@ -13,10 +20,21 @@ import com.badlogic.ashley.core.Entity
  * onAddLife : est appelé lorsque l'on ajoute des points de vie à l'entité
  * onRemoveLife : est appelé lorsque l'on supprime des points de vie à l'entité
  */
-class LifeComponent(var entity: Entity, val initialHP: Int, val onAddLife: ((entity: Entity, hp: Int) -> Unit)? = null, val onRemoveLife: ((entity: Entity, hp: Int) -> Unit)? = null) : BaseComponent<LifeComponent>() {
+class LifeComponent(var entity: Entity, initialHP: Int) : BaseComponent<LifeComponent>() {
     override fun copy(): LifeComponent {
-        return LifeComponent(entity, initialHP, onRemoveLife, onAddLife)
+        /*val lifeComponent = LifeComponent(entity, initialHP)
+
+        lifeComponent.onAddLife = onAddLife
+        lifeComponent.onRemoveLife = onRemoveLife
+
+        return lifeComponent
+        */
+
+        TODO("Trouver une solution car si une copie a lieu, ça veut dire que c'est à destination d'une autre entité")
     }
+
+    val onAddLife = Signal<LifeListener>()
+    val onRemoveLife = Signal<LifeListener>()
 
     var hp = initialHP
         private set
@@ -27,7 +45,7 @@ class LifeComponent(var entity: Entity, val initialHP: Int, val onAddLife: ((ent
     fun removeLife(remove: Int) {
         for (i in remove downTo 0) {
             --hp
-            if (hp >= 0) onRemoveLife?.invoke(entity, hp) else break
+            if (hp >= 0) onRemoveLife.dispatch(LifeListener(entity, hp))
         }
     }
 
@@ -37,7 +55,7 @@ class LifeComponent(var entity: Entity, val initialHP: Int, val onAddLife: ((ent
     fun addLife(add: Int) {
         for (i in 0 until add) {
             ++hp
-            onAddLife?.invoke(entity, hp)
+            onAddLife.dispatch(LifeListener(entity, hp))
         }
     }
 
@@ -49,4 +67,18 @@ class LifeComponent(var entity: Entity, val initialHP: Int, val onAddLife: ((ent
         for (i in hp downTo 0)
             removeLife(i)
     }
+}
+
+fun lifeComponent(entity: Entity, initialHP: Int, onAddLife: (LifeComponent.() -> Listener<LifeListener>)? = null, onRemoveLife: (LifeComponent.() -> Listener<LifeListener>)? = null): LifeComponent {
+    val lifeComponent = LifeComponent(entity, initialHP)
+
+    if (onAddLife != null) {
+        lifeComponent.onAddLife.add(lifeComponent.onAddLife())
+    }
+
+    if (onRemoveLife != null) {
+        lifeComponent.onRemoveLife.add(lifeComponent.onRemoveLife())
+    }
+
+    return lifeComponent
 }

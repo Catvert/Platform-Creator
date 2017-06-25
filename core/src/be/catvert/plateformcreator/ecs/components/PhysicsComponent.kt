@@ -1,13 +1,17 @@
 package be.catvert.plateformcreator.ecs.components
 
 import com.badlogic.ashley.core.Entity
+import com.badlogic.ashley.signals.Listener
+import com.badlogic.ashley.signals.Signal
 
 
 /**
  * Created by Catvert on 04/06/17.
  */
 
-
+/**
+ * Enmu permettant de définir le type de mouvement de l'entité (fluide ou linéaire)
+ */
 enum class MovementType {
     SMOOTH, LINEAR
 }
@@ -48,9 +52,22 @@ enum class NextActions {
     GO_LEFT, GO_RIGHT, GO_UP, GO_DOWN, GRAVITY, JUMP
 }
 
+/**
+ * Permet de déterminer quel mask l'entité doit utiliser pour les collisions
+ */
 enum class MaskCollision {
     ALL, ONLY_PLAYER, ONLY_ENEMY, SENSOR
 }
+
+/**
+ * Listener lors d'une collision avec une autre entité pour le mask correspondant
+ */
+data class CollisionListener(val entity: Entity, val collideEntity: Entity, val side: CollisionSide)
+
+/**
+ * Listener lorsque l'entité bouge
+ */
+data class MoveListener(val entity: Entity, val moveX: Int, val moveY: Int)
 
 /**
  * Ce component permet d'ajouter à l'entité des propriétés physique tel que la gravité, vitesse de déplacement ...
@@ -65,14 +82,20 @@ class PhysicsComponent(var isStatic: Boolean, var moveSpeed: Int = 0, var moveme
         val physicsComp = PhysicsComponent(isStatic, moveSpeed, movementType, maskCollision = maskCollision)
 
         physicsComp.jumpData = if (jumpData != null) JumpData(jumpData!!.jumpHeight) else null
-        physicsComp.onCollisionWith = onCollisionWith
+        physicsComp.onCollisionWith
         physicsComp.onMove = onMove
 
         return physicsComp
     }
 
+    /**
+     * Les nextActions représentes les actions que doit faire l'entité pendant le prochain frame
+     */
     val nextActions = mutableSetOf<NextActions>()
 
+    /**
+     * Donnée de jump, si null, aucun jump sera disponible pour l'entité
+     */
     var jumpData: JumpData? = null
 
     /**
@@ -84,15 +107,28 @@ class PhysicsComponent(var isStatic: Boolean, var moveSpeed: Int = 0, var moveme
     /**
      * Appelé lorsque une entité ayant ce component touche cette entité
      */
-    var onCollisionWith: ((thisEntity: Entity, collisionEntity: Entity, side: CollisionSide) -> Unit)? = null
+    var onCollisionWith = Signal<CollisionListener>()
 
     /**
      * Appelé lorsque l'entité bouge à cause des NextActions
      */
-    var onMove: ((thisEntity: Entity, moveX: Int, moveY: Int) -> Unit)? = null
+    var onMove = Signal<MoveListener>()
 
     /**
      * Permet à l'entité de savoir si elle est sur le sol ou non
      */
     var isOnGround = false
+}
+
+fun physicsComponent(isStatic: Boolean, init: PhysicsComponent.() -> Unit, onCollisionWith: (PhysicsComponent.() -> Listener<CollisionListener>)? = null, onMove: (PhysicsComponent.() -> Listener<MoveListener>)? = null): PhysicsComponent {
+    val physicsComponent = PhysicsComponent(isStatic)
+
+    physicsComponent.init()
+
+    if (onCollisionWith != null)
+        physicsComponent.onCollisionWith.add(physicsComponent.onCollisionWith())
+    if (onMove != null)
+        physicsComponent.onMove.add(physicsComponent.onMove())
+
+    return physicsComponent
 }

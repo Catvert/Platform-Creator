@@ -17,6 +17,9 @@ enum class ResizeMode {
     NO_RESIZE, ACTUAL_REGION, FIXED_SIZE
 }
 
+/**
+ * Les layer représente la "couche" de l'entité, les entités ayant la plus haute couche seront dessiner en dernier et seront donc "au-dessus" des autres
+ */
 enum class Layer(val layer: Int) {
     LAYER_0(0), LAYER_1(1), LAYER_2(2), LAYER_MOVABLE_ENT(3), LAYER_4(4), LAYER_5(5), LAYER_HUD(6)
 }
@@ -38,14 +41,15 @@ class RenderComponent(val textureInfoList: List<TextureInfo> = listOf(),
                       var flipY: Boolean = false,
                       var renderLayer: Layer = Layer.LAYER_0,
                       var resizeMode: ResizeMode = ResizeMode.NO_RESIZE) : BaseComponent<RenderComponent>() {
+
     override fun copy(): RenderComponent {
-        return RenderComponent(textureInfoList, animationList, useAnimation, initialFlipX, initialFlipY, renderLayer, resizeMode)
+        return RenderComponent(textureInfoList, animationList, useAnimation, flipX, flipY, renderLayer, resizeMode)
     }
 
+    /**
+     * Permet de faire fonctionner les animations
+     */
     private var stateTime = 0f
-
-    private val initialFlipX = flipX
-    private val initialFlipY = flipY
 
     /**
      * Permet au RenderSystem de savoir qu'elle texture il doit utiliser
@@ -80,4 +84,18 @@ class RenderComponent(val textureInfoList: List<TextureInfo> = listOf(),
             return textureInfoList[actualTextureInfoIndex].texture
         }
     }
+}
+
+/**
+ * Permet de construire un renderComponent
+ */
+fun renderComponent(init: RenderComponent.(textures: MutableList<TextureInfo>, animations: MutableList<Animation<TextureAtlas.AtlasRegion>>) -> Unit): RenderComponent {
+    val textureList = mutableListOf<TextureInfo>()
+    val animationsList = mutableListOf<Animation<TextureAtlas.AtlasRegion>>()
+
+    val renderComponent = RenderComponent(textureList, animationsList)
+
+    renderComponent.init(textureList, animationsList)
+
+    return renderComponent
 }

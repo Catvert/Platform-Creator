@@ -1,6 +1,8 @@
 package be.catvert.plateformcreator.scenes
 
-import be.catvert.plateformcreator.*
+import be.catvert.plateformcreator.GameKeys
+import be.catvert.plateformcreator.Level
+import be.catvert.plateformcreator.MtrGame
 import be.catvert.plateformcreator.ecs.EntityEvent
 import be.catvert.plateformcreator.ecs.components.TransformComponent
 import be.catvert.plateformcreator.ecs.systems.RenderingSystem
@@ -11,9 +13,8 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.math.MathUtils
 
-
 /**
- * Created by arno on 03/06/17.
+ * Created by Catvert on 03/06/17.
  */
 
 /**
@@ -27,7 +28,8 @@ class GameScene(game: MtrGame, entityEvent: EntityEvent, private val level: Leve
     private val transformPlayer = level.player.getComponent(TransformComponent::class.java)
 
     init {
-        _game.background = level.background
+        background = level.background
+
         _entityEvent.onEntityAdded = { entity -> level.addEntity(entity) }
         _entityEvent.onEntityRemoved = { entity -> level.removeEntity(entity) }
 

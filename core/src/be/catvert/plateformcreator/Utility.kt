@@ -20,7 +20,6 @@ import com.badlogic.gdx.math.Rectangle
  */
 class Utility {
     companion object {
-
         /**
          * Permet de retourner tout les fichiers présent dans un répertoire récursivement
          */
@@ -39,6 +38,16 @@ class Utility {
         }
     }
 }
+
+/**
+ * Représente un point dans l'espace (float)
+ */
+data class Point<out T : Number>(val x: T, val y: T)
+
+/**
+ * Méthode d'extension permettant de simplifier l'accès au nom de la classe utilisée
+ */
+fun Any.className(): String = this::class.java.simpleName
 
 /**
  * Méthode d'extension permettant de copier l'entité

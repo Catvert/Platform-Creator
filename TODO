@@ -4,9 +4,11 @@ Fonctionnalitées à venir {
     - Un fonction pour simuler le niveau dans l'éditeur -> pq pas lancer la gameScene et quand le joueur meurt, se rediriger vers l'éditeur là où il en était
     - Toutes les resources chargés doivent pouvoir être changée par l'utilisateur dans un fichier de configuration
     - Delta time
+    - Pouvoir assigner les touches en appuyant simplement dessus
 }
 
 Bugs {
     - Lorsqu'on ouvre une fenêtre dans l'éditeur, il ya des chances que tout ce fige car UI Hover est tjr a true alors que l'utilisateur n'est plus sur le stage
     - [Pas spécialement un bug] Quand par exemple, la turtle se rapproche du bord des activeCells [grid] alors elle change de direction
+    - Bug lors de la copie avec les flèches d'un enemi
 }

@@ -1,11 +1,12 @@
 package be.catvert.plateformcreator.scenes
 
-import be.catvert.plateformcreator.*
-import be.catvert.plateformcreator.ecs.components.TransformComponent
+import be.catvert.plateformcreator.GameKeys
+import be.catvert.plateformcreator.LevelFactory
+import be.catvert.plateformcreator.MtrGame
+import be.catvert.plateformcreator.Utility
 import be.catvert.plateformcreator.ecs.systems.RenderingSystem
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Graphics
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
@@ -46,7 +47,8 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
         }
 
     init {
-        _game.background = _game.getMainBackground()
+        background = game.getMainBackground()
+
         entities += logo
 
         stage.addActor(window("Menu Principal") {
@@ -60,7 +62,9 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
                     addListener(onClick { showSelectLevelsWindow() })
                 }
                 textButton("Options") {
-                    addListener(onClick { showSettingsWindows() })
+                    addListener(onClick {
+                        showSettingsWindows()
+                    })
                 }
                 textButton("Quitter") {
                     addListener(onClick { Gdx.app.exit() })
@@ -220,7 +224,7 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
                                         showDialog("Opération réussie !", "La copie s'est correctement effectuée !")
                                     } catch(e: IOException) {
                                         showDialog("Opération échouée !", "Un problème s'est produit lors de la copie !")
-                                        println("Erreur copie : $e")
+                                        ktx.log.error(e, message = { "Erreur survenue lors de la copie du niveau ! Erreur : $e" })
                                     }
                                 }
                             }
@@ -237,7 +241,7 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
                                             showDialog("Opération réussie !", "La suppression s'est correctement effectuée !")
                                         } catch(e: IOException) {
                                             showDialog("Opération échouée !", "Un problème s'est produit lors de la suppression !")
-                                            println("Erreur suppression : $e")
+                                            ktx.log.error(e, message = { "Erreur survenue lors de la suppression du niveau !" })
                                         }
                                     }
                                 })
@@ -281,28 +285,28 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
                 textButton("Appliquer") {
                     addListener(onClick {
                         var success = true
-                        if(widthArea.text.toIntOrNull() == null) {
+                        if (widthArea.text.toIntOrNull() == null) {
                             widthArea.color = Color.RED
                             success = false
                         }
-                        if(heightArea.text.toIntOrNull() == null) {
+                        if (heightArea.text.toIntOrNull() == null) {
                             heightArea.color = Color.RED
                             success = false
                         }
-                        if(success) {
+                        if (success) {
                             widthArea.color = Color.WHITE
                             heightArea.color = Color.WHITE
 
                             _game.vsync = vsync.isChecked
 
-                            if(fullscreen.isChecked)
+                            if (fullscreen.isChecked)
                                 Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
                             else
                                 Gdx.graphics.setWindowedMode(widthArea.text.toInt(), heightArea.text.toInt())
 
                             logo = _game.getLogo() // Met à jour le logo
 
-                            if(_game.saveGameConfig())
+                            if (_game.saveGameConfig())
                                 showDialog("Sauvegarde effectuée !", "La sauvegarde de la config du jeu c'est correctement effectuée !")
                             else
                                 showDialog("Erreur lors de la sauvegarde !", "Une erreur est survenue lors de la sauvegarde de la config du jeu !")
@@ -344,29 +348,27 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
 
                     keyAreaList.forEach {
                         val gameKey = it.userObject as GameKeys
-                        if(it.text.isBlank()) {
+                        if (it.text.isBlank()) {
                             success = false
                             it.color = Color.RED
                             return@forEach
                         }
 
                         val newKey = Input.Keys.valueOf(it.text)
-                        if(newKey == -1) {
+                        if (newKey == -1) {
                             success = false
                             it.color = Color.RED
-                        }
-                        else
+                        } else
                             gameKey.key = newKey
                     }
 
-                    if(success) {
+                    if (success) {
                         keyAreaList.forEach { it.color = Color.WHITE }
-                        if(_game.saveKeysConfig())
+                        if (_game.saveKeysConfig())
                             showDialog("Sauvegarde effectuée !", "La sauvegarde des touches c'est correctement effectuée !")
                         else
                             showDialog("Erreur lors de la sauvegarde", "Une erreur est survenue lors de la sauvegarde du jeu !")
-                    }
-                    else {
+                    } else {
                         showDialog("Erreur lors de la sauvegarde !", "Une ou plusieurs touches sont invalides !")
                     }
                 })

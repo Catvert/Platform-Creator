@@ -31,6 +31,7 @@ import ktx.actors.contains
 import ktx.actors.onChange
 import ktx.actors.onClick
 import ktx.app.use
+import ktx.ashley.mapperFor
 import ktx.collections.toGdxArray
 import ktx.vis.window
 
@@ -64,10 +65,13 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
     }
 
     private val shapeRenderer = ShapeRenderer()
-    private val transformMapper = ComponentMapper.getFor(TransformComponent::class.java)
+
+    private val transformMapper = mapperFor<TransformComponent>()
+    private val renderMapper = mapperFor<RenderComponent>()
+
     private val cameraMoveSpeed = 10f
     private val maxEntitySize = 500f
-    private val selectEntities: MutableSet<Entity> = mutableSetOf()
+    private val selectEntities = mutableSetOf<Entity>()
     private var selectMoveEntity: Entity? = null
     private val entityFactory = _game.entityFactory
     private fun addSelectEntity(entity: Entity) {
@@ -111,7 +115,8 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
     override val entities: MutableSet<Entity> = mutableSetOf()
 
     init {
-        _game.background = level.background
+        background = level.background
+
         showInfoEntityWindow()
 
         level.activeRect.setSize(Gdx.graphics.width.toFloat() * 3, Gdx.graphics.height.toFloat() * 3)
@@ -267,6 +272,19 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                             removeEntityFromLevel(entity)
                         }
                     }
+
+                    if(Gdx.input.isKeyJustPressed(GameKeys.EDITOR_FLIPX_0.key) || Gdx.input.isKeyJustPressed(GameKeys.EDITOR_FLIPX_1.key)) {
+                        val entity = findEntityUnderMouse()
+                        if(entity != null && renderMapper.has(entity)) {
+                            renderMapper[entity].flipX = !renderMapper[entity].flipX
+                        }
+                    }
+                    if(Gdx.input.isKeyJustPressed(GameKeys.EDITOR_FLIPY_0.key) || Gdx.input.isKeyJustPressed(GameKeys.EDITOR_FLIPY_1.key)) {
+                        val entity = findEntityUnderMouse()
+                        if(entity != null && renderMapper.has(entity)) {
+                             renderMapper[entity].flipY = !renderMapper[entity].flipY
+                        }
+                    }
                 }
                 EditorScene.EditorMode.SelectEntity -> {
                     fun moveEntities(moveX: Float, moveY: Float) {
@@ -274,7 +292,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                             var result = true
                             it.forEach {
                                 val transform = transformMapper[it]
-                                if (!level.matrixRect.contains(Rectangle(transform.rectangle.x + moveX, transform.rectangle.y + moveY, transform.rectangle.width, transform.rectangle.height))) {
+                                if (Rectangle(transform.rectangle.x + moveX, transform.rectangle.y + moveY, transform.rectangle.width, transform.rectangle.height) !in level.matrixRect) {
                                     result = false
                                 }
                             }
@@ -298,7 +316,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                                 clearSelectEntities()
                             } else if (selectEntities.isEmpty() || Gdx.input.isKeyPressed(GameKeys.EDITOR_APPEND_SELECT_ENTITIES.key)) {
                                 addSelectEntity(entity)
-                            } else if (selectEntities.contains(entity)) {
+                            } else if (entity in selectEntities) {
                                 selectMoveEntity = entity
                             } else {
                                 clearSelectEntities()
@@ -565,7 +583,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
 
                                             onTextureSelected(texture)
                                             image.drawable = com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable(texture.texture)
-                                            if (!this@table.contains(image)) {
+                                            if (image !in this@table) {
                                                 this@table.add(image).size(this.height, this.height).spaceLeft(10f)
                                             }
                                         })
@@ -611,7 +629,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
 
                                         addButton.addListener(addButton.onClick {
                                             if (checkValidSize(width, height) && selectedTexture != null) {
-                                                finishEntityBuild(entityFactory.createSprite(Rectangle(0f, 0f, width.text.toInt().toFloat(), height.text.toInt().toFloat()), RenderComponent(listOf(selectedTexture!!))))
+                                                finishEntityBuild(entityFactory.createSprite(TransformComponent(Rectangle(0f, 0f, width.text.toInt().toFloat(), height.text.toInt().toFloat())), renderComponent { textures, _ -> textures += selectedTexture!! }))
                                             }
                                         })
                                     }
@@ -625,7 +643,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
 
                                         addButton.addListener(addButton.onClick {
                                             if (checkValidSize(width, height) && selectedTexture != null) {
-                                                finishEntityBuild(entityFactory.createPhysicsSprite(Rectangle(0f, 0f, width.text.toInt().toFloat(), height.text.toInt().toFloat()), RenderComponent(listOf(selectedTexture!!)), PhysicsComponent(true)))
+                                                finishEntityBuild(entityFactory.createPhysicsSprite(TransformComponent(Rectangle(0f, 0f, width.text.toInt().toFloat(), height.text.toInt().toFloat())), renderComponent { textures, _ -> textures += selectedTexture!! }, PhysicsComponent(true)))
                                             }
                                         })
 
@@ -636,7 +654,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                                         }
 
                                         addButton.addListener(addButton.onClick {
-                                            finishEntityBuild(entityFactory.createEnemyWithType(enemyType.selected, _entityEvent, Vector2(0f, 0f)))
+                                            finishEntityBuild(entityFactory.createEnemyWithType(enemyType.selected, _entityEvent, Point(0, 0)))
                                         })
                                     }
                                     EntityFactory.EntityType.Player -> {
@@ -813,18 +831,17 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                         touchable = Touchable.disabled
 
                         onSelectEntityChanged.add { _, selectEntity ->
-                            if(selectEntity == null) {
+                            if (selectEntity == null) {
                                 touchable = Touchable.disabled
                                 selectedIndex = 0
-                            }
-                            else {
+                            } else {
                                 touchable = Touchable.enabled
                                 selected = selectEntity[RenderComponent::class.java].renderLayer
                             }
                         }
 
                         addListener(onChange {
-                            if(this.isTouchable) {
+                            if (this.isTouchable) {
                                 val selectEntity = selectEntities.elementAt(0)
                                 selectEntity[RenderComponent::class.java].renderLayer = selected
                             }
@@ -852,7 +869,7 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                             LevelFactory(_game).saveLevel(level)
                             this@window.remove()
                         } catch(e: Exception) {
-                            println("Erreur lors de l'enregistrement du niveau ! Erreur : $e")
+                            ktx.log.error(e, message = { "Erreur lors de l'enregistrement du niveau !" })
                         }
                     })
                 }

@@ -18,8 +18,8 @@ import com.badlogic.gdx.math.Rectangle
 
 /**
  * Ce système permet de gérer le système physique du jeu en mettant à jour les entités ayant un physicsComponent et un transformComponent
- * level : Le niveau chargé au préalable
- * gravity : La gravité à appliquée au entité implémentant un physicsComponent, permet aussi de spécifier la vitesse du jump(inverse de la gravité)
+ * @param level : Le niveau chargé au préalable
+ * @param gravity : La gravité à appliquée au entité implémentant un physicsComponent, permet aussi de spécifier la vitesse du jump(inverse de la gravité)
  */
 class PhysicsSystem(private val level: Level, val gravity: Int = 15) : EntitySystem() {
     private lateinit var entities: ImmutableArray<Entity>
@@ -58,7 +58,7 @@ class PhysicsSystem(private val level: Level, val gravity: Int = 15) : EntitySys
                     NextActions.GRAVITY -> if (physicsComp.gravity) moveSpeedY -= gravity
                     NextActions.JUMP -> {
                         if (physicsComp.jumpData == null) {
-                            println("L'entité ne contient pas de jumpData")
+                            ktx.log.error { "L'entité essaye de sauter mais ne contient pas de jumpData !" }
                             return@action
                         }
 
@@ -130,13 +130,13 @@ class PhysicsSystem(private val level: Level, val gravity: Int = 15) : EntitySys
             if (!collideOnMove(moveX, 0, entity)) {
                 transformTarget.rectangle.x = Math.max(0f, transformTarget.rectangle.x + moveX)
                 level.setEntityGrid(entity)
-                physicsTarget.onMove?.invoke(entity, if (transformTarget.rectangle.x == 0f) 0 else moveX, moveY) // TODO voir ici pour amélioration
+                physicsTarget.onMove.dispatch(MoveListener(entity, if (transformTarget.rectangle.x == 0f) 0 else moveX, moveY)) // TODO voir ici pour amélioration
                 newMoveX = 0
             }
             if (!collideOnMove(0, moveY, entity)) {
                 transformTarget.rectangle.y += moveY
                 level.setEntityGrid(entity)
-                physicsTarget.onMove?.invoke(entity, moveX, moveY)
+                physicsTarget.onMove.dispatch(MoveListener(entity, moveX, moveY))
                 newMoveY = 0
             }
 
@@ -173,8 +173,14 @@ class PhysicsSystem(private val level: Level, val gravity: Int = 15) : EntitySys
         newRect.setPosition(newRect.x + moveX, newRect.y + moveY)
 
         level.getRectCells(newRect).forEach {
-            level.matrixGrid[it.x][it.y].first.filter { // On parcourt toute les entités avec la condition en-dessous
-                transformMapper[it] != transformTarget && physicsMapper.has(it) && (physicsMapper[it].maskCollision == physicsTarget.maskCollision)
+            level.matrixGrid[it.x][it.y].first.filter {
+                transformMapper[it] != transformTarget  // On vérifie si la targetEntity n'est pas la même que celle dans l'itération
+                        && physicsMapper.has(it) // On vérifie si l'entité qu'on parcourt a un physicsComponent
+                        && when (physicsTarget.maskCollision) { // On vérifie si le mask est correcte
+                    MaskCollision.ALL, MaskCollision.SENSOR -> true
+                    MaskCollision.ONLY_PLAYER -> it.flags == EntityFactory.EntityType.Player.flag
+                    MaskCollision.ONLY_ENEMY -> it.flags == EntityFactory.EntityType.Enemy.flag
+                }
             }.forEach {
                 val transformComponent = transformMapper[it]
 
@@ -182,11 +188,11 @@ class PhysicsSystem(private val level: Level, val gravity: Int = 15) : EntitySys
                     val side = if (moveX > 0) CollisionSide.OnRight else if (moveX < 0) CollisionSide.OnLeft else if (moveY > 0) CollisionSide.OnUp else if (moveY < 0) CollisionSide.OnDown else CollisionSide.Unknow
 
                     if (entity.flags == EntityFactory.EntityType.Enemy.flag && it.flags == EntityFactory.EntityType.Player.flag)
-                        entity[EnemyComponent::class.java].onPlayerCollision?.invoke(entity, it, side)
+                        entity[EnemyComponent::class.java].onPlayerCollision.dispatch(CollisionListener(entity, it, side))
                     else if (entity.flags == EntityFactory.EntityType.Player.flag && it.flags == EntityFactory.EntityType.Enemy.flag)
-                        it[EnemyComponent::class.java].onPlayerCollision?.invoke(it, entity, -side) // - side to inverse the side
+                        it[EnemyComponent::class.java].onPlayerCollision.dispatch(CollisionListener(it, entity, -side)) // - side to inverse the side
                     else
-                        physicsMapper[entity].onCollisionWith?.invoke(entity, it, side)
+                        physicsMapper[entity].onCollisionWith.dispatch(CollisionListener(entity, it, side))
 
                     return true
                 }
