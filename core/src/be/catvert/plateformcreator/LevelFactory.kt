@@ -7,10 +7,10 @@ import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.math.Rectangle
-import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.JsonReader
 import com.badlogic.gdx.utils.JsonValue
 import com.badlogic.gdx.utils.JsonWriter
+import ktx.log.error
 import java.io.FileReader
 import java.io.FileWriter
 
@@ -30,7 +30,7 @@ class LevelFactory(private val game: MtrGame) {
     fun createEmptyLevel(levelName: String, levelPath: FileHandle): Pair<Level, EntityEvent> {
         val loadedEntities = mutableListOf<Entity>()
 
-        val player = entityFactory.createPlayer(Vector2(100f, 100f))
+        val player = entityFactory.createPlayer(Point(100, 100))
         val defaultBackground = game.getGameTexture(Gdx.files.internal("game/background/background-4.png"))
 
         loadedEntities += player
@@ -41,7 +41,7 @@ class LevelFactory(private val game: MtrGame) {
              }
          }*/
 
-        return Level(game, levelName, levelPath, player, RenderComponent(listOf(defaultBackground)), loadedEntities) to EntityEvent()
+        return Level(game, levelName, levelPath, player, renderComponent { textures, _ -> textures += defaultBackground }, loadedEntities) to EntityEvent()
     }
 
     /**
@@ -67,56 +67,58 @@ class LevelFactory(private val game: MtrGame) {
             levelName = root["levelName"].asString()
             backgroundPath = Gdx.files.internal(root["background"].asString())
 
-            fun getPosition(it: JsonValue): Pair<Int, Int> {
-                return it["position"]["x"].asInt() to it["position"]["y"].asInt()
+            fun getPosition(it: JsonValue): Point<Int> {
+                return Point(it["position"]["x"].asInt(), it["position"]["y"].asInt())
             }
 
             fun getSize(it: JsonValue): Pair<Int, Int> {
-                return  it["size"]["x"].asInt() to it["size"]["y"].asInt()
+                return it["size"]["x"].asInt() to it["size"]["y"].asInt()
             }
 
-            fun getSpriteSheetTexture(it: JsonValue): Triple<String, String, Layer> { // First is the sprite sheet, second is the texture name
-                var layer = Layer.LAYER_0
-                if(it.has("layer")) {
-                    val layerInt = it["layer"].asInt()
-                    val loadedLayer = Layer.values().firstOrNull { it.layer == layerInt }
-                    if(loadedLayer != null)
-                        layer = loadedLayer
-                }
+            fun getTransformComponent(it: JsonValue): TransformComponent {
+                val (width, height) = getSize(it)
+                val (x, y) = getPosition(it)
+                return TransformComponent(Rectangle(x.toFloat(), y.toFloat(), width.toFloat(), height.toFloat()))
+            }
 
-                return Triple(it["spritesheet"].asString(), it["texture_name"].asString(), layer)
+            fun getRenderComponent(it: JsonValue) = renderComponent { textures, _ ->
+                textures += game.getSpriteSheetTexture(it["spritesheet"].asString(), it["texture_name"].asString())
+
+                flipX = it["flipX"].asBoolean()
+                flipY = it["flipY"].asBoolean()
+
+                renderLayer = Layer.values().firstOrNull { layer -> layer.layer == it["layer"].asInt() } ?: Layer.LAYER_0
             }
 
             root["entities"].forEach {
                 val type = it["type"].asString()
-                val (x, y) = getPosition(it)
                 when (type) {
                     EntityFactory.EntityType.Sprite.name -> {
-                        val (width, height) = getSize(it)
-                        val texture = getSpriteSheetTexture(it)
-                        addEntity(entityFactory.createSprite(Rectangle(x.toFloat(), y.toFloat(), width.toFloat(), height.toFloat()), RenderComponent(listOf(game.getSpriteSheetTexture(texture.first, texture.second)), renderLayer = texture.third)))
+                        addEntity(entityFactory.createSprite(
+                                getTransformComponent(it),
+                                getRenderComponent(it)))
                     }
                     EntityFactory.EntityType.PhysicsSprite.name -> {
-                        val (width, height) = getSize(it)
-                        val texture = getSpriteSheetTexture(it)
-                        addEntity(entityFactory.createPhysicsSprite(Rectangle(x.toFloat(), y.toFloat(), width.toFloat(), height.toFloat()), RenderComponent(listOf(game.getSpriteSheetTexture(texture.first, texture.second)), renderLayer = texture.third), PhysicsComponent(true)))
+                        addEntity(entityFactory.createPhysicsSprite(
+                                getTransformComponent(it),
+                                getRenderComponent(it), PhysicsComponent(true)))
                     }
                     EntityFactory.EntityType.Player.name -> {
-                        player = entityFactory.createPlayer(Vector2(x.toFloat(), y.toFloat()))
+                        player = entityFactory.createPlayer(getPosition(it))
                         addEntity(player)
                     }
                     EntityFactory.EntityType.Enemy.name -> {
                         val enemyType = EnemyType.valueOf(it["enemyType"].asString())
-                        addEntity(entityFactory.createEnemyWithType(enemyType, entityEvent, Vector2(x.toFloat(), y.toFloat())))
+                        addEntity(entityFactory.createEnemyWithType(enemyType, entityEvent, getPosition(it)))
                     }
                 }
             }
         } catch(e: Exception) {
             errorInLevel = true
-            println("Erreur lors du chargement du niveau ! Erreur : $e")
+            error(e, message = { "Erreur lors du chargement du niveau ! Erreur : $e" })
         }
 
-        return Triple(!errorInLevel, Level(game, levelName, levelPath, player, RenderComponent(listOf(game.getGameTexture(backgroundPath))), entities), entityEvent)
+        return Triple(!errorInLevel, Level(game, levelName, levelPath, player, renderComponent { textures, _ -> textures += game.getGameTexture(backgroundPath) }, entities), entityEvent)
     }
 
     /**
@@ -144,6 +146,8 @@ class LevelFactory(private val game: MtrGame) {
             writer.name("spritesheet").value(renderComponent.textureInfoList[0].spriteSheet)
             writer.name("texture_name").value(renderComponent.textureInfoList[0].textureName)
             writer.name("layer").value(renderComponent.renderLayer.layer)
+            writer.name("flipX").value(renderComponent.flipX)
+            writer.name("flipY").value(renderComponent.flipY)
         }
 
         writer.`object`()
