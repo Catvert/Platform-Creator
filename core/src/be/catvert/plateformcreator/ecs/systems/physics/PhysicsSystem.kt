@@ -191,10 +191,13 @@ class PhysicsSystem(private val level: Level, val gravity: Int = 15) : EntitySys
                         entity[EnemyComponent::class.java].onPlayerCollision.dispatch(CollisionListener(entity, it, side))
                     else if (entity.flags == EntityFactory.EntityType.Player.flag && it.flags == EntityFactory.EntityType.Enemy.flag)
                         it[EnemyComponent::class.java].onPlayerCollision.dispatch(CollisionListener(it, entity, -side)) // - side to inverse the side
-                    else
+                    else if (it.flags != EntityFactory.EntityType.Special.flag)
                         physicsMapper[entity].onCollisionWith.dispatch(CollisionListener(entity, it, side))
 
-                    return true
+                    if (it.flags == EntityFactory.EntityType.Special.flag) {
+                        physicsMapper[it].onCollisionWith.dispatch(CollisionListener(it, entity, side))
+                    } else
+                        return true
                 }
             }
         }

@@ -10,6 +10,7 @@ import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.Rectangle
+import org.lwjgl.util.Point
 
 /**
  * Created by Catvert on 03/06/17.
@@ -39,10 +40,8 @@ class Utility {
     }
 }
 
-/**
- * Représente un point dans l'espace (float)
- */
-data class Point<out T : Number>(val x: T, val y: T)
+operator fun Point.component1() = this.x
+operator fun Point.component2() = this.y
 
 /**
  * Méthode d'extension permettant de simplifier l'accès au nom de la classe utilisée

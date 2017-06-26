@@ -5,7 +5,6 @@ import be.catvert.plateformcreator.LevelFactory
 import be.catvert.plateformcreator.MtrGame
 import be.catvert.plateformcreator.Utility
 import be.catvert.plateformcreator.ecs.systems.RenderingSystem
-import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.files.FileHandle
@@ -33,8 +32,6 @@ import java.nio.file.StandardCopyOption
  * Scène du menu principal
  */
 class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(game)) {
-    override val entities: MutableSet<Entity> = mutableSetOf()
-
     private val glyphCreatedBy = GlyphLayout(_game.mainFont, "par Catvert")
 
     private val levelFactory = LevelFactory(game)

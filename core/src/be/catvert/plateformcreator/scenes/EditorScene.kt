@@ -5,7 +5,6 @@ import be.catvert.plateformcreator.ecs.EntityEvent
 import be.catvert.plateformcreator.ecs.EntityFactory
 import be.catvert.plateformcreator.ecs.components.*
 import be.catvert.plateformcreator.ecs.systems.RenderingSystem
-import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.signals.Signal
 import com.badlogic.gdx.Gdx
@@ -34,6 +33,7 @@ import ktx.app.use
 import ktx.ashley.mapperFor
 import ktx.collections.toGdxArray
 import ktx.vis.window
+import org.lwjgl.util.Point
 
 /**
  * Created by Catvert on 10/06/17.
@@ -42,7 +42,7 @@ import ktx.vis.window
 /**
  * Scène de l'éditeur de niveau
  */
-class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Level) : BaseScene(game, entityEvent, systems = RenderingSystem(game)) {
+class EditorScene(game: MtrGame, private val _entityEvent: EntityEvent, private val level: Level) : BaseScene(game, systems = RenderingSystem(game)) {
     /**
      * Enum représentant les différents modes de l'éditeur(sélection d'entités, copie ..)
      */
@@ -112,8 +112,6 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
     private var UIHover = false
     private val editorFont = BitmapFont(Gdx.files.internal("fonts/editorFont.fnt"))
 
-    override val entities: MutableSet<Entity> = mutableSetOf()
-
     init {
         background = level.background
 
@@ -155,6 +153,15 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
         when (editorMode) {
             EditorScene.EditorMode.NoMode -> {
+
+                entities.forEach {
+                    if (it.flags == EntityFactory.EntityType.Special.flag) {
+                        shapeRenderer.color = Color.BLACK
+                        val rect = transformMapper[it].rectangle
+                        shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height)
+                    }
+                }
+
                 if (rectangleMode.rectangleStarted) {
                     shapeRenderer.color = Color.BLUE
                     val rect = rectangleMode.getRectangle()
@@ -184,7 +191,6 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                 }
             }
         }
-
         shapeRenderer.end()
 
         super.render(delta)
@@ -233,7 +239,6 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
 
         val mousePos = Vector2(Gdx.input.x.toFloat(), Gdx.input.y.toFloat())
         val mousePosInWorld = camera.unproject(Vector3(mousePos, 0f))
-        val latestMousePosInWorld = camera.unproject(Vector3(latestMousePos, 0f))
 
         if (!UIHover) {
             when (editorMode) {
@@ -273,16 +278,16 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                         }
                     }
 
-                    if(Gdx.input.isKeyJustPressed(GameKeys.EDITOR_FLIPX_0.key) || Gdx.input.isKeyJustPressed(GameKeys.EDITOR_FLIPX_1.key)) {
+                    if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_FLIPX_0.key) || Gdx.input.isKeyJustPressed(GameKeys.EDITOR_FLIPX_1.key)) {
                         val entity = findEntityUnderMouse()
-                        if(entity != null && renderMapper.has(entity)) {
+                        if (entity != null && renderMapper.has(entity)) {
                             renderMapper[entity].flipX = !renderMapper[entity].flipX
                         }
                     }
-                    if(Gdx.input.isKeyJustPressed(GameKeys.EDITOR_FLIPY_0.key) || Gdx.input.isKeyJustPressed(GameKeys.EDITOR_FLIPY_1.key)) {
+                    if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_FLIPY_0.key) || Gdx.input.isKeyJustPressed(GameKeys.EDITOR_FLIPY_1.key)) {
                         val entity = findEntityUnderMouse()
-                        if(entity != null && renderMapper.has(entity)) {
-                             renderMapper[entity].flipY = !renderMapper[entity].flipY
+                        if (entity != null && renderMapper.has(entity)) {
+                            renderMapper[entity].flipY = !renderMapper[entity].flipY
                         }
                     }
                 }
@@ -659,6 +664,15 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                                     }
                                     EntityFactory.EntityType.Player -> {
                                     }
+                                    EntityFactory.EntityType.Special -> {
+                                        val specialType = this@verticalSettingsGroup.selectBox<SpecialType> {
+                                            items = SpecialType.values().toGdxArray()
+                                        }
+
+                                        addButton.addListener(addButton.onClick {
+                                            finishEntityBuild(entityFactory.createSpecialWithType(specialType.selected, _entityEvent, Point(0, 0)))
+                                        })
+                                    }
                                 }
                             }
 
@@ -831,19 +845,19 @@ class EditorScene(game: MtrGame, entityEvent: EntityEvent, private val level: Le
                         touchable = Touchable.disabled
 
                         onSelectEntityChanged.add { _, selectEntity ->
-                            if (selectEntity == null) {
+                            if (selectEntity == null || !renderMapper.has(selectEntity)) {
                                 touchable = Touchable.disabled
                                 selectedIndex = 0
                             } else {
                                 touchable = Touchable.enabled
-                                selected = selectEntity[RenderComponent::class.java].renderLayer
+                                selected = renderMapper[selectEntity].renderLayer
                             }
                         }
 
                         addListener(onChange {
                             if (this.isTouchable) {
                                 val selectEntity = selectEntities.elementAt(0)
-                                selectEntity[RenderComponent::class.java].renderLayer = selected
+                                renderMapper[selectEntity].renderLayer = selected
                             }
                         })
                     }

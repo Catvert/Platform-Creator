@@ -8,7 +8,6 @@ import be.catvert.plateformcreator.ecs.components.TransformComponent
 import be.catvert.plateformcreator.ecs.systems.RenderingSystem
 import be.catvert.plateformcreator.ecs.systems.UpdateSystem
 import be.catvert.plateformcreator.ecs.systems.physics.PhysicsSystem
-import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.math.MathUtils
@@ -20,9 +19,7 @@ import com.badlogic.gdx.math.MathUtils
 /**
  * Scène du jeu
  */
-class GameScene(game: MtrGame, entityEvent: EntityEvent, private val level: Level) : BaseScene(game, entityEvent, RenderingSystem(game), UpdateSystem(level), PhysicsSystem(level)) {
-    override val entities: MutableSet<Entity> = mutableSetOf()
-
+class GameScene(game: MtrGame, private val _entityEvent: EntityEvent, private val level: Level) : BaseScene(game, RenderingSystem(game), UpdateSystem(level), PhysicsSystem(level)) {
     private val cameraMoveSpeed = 10f
 
     private val transformPlayer = level.player.getComponent(TransformComponent::class.java)

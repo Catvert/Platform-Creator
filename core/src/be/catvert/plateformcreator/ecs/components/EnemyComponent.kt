@@ -11,7 +11,7 @@ import com.badlogic.ashley.signals.Signal
  * Représente le type de l'ennemi
  */
 enum class EnemyType {
-    Spinner, Spider
+    Spinner, Spider, SnakeSlime
 }
 
 /**

@@ -11,6 +11,8 @@ import com.badlogic.gdx.utils.JsonReader
 import com.badlogic.gdx.utils.JsonValue
 import com.badlogic.gdx.utils.JsonWriter
 import ktx.log.error
+import ktx.log.info
+import org.lwjgl.util.Point
 import java.io.FileReader
 import java.io.FileWriter
 
@@ -30,7 +32,9 @@ class LevelFactory(private val game: MtrGame) {
     fun createEmptyLevel(levelName: String, levelPath: FileHandle): Pair<Level, EntityEvent> {
         val loadedEntities = mutableListOf<Entity>()
 
-        val player = entityFactory.createPlayer(Point(100, 100))
+        val entityEvent = EntityEvent(levelPath)
+
+        val player = entityFactory.createPlayer(entityEvent, Point(100, 100))
         val defaultBackground = game.getGameTexture(Gdx.files.internal("game/background/background-4.png"))
 
         loadedEntities += player
@@ -40,16 +44,18 @@ class LevelFactory(private val game: MtrGame) {
                  loadedEntities += entityFactory.createPhysicsSprite(Rectangle(500 + 50f*x, 500 + 50f *y, 50f, 50f), RenderComponent(listOf(game.getSpriteSheetTexture("sheet", "slice03_03"))), PhysicsComponent(true))
              }
          }*/
-
-        return Level(game, levelName, levelPath, player, renderComponent { textures, _ -> textures += defaultBackground }, loadedEntities) to EntityEvent()
+        return Level(game, levelName, levelPath, player, renderComponent { textures, _ -> textures += defaultBackground }, loadedEntities) to entityEvent
     }
 
     /**
      * Charge un niveau
      */
-    fun loadLevel(levelPath: FileHandle): Triple<Boolean, Level, EntityEvent> { // NOTE A SOIS MEME, SI UN ENTITE DOIT CREER UNE AUTRE ENTITE, IL FAUT PASSER LEVEL.ADDENTITY ET PAS LA LISTE ICI
+    fun loadLevel(levelPath: FileHandle): Triple<Boolean, Level, EntityEvent> { // NOTE A SOIS MEME, SI UN ENTITE DOIT CREER UNE AUTRE ENTITE, IL FAUT PASSER PAR LEVEL.ADDENTITY ET PAS LA LISTE ICI
+        info { "Loading level : $levelPath" }
+
         val entities = mutableListOf<Entity>()
-        val entityEvent = EntityEvent()
+
+        val entityEvent = EntityEvent(levelPath)
 
         if (!levelPath.exists())
             throw Exception("Niveau introuvable ! Chemin : $levelPath")
@@ -67,7 +73,7 @@ class LevelFactory(private val game: MtrGame) {
             levelName = root["levelName"].asString()
             backgroundPath = Gdx.files.internal(root["background"].asString())
 
-            fun getPosition(it: JsonValue): Point<Int> {
+            fun getPosition(it: JsonValue): Point {
                 return Point(it["position"]["x"].asInt(), it["position"]["y"].asInt())
             }
 
@@ -82,7 +88,7 @@ class LevelFactory(private val game: MtrGame) {
             }
 
             fun getRenderComponent(it: JsonValue) = renderComponent { textures, _ ->
-                textures += game.getSpriteSheetTexture(it["spritesheet"].asString(), it["texture_name"].asString())
+                textures += game.getSpriteSheetTexture(it["spritesheet"].asString(), it["texturePath"].asString())
 
                 flipX = it["flipX"].asBoolean()
                 flipY = it["flipY"].asBoolean()
@@ -104,12 +110,16 @@ class LevelFactory(private val game: MtrGame) {
                                 getRenderComponent(it), PhysicsComponent(true)))
                     }
                     EntityFactory.EntityType.Player.name -> {
-                        player = entityFactory.createPlayer(getPosition(it))
+                        player = entityFactory.createPlayer(entityEvent, getPosition(it))
                         addEntity(player)
                     }
                     EntityFactory.EntityType.Enemy.name -> {
                         val enemyType = EnemyType.valueOf(it["enemyType"].asString())
                         addEntity(entityFactory.createEnemyWithType(enemyType, entityEvent, getPosition(it)))
+                    }
+                    EntityFactory.EntityType.Special.name -> {
+                        val specialType = SpecialType.valueOf(it["specialType"].asString())
+                        addEntity(entityFactory.createSpecialWithType(specialType, entityEvent, getPosition(it)))
                     }
                 }
             }
@@ -144,7 +154,7 @@ class LevelFactory(private val game: MtrGame) {
 
         fun saveRender(renderComponent: RenderComponent) {
             writer.name("spritesheet").value(renderComponent.textureInfoList[0].spriteSheet)
-            writer.name("texture_name").value(renderComponent.textureInfoList[0].textureName)
+            writer.name("texturePath").value(renderComponent.textureInfoList[0].texturePath)
             writer.name("layer").value(renderComponent.renderLayer.layer)
             writer.name("flipX").value(renderComponent.flipX)
             writer.name("flipY").value(renderComponent.flipY)
@@ -178,6 +188,10 @@ class LevelFactory(private val game: MtrGame) {
                 EntityFactory.EntityType.Enemy.flag -> {
                     savePosition(transformComp)
                     writer.name("enemyType").value(it[EnemyComponent::class.java].enemyType)
+                }
+                EntityFactory.EntityType.Special.flag -> {
+                    savePosition(transformComp)
+                    writer.name("specialType").value(it[SpecialComponent::class.java].specialType)
                 }
             }
             writer.pop()

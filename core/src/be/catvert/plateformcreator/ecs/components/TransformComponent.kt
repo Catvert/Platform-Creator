@@ -1,8 +1,8 @@
 package be.catvert.plateformcreator.ecs.components
 
-import be.catvert.plateformcreator.Point
 import be.catvert.plateformcreator.ecs.systems.physics.GridCell
 import com.badlogic.gdx.math.Rectangle
+import org.lwjgl.util.Point
 
 /**
  * Created by Catvert on 03/06/17.

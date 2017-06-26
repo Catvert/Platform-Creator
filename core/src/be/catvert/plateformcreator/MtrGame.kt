@@ -95,6 +95,7 @@ class MtrGame(vsync: Boolean) : Game() {
 
     override fun render() {
         super.render()
+        Gdx.graphics.setTitle("Plateform Creator - FPS : ${Gdx.graphics.framesPerSecond}")
 
         val delta = Gdx.graphics.deltaTime
 
