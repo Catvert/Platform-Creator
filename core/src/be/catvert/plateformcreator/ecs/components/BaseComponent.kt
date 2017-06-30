@@ -8,6 +8,7 @@ import com.badlogic.ashley.core.Component
 
 /**
  * Cette classe permet d'ajouter au component une variable pour savoir si il est actif ou non et une méthode de copie
+ * @property active Permet d'activer ou de désactiver le component
  */
 abstract class BaseComponent<out T : Component>(var active: Boolean = true) : Component {
     /**

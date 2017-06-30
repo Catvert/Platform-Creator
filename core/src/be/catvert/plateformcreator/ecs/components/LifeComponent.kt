@@ -10,37 +10,40 @@ import com.badlogic.ashley.signals.Signal
 
 /**
  * Listener lorsque la vie de l'entité change
+ * @property entity L'entité ayant le lifeComponent
  */
 data class LifeListener(val entity: Entity, val hp: Int)
 
 /**
  * Ce component permet d'ajouter un système de point de vie à l'entité
- * entity : l'entité possédant ce component
- * initialHP : Les points de vie initial de l'entité
- * onAddLife : est appelé lorsque l'on ajoute des points de vie à l'entité
- * onRemoveLife : est appelé lorsque l'on supprime des points de vie à l'entité
+ * @property entity : l'entité possédant ce component
+ * @property initialHP : Les points de vie initial de l'entité
  */
-class LifeComponent(var entity: Entity, initialHP: Int) : BaseComponent<LifeComponent>() {
+class LifeComponent(var entity: Entity, private val initialHP: Int) : BaseComponent<LifeComponent>() {
     override fun copy(): LifeComponent {
-        /*val lifeComponent = LifeComponent(entity, initialHP)
-
-        lifeComponent.onAddLife = onAddLife
-        lifeComponent.onRemoveLife = onRemoveLife
-
-        return lifeComponent
-        */
-
+        return LifeComponent(entity, initialHP)
         TODO("Trouver une solution car si une copie a lieu, ça veut dire que c'est à destination d'une autre entité")
     }
 
+    /**
+     * Signal appelé quand l'entité reçoit de la vie
+     */
     val onAddLife = Signal<LifeListener>()
+
+    /**
+     * Signal appelé quand l'entité perd de la vie
+     */
     val onRemoveLife = Signal<LifeListener>()
 
+    /**
+     * Les points de vie de l'entité
+     */
     var hp = initialHP
         private set
 
     /**
      * Permet de supprimer des points de vie à l'entité
+     * @param remove Les points de vie à retirer à l'entité
      */
     fun removeLife(remove: Int) {
         for (i in remove downTo 0) {
@@ -51,12 +54,14 @@ class LifeComponent(var entity: Entity, initialHP: Int) : BaseComponent<LifeComp
 
     /**
      * Permet d'ajouter des points de vie à l'entité
+     * @param add Les points de vie à ajouter à l'entité
      */
     fun addLife(add: Int) {
         for (i in 0 until add) {
             ++hp
             onAddLife.dispatch(LifeListener(entity, hp))
         }
+
     }
 
     /**

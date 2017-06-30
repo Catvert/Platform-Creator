@@ -11,6 +11,7 @@ import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
+import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
@@ -35,38 +36,91 @@ import java.io.IOException
 
 /**
  * Classe du jeu
+ * @param vsync Activer ou non la vsync au lancement du jeu
  */
 class MtrGame(vsync: Boolean) : Game() {
+    /**
+     * Le chemin vers le fichier de configuration de l'UI
+     */
     private val UISkinPath: String = "ui/tinted/x1/tinted.json"
 
+    /**
+     * Le batch utilisé pour dessiner les entités
+     */
     lateinit var batch: SpriteBatch
         private set
+
+    /**
+     * Le batch utilisé pour dessiner l'UI
+     */
     lateinit var stageBatch: SpriteBatch
         private set
+
+    /**
+     * Le font principal du jeu
+     */
     lateinit var mainFont: BitmapFont
         private set
+
+    /**
+     * La projection du batch par défaut
+     */
     lateinit var defaultProjection: Matrix4
         private set
 
+    /**
+     * La scène en cour
+     */
     private lateinit var currentScene: BaseScene
 
+    /**
+     * Permet d'activer ou non la synchronisation vertical
+     */
     var vsync = vsync
         set(value) {
             field = value
             Gdx.graphics.setVSync(vsync)
         }
 
+    /**
+     * L'assetManager utilisé pour charger les ressources
+     */
     val assetManager = AssetManager()
-    val entityFactory = EntityFactory(this)
 
+    /**
+     * La couleur utilisé pendant le rafraichissement de l'écran
+     */
     var clearScreenColor = Triple(186f / 255f, 212f / 255f, 1f)
 
+    /**
+     * L'engine utilisé pour le ECS
+     */
     val engine = Engine()
 
+    /**
+     * Les textures chargées depuis les spritesheets
+     */
     private val textureAtlasList = mutableListOf<Pair<TextureAtlas, String>>()
+
+    /**
+     * Permet de retourner les textures chargées depuis les spritesheets
+     */
     fun getTextureAtlasList(): List<Pair<TextureAtlas, String>> = textureAtlasList
 
+    /**
+     * Les animations chargées
+     */
     private val animationsList = mutableListOf<Pair<Animation<TextureAtlas.AtlasRegion>, String>>()
+
+    /**
+     * La liste des fond d'écrans disponibles
+     */
+    private val backgroundsList = mutableListOf<Pair<FileHandle, RenderComponent>>()
+
+    /**
+     * Retourne la liste des fond d'écrans disponibles
+     */
+    fun getBackgroundsList(): List<Pair<FileHandle, RenderComponent>> = backgroundsList
 
     override fun create() {
         info {
@@ -102,7 +156,7 @@ class MtrGame(vsync: Boolean) : Game() {
         clearScreen(clearScreenColor.first, clearScreenColor.second, clearScreenColor.third)
 
         /**
-         * Draw the background
+         * Dessine le fond d'écran de la scène
          */
         batch.projectionMatrix = defaultProjection
         batch.use {
@@ -111,15 +165,19 @@ class MtrGame(vsync: Boolean) : Game() {
         batch.projectionMatrix = currentScene.camera.combined
 
         /**
-         * Draw the scene and ui
+         * Met à jour la scène (inputs ..)
+         * Permet à la scène d'ajouter ou de supprimer des entités à la volée
          */
-        engine.removeAllEntities()
-        currentScene.entities.forEach {
-            if (it !in engine.entities)
-                engine.addEntity(it)
-        }
+        currentScene.update(delta)
 
+        /**
+         * Met à jour les différents systèmes (render, physics, update)
+         */
         engine.update(delta)
+
+        /**
+         * Dessine l'UI et les différents éléments de la scène (textes, formes, ..)
+         */
         currentScene.render(delta)
     }
 
@@ -143,8 +201,8 @@ class MtrGame(vsync: Boolean) : Game() {
 
     /**
      * Permet de définir la scène actuelle
-     * Dispose la scène précédament chargée
-     * Supprime les entités chargées dans la scène précédante
+     * @param scene La scène à charger
+     * @param removeLastScene Dispose la scène précédament chargée et supprime les entités chargées dans la scène précédante
      */
     fun <T : BaseScene> setScene(scene: T, removeLastScene: Boolean = true) {
         if (removeLastScene) {
@@ -167,6 +225,15 @@ class MtrGame(vsync: Boolean) : Game() {
 
         info { "Current scene : ${scene.className()}" }
         currentScene = scene
+        currentScene.show()
+    }
+
+    fun refreshEntitiesInEngine() {
+        engine.removeAllEntities()
+        currentScene.entities.forEach {
+            if (it !in engine.entities)
+                engine.addEntity(it)
+        }
     }
 
     /**
@@ -217,6 +284,10 @@ class MtrGame(vsync: Boolean) : Game() {
         Utility.getFilesRecursivly(Gdx.files.internal("spritesheets"), "atlas").forEach {
             textureAtlasList += assetManager.loadOnDemand<TextureAtlas>(it.toString()).asset to it.file().nameWithoutExtension
         }
+
+        Utility.getFilesRecursivly(Gdx.files.internal("game/background"), "png").forEach {
+            backgroundsList.add(it to renderComponent({ textures, _ -> textures += getTexture(it) }))
+        }
     }
 
     /**
@@ -224,7 +295,7 @@ class MtrGame(vsync: Boolean) : Game() {
      */
     fun getLogo(): Entity {
         val (logoWidth, logoHeight) = getLogoSize()
-        return entityFactory.createSprite(TransformComponent(Rectangle(Gdx.graphics.width / 2f - logoWidth / 2f, Gdx.graphics.height - logoHeight, logoWidth, logoHeight)), renderComponent { textures, _ -> textures += getGameTexture(Gdx.files.internal("game/logo.png")) })
+        return EntityFactory.createSprite(TransformComponent(Rectangle(Gdx.graphics.width / 2f - logoWidth / 2f, Gdx.graphics.height - logoHeight, logoWidth, logoHeight)), renderComponent { textures, _ -> textures += getTexture(Gdx.files.internal("game/logo.png")) })
     }
 
     /**
@@ -238,13 +309,14 @@ class MtrGame(vsync: Boolean) : Game() {
      * Permet de retourner le fond d'écran principal
      */
     fun getMainBackground(): RenderComponent {
-        return renderComponent { textures, _ -> textures += getGameTexture(Gdx.files.internal("game/mainmenu.png")) }
+        return renderComponent { textures, _ -> textures += getTexture(Gdx.files.internal("game/mainmenu.png")) }
     }
 
     /**
-     * Permet de charger et/ou de retourner une texture du dossier game
+     * Permet de charger et/ou de retourner une texture
+     * @param path Le chemin vers la texture
      */
-    fun getGameTexture(path: FileHandle): TextureInfo {
+    fun getTexture(path: FileHandle): TextureInfo {
         try {
             if (!path.exists())
                 throw Exception("La chemin n'existe pas")
@@ -262,8 +334,23 @@ class MtrGame(vsync: Boolean) : Game() {
         return TextureInfo(TextureAtlas.AtlasRegion(Texture(1, 1, Pixmap.Format.Alpha), 0, 0, 1, 1))
     }
 
+
+    /**
+     * Permet de charger un son
+     * @param path Le chemin vers le fichier audio
+     */
+    fun getGameSound(path: FileHandle): Sound {
+        if (assetManager.isLoaded(path.path())) {
+            return assetManager.get(path.path())
+        } else {
+            return assetManager.loadOnDemand<Sound>(path.path()).asset
+        }
+    }
+
     /**
      * Permet de retourner la région ayant le nom spécifié d'un spriteSheet spécifié
+     * @param spriteSheet Le nom de la spriteSheet
+     * @param textureName Le nom de la texture
      */
     fun getSpriteSheetTexture(spriteSheet: String, textureName: String): TextureInfo {
         try {
@@ -276,7 +363,8 @@ class MtrGame(vsync: Boolean) : Game() {
 
     /**
      * Permet de retourner une animation portant le nom spécifié
-     * frameDuration : La durée de chaque frame
+     * @param animationName Le nom de l'animation
+     * @param frameDuration La durée de chaque frame
      */
     fun getAnimation(animationName: String, frameDuration: Float): Animation<TextureAtlas.AtlasRegion> {
         try {
@@ -289,7 +377,15 @@ class MtrGame(vsync: Boolean) : Game() {
     }
 
     /**
+     * Permet de retourner le fond d'écran depuis la liste des fond d'écrans
+     * @param fileHandle Le chemin vers le fond d'écran
+     */
+    fun getBackground(fileHandle: FileHandle) = backgroundsList.first { it.first == fileHandle }
+
+    /**
      * Permet de créer une animation à partir de plusieurs régions.
+     * @param regions Les régions à utiliser pour créer l'animation
+     * @param frameDuration La durée de chaque frame
      */
     fun createAnimationFromRegions(regions: GdxArray<out TextureAtlas.AtlasRegion>, frameDuration: Float): Animation<TextureAtlas.AtlasRegion> {
         return Animation(frameDuration, regions)

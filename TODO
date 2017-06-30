@@ -1,10 +1,9 @@
 Fonctionnalitées à venir {
-    - UI en jeu pour le score, point de vies restant, timer ..
-    - Menu options dans l'éditeur pour les caractéristiques du niveau
     - Un fonction pour simuler le niveau dans l'éditeur -> pq pas lancer la gameScene et quand le joueur meurt, se rediriger vers l'éditeur là où il en était
     - Toutes les resources chargés doivent pouvoir être changée par l'utilisateur dans un fichier de configuration
     - Delta time
     - Pouvoir assigner les touches en appuyant simplement dessus
+    - Pouvoir redimensionner les entités en glissant depuis un coin -> et un groupe en même temps si & seulement si elles sont des sprites ou physicsSprite
 }
 
 Bugs {

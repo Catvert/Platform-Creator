@@ -8,6 +8,10 @@ package be.catvert.plateformcreator.ecs
  * Interface permettant d'implémenter une méthode de mise à jour
  */
 interface IUpdateable {
+    /**
+     * Méthode de mise à jour
+     * @param deltaTime Le delta actuelle
+     */
     fun update(deltaTime: Float)
 
     operator fun invoke(deltaTime: Float) {

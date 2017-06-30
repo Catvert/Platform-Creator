@@ -4,10 +4,10 @@ import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.signals.Listener
 import com.badlogic.ashley.signals.Signal
 
-
 /**
  * Created by Catvert on 04/06/17.
  */
+
 
 /**
  * Enmu permettant de définir le type de mouvement de l'entité (fluide ou linéaire)
@@ -18,11 +18,11 @@ enum class MovementType {
 
 /**
  * Classe de données permettant de gérer les sauts notament en définissant la hauteur du saut
- * jumpHeight : La hauteur du saut
- * isJumping : Permet de savoir si l'entité est entrain de sauté
- * targetHeight : La hauteur en y à atteindre
- * startJumping : Débute le saut de l'entité
- * forceJumping : Permet de forcer le saut de l'entité
+ * @property jumpHeight : La hauteur du saut
+ * @property isJumping : Permet de savoir si l'entité est entrain de sauté
+ * @property targetHeight : La hauteur en y à atteindre
+ * @property startJumping : Débute le saut de l'entité
+ * @property forceJumping : Permet de forcer le saut de l'entité
  */
 data class JumpData(var jumpHeight: Int, var isJumping: Boolean = false, var targetHeight: Int = 0, var startJumping: Boolean = false, var forceJumping: Boolean = false)
 
@@ -56,7 +56,7 @@ enum class NextActions {
  * Permet de déterminer quel mask l'entité doit utiliser pour les collisions
  */
 enum class MaskCollision {
-    ALL, ONLY_PLAYER, ONLY_ENEMY, SENSOR
+    ALL, ONLY_PLAYER, ONLY_ENEMY
 }
 
 /**
@@ -72,10 +72,10 @@ data class MoveListener(val entity: Entity, val moveX: Int, val moveY: Int)
 /**
  * Ce component permet d'ajouter à l'entité des propriétés physique tel que la gravité, vitesse de déplacement ...
  * Une entité contenant ce component ne pourra pas être traversé par une autre entité ayant également ce component
- * isStatic : Permet de spécifier si l'entité est sensé bougé ou non
- * moveSpeed : La vitesse de déplacement de l'entité qui sera utilisée avec les NextActions
- * smoothMove : Permet d'inclure ou non le déplacement "fluide" à l'entité
- * gravity : Permet de spécifier si la gravité est appliquée à l'entité
+ * @param isStatic : Permet de spécifier si l'entité est sensé bougé ou non
+ * @param moveSpeed : La vitesse de déplacement de l'entité qui sera utilisée avec les NextActions
+ * @param movementType : Permet de définir le type de déplacement de l'entité
+ * @param gravity : Permet de spécifier si la gravité est appliquée à l'entité
  */
 class PhysicsComponent(var isStatic: Boolean, var moveSpeed: Int = 0, var movementType: MovementType = MovementType.LINEAR, var gravity: Boolean = !isStatic, var maskCollision: MaskCollision = MaskCollision.ALL) : BaseComponent<PhysicsComponent>() {
     override fun copy(): PhysicsComponent {
@@ -99,18 +99,22 @@ class PhysicsComponent(var isStatic: Boolean, var moveSpeed: Int = 0, var moveme
     var jumpData: JumpData? = null
 
     /**
-     * ActualMoveSpeed permet de connaître la vitesse actuelle de l'entité
+     * La vitesse de déplacement x actuelle de l'entité (à titre d'information)
      */
     var actualMoveSpeedX = 0f
+
+    /**
+     * La vitesse de déplacement y actuelle de l'entité (à titre d'information)
+     */
     var actualMoveSpeedY = 0f
 
     /**
-     * Appelé lorsque une entité ayant ce component touche cette entité
+     * Signal appelé lorsque une entité ayant ce component touche cette entité
      */
     var onCollisionWith = Signal<CollisionListener>()
 
     /**
-     * Appelé lorsque l'entité bouge à cause des NextActions
+     * Signal appelé lorsque l'entité bouge à cause des NextActions
      */
     var onMove = Signal<MoveListener>()
 
@@ -118,6 +122,11 @@ class PhysicsComponent(var isStatic: Boolean, var moveSpeed: Int = 0, var moveme
      * Permet à l'entité de savoir si elle est sur le sol ou non
      */
     var isOnGround = false
+
+    /**
+     * Permet à l'entité de passer les collisions, ne reçoit plus que les callbacks
+     */
+    var isSensor = false
 }
 
 fun physicsComponent(isStatic: Boolean, init: PhysicsComponent.() -> Unit, onCollisionWith: (PhysicsComponent.() -> Listener<CollisionListener>)? = null, onMove: (PhysicsComponent.() -> Listener<MoveListener>)? = null): PhysicsComponent {

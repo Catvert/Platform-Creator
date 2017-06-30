@@ -6,6 +6,9 @@ import com.badlogic.gdx.Input
  * Created by Catvert on 18/06/17.
  */
 
+/**
+ * Enumération des différentes touches utilisées dans le jeu
+ */
 enum class GameKeys(var key: Int, val description: String) {
     EDITOR_CAMERA_LEFT(Input.Keys.Q, "Editor camera left move"),
     EDITOR_CAMERA_RIGHT(Input.Keys.D, "Editor camera right move"),
@@ -26,6 +29,8 @@ enum class GameKeys(var key: Int, val description: String) {
     EDITOR_FLIPX_1(Input.Keys.RIGHT, "Editor flip x[1]"),
     EDITOR_FLIPY_0(Input.Keys.UP, "Editor flip y"),
     EDITOR_FLIPY_1(Input.Keys.DOWN, "Editor flip y[1]"),
+    EDITOR_UP_LAYER(Input.Keys.PLUS, "Editor up select layer"),
+    EDITOR_DOWN_LAYER(Input.Keys.MINUS, "Editor down select layer"),
 
 
     DEBUG_MODE(Input.Keys.F12, "Debug Mode"),

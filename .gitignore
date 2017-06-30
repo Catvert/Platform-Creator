@@ -114,3 +114,5 @@ gradle-app.setting
 Thumbs.db
 
 out/
+
+dokka-fatjar\.jar

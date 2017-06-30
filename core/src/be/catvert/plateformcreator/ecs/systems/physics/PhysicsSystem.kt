@@ -4,11 +4,11 @@ import be.catvert.plateformcreator.Level
 import be.catvert.plateformcreator.ecs.EntityFactory
 import be.catvert.plateformcreator.ecs.components.*
 import be.catvert.plateformcreator.get
+import be.catvert.plateformcreator.isType
 import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.core.EntitySystem
 import com.badlogic.ashley.core.Family
-import com.badlogic.ashley.utils.ImmutableArray
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Rectangle
 
@@ -18,18 +18,16 @@ import com.badlogic.gdx.math.Rectangle
 
 /**
  * Ce système permet de gérer le système physique du jeu en mettant à jour les entités ayant un physicsComponent et un transformComponent
- * @param level : Le niveau chargé au préalable
- * @param gravity : La gravité à appliquée au entité implémentant un physicsComponent, permet aussi de spécifier la vitesse du jump(inverse de la gravité)
+ * @property level : Le niveau chargé au préalable
+ * @property gravity : La gravité à appliquer aux entités implémentant un physicsComponent, permet aussi de spécifier la vitesse du jump(inverse de la gravité)
  */
 class PhysicsSystem(private val level: Level, val gravity: Int = 15) : EntitySystem() {
-    private lateinit var entities: ImmutableArray<Entity>
-
     private val transformMapper = ComponentMapper.getFor(TransformComponent::class.java)
     private val physicsMapper = ComponentMapper.getFor(PhysicsComponent::class.java)
 
     override fun update(deltaTime: Float) {
         super.update(deltaTime)
-        entities = engine.getEntitiesFor(Family.all(PhysicsComponent::class.java, TransformComponent::class.java).get())
+        val entities = engine.getEntitiesFor(Family.all(PhysicsComponent::class.java, TransformComponent::class.java).get())
 
         entities.forEach { entity ->
             val physicsComp = physicsMapper[entity]
@@ -116,8 +114,8 @@ class PhysicsSystem(private val level: Level, val gravity: Int = 15) : EntitySys
 
     /**
      * Permet d'essayer de déplacer une entité ayant un physicsComponent
-     * moveX : Le déplacement x
-     * moveY : Le déplacement y
+     * @param moveX : Le déplacement x
+     * @param moveY : Le déplacement y
      */
     private fun tryMove(moveX: Int, moveY: Int, entity: Entity) {
         val transformTarget = transformMapper[entity]
@@ -160,10 +158,9 @@ class PhysicsSystem(private val level: Level, val gravity: Int = 15) : EntitySys
 
     /**
      * Permet de tester si un déplacement est possible ou non
-     * moveX : Le déplacement x
-     * moveY : Le déplacement y
-     * entity : L'entité à tester
-     *
+     * @param moveX : Le déplacement x
+     * @param moveY : Le déplacement y
+     * @param entity : L'entité à tester
      */
     private fun collideOnMove(moveX: Int, moveY: Int, entity: Entity): Boolean {
         val physicsTarget = physicsMapper[entity]
@@ -176,10 +173,10 @@ class PhysicsSystem(private val level: Level, val gravity: Int = 15) : EntitySys
             level.matrixGrid[it.x][it.y].first.filter {
                 transformMapper[it] != transformTarget  // On vérifie si la targetEntity n'est pas la même que celle dans l'itération
                         && physicsMapper.has(it) // On vérifie si l'entité qu'on parcourt a un physicsComponent
-                        && when (physicsTarget.maskCollision) { // On vérifie si le mask est correcte
-                    MaskCollision.ALL, MaskCollision.SENSOR -> true
-                    MaskCollision.ONLY_PLAYER -> it.flags == EntityFactory.EntityType.Player.flag
-                    MaskCollision.ONLY_ENEMY -> it.flags == EntityFactory.EntityType.Enemy.flag
+                        && when (physicsMapper[it].maskCollision) { // On vérifie si le mask est correcte
+                    MaskCollision.ALL -> true
+                    MaskCollision.ONLY_PLAYER -> entity isType EntityFactory.EntityType.Player
+                    MaskCollision.ONLY_ENEMY -> entity isType EntityFactory.EntityType.Enemy
                 }
             }.forEach {
                 val transformComponent = transformMapper[it]
@@ -187,16 +184,16 @@ class PhysicsSystem(private val level: Level, val gravity: Int = 15) : EntitySys
                 if (newRect.overlaps(transformComponent.rectangle)) {
                     val side = if (moveX > 0) CollisionSide.OnRight else if (moveX < 0) CollisionSide.OnLeft else if (moveY > 0) CollisionSide.OnUp else if (moveY < 0) CollisionSide.OnDown else CollisionSide.Unknow
 
-                    if (entity.flags == EntityFactory.EntityType.Enemy.flag && it.flags == EntityFactory.EntityType.Player.flag)
+                    if (entity isType EntityFactory.EntityType.Enemy && it isType EntityFactory.EntityType.Player)
                         entity[EnemyComponent::class.java].onPlayerCollision.dispatch(CollisionListener(entity, it, side))
-                    else if (entity.flags == EntityFactory.EntityType.Player.flag && it.flags == EntityFactory.EntityType.Enemy.flag)
+                    else if (entity isType EntityFactory.EntityType.Player && it isType EntityFactory.EntityType.Enemy)
                         it[EnemyComponent::class.java].onPlayerCollision.dispatch(CollisionListener(it, entity, -side)) // - side to inverse the side
-                    else if (it.flags != EntityFactory.EntityType.Special.flag)
-                        physicsMapper[entity].onCollisionWith.dispatch(CollisionListener(entity, it, side))
-
-                    if (it.flags == EntityFactory.EntityType.Special.flag) {
+                    else if (!physicsMapper[it].isSensor)
+                        physicsTarget.onCollisionWith.dispatch(CollisionListener(entity, it, side))
+                    else // is a sensor
                         physicsMapper[it].onCollisionWith.dispatch(CollisionListener(it, entity, side))
-                    } else
+
+                    if (!physicsMapper[it].isSensor)
                         return true
                 }
             }

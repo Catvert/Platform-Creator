@@ -10,9 +10,12 @@ import com.badlogic.gdx.Input
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
+import com.badlogic.gdx.scenes.scene2d.InputListener
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane
 import com.kotcrab.vis.ui.widget.*
 import ktx.actors.onClick
+import ktx.actors.onKeyDown
+import ktx.actors.onKeyUp
 import ktx.actors.plus
 import ktx.app.use
 import ktx.collections.GdxArray
@@ -23,20 +26,18 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 
-
 /**
  * Created by Catvert on 03/06/17.
  */
+
 
 /**
  * Scène du menu principal
  */
 class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(game)) {
-    private val glyphCreatedBy = GlyphLayout(_game.mainFont, "par Catvert")
+    private val glyphCreatedBy = GlyphLayout(this.game.mainFont, "par Catvert")
 
-    private val levelFactory = LevelFactory(game)
-
-    private var logo = _game.getLogo()
+    private var logo = this.game.getLogo()
         set(value) {
             entities -= logo
             field = value
@@ -48,7 +49,7 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
 
         entities += logo
 
-        stage.addActor(window("Menu Principal") {
+        stage + window("Menu Principal") {
             setSize(200f, 200f)
             setPosition(Gdx.graphics.width / 2f - width / 2, Gdx.graphics.height / 2f - height / 2)
 
@@ -67,22 +68,23 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
                     addListener(onClick { Gdx.app.exit() })
                 }
             }
-        })
+        }
     }
 
     override fun render(delta: Float) {
         super.render(delta)
 
-        _game.batch.use {
-            _game.mainFont.draw(it, glyphCreatedBy, Gdx.graphics.width - glyphCreatedBy.width, glyphCreatedBy.height)
+        game.batch.use {
+            game.mainFont.draw(it, glyphCreatedBy, Gdx.graphics.width - glyphCreatedBy.width, glyphCreatedBy.height)
         }
     }
 
     /**
      * Affiche une fenêtre pour sélectionner le nom du niveau
+     * @param onNameSelected Méthode appelée quand l'utilisateur a correctement entré le nom du niveau
      */
     fun showSetNameLevelWindow(onNameSelected: (name: String) -> Unit) {
-        stage.addActor(window("Choisissez un nom pour le niveau") {
+        stage + window("Choisissez un nom pour le niveau") {
             isModal = true
             setSize(300f, 150f)
             setPosition(Gdx.graphics.width / 2f - width / 2, Gdx.graphics.height / 2f - height / 2)
@@ -107,14 +109,14 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
                     })
                 }
             }
-        })
+        }
     }
 
     /**
      * Affiche un dialogue simple
-     * title : Le titre
-     * content : Le contenu du dialogue
-     * onClose : Fonction appelée quand l'utilisateur a appuié sur le bouton fermer
+     * @param title : Le titre
+     * @param content : Le contenu du dialogue
+     * @param onClose : Fonction appelée quand l'utilisateur a appuié sur le bouton fermer
      */
     fun showDialog(title: String, content: String, onClose: (() -> Unit)? = null) {
         showDialog(title, content, listOf(VisTextButton("Fermer")), { _ -> onClose?.invoke() })
@@ -122,13 +124,13 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
 
     /**
      * Affiche un dialogue complexe
-     * title : Le titre
-     * content : Le contenu du dialogue
-     * buttons : Les boutons disponibles dans le dialogue
-     * onClose : Fonction appelée quand l'utilisateur a appuié sur un bouton
+     * @param title : Le titre
+     * @param content : Le contenu du dialogue
+     * @param buttons : Les boutons disponibles dans le dialogue
+     * @param onClose : Fonction appelée quand l'utilisateur a appuié sur un bouton
      */
     fun showDialog(title: String, content: String, buttons: List<VisTextButton>, onClose: ((button: Int) -> Unit)) {
-        stage.addActor(window(title) {
+        stage + window(title) {
             isModal = true
             setSize(400f, 150f)
             setPosition(Gdx.graphics.width / 2f - width / 2, Gdx.graphics.height / 2f - height / 2)
@@ -140,16 +142,16 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
 
                 horizontalGroup {
                     space(10f)
-                    buttons.forEachIndexed { i, it ->
-                        addActor(it)
-                        it.addListener(it.onClick {
+                    buttons.forEachIndexed { i, button ->
+                        addActor(button)
+                        button.addListener(button.onClick {
                             this@window.remove()
                             onClose(i)
                         })
                     }
                 }
             }
-        })
+        }
     }
 
     /**
@@ -174,7 +176,7 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
         val list = VisList<LevelItem>()
         list.setItems(getLevels())
 
-        stage.addActor(window("Sélection d'un niveau") window@ {
+        stage + window("Sélection d'un niveau") window@ {
             addCloseButton()
             isModal = true
             setSize(400f, 400f)
@@ -188,26 +190,26 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
                     textButton("Jouer") {
                         addListener(onClick {
                             if (list.selected != null) {
-                                val (success, level, entityEvent) = levelFactory.loadLevel(list.selected.file)
+                                val (success, level) = LevelFactory.loadLevel(game, list.selected.file)
                                 if (success)
-                                    _game.setScene(GameScene(_game, entityEvent, level))
+                                    game.setScene(GameScene(game, level))
                             }
                         })
                     }
                     textButton("Éditer") {
                         addListener(onClick {
                             if (list.selected != null) {
-                                val (success, level, entityEvent) = levelFactory.loadLevel(list.selected.file)
+                                val (success, level) = LevelFactory.loadLevel(game, list.selected.file)
                                 if (success)
-                                    _game.setScene(EditorScene(_game, entityEvent, level))
+                                    game.setScene(EditorScene(game, level))
                             }
                         })
                     }
                     textButton("Nouveau") {
                         addListener(onClick {
                             showSetNameLevelWindow { name ->
-                                val (level, entityEvent) = levelFactory.createEmptyLevel(name, Gdx.files.internal("levels/$name.mtrlvl"))
-                                _game.setScene(EditorScene(_game, entityEvent, level))
+                                val level = LevelFactory.createEmptyLevel(game, Gdx.files.internal("levels/$name.mtrlvl"), name)
+                                game.setScene(EditorScene(game, level))
                             }
                         })
                     }
@@ -247,7 +249,7 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
                     }
                 }
             }
-        })
+        }
     }
 
     /**
@@ -276,7 +278,7 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
                     isChecked = Gdx.graphics.isFullscreen
                 }
                 val vsync = checkBox("VSync") {
-                    isChecked = _game.vsync
+                    isChecked = game.vsync
                 }
 
                 textButton("Appliquer") {
@@ -294,16 +296,16 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
                             widthArea.color = Color.WHITE
                             heightArea.color = Color.WHITE
 
-                            _game.vsync = vsync.isChecked
+                            game.vsync = vsync.isChecked
 
                             if (fullscreen.isChecked)
                                 Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
                             else
                                 Gdx.graphics.setWindowedMode(widthArea.text.toInt(), heightArea.text.toInt())
 
-                            logo = _game.getLogo() // Met à jour le logo
+                            logo = game.getLogo() // Met à jour le logo
 
-                            if (_game.saveGameConfig())
+                            if (game.saveGameConfig())
                                 showDialog("Sauvegarde effectuée !", "La sauvegarde de la config du jeu c'est correctement effectuée !")
                             else
                                 showDialog("Erreur lors de la sauvegarde !", "Une erreur est survenue lors de la sauvegarde de la config du jeu !")
@@ -325,6 +327,10 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
                     add(VisLabel(key.description))
 
                     val keyArea = VisTextArea(Input.Keys.toString(key.key))
+                    keyArea.addListener(keyArea.onKeyUp {
+                        keyArea.text = Input.Keys.toString(it)
+                    })
+                    keyArea.isReadOnly = true
                     keyArea.userObject = key
                     keyAreaList += keyArea
 
@@ -345,14 +351,9 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
 
                     keyAreaList.forEach {
                         val gameKey = it.userObject as GameKeys
-                        if (it.text.isBlank()) {
-                            success = false
-                            it.color = Color.RED
-                            return@forEach
-                        }
 
                         val newKey = Input.Keys.valueOf(it.text)
-                        if (newKey == -1) {
+                        if (newKey == -1 || newKey == Input.Keys.UNKNOWN) {
                             success = false
                             it.color = Color.RED
                         } else
@@ -361,7 +362,7 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
 
                     if (success) {
                         keyAreaList.forEach { it.color = Color.WHITE }
-                        if (_game.saveKeysConfig())
+                        if (game.saveKeysConfig())
                             showDialog("Sauvegarde effectuée !", "La sauvegarde des touches c'est correctement effectuée !")
                         else
                             showDialog("Erreur lors de la sauvegarde", "Une erreur est survenue lors de la sauvegarde du jeu !")

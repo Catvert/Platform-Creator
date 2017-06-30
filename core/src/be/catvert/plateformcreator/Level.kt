@@ -3,7 +3,6 @@ package be.catvert.plateformcreator
 import be.catvert.plateformcreator.ecs.IUpdateable
 import be.catvert.plateformcreator.ecs.components.BaseComponent
 import be.catvert.plateformcreator.ecs.components.LifeComponent
-import be.catvert.plateformcreator.ecs.components.RenderComponent
 import be.catvert.plateformcreator.ecs.components.TransformComponent
 import be.catvert.plateformcreator.ecs.systems.physics.GridCell
 import com.badlogic.ashley.core.ComponentMapper
@@ -19,34 +18,80 @@ import com.badlogic.gdx.math.Rectangle
 
 /**
  * Classe représantant le niveau en cour
- * game : l'objet du jeu
- * levelName : Le nom du niveau
- * player : L'entité du joueur
- * background : Le fond d'écran du niveau
- * levelFile : Le fichier utilisé pour charger le niveau
- * loadedEntities : Les entités chargés et à sauvegarder dans le fichier du niveau
+ * @property game : l'objet du jeu
+ * @property levelName : Le nom du niveau
+ * @property levelFile : Le fichier utilisé pour charger le niveau
+ * @property player : L'entité du joueur
+ * @property backgroundPath : Le fond d'écran du niveau
+ * @property loadedEntities : Les entités chargés et à sauvegarder dans le fichier du niveau
  */
-class Level(private val _game: MtrGame, var levelName: String, val levelFile: FileHandle, val player: Entity, val background: RenderComponent, val loadedEntities: MutableList<Entity>) : IUpdateable {
+class Level(private val game: MtrGame, var levelName: String, val levelFile: FileHandle, val player: Entity, var backgroundPath: FileHandle, val loadedEntities: MutableList<Entity>) : IUpdateable {
+    /**
+     * ShapeRenderer utilisé par exemple pour dessiner des rectangles autour des entités
+     */
     private val shapeRenderer = ShapeRenderer()
 
-    private val matrixSizeX = 300
-    private val matrixSizeY = 100
+    /**
+     * Taille de la matrix en largeur
+     */
+    private val matrixWidth = 300
+
+    /**
+     * Taille de la matrix en hauteur
+     */
+    private val matrixHeight = 100
+
+    /**
+     * Taille d'une cellule en largeur x hauteur
+     */
     private val sizeGridCell = 200f
 
-    val matrixGrid = matrix2d(matrixSizeX, matrixSizeY, { row: Int, width: Int -> Array(width) { col -> mutableListOf<Entity>() to Rectangle(row.toFloat() * sizeGridCell, col.toFloat() * sizeGridCell, sizeGridCell, sizeGridCell) } })
-    val matrixRect = Rectangle(0f, 0f, sizeGridCell * matrixSizeX, sizeGridCell * matrixSizeY)
+    /**
+     * La matrix permettant de stoquer les différentes entités selon leur position dans l'espace
+     */
+    val matrixGrid = matrix2d(matrixWidth, matrixHeight, { row: Int, width: Int -> Array(width) { col -> mutableListOf<Entity>() to Rectangle(row.toFloat() * sizeGridCell, col.toFloat() * sizeGridCell, sizeGridCell, sizeGridCell) } })
 
+    /**
+     * Le rectangle illustrant la matrix
+     */
+    val matrixRect = Rectangle(0f, 0f, sizeGridCell * matrixWidth, sizeGridCell * matrixHeight)
+
+    /**
+     * Les cellules actives
+     */
     private val activeGridCells = mutableListOf<GridCell>()
+
+    /**
+     * Permet de retourner les cellules actives
+     */
     fun getActiveGridCells(): List<GridCell> = activeGridCells
 
+    /**
+     * Le rectangle illustrant la zone où les cellules sont actives
+     */
     val activeRect = Rectangle(player.getComponent(TransformComponent::class.java).rectangle)
 
     private val transformMapper = ComponentMapper.getFor(TransformComponent::class.java)
     private val lifeMapper = ComponentMapper.getFor(LifeComponent::class.java)
 
+    /**
+     * Permet de dessiner ou non les cellules (debug)
+     */
     var drawDebugCells = false
+
+    /**
+     * Permet de spécifier si la caméra doit suivre le joueur
+     */
     var followPlayerCamera = true
-    var killEntityUnderY = true
+
+    /**
+     * Permet de spécifier si le niveau doit tuer les entités qui ont un y négatif
+     */
+    var killEntityNegativeY = true
+
+    /**
+     * Appliquer ou non la gravité
+     */
     var applyGravity = true
 
     init {
@@ -54,7 +99,7 @@ class Level(private val _game: MtrGame, var levelName: String, val levelFile: Fi
 
         loadedEntities.forEach {
             setEntityGrid(it) // Besoin de setGrid car les entités n'ont pas encore été ajoutée à la matrix
-            if (it == player)
+            if (it === player)
                 return@forEach
             it.components.filter { c -> c is BaseComponent<*> }.forEach {
                 (it as BaseComponent<*>).active = false
@@ -66,7 +111,7 @@ class Level(private val _game: MtrGame, var levelName: String, val levelFile: Fi
         updateActiveCells()
 
         if (drawDebugCells) {
-            shapeRenderer.projectionMatrix = _game.batch.projectionMatrix
+            shapeRenderer.projectionMatrix = game.batch.projectionMatrix
             shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
             matrixGrid.forEach {
                 it.forEach {
@@ -84,7 +129,7 @@ class Level(private val _game: MtrGame, var levelName: String, val levelFile: Fi
     private fun updateActiveCells() {
         activeGridCells.forEach {
             matrixGrid[it.x][it.y].first.forEach matrix@ {
-                if (it == player)
+                if (it === player)
                     return@matrix
                 it.components.filter { c -> c is BaseComponent<*> }.forEach {
                     (it as BaseComponent<*>).active = false
@@ -101,7 +146,7 @@ class Level(private val _game: MtrGame, var levelName: String, val levelFile: Fi
                 val entity = matrixGrid[it.x][it.y].first[i]
                 entity.components.filter { c -> c is BaseComponent<*> }.forEach {
                     (it as BaseComponent<*>).active = true
-                    if (killEntityUnderY && it is TransformComponent && it.rectangle.y < 0) {
+                    if (killEntityNegativeY && it is TransformComponent && it.rectangle.y < 0) {
                         if (lifeMapper.has(entity))
                             lifeMapper[entity].killInstant()
                         removeEntity(entity)
@@ -113,12 +158,13 @@ class Level(private val _game: MtrGame, var levelName: String, val levelFile: Fi
 
     /**
      * Permet de retourner les cellules présentes dans le rectangle spécifié
+     * @param rect Le rectangle
      */
     fun getRectCells(rect: Rectangle): List<GridCell> {
         val cells = mutableListOf<GridCell>()
 
         fun rectContains(x: Int, y: Int): Boolean {
-            if ((x < 0 || y < 0) || (x >= matrixSizeX || y >= matrixSizeY)) {
+            if ((x < 0 || y < 0) || (x >= matrixWidth || y >= matrixHeight)) {
                 return false
             }
 
@@ -154,6 +200,7 @@ class Level(private val _game: MtrGame, var levelName: String, val levelFile: Fi
 
     /**
      * Permet d'ajouter une entité au niveau (ne l'ajoute pas dans loadedEntities)
+     * @param entity L'entité à ajouter
      */
     fun addEntity(entity: Entity) {
         setEntityGrid(entity)
@@ -165,6 +212,7 @@ class Level(private val _game: MtrGame, var levelName: String, val levelFile: Fi
 
     /**
      * Permet de supprimer une entité du niveau (ne la supprime pas de loadedEntities)
+     * @param entity L'entité à supprimer
      */
     fun removeEntity(entity: Entity) {
         transformMapper[entity].gridCell.forEach {
@@ -174,6 +222,7 @@ class Level(private val _game: MtrGame, var levelName: String, val levelFile: Fi
 
     /**
      * Permet de mettre à jour la liste des cellules où l'entité se trouve
+     * @param entity L'entité à mettre à jour
      */
     fun setEntityGrid(entity: Entity) {
         val transformComp = transformMapper[entity]
@@ -192,6 +241,7 @@ class Level(private val _game: MtrGame, var levelName: String, val levelFile: Fi
 
     /**
      * Permet de retourner les entités présentent dans les cellules spécifiées
+     * @param cells Les cellules où les entités sont présentes
      */
     fun getAllEntitiesInCells(cells: List<GridCell>): List<Entity> {
         val list = mutableListOf<Entity>()
@@ -203,6 +253,8 @@ class Level(private val _game: MtrGame, var levelName: String, val levelFile: Fi
 
     /**
      * Permet de retourné les entités présentent dans le rectangle spécifiés
+     * @param rect le rectangle dans lequel les entités seront retournées
+     * @param overlaps permet de spécifier si le mode de détection est en overlaps ou contains
      */
     fun getAllEntitiesInRect(rect: Rectangle, overlaps: Boolean = true): List<Entity> {
         val list = mutableSetOf<Entity>()

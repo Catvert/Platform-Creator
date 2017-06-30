@@ -11,12 +11,14 @@ import com.badlogic.ashley.signals.Signal
 
 /**
  * Listener appelé à chaque frame
+ * @property delta Le delta au moment que où ce listener est appelé
+ * @property entity L'entité ayant le updateComponent
+ * @property level Le niveau
  */
 data class UpdateListener(val delta: Float, val entity: Entity, val level: Level)
 
 /**
  * Ce component permet d'ajouter une méthode à l'entité qui sera appelée à chaque frame
- * update : La méthode appelée à chaque frame
  */
 class UpdateComponent : BaseComponent<UpdateComponent>() {
     override fun copy(): UpdateComponent {

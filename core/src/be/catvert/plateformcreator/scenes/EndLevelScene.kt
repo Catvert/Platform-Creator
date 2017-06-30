@@ -5,8 +5,8 @@ import be.catvert.plateformcreator.MtrGame
 import be.catvert.plateformcreator.ecs.systems.RenderingSystem
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
-import com.badlogic.gdx.scenes.scene2d.InputEvent
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
+import ktx.actors.onClick
+import ktx.actors.plus
 import ktx.vis.window
 
 /**
@@ -15,13 +15,18 @@ import ktx.vis.window
 
 /**
  * Scène de fin de niveau, appelé lorsque le joueur meurt ou fini le niveau
+ * @param game L'objet du jeu
+ * @param levelFile Le fichier utilisé pour charger le niveau
+ * @param levelSuccess Permet de spécifier si oui ou non le joueur a réussi le niveau
  */
 class EndLevelScene(game: MtrGame, levelFile: FileHandle, levelSuccess: Boolean) : BaseScene(game, systems = RenderingSystem(game)) {
     init {
         background = game.getMainBackground()
         entities += game.getLogo()
 
-        stage.addActor(window("Fin de partie") {
+        game.getGameSound(Gdx.files.internal(if (levelSuccess) "sounds/game-over-success.wav" else "sounds/game-over-fail.wav")).play()
+
+        stage + window("Fin de partie") {
             setSize(200f, 200f)
             setPosition(Gdx.graphics.width / 2f - width / 2, Gdx.graphics.height / 2f - height / 2)
 
@@ -29,26 +34,18 @@ class EndLevelScene(game: MtrGame, levelFile: FileHandle, levelSuccess: Boolean)
                 space(10f)
 
                 textButton("Recommencer le niveau") {
-                    addListener(object : ClickListener() {
-                        override fun clicked(event: InputEvent?, x: Float, y: Float) {
-                            super.clicked(event, x, y)
-
-                            val (success, level, entityEvent) = LevelFactory(game).loadLevel(levelFile)
-                            if (success)
-                                game.setScene(GameScene(game, entityEvent, level))
-                        }
+                    addListener(onClick {
+                        val (success, level) = LevelFactory.loadLevel(game, levelFile)
+                        if (success)
+                            game.setScene(GameScene(game, level))
                     })
                 }
                 textButton("Revenir au menu principal") {
-                    addListener(object : ClickListener() {
-                        override fun clicked(event: InputEvent?, x: Float, y: Float) {
-                            super.clicked(event, x, y)
-
-                            game.setScene(MainMenuScene(game))
-                        }
+                    addListener(onClick {
+                        game.setScene(MainMenuScene(game))
                     })
                 }
             }
-        })
+        }
     }
 }

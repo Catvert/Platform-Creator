@@ -32,6 +32,9 @@ object DesktopLauncher {
         LwjglApplication(MtrGame(vsync), config)
     }
 
+    /**
+     * Charge le fichier de configuration des touches du jeu
+     */
     private fun loadKeysConfig() {
         try {
             val root = JsonReader().parse(FileReader("keysConfig.json"))
@@ -47,6 +50,9 @@ object DesktopLauncher {
         }
     }
 
+    /**
+     * Charge le fichier de configuration du jeu
+     */
     private fun loadConfig(): GameConfig {
         try {
             val root = JsonReader().parse(FileReader("config.json"))

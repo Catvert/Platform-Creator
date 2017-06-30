@@ -1,7 +1,6 @@
 package be.catvert.plateformcreator.ecs
 
 import com.badlogic.ashley.core.Entity
-import com.badlogic.gdx.files.FileHandle
 
 /**
  * Created by Catvert on 12/06/17.
@@ -9,9 +8,13 @@ import com.badlogic.gdx.files.FileHandle
 
 /**
  * Cette classe permet d'ajouter une méthode d'ajout et de suppression d'une entité spécifique
- * Elle est spécifiquement utilisée pour les entités ayant le besoin d'ajouter ou supprimer une entité
+ * Elle est spécifiquement utilisée pour les entités ayant le besoin d'ajouter ou supprimer une entité et d'ajouter des points de score au joueur
+ * Méthode (ré)implémentée par gameScene permettant de supprimer ou d'ajouter une entité et d'ajouter des points de score au joueur
  */
-class EntityEvent(val levelFile: FileHandle) {
-    var onEntityRemoved: ((entity: Entity) -> Unit)? = null
-    var onEntityAdded: ((entity: Entity) -> Unit)? = null
+class EntityEvent private constructor() {
+    companion object {
+        var onEntityRemoved: ((entity: Entity) -> Unit)? = null
+        var onEntityAdded: ((entity: Entity) -> Unit)? = null
+        var onAddScore: ((addScore: Int) -> Unit)? = null
+    }
 }

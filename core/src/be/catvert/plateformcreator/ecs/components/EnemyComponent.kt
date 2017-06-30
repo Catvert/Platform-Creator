@@ -16,6 +16,7 @@ enum class EnemyType {
 
 /**
  * Ce component permet d'identifier l'ennemi ainsi que de permettre à l'ennemi d'avoir un callback lors d'une collision avec le joueur
+ * @property enemyType Le type de l'ennemi
  */
 class EnemyComponent(var enemyType: EnemyType) : BaseComponent<EnemyComponent>() {
     override fun copy(): EnemyComponent {

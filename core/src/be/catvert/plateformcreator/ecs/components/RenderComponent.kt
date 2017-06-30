@@ -26,13 +26,13 @@ enum class Layer(val layer: Int) {
 
 /**
  * Ce component permet d'ajouter une/des textures et/ou une/des animations à l'entité
- * textureInfoList : Liste des textures que dispose l'entité
- * animationList : Liste des animations que dispose l'entité
- * useAnimation : Permet de spécifier si l'entité doit utiliser une animation ou une texture
- * flipX : Permet de retourner horizontalement la texture
- * flipY : Permet de retourner verticalement la texture
- * renderLayer : Permet de spécifier à quel priorité il faut dessiner l'entité, plus il est élevé, plus l'entité sera en avant-plan
- * resizeMode : Permet de spécifier comment la taille de l'entité doit changer
+ * @property textureInfoList : Liste des textures que dispose l'entité
+ * @property animationList : Liste des animations que dispose l'entité
+ * @property useAnimation : Permet de spécifier si l'entité doit utiliser une animation ou une texture
+ * @property flipX : Permet de retourner horizontalement la texture
+ * @property flipY : Permet de retourner verticalement la texture
+ * @property renderLayer : Permet de spécifier à quel priorité il faut dessiner l'entité, plus il est élevé, plus l'entité sera en avant-plan
+ * @property resizeMode : Permet de spécifier comment la taille de l'entité doit changer
  */
 class RenderComponent(val textureInfoList: List<TextureInfo> = listOf(),
                       val animationList: List<Animation<TextureAtlas.AtlasRegion>> = listOf(),
@@ -86,9 +86,6 @@ class RenderComponent(val textureInfoList: List<TextureInfo> = listOf(),
     }
 }
 
-/**
- * Permet de construire un renderComponent
- */
 fun renderComponent(init: RenderComponent.(textures: MutableList<TextureInfo>, animations: MutableList<Animation<TextureAtlas.AtlasRegion>>) -> Unit): RenderComponent {
     val textureList = mutableListOf<TextureInfo>()
     val animationsList = mutableListOf<Animation<TextureAtlas.AtlasRegion>>()

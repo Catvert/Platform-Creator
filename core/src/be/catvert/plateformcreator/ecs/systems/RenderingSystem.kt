@@ -6,10 +6,8 @@ import be.catvert.plateformcreator.ecs.components.RenderComponent
 import be.catvert.plateformcreator.ecs.components.ResizeMode
 import be.catvert.plateformcreator.ecs.components.TransformComponent
 import com.badlogic.ashley.core.ComponentMapper
-import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.core.EntitySystem
 import com.badlogic.ashley.core.Family
-import com.badlogic.ashley.utils.ImmutableArray
 import ktx.app.use
 
 /**
@@ -18,17 +16,16 @@ import ktx.app.use
 
 /**
  * Ce système permet de dessiner les entités ayant un transformComponent et un renderComponent
+ * @property game L'objet du jeu
  */
 class RenderingSystem(private val game: MtrGame) : EntitySystem() {
     private val renderMapper = ComponentMapper.getFor(RenderComponent::class.java)
     private val transformMapper = ComponentMapper.getFor(TransformComponent::class.java)
 
-    private lateinit var entities: ImmutableArray<Entity>
-
     override fun update(deltaTime: Float) {
         super.update(deltaTime)
 
-        entities = engine.getEntitiesFor(Family.all(RenderComponent::class.java, TransformComponent::class.java).get())
+        val entities = engine.getEntitiesFor(Family.all(RenderComponent::class.java, TransformComponent::class.java).get())
 
         game.batch.use { batch ->
             entities.sortedWith(compareBy { renderMapper[it].renderLayer.layer }).forEach {
