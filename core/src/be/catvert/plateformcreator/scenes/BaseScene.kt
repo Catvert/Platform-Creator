@@ -64,10 +64,6 @@ abstract class BaseScene(protected val game: MtrGame, vararg systems: EntitySyst
     override fun render(delta: Float) {
         super.render(delta)
 
-        game.batch.projectionMatrix = camera.combined
-
-        update(delta)
-
         stage.act(delta)
         stage.draw()
     }

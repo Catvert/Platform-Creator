@@ -133,7 +133,7 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
         set(value) {
             field = value
 
-            if (value == null)
+            if (value == null || value isType EntityFactory.EntityType.Player)
                 editorMode = EditorMode.NoMode
             else
                 editorMode = EditorMode.CopyEntity
@@ -464,12 +464,8 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
                     }
                 }
                 EditorScene.EditorMode.CopyEntity -> {
-                    if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-                        val entity = findEntityUnderMouse()
-                        if (entity != null && entity isNotType EntityFactory.EntityType.Player)
-                            copyEntity = entity
-                        else
-                            copyEntity = null
+                    if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) || Gdx.input.isKeyJustPressed(GameKeys.EDITOR_COPY_MODE.key)) {
+                        copyEntity = findEntityUnderMouse()
                     }
                     if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && !latestRightButtonClick) {
                         val newEntity = entityFactory.copyEntity(copyEntity!!)
@@ -548,8 +544,11 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
             val goodLayerEntity = entities.find { renderMapper.has(it) && renderMapper[it].renderLayer == selectedLayer }
             if (goodLayerEntity != null)
                 return goodLayerEntity
-            else
-                return entities.first()
+            else {
+                val entity = entities.first()
+                selectedLayer = renderMapper[entity].renderLayer
+                return entity
+            }
         }
 
         return null
