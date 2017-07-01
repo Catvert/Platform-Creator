@@ -175,8 +175,7 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
             // remove life
             Listener<LifeListener>({ _, _ ->
                 if (hp == 0) {
-
-                    game.setScene(EndLevelScene(game, levelFile, false))
+                    EntityEvent.onEndLevel.invoke(false)
                 }
             })
         })
@@ -246,8 +245,8 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
                 enemyComponent(EnemyType.Spider, {
                     Listener({ _, (entity, collideEntity, side) ->
                         if (side == CollisionSide.OnUp) {
-                            EntityEvent.onAddScore?.invoke(2)
-                            EntityEvent.onEntityRemoved?.invoke(entity) // remove this entity
+                            EntityEvent.onAddScore.invoke(2)
+                            EntityEvent.onEntityRemoved.invoke(entity) // remove this entity
                             dieSound.play()
                         } else
                             collideEntity[LifeComponent::class.java].removeLife(1)
@@ -328,17 +327,16 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
      * @param pos La position de l'entité
      */
     fun createSpecialWithType(specialType: SpecialType, pos: Point) = when (specialType) {
-        SpecialType.ExitLevel -> createSpecialExitLevel(game, pos)
+        SpecialType.ExitLevel -> createSpecialExitLevel(pos)
         SpecialType.BlockEnemy -> createSpecialBlockEnemy(pos)
         SpecialType.GoldCoin -> createSpecialGoldCoin(pos)
     }
 
     /**
      * Permet de créer une entité spécial, qui permet de sortir du niveau
-     * @param game L'objet du jeu
      * @param pos La position de l'entité
      */
-    private fun createSpecialExitLevel(game: MtrGame, pos: Point) = createSpecial(
+    private fun createSpecialExitLevel(pos: Point) = createSpecial(
             SpecialComponent(SpecialType.ExitLevel),
             TransformComponent(Rectangle(pos.x.toFloat(), pos.y.toFloat(), 20f, 20f)), null,
             physicsComponent(true, {
@@ -347,7 +345,7 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
             }, {
                 Listener<CollisionListener>({ _, collision ->
                     if (collision.collideEntity isType EntityFactory.EntityType.Player) {
-                        game.setScene(EndLevelScene(game, levelFile, true))
+                        EntityEvent.onEndLevel.invoke(true)
                     }
                 })
             }))
@@ -382,8 +380,8 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
                 }, {
                     Listener<CollisionListener>({ _, (entity, collideEntity) ->
                         if (collideEntity isType EntityType.Player) {
-                            EntityEvent.onAddScore?.invoke(1)
-                            EntityEvent.onEntityRemoved?.invoke(entity)
+                            EntityEvent.onAddScore.invoke(1)
+                            EntityEvent.onEntityRemoved.invoke(entity)
                             coinSound.play()
                         }
                     })

@@ -31,6 +31,7 @@ enum class GameKeys(var key: Int, val description: String) {
     EDITOR_FLIPY_1(Input.Keys.DOWN, "Editor flip y[1]"),
     EDITOR_UP_LAYER(Input.Keys.PLUS, "Editor up select layer"),
     EDITOR_DOWN_LAYER(Input.Keys.MINUS, "Editor down select layer"),
+    EDITOR_SWITCH_RESIZE_MODE(Input.Keys.R, "Editor switch resize mode"),
 
 
     DEBUG_MODE(Input.Keys.F12, "Debug Mode"),

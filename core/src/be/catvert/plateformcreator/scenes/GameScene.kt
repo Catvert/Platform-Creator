@@ -23,6 +23,7 @@ import ktx.app.use
  * Scène du jeu
  * @param game L'objet du jeu
  * @param level Le niveau
+ * @param onEndOfLevel
  */
 class GameScene(game: MtrGame, private val level: Level) : BaseScene(game, RenderingSystem(game), UpdateSystem(level), PhysicsSystem(level)) {
     private val cameraMoveSpeed = 10f
@@ -40,6 +41,7 @@ class GameScene(game: MtrGame, private val level: Level) : BaseScene(game, Rende
         EntityEvent.onEntityAdded = { entity -> level.addEntity(entity) }
         EntityEvent.onEntityRemoved = { entity -> level.removeEntity(entity) }
         EntityEvent.onAddScore = { scorePlayer += it }
+        EntityEvent.onEndLevel = { levelSuccess -> game.setScene(EndLevelScene(game, level.levelFile, levelSuccess)) }
 
         entities.addAll(level.loadedEntities)
     }

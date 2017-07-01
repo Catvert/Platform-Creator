@@ -13,8 +13,18 @@ import com.badlogic.ashley.core.Entity
  */
 class EntityEvent private constructor() {
     companion object {
-        var onEntityRemoved: ((entity: Entity) -> Unit)? = null
-        var onEntityAdded: ((entity: Entity) -> Unit)? = null
-        var onAddScore: ((addScore: Int) -> Unit)? = null
+        var onEntityRemoved: (entity: Entity) -> Unit = {
+            throw Exception("Méthode onEntityRemoved non implémentée !")
+        }
+        var onEntityAdded: (entity: Entity) -> Unit = {
+            throw Exception("Méthode onEntityAdded non implémentée !")
+        }
+        var onAddScore: (addScore: Int) -> Unit = {
+            throw Exception("Méthode onAddScore non implémentée !")
+        }
+        var onEndLevel: (levelSuccess: Boolean) -> Unit = {
+            throw Exception("Méthode onEndLevel non implémentée !")
+        }
     }
 }
+

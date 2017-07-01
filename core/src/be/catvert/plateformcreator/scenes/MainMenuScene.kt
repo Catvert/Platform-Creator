@@ -10,11 +10,9 @@ import com.badlogic.gdx.Input
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
-import com.badlogic.gdx.scenes.scene2d.InputListener
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane
 import com.kotcrab.vis.ui.widget.*
 import ktx.actors.onClick
-import ktx.actors.onKeyDown
 import ktx.actors.onKeyUp
 import ktx.actors.plus
 import ktx.app.use

@@ -25,7 +25,7 @@ import com.badlogic.gdx.math.Rectangle
  * @property backgroundPath : Le fond d'écran du niveau
  * @property loadedEntities : Les entités chargés et à sauvegarder dans le fichier du niveau
  */
-class Level(private val game: MtrGame, var levelName: String, val levelFile: FileHandle, val player: Entity, var backgroundPath: FileHandle, val loadedEntities: MutableList<Entity>) : IUpdateable {
+class Level(private val game: MtrGame, var levelName: String, val levelFile: FileHandle, var player: Entity, var backgroundPath: FileHandle, val loadedEntities: MutableList<Entity>) : IUpdateable {
     /**
      * ShapeRenderer utilisé par exemple pour dessiner des rectangles autour des entités
      */
@@ -97,14 +97,7 @@ class Level(private val game: MtrGame, var levelName: String, val levelFile: Fil
     init {
         activeRect.setSize(Gdx.graphics.width.toFloat() * 1.5f, Gdx.graphics.height.toFloat() * 1.5f)
 
-        loadedEntities.forEach {
-            setEntityGrid(it) // Besoin de setGrid car les entités n'ont pas encore été ajoutée à la matrix
-            if (it === player)
-                return@forEach
-            it.components.filter { c -> c is BaseComponent<*> }.forEach {
-                (it as BaseComponent<*>).active = false
-            }
-        }
+        setActualEntitiesList(loadedEntities)
     }
 
     override fun update(deltaTime: Float) {
@@ -236,6 +229,29 @@ class Level(private val game: MtrGame, var levelName: String, val levelFile: Fil
         getRectCells(transformComp.rectangle).forEach {
             matrixGrid[it.x][it.y].first.add(entity)
             transformComp.gridCell.add(it)
+        }
+    }
+
+    fun clearMatrix() {
+        matrixGrid.forEach {
+            it.forEach {
+                it.first.clear()
+            }
+        }
+    }
+
+    fun setActualEntitiesList(entities: List<Entity>) {
+        clearMatrix()
+
+
+
+        entities.forEach {
+            setEntityGrid(it) // Besoin de setGrid car les entités n'ont pas encore été ajoutée à la matrix
+            if (it === player)
+                return@forEach
+            it.components.filter { c -> c is BaseComponent<*> }.forEach {
+                (it as BaseComponent<*>).active = false
+            }
         }
     }
 
