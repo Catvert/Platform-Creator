@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.Vector2
+import ktx.collections.toGdxArray
 
 /**
  * Created by Catvert on 05/06/17.
@@ -34,7 +35,7 @@ enum class Layer(val layer: Int) {
  * @property renderLayer : Permet de spécifier à quel priorité il faut dessiner l'entité, plus il est élevé, plus l'entité sera en avant-plan
  * @property resizeMode : Permet de spécifier comment la taille de l'entité doit changer
  */
-class RenderComponent(val textureInfoList: List<TextureInfo> = listOf(),
+class RenderComponent(val textureInfoList: MutableList<TextureInfo> = mutableListOf<TextureInfo>(),
                       val animationList: List<Animation<TextureAtlas.AtlasRegion>> = listOf(),
                       var useAnimation: Boolean = false,
                       var flipX: Boolean = false,
@@ -43,7 +44,17 @@ class RenderComponent(val textureInfoList: List<TextureInfo> = listOf(),
                       var resizeMode: ResizeMode = ResizeMode.NO_RESIZE) : BaseComponent<RenderComponent>() {
 
     override fun copy(): RenderComponent {
-        return RenderComponent(textureInfoList, animationList, useAnimation, flipX, flipY, renderLayer, resizeMode)
+        val newTextureInfoList = mutableListOf<TextureInfo>()
+        textureInfoList.forEach {
+            newTextureInfoList += it.copy()
+        }
+
+        val newAnimationInfoList = mutableListOf<Animation<TextureAtlas.AtlasRegion>>()
+        animationList.forEach {
+            newAnimationInfoList += Animation<TextureAtlas.AtlasRegion>(it.frameDuration, it.keyFrames.toGdxArray())
+        }
+
+        return RenderComponent(newTextureInfoList, newAnimationInfoList, useAnimation, flipX, flipY, renderLayer, resizeMode)
     }
 
     /**
@@ -71,6 +82,11 @@ class RenderComponent(val textureInfoList: List<TextureInfo> = listOf(),
      * Le resizeMode doit être en FIXED_RESIZE
      */
     var fixedResize: Vector2? = null
+
+    /**
+     * Permet de spécifier si l'entité à une texture fixe
+     */
+    var fixedTextureEditor = false
 
     /**
      * Permet de retourner la region à dessiner

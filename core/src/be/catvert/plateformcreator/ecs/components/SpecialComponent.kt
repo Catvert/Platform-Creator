@@ -8,7 +8,7 @@ package be.catvert.plateformcreator.ecs.components
  * Réprésente les différents type de spécial
  */
 enum class SpecialType {
-    ExitLevel, BlockEnemy, GoldCoin
+    ExitLevel, BlockEnemy, GoldCoin, Teleporter
 }
 
 /**

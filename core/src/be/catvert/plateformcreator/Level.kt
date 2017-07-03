@@ -102,7 +102,9 @@ class Level(private val game: MtrGame, var levelName: String, val levelFile: Fil
 
     override fun update(deltaTime: Float) {
         updateActiveCells()
+    }
 
+    fun drawDebug() {
         if (drawDebugCells) {
             shapeRenderer.projectionMatrix = game.batch.projectionMatrix
             shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
@@ -242,8 +244,6 @@ class Level(private val game: MtrGame, var levelName: String, val levelFile: Fil
 
     fun setActualEntitiesList(entities: List<Entity>) {
         clearMatrix()
-
-
 
         entities.forEach {
             setEntityGrid(it) // Besoin de setGrid car les entités n'ont pas encore été ajoutée à la matrix

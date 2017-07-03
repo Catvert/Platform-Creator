@@ -69,6 +69,8 @@ class GameScene(game: MtrGame, private val level: Level) : BaseScene(game, Rende
     override fun render(delta: Float) {
         super.render(delta)
 
+        level.drawDebug()
+
         game.batch.projectionMatrix = game.defaultProjection
         game.batch.use { gameBatch ->
             game.mainFont.draw(gameBatch, "Score : $scorePlayer", 10f, Gdx.graphics.height - game.mainFont.lineHeight)

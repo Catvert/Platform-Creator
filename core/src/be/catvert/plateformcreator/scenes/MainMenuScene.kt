@@ -177,7 +177,7 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
         stage + window("Sélection d'un niveau") window@ {
             addCloseButton()
             isModal = true
-            setSize(400f, 400f)
+            setSize(300f, 250f)
             setPosition(Gdx.graphics.width / 2f - width / 2, Gdx.graphics.height / 2f - height / 2)
 
             horizontalGroup {

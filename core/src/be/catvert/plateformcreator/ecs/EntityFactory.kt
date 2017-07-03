@@ -107,6 +107,7 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
                     fixedResize = Vector2(textures[0].texture.regionWidth.toFloat(), textures[0].texture.regionHeight.toFloat())
                     resizeMode = ResizeMode.FIXED_SIZE
                     renderLayer = Layer.LAYER_MOVABLE_ENT
+                    fixedTextureEditor = true
                 },
                 physicsComponent(false, { moveSpeed = 15; movementType = MovementType.SMOOTH; jumpData = JumpData(300) }))
 
@@ -192,6 +193,7 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
 
         transformMapper[entity].fixedSizeEditor = fixedSizeEditor
         renderMapper[entity].renderLayer = Layer.LAYER_MOVABLE_ENT
+        renderMapper[entity].fixedTextureEditor = true
 
         entity.setType(EntityType.Enemy)
 
@@ -316,6 +318,9 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
 
         transformMapper[this].fixedSizeEditor = fixedSizeEditor
 
+        if(renderMapper.has(this))
+             renderMapper[this].fixedTextureEditor = true
+
         setType(EntityType.Special)
 
         this += specialComponent
@@ -330,6 +335,33 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
         SpecialType.ExitLevel -> createSpecialExitLevel(pos)
         SpecialType.BlockEnemy -> createSpecialBlockEnemy(pos)
         SpecialType.GoldCoin -> createSpecialGoldCoin(pos)
+        SpecialType.Teleporter -> createSpecialTeleporter(pos)
+    }
+
+    private fun createSpecialTeleporter(pos: Point): Entity {
+        val teleportPointParam = EntityParameter<Point>(null,"Teleporter point", true)
+
+        val entity = createSpecial(
+                SpecialComponent(SpecialType.Teleporter),
+                TransformComponent(Rectangle(pos.x.toFloat(), pos.y.toFloat(), 20f, 20f)),
+                null,
+                physicsComponent(true, {
+                    maskCollision = MaskCollision.ONLY_PLAYER
+                    isSensor = true
+                }, {
+                    Listener<CollisionListener>({ _, collision ->
+                        if(collision.collideEntity isType EntityType.Player) {
+                            if(teleportPointParam.param != null) {
+                                transformMapper[collision.collideEntity].rectangle.setPosition(teleportPointParam.param!!.x.toFloat(), teleportPointParam.param!!.y.toFloat())
+                            }
+                        }
+                    })
+                }))
+
+
+        entity += ParametersComponent(teleportPointParam)
+
+        return entity
     }
 
     /**

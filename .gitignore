@@ -116,3 +116,5 @@ Thumbs.db
 out/
 
 dokka-fatjar\.jar
+
+core/assets/desktop-1\.0\.jar

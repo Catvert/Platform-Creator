@@ -5,7 +5,5 @@ Fonctionnalitées à venir {
 }
 
 Bugs {
-    - Lorsqu'on ouvre une fenêtre dans l'éditeur, il ya des chances que tout ce fige car UI Hover est tjr a true alors que l'utilisateur n'est plus sur le stage
-    - [Pas spécialement un bug] Quand par exemple, la turtle se rapproche du bord des activeCells [grid] alors elle change de direction
     - Bug lors de la copie avec les flèches d'un enemi
 }
