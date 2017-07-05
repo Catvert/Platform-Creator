@@ -35,8 +35,8 @@ class EndLevelScene(game: MtrGame, levelFile: FileHandle, levelSuccess: Boolean)
 
                 textButton("Recommencer le niveau") {
                     addListener(onClick {
-                        val (success, level) = LevelFactory.loadLevel(game, levelFile)
-                        if (success)
+                        val level = LevelFactory.loadLevel(game, levelFile)
+                        if (level != null)
                             game.setScene(GameScene(game, level))
                     })
                 }

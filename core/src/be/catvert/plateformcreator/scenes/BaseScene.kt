@@ -1,7 +1,7 @@
 package be.catvert.plateformcreator.scenes
 
 import be.catvert.plateformcreator.MtrGame
-import be.catvert.plateformcreator.ecs.IUpdateable
+import be.catvert.plateformcreator.ecs.Updateable
 import be.catvert.plateformcreator.ecs.components.RenderComponent
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.core.EntitySystem
@@ -21,7 +21,7 @@ import ktx.app.KtxScreen
  * @property game : L'objet du jeu
  * @param systems : Permet de spécifier les systèmes à ajouter à la scène
  */
-abstract class BaseScene(protected val game: MtrGame, vararg systems: EntitySystem) : KtxScreen, IUpdateable {
+abstract class BaseScene(protected val game: MtrGame, vararg systems: EntitySystem) : KtxScreen, Updateable {
     /**
      * Représente la partie de l'écran qu'utilisera le stage pour se dessiner
      */

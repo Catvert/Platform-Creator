@@ -9,7 +9,6 @@ import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.Rectangle
-import com.badlogic.gdx.scenes.scene2d.Actor
 
 /**
  * Created by Catvert on 03/06/17.
@@ -119,26 +118,26 @@ fun <B : Batch> B.draw(texture: TextureAtlas.AtlasRegion, rect: Rectangle, flipX
     this.draw(texture, rect.x, rect.y, rect.width, rect.height)
 }
 
-operator fun Entity.plusAssign(component: BaseComponent<*>) {
+operator fun Entity.plus(component: BaseComponent<*>) {
     this.add(component)
 }
 
-operator fun Entity.minusAssign(component: Class<out BaseComponent<*>>) {
+operator fun Entity.minus(component: Class<out BaseComponent<*>>) {
     this.remove(component)
 }
 
-operator fun Engine.plusAssign(entity: Entity) {
+operator fun Engine.plus(entity: Entity) {
     this.addEntity(entity)
 }
 
-operator fun Engine.minusAssign(entity: Entity) {
+operator fun Engine.minus(entity: Entity) {
     this.removeEntity(entity)
 }
 
-operator fun Engine.plusAssign(system: EntitySystem) {
+operator fun Engine.plus(system: EntitySystem) {
     this.addSystem(system)
 }
 
-operator fun Engine.minusAssign(system: EntitySystem) {
+operator fun Engine.minus(system: EntitySystem) {
     this.removeSystem(system)
 }

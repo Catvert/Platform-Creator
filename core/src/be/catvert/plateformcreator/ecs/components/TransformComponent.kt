@@ -29,3 +29,11 @@ class TransformComponent(var rectangle: Rectangle = Rectangle(), var fixedSizeEd
      */
     fun position() = Point(rectangle.x.toInt(), rectangle.y.toInt())
 }
+
+fun transformComponent(init: TransformComponent.() -> Rectangle): TransformComponent {
+    val transformComp = TransformComponent()
+
+    transformComp.rectangle = transformComp.init()
+
+    return transformComp
+}

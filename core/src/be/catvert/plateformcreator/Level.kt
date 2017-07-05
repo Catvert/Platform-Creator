@@ -1,6 +1,6 @@
 package be.catvert.plateformcreator
 
-import be.catvert.plateformcreator.ecs.IUpdateable
+import be.catvert.plateformcreator.ecs.Updateable
 import be.catvert.plateformcreator.ecs.components.BaseComponent
 import be.catvert.plateformcreator.ecs.components.LifeComponent
 import be.catvert.plateformcreator.ecs.components.TransformComponent
@@ -25,7 +25,7 @@ import com.badlogic.gdx.math.Rectangle
  * @property backgroundPath : Le fond d'écran du niveau
  * @property loadedEntities : Les entités chargés et à sauvegarder dans le fichier du niveau
  */
-class Level(private val game: MtrGame, var levelName: String, val levelFile: FileHandle, var player: Entity, var backgroundPath: FileHandle, val loadedEntities: MutableList<Entity>) : IUpdateable {
+class Level(private val game: MtrGame, var levelName: String, val levelFile: FileHandle, var player: Entity, var backgroundPath: FileHandle, val loadedEntities: MutableList<Entity>) : Updateable {
     /**
      * ShapeRenderer utilisé par exemple pour dessiner des rectangles autour des entités
      */
@@ -143,7 +143,7 @@ class Level(private val game: MtrGame, var levelName: String, val levelFile: Fil
                     (it as BaseComponent<*>).active = true
                     if (killEntityNegativeY && it is TransformComponent && it.rectangle.y < 0) {
                         if (lifeMapper.has(entity))
-                            lifeMapper[entity].killInstant()
+                            LifeComponent.killInstant(entity)
                         removeEntity(entity)
                     }
                 }
