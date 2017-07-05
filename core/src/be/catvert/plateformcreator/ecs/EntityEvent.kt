@@ -25,6 +25,38 @@ class EntityEvent private constructor() {
         var onEndLevel: (levelSuccess: Boolean) -> Unit = {
             throw Exception("Méthode onEndLevel non implémentée !")
         }
+
+        /**
+         * Permet de supprimer une entité du niveau(dynamiquement)
+         * @param entity L'entité à supprimer dynamiquement du niveau
+         */
+        fun removeEntity(entity: Entity) {
+            onEntityRemoved(entity)
+        }
+
+        /**
+         * Permet d'ajouter une entité au niveau(dynamiquement)
+         * @param entity L'entité à ajouter dynamiquement au niveau
+         */
+        fun addEntity(entity: Entity) {
+            onEntityAdded(entity)
+        }
+
+        /**
+         * Permet d'ajouter des points de score au joueur
+         * @param score Le score à ajouter au joueur
+         */
+        fun addScore(score: Int) {
+            onAddScore(score)
+        }
+
+        /**
+         * Permet de finir le niveau
+         * @param success Permet de spécifié si le niveau est réussi ou perdu
+         */
+        fun endLevel(success: Boolean) {
+            onEndLevel(success)
+        }
     }
 }
 

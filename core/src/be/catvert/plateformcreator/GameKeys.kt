@@ -32,7 +32,7 @@ enum class GameKeys(var key: Int, val description: String) {
     EDITOR_SWITCH_RESIZE_MODE(Input.Keys.R, "Editor switch resize mode"),
     EDITOR_MOVE_ENTITY_LEFT(Input.Keys.LEFT, "Editor move entity 1 pixel left"),
     EDITOR_MOVE_ENTITY_RIGHT(Input.Keys.RIGHT, "Editor move entity 1 pixel right"),
-    EDITOR_MOVE_ENTITY_UP(Input.Keys.UP,"Editor move entity 1 pixel up"),
+    EDITOR_MOVE_ENTITY_UP(Input.Keys.UP, "Editor move entity 1 pixel up"),
     EDITOR_MOVE_ENTITY_DOWN(Input.Keys.DOWN, "Editor move entity 1 pixel down"),
 
 

@@ -44,6 +44,8 @@ class GameScene(game: MtrGame, private val level: Level) : BaseScene(game, Rende
         EntityEvent.onEndLevel = { levelSuccess -> game.setScene(EndLevelScene(game, level.levelFile, levelSuccess)) }
 
         entities.addAll(level.loadedEntities)
+
+        updateCamera(false)
     }
 
     /**
@@ -77,18 +79,12 @@ class GameScene(game: MtrGame, private val level: Level) : BaseScene(game, Rende
             val layout = GlyphLayout(game.mainFont, "Temps : $_timeInGame")
             game.mainFont.draw(gameBatch, layout, Gdx.graphics.width / 2 - layout.width / 2, Gdx.graphics.height - layout.height)
         }
-
-        level.activeRect.setPosition(Math.max(0f, transformPlayer.rectangle.x - level.activeRect.width / 2 + transformPlayer.rectangle.width / 2), Math.max(0f, transformPlayer.rectangle.y - level.activeRect.height / 2 + transformPlayer.rectangle.height / 2))
-
-        if (level.followPlayerCamera) {
-            val x = MathUtils.lerp(camera.position.x, Math.max(0f + camera.viewportWidth / 2, transformPlayer.rectangle.x + transformPlayer.rectangle.width / 2), 0.1f)
-            val y = MathUtils.lerp(camera.position.y, Math.max(0f + camera.viewportHeight / 2, transformPlayer.rectangle.y + transformPlayer.rectangle.height / 2), 0.1f)
-            camera.position.set(x, y, 0f)
-        }
     }
 
     override fun update(deltaTime: Float) {
         level.update(deltaTime)
+
+        level.activeRect.setPosition(Math.max(0f, transformPlayer.rectangle.x - level.activeRect.width / 2 + transformPlayer.rectangle.width / 2), Math.max(0f, transformPlayer.rectangle.y - level.activeRect.height / 2 + transformPlayer.rectangle.height / 2))
 
         entities.clear()
         entities.addAll(level.getAllEntitiesInCells(level.getActiveGridCells()))
@@ -100,6 +96,20 @@ class GameScene(game: MtrGame, private val level: Level) : BaseScene(game, Rende
             game.setScene(PauseScene(game, level.levelFile, this), false)
         }
 
+        if (Gdx.input.isKeyJustPressed(GameKeys.DEBUG_MODE.key)) {
+            level.drawDebugCells = !level.drawDebugCells
+        }
+        if (Gdx.input.isKeyJustPressed(GameKeys.GAME_SWITCH_GRAVITY.key)) {
+            level.applyGravity = !level.applyGravity
+        }
+        if (Gdx.input.isKeyJustPressed(GameKeys.GAME_FOLLOW_CAMERA_PLAYER.key)) {
+            level.followPlayerCamera = !level.followPlayerCamera
+        }
+
+        updateCamera(true)
+    }
+
+    private fun updateCamera(lerp: Boolean) {
         if (Gdx.input.isKeyPressed(GameKeys.CAMERA_ZOOM_UP.key)) {
             camera.zoom -= 0.02f
         }
@@ -110,27 +120,26 @@ class GameScene(game: MtrGame, private val level: Level) : BaseScene(game, Rende
             camera.zoom = 1f
         }
 
-        if (Gdx.input.isKeyJustPressed(GameKeys.GAME_FOLLOW_CAMERA_PLAYER.key)) {
-            level.followPlayerCamera = !level.followPlayerCamera
-        }
-        if (Gdx.input.isKeyPressed(GameKeys.GAME_CAMERA_LEFT.key)) {
-            camera.position.x -= cameraMoveSpeed
-        }
-        if (Gdx.input.isKeyPressed(GameKeys.GAME_CAMERA_RIGHT.key)) {
-            camera.position.x += cameraMoveSpeed
-        }
-        if (Gdx.input.isKeyPressed(GameKeys.GAME_CAMERA_DOWN.key)) {
-            camera.position.y -= cameraMoveSpeed
-        }
-        if (Gdx.input.isKeyPressed(GameKeys.GAME_CAMERA_UP.key)) {
-            camera.position.y += cameraMoveSpeed
-        }
+        if (level.followPlayerCamera) {
+            val posX = Math.max(0f + camera.viewportWidth / 2, transformPlayer.rectangle.x + transformPlayer.rectangle.width / 2)
+            val posY = Math.max(0f + camera.viewportHeight / 2, transformPlayer.rectangle.y + transformPlayer.rectangle.height / 2)
 
-        if (Gdx.input.isKeyJustPressed(GameKeys.DEBUG_MODE.key)) {
-            level.drawDebugCells = !level.drawDebugCells
-        }
-        if (Gdx.input.isKeyJustPressed(GameKeys.GAME_SWITCH_GRAVITY.key)) {
-            level.applyGravity = !level.applyGravity
+            val lerpX = MathUtils.lerp(camera.position.x, posX, 0.1f)
+            val lerpY = MathUtils.lerp(camera.position.y, posY, 0.1f)
+            camera.position.set(if (lerp) lerpX else posX, if (lerp) lerpY else posY, 0f)
+        } else {
+            if (Gdx.input.isKeyPressed(GameKeys.GAME_CAMERA_LEFT.key)) {
+                camera.position.x -= cameraMoveSpeed
+            }
+            if (Gdx.input.isKeyPressed(GameKeys.GAME_CAMERA_RIGHT.key)) {
+                camera.position.x += cameraMoveSpeed
+            }
+            if (Gdx.input.isKeyPressed(GameKeys.GAME_CAMERA_DOWN.key)) {
+                camera.position.y -= cameraMoveSpeed
+            }
+            if (Gdx.input.isKeyPressed(GameKeys.GAME_CAMERA_UP.key)) {
+                camera.position.y += cameraMoveSpeed
+            }
         }
 
         camera.update()

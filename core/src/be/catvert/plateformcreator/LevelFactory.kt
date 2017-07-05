@@ -33,7 +33,7 @@ class LevelFactory private constructor() {
         fun createEmptyLevel(game: MtrGame, levelFile: FileHandle, levelName: String): Level {
             val loadedEntities = mutableListOf<Entity>()
 
-            val player = EntityFactory(game, levelFile).createPlayer(Point(100, 100))
+            val player = EntityFactory(game, levelFile).createPlayer(Point(100, 100), ParametersComponent.defaultParameters)
 
             loadedEntities += player
 
@@ -44,16 +44,15 @@ class LevelFactory private constructor() {
          * Charge le niveau depuis levelFile
          * @param game L'objet du jeu
          * @param levelFile Le fichier utilisé pour charger le niveau
-         * @return Boolean : Réussite ou non du chargement du niveau | Level : Le niveau chargé ou non
+         * @return Le niveau chargé ou non (null)
          */
-        fun loadLevel(game: MtrGame, levelFile: FileHandle): Pair<Boolean, Level> {
+        fun loadLevel(game: MtrGame, levelFile: FileHandle): Level? {
             val entityFactory = EntityFactory(game, levelFile)
 
             val entities = mutableListOf<Entity>()
 
-            var loadSuccess = true
-            var levelName = ""
-            var backgroundPath = FileHandle("")
+            var levelName: String
+            var backgroundPath: FileHandle
             var player: Entity = Entity()
 
             info { "Loading level : $levelFile" }
@@ -69,20 +68,32 @@ class LevelFactory private constructor() {
                 levelName = root["levelName"].asString()
                 backgroundPath = Gdx.files.internal(root["background"].asString())
 
+                /**
+                 * Permet de charger la position d'une entité
+                 */
                 fun getPosition(it: JsonValue): Point {
                     return Point(it["position"]["x"].asInt(), it["position"]["y"].asInt())
                 }
 
+                /**
+                 * Permet de charger la taille d'une entité
+                 */
                 fun getSize(it: JsonValue): Pair<Int, Int> {
                     return it["size"]["x"].asInt() to it["size"]["y"].asInt()
                 }
 
+                /**
+                 * Permet de charger le transformComponent d'une entité
+                 */
                 fun getTransformComponent(it: JsonValue): TransformComponent {
                     val (width, height) = getSize(it)
                     val (x, y) = getPosition(it)
                     return TransformComponent(Rectangle(x.toFloat(), y.toFloat(), width.toFloat(), height.toFloat()))
                 }
 
+                /**
+                 * Permet de charger le renderComponent d'une entité
+                 */
                 fun getRenderComponent(it: JsonValue) = renderComponent { textures, _ ->
                     textures += game.getSpriteSheetTexture(it["spritesheet"].asString(), it["texturePath"].asString())
 
@@ -90,6 +101,26 @@ class LevelFactory private constructor() {
                     flipY = it["flipY"].asBoolean()
 
                     renderLayer = Layer.values().firstOrNull { layer -> layer.layer == it["layer"].asInt() } ?: Layer.LAYER_0
+                }
+
+                /**
+                 * Permet de charger les paramètres d'une entité
+                 */
+                fun getParameters(it: JsonValue): List<EntityParameter<*>> {
+                    val list = mutableListOf<EntityParameter<*>>()
+
+                    if (it.has("parameters")) {
+                        it["parameters"].forEach {
+                            val type = it["type"].asString()
+                            val id = it["id"].asInt()
+                            val description = it["description"].asString()
+                            val drawInEditor = it["drawInEditor"].asBoolean()
+
+                            list += EntityParameter(id, description, Parameter.loadParameterFromJson(ParameterType.getType(type), it), drawInEditor)
+                        }
+                    }
+
+                    return list
                 }
 
                 root["entities"].forEach {
@@ -106,25 +137,25 @@ class LevelFactory private constructor() {
                                     getRenderComponent(it), PhysicsComponent(true)))
                         }
                         EntityFactory.EntityType.Player.name -> {
-                            player = entityFactory.createPlayer(getPosition(it))
+                            player = entityFactory.createPlayer(getPosition(it), getParameters(it))
                             addEntity(player)
                         }
                         EntityFactory.EntityType.Enemy.name -> {
                             val enemyType = EnemyType.valueOf(it["enemyType"].asString())
-                            addEntity(entityFactory.createEnemyWithType(enemyType, getPosition(it)))
+                            addEntity(entityFactory.createEnemyWithType(enemyType, getPosition(it), getParameters(it)))
                         }
                         EntityFactory.EntityType.Special.name -> {
                             val specialType = SpecialType.valueOf(it["specialType"].asString())
-                            addEntity(entityFactory.createSpecialWithType(specialType, getPosition(it)))
+                            addEntity(entityFactory.createSpecialWithType(specialType, getPosition(it), getParameters(it)))
                         }
                     }
                 }
             } catch(e: Exception) {
-                loadSuccess = false
                 error(e, message = { "Erreur lors du chargement du niveau ! Erreur : $e" })
+                return null
             }
 
-            return Pair(loadSuccess, Level(game, levelName, levelFile, player, backgroundPath, entities))
+            return Level(game, levelName, levelFile, player, backgroundPath, entities)
         }
 
         /**
@@ -138,6 +169,9 @@ class LevelFactory private constructor() {
             val writer = JsonWriter(FileWriter(level.levelFile.path()))
             writer.setOutputType(JsonWriter.OutputType.json)
 
+            /**
+             * Permet de sauvegarder la position d'une entité
+             */
             fun savePosition(transformComponent: TransformComponent) {
                 writer.`object`("position")
                 writer.name("x").value(transformComponent.rectangle.x.toInt())
@@ -145,6 +179,9 @@ class LevelFactory private constructor() {
                 writer.pop()
             }
 
+            /**
+             * Permet de sauvegarder la taille d'une entité
+             */
             fun saveSize(transformComponent: TransformComponent) {
                 writer.`object`("size")
                 writer.name("x").value(transformComponent.rectangle.width.toInt())
@@ -152,12 +189,35 @@ class LevelFactory private constructor() {
                 writer.pop()
             }
 
+            /**
+             * Permet de sauvegarder le rendu d'une entité
+             */
             fun saveRender(renderComponent: RenderComponent) {
                 writer.name("spritesheet").value(renderComponent.textureInfoList[0].spriteSheet)
                 writer.name("texturePath").value(renderComponent.textureInfoList[0].texturePath)
                 writer.name("layer").value(renderComponent.renderLayer.layer)
                 writer.name("flipX").value(renderComponent.flipX)
                 writer.name("flipY").value(renderComponent.flipY)
+            }
+
+            /**
+             * Permet de sauvegarder les paramètres d'une entité
+             */
+            fun saveParameters(parameter: ParametersComponent) {
+                writer.array("parameters")
+                parameter.getParameters().forEach {
+                    writer.`object`()
+
+                    writer.name("id").value(it.id)
+                    writer.name("description").value(it.description)
+                    writer.name("drawInEditor").value(it.drawInEditor)
+
+                    ParameterType.saveType(writer, it.param.type)
+                    it.param.saveParam(writer)
+
+                    writer.pop()
+                }
+                writer.pop()
             }
 
             writer.`object`()
@@ -194,6 +254,10 @@ class LevelFactory private constructor() {
                         writer.name("specialType").value(it[SpecialComponent::class.java].specialType)
                     }
                 }
+
+                if (mapperFor<ParametersComponent>().has(it))
+                    saveParameters(mapperFor<ParametersComponent>()[it])
+
                 writer.pop()
             }
             writer.pop()

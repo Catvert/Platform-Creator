@@ -3,6 +3,7 @@ package be.catvert.plateformcreator.scenes
 import be.catvert.plateformcreator.*
 import be.catvert.plateformcreator.ecs.EntityFactory
 import be.catvert.plateformcreator.ecs.components.*
+import be.catvert.plateformcreator.ecs.components.ParameterType
 import be.catvert.plateformcreator.ecs.systems.RenderingSystem
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.signals.Signal
@@ -10,16 +11,18 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.*
-import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane
-import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.kotcrab.vis.ui.widget.*
-import ktx.actors.*
+import ktx.actors.contains
+import ktx.actors.onChange
+import ktx.actors.onClick
+import ktx.actors.plus
 import ktx.app.use
 import ktx.ashley.has
 import ktx.ashley.mapperFor
@@ -38,7 +41,7 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
      * Enum représentant les différents modes de l'éditeur(sélection d'entités, copie ..)
      */
     private enum class EditorMode {
-        NoMode, SelectEntity, CopyEntity
+        NoMode, SelectEntity, CopyEntity, SelectPoint
     }
 
     /**
@@ -66,12 +69,6 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
             val maxY = Math.max(startPosition.y, endPosition.y)
 
             return Rectangle(minX, minY, maxX - minX, maxY - minY)
-        }
-    }
-
-    private data class TextureAtlasSelect(val textureAtlas: TextureAtlas, val atlasName: String) {
-        override fun toString(): String {
-            return atlasName
         }
     }
 
@@ -116,7 +113,9 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
     /**
      * Signal appelé quand l'entité sélectionnée subit des modifications
      */
-    private var onSelectEntityUpdate: Signal<Entity?> = Signal()
+    private val onSelectEntityUpdate: Signal<Entity?> = Signal()
+
+    private val onSelectPoint: Signal<Point> = Signal()
 
     /**
      * L'entité à copier
@@ -200,7 +199,7 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
      * Permet de vérifier si l'utilisateur est sur l'UI ou non
      */
     fun isUIHover(): Boolean {
-        stage.actors.forEach {
+        stage.actors.filter { it.isVisible }.forEach {
             val mouseX = Gdx.input.x.toFloat()
             val mouseY = Gdx.input.y.toFloat()
 
@@ -215,7 +214,6 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
         background = game.getBackground(level.backgroundPath).second
 
         showInfoEntityWindow()
-        //showEntitiesWindow()
 
         level.activeRect.setSize(Gdx.graphics.width.toFloat() * 3, Gdx.graphics.height.toFloat() * 3)
         level.followPlayerCamera = false
@@ -234,26 +232,21 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
 
         /**
-         * Dessine les entités qui n'ont pas de renderComponent avec un rectangle noir
+         * Dessine les entités qui n'ont pas de renderComponent avec un rectangle noir et les paramètres des entités
          */
         entities.forEach { entity ->
-            if(!renderMapper.has(entity)) {
+            if (!renderMapper.has(entity)) {
                 shapeRenderer.color = Color.BLACK
                 val rect = transformMapper[entity].rectangle
                 shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height)
             }
-            if(entity.has(mapperFor<ParametersComponent>())) {
+
+            if (entity.has(mapperFor<ParametersComponent>())) {
                 val params = mapperFor<ParametersComponent>()[entity].getParameters()
 
                 params.forEach {
-                    if(it.param != null && it.drawInEditor) {
-                        when(it.param) {
-                            is Point -> {
-                                val point = it.param as Point
-                                shapeRenderer.color = Color.BLACK
-                                shapeRenderer.line(transformMapper[entity].rectangle.x, transformMapper[entity].rectangle.y, point.x.toFloat(), point.y.toFloat())
-                            }
-                        }
+                    if (it.drawInEditor) {
+                        it.param.onDrawInEditor(entity, shapeRenderer)
                     }
                 }
             }
@@ -316,6 +309,13 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
                     val transform = transformMapper[copyEntity]
                     shapeRenderer.color = Color.GREEN
                     shapeRenderer.rect(transform.rectangle.x, transform.rectangle.y, transform.rectangle.width, transform.rectangle.height)
+                }
+            }
+            EditorScene.EditorMode.SelectPoint -> {
+                game.batch.projectionMatrix = game.defaultProjection
+                game.batch.use { gameBatch ->
+                    val layout = GlyphLayout(game.mainFont, "Sélectionner un point")
+                    game.mainFont.draw(gameBatch, layout, Gdx.graphics.width / 2f - layout.width / 2, Gdx.graphics.height - game.mainFont.lineHeight)
                 }
             }
         }
@@ -601,16 +601,28 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
                         var posX = transform.rectangle.x
                         var posY = transform.rectangle.y
 
+                        var sizeX = transform.rectangle.width.toInt()
+                        var sizeY = transform.rectangle.height.toInt()
+
+                        if (transform.rectangle.width == 0f || transform.rectangle.height == 0f) {
+                            if (renderMapper.has(newEntity)) {
+                                val region = renderMapper[newEntity].getActualAtlasRegion()
+
+                                sizeX = region.regionWidth
+                                sizeY = region.regionHeight
+                            }
+                        }
+
                         var moveToNextEntity = true
 
                         if (Gdx.input.isKeyPressed(GameKeys.EDITOR_SMARTCOPY_LEFT.key)) {
-                            posX -= transform.rectangle.width
+                            posX -= sizeX
                         } else if (Gdx.input.isKeyPressed(GameKeys.EDITOR_SMARTCOPY_RIGHT.key)) {
-                            posX += transform.rectangle.width
+                            posX += sizeX
                         } else if (Gdx.input.isKeyPressed(GameKeys.EDITOR_SMARTCOPY_DOWN.key)) {
-                            posY -= transform.rectangle.height
+                            posY -= sizeY
                         } else if (Gdx.input.isKeyPressed(GameKeys.EDITOR_SMARTCOPY_UP.key)) {
-                            posY += transform.rectangle.height
+                            posY += sizeY
                         } else {
                             posX = Math.min(level.matrixRect.width - transform.rectangle.width, // Les min et max permettent de rester dans le cadre du matrix
                                     Math.max(0f, mousePosInWorld.x - transform.rectangle.width / 2))
@@ -625,6 +637,12 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
 
                         if (moveToNextEntity)
                             copyEntity = newEntity
+                    }
+                }
+                EditorScene.EditorMode.SelectPoint -> {
+                    if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !leftButtonPressedLastFrame) {
+                        onSelectPoint.dispatch(Point(mousePosInWorld.x.toInt(), mousePosInWorld.y.toInt()))
+                        editorMode = EditorMode.NoMode
                     }
                 }
             }
@@ -681,7 +699,7 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
     }
 
     /**
-     * Permet de retourner l'entité sous le pointeur et de mettre à jour les entités sous le pointeur(entitiesUnderMouse)
+     * Permet de retourner l'entité sous le pointeur par rapport à son layer
      */
     private fun findEntityUnderMouse(): Entity? {
         stage.keyboardFocus = null // Enlève le focus sur la fenêtre active permettant d'utiliser par exemple les touches de déplacement même si le joueur était dans un textField l'étape avant
@@ -708,117 +726,19 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
     }
 
     /**
-     * Pas encore fini d'être implémenté
-     *
-     */
-    fun showEntitiesWindow() {
-        TODO("Pas encore fini")
-        stage + window("") {
-            setSize(Gdx.graphics.width.toFloat(), 200f)
-            isMovable = false
-
-            verticalGroup {
-                horizontalGroup {
-                    verticalGroup verticalSettingsGroup@ {
-                        selectBox<EntityFactory.EntityType> {
-                            items = EntityFactory.EntityType.values().toGdxArray().let {
-                                it.removeValue(EntityFactory.EntityType.Player, false); it
-                            }
-                            fun addTextures() {
-                                this@horizontalGroup.table {
-                                    val table = VisTable()
-                                    table.setSize(Gdx.graphics.width.toFloat() - 300f, 200f)
-
-                                    val selectedImage = VisImage()
-
-                                    selectBox<TextureAtlasSelect> {
-                                        items = game.getTextureAtlasList().let {
-                                            val list = mutableListOf<TextureAtlasSelect>()
-
-                                            it.forEach {
-                                                list += TextureAtlasSelect(it.first, it.second)
-                                            }
-
-                                            list.toGdxArray()
-                                        }
-
-                                        addListener(onChange {
-                                            table.clearChildren()
-
-                                            var count = 0
-                                            selected.textureAtlas.regions.forEach {
-                                                val textureInfo = it
-                                                val image = VisImage(textureInfo)
-
-                                                image.userObject = TextureInfo(it, selected.atlasName, it.name)
-
-                                                image.addListener(image.onClick {
-                                                    image.color = Color.BLUE
-                                                })
-
-                                                table.add(image).size(50f, 50f).space(10f)
-
-                                                ++count
-                                                if (count >= 20) {
-                                               //     table.row()
-                                                    count = 0
-                                                }
-                                            }
-                                        })
-
-                                        if (items.size > 1) { // Permet de mettre a jour les acteurs pour créer l'entités
-                                            selectedIndex = 1
-                                            selectedIndex = 0
-                                        }
-                                    }
-                                    row()
-
-                                   // val scroll = ScrollPane(table)
-                                    add(table).size(table.width, table.height).space(10f)
-                                }
-                            }
-
-                            addListener(onChange {
-                                this@horizontalGroup.clearChildren()
-                                this@horizontalGroup.addActor(this)
-
-                                if (selected != null) {
-                                    when (selected!!) {
-                                        EntityFactory.EntityType.Sprite -> {
-                                            addTextures()
-                                        }
-                                        EntityFactory.EntityType.PhysicsSprite -> {
-                                            addTextures()
-                                        }
-                                        EntityFactory.EntityType.Enemy -> {
-                                        }
-                                        EntityFactory.EntityType.Player -> {
-                                        }
-                                        EntityFactory.EntityType.Special -> {
-                                            val specialType = this@verticalSettingsGroup.selectBox<SpecialType> {
-                                                items = SpecialType.values().toGdxArray()
-                                            }
-                                        }
-                                    }
-                                }
-                            })
-
-                            if (this.items.size > 1) { // Permet de mettre a jour les acteurs pour créer l'entités
-                                this.selectedIndex = 1
-                                this.selectedIndex = 0
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
      * Permet d'afficher la fenêtre pour sélectionner une texture
      * @param onTextureSelected Méthode appelée quand la texture a été correctement sélectionnée par le joueur
      */
     private fun showSelectTextureWindow(onTextureSelected: (TextureInfo) -> Unit) {
+        /**
+         * Classe de donnée représentant la sélection d'une texture atlas
+         */
+        data class TextureAtlasSelect(val textureAtlas: TextureAtlas, val atlasName: String) {
+            override fun toString(): String {
+                return atlasName
+            }
+        }
+
         stage + window("Sélectionner une texture") {
             setSize(400f, 400f)
             setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
@@ -1281,7 +1201,7 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
         stage + window("Paramètre de l'entité") {
             isModal = true
             isResizable = false
-            setSize(250f, 300f)
+            setSize(250f, 350f)
             setPosition(Gdx.graphics.width / 2 - width / 2, Gdx.graphics.height / 2 - height / 2)
             addCloseButton()
 
@@ -1312,13 +1232,14 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
                     })
                 }
 
-                if(selectEntities.size == 1) {
-                    if(firstEntity.has(mapperFor<ParametersComponent>())) {
+                if (selectEntities.size == 1) {
+                    if (firstEntity.has(mapperFor<ParametersComponent>())) {
                         val parameters = mapperFor<ParametersComponent>()[firstEntity].getParameters()
-                        if(parameters.isNotEmpty()) {
+                        if (parameters.isNotEmpty()) {
                             textButton("Paramètres avancées") {
                                 addListener(onClick {
-                                 //   showParametersCompEntityWindow(parameters)
+                                    showParametersEntityWindow(parameters)
+                                    this@window.remove()
                                 })
                             }
                         }
@@ -1450,10 +1371,14 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
         }
     }
 
-    private fun showParametersCompEntityWindow(parameters: List<EntityParameter<*>>) {
+    /**
+     * Permet d'afficher la fenêtre permettant de modifier les paramètres de l'entités ayant un parametersComponent
+     * @param parameters Les paramètres à afficher et à modifier
+     */
+    private fun showParametersEntityWindow(parameters: List<EntityParameter<*>>) {
         stage + window("Les paramètres avancées") {
             isModal = true
-            setSize(500f, 200f)
+            setSize(600f, 200f)
             setPosition(Gdx.graphics.width / 2 - width / 2, Gdx.graphics.height / 2 - height / 2)
             addCloseButton()
 
@@ -1465,38 +1390,106 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
                 return saveButton
             }
 
-            parameters.forEach { it ->
-                when(it.param) {
-                    is Point? -> {
-                        val param = it as EntityParameter<Point>
+            verticalGroup {
+                space(10f)
 
-                        var x = 0
-                        var y = 0
+                parameters.forEach { parameter ->
+                    when (parameter.param.type) {
+                        ParameterType.Point -> {
+                            val point = parameter.cast<Point>().getValue()
 
-                        horizontalGroup {
-                            space(10f)
+                            var x = point.x
+                            var y = point.y
 
-                            label(param.description)
+                            horizontalGroup {
+                                space(10f)
 
-                            textArea(param.param?.x?.toString() ?: x.toString()) {
-                                width = 50f
+                                label(parameter.description)
 
-                                addListener(onChange {
-                                    if(text.toIntOrNull() != null)
-                                        x = text.toInt()
+                                textArea(point.x.toString()) {
+                                    addListener(onChange {
+                                        if (text.toIntOrNull() != null)
+                                            x = text.toInt()
+                                    })
+
+                                    onSelectPoint.add { _, (posX, _) ->
+                                        text = posX.toString()
+                                    }
+                                }
+
+                                textArea(point.y.toString()) {
+                                    addListener(onChange {
+                                        if (text.toIntOrNull() != null)
+                                            y = text.toInt()
+                                    })
+
+                                    onSelectPoint.add { _, (_, posY) ->
+                                        text = posY.toString()
+                                    }
+                                }
+
+                                textButton("Sélect.") {
+                                    addListener(onClick {
+                                        this@window.isVisible = false
+
+                                        editorMode = EditorMode.SelectPoint
+                                    })
+
+                                    onSelectPoint.add { _, (posX, posY) ->
+                                        x = posX
+                                        y = posY
+
+                                        this@window.isVisible = true
+                                    }
+                                }
+
+                                addActor(addSaveButton({
+                                    parameter.cast<Point>().setValue(Point(Math.max(0, Math.min(level.matrixRect.width.toInt(), x)), Math.max(0, Math.min(level.matrixRect.height.toInt(), y))))
+                                }))
+                            }
+                        }
+                        ParameterType.Boolean -> {
+                            val bool = parameter.cast<Boolean>().getValue()
+
+                            var value = bool
+
+                            horizontalGroup {
+                                space(10f)
+
+                                checkBox(parameter.description) {
+                                    isChecked = value
+
+                                    addListener(onChange {
+                                        value = isChecked
+                                    })
+                                }
+
+                                addActor(addSaveButton({
+                                    parameter.cast<Boolean>().setValue(value)
+                                }))
+                            }
+                        }
+                        ParameterType.Integer -> {
+                            val int = parameter.cast<Int>().getValue()
+
+                            var value = int
+
+                            horizontalGroup {
+                                space(10f)
+
+                                label(parameter.description)
+
+                                textArea(value.toString()) {
+                                    addListener(onChange {
+                                        if (text.toIntOrNull() != null)
+                                            value = text.toInt()
+                                    })
+                                }
+
+                                addActor(addSaveButton {
+                                    parameter.cast<Int>().setValue(value)
                                 })
                             }
-
-                            textArea(param.param?.y?.toString()?: y.toString()) {
-                                width = 50f
-
-                                addListener(onChange {
-                                    if(text.toIntOrNull() != null)
-                                        y = text.toInt()
-                                })
-                            }
-
-                            addActor(addSaveButton({ param.param = Point(x, y) }))
                         }
                     }
                 }

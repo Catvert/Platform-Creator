@@ -2,7 +2,6 @@ package be.catvert.plateformcreator.ecs
 
 import be.catvert.plateformcreator.*
 import be.catvert.plateformcreator.ecs.components.*
-import be.catvert.plateformcreator.scenes.EndLevelScene
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.signals.Listener
 import com.badlogic.gdx.Gdx
@@ -40,30 +39,30 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
     private val renderMapper = mapperFor<RenderComponent>()
     private val physicsMapper = mapperFor<PhysicsComponent>()
     private val transformMapper = mapperFor<TransformComponent>()
+    private val parametersMapper = mapperFor<ParametersComponent>()
 
     /**
      * Permet de copier une entité selon son flag
      * @param copy L'entité à copier
      */
     fun copyEntity(copy: Entity): Entity {
-        val transformComp = transformMapper[copy]
-        val renderComp = renderMapper[copy]
+        val params = if (parametersMapper.has(copy)) parametersMapper[copy].copy().getParameters() else ParametersComponent.defaultParameters
 
-        when (copy.getType()) {
+        return when (copy.getType()) {
             EntityFactory.EntityType.Sprite -> {
-                return createSprite(transformComp.copy(), renderComp.copy())
+                createSprite(transformMapper[copy].copy(), renderMapper[copy].copy())
             }
             EntityFactory.EntityType.PhysicsSprite -> {
-                return createPhysicsSprite(transformComp.copy(), renderComp.copy(), physicsMapper[copy].copy())
+                createPhysicsSprite(transformMapper[copy].copy(), renderMapper[copy].copy(), physicsMapper[copy].copy())
             }
             EntityFactory.EntityType.Player -> {
-                return createPlayer(transformComp.position())
+                createPlayer(transformMapper[copy].position(), params)
             }
             EntityFactory.EntityType.Enemy -> {
-                return createEnemyWithType(mapperFor<EnemyComponent>()[copy].enemyType, transformComp.position())
+                createEnemyWithType(mapperFor<EnemyComponent>()[copy].enemyType, transformMapper[copy].position(), params)
             }
             EntityFactory.EntityType.Special -> {
-                return createSpecialWithType(mapperFor<SpecialComponent>()[copy].specialType, transformComp.position())
+                createSpecialWithType(mapperFor<SpecialComponent>()[copy].specialType, transformMapper[copy].position(), params)
             }
         }
     }
@@ -73,8 +72,8 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
          * Permet de créer un sprite
          */
         fun createSprite(transformComponent: TransformComponent, renderComponent: RenderComponent) = entity {
-            this += transformComponent
-            this += renderComponent
+            this + transformComponent
+            this + renderComponent
             setType(EntityType.Sprite)
         }
 
@@ -85,7 +84,7 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
             val entity = createSprite(transformComponent, renderComponent)
             entity.setType(EntityType.PhysicsSprite)
 
-            entity += physicsComponent
+            entity + physicsComponent
 
             return entity
         }
@@ -95,9 +94,17 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
      * Permet de créer le joueur
      * @param pos La position de l'entité
      */
-    fun createPlayer(pos: Point): Entity {
+    fun createPlayer(pos: Point, parameters: List<EntityParameter<*>>): Entity {
+        val goRightOnStartParam = if (parameters == ParametersComponent.defaultParameters) EntityParameter<Boolean>(0, "Flip left on level start", false) else parameters.first { it.id == 0 }.cast()
+        val jumpHeightParam = if (parameters == ParametersComponent.defaultParameters) EntityParameter<Int>(1, "Jump height", 300) else parameters.first { it.id == 1 }.cast()
+
+        jumpHeightParam.castParam<IntParameter>().let {
+            it.min = 0
+            it.max = 500
+        }
+
         val entity = createPhysicsSprite(
-                TransformComponent(Rectangle(pos.x.toFloat(), pos.y.toFloat(), 0f, 0f), true),
+                transformComponent { fixedSizeEditor = true; Rectangle(pos.x.toFloat(), pos.y.toFloat(), 0f, 0f) },
                 renderComponent { textures, animations ->
                     textures += game.getSpriteSheetTexture("alienGreen", "alienGreen_stand")
                     textures += game.getSpriteSheetTexture("alienGreen", "alienGreen_jump")
@@ -109,7 +116,7 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
                     renderLayer = Layer.LAYER_MOVABLE_ENT
                     fixedTextureEditor = true
                 },
-                physicsComponent(false, { moveSpeed = 15; movementType = MovementType.SMOOTH; jumpData = JumpData(300) }))
+                physicsComponent(false, { moveSpeed = 15; movementType = MovementType.SMOOTH; jumpData = JumpData(jumpHeightParam.getValue()) }))
 
         entity.setType(EntityType.Player)
 
@@ -117,7 +124,9 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
 
         val jumpSound = game.getGameSound(Gdx.files.internal("sounds/player/jump.ogg"))
 
-        entity += updateComponent {
+        renderMapper[entity].flipX = goRightOnStartParam.getValue()
+
+        entity + updateComponent {
             Listener<UpdateListener>({ _, (_, e, _) ->
                 @Suppress("NAME_SHADOWING")
                 val renderComp = renderMapper[e]
@@ -172,14 +181,19 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
             })
         }
 
-        entity += lifeComponent(entity, 1, null, {
+        entity + lifeComponent(1, null, {
             // remove life
             Listener<LifeListener>({ _, _ ->
                 if (hp == 0) {
-                    EntityEvent.onEndLevel.invoke(false)
+                    EntityEvent.endLevel(false)
                 }
             })
         })
+
+        entity + parametersComponent {
+            this + goRightOnStartParam
+            this + jumpHeightParam
+        }
 
         return entity
     }
@@ -197,7 +211,7 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
 
         entity.setType(EntityType.Enemy)
 
-        entity += enemyComponent
+        entity + enemyComponent
 
         return entity
     }
@@ -207,9 +221,9 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
      * @param enemyType Le type de l'ennemi
      * @param pos La position de l'entité
      */
-    fun createEnemyWithType(enemyType: EnemyType, pos: Point): Entity = when (enemyType) {
+    fun createEnemyWithType(enemyType: EnemyType, pos: Point, parameters: List<EntityParameter<*>> = ParametersComponent.defaultParameters): Entity = when (enemyType) {
         EnemyType.Spinner -> createSpinnerEnemy(pos)
-        EnemyType.Spider -> createSpiderEnemy(pos)
+        EnemyType.Spider -> createSpiderEnemy(pos, parameters)
         EnemyType.SnakeSlime -> createSnakeSlime(pos)
     }
 
@@ -220,10 +234,10 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
     private fun createSpinnerEnemy(pos: Point) = createEnemy(
             enemyComponent(EnemyType.Spinner, {
                 Listener({ _, collision ->
-                    collision.collideEntity[LifeComponent::class.java].removeLife(1)
+                    LifeComponent.removeLifeTo(collision.collideEntity, 1)
                 })
             }),
-            TransformComponent(Rectangle(pos.x.toFloat(), pos.y.toFloat(), 0f, 0f)),
+            transformComponent { Rectangle(pos.x.toFloat(), pos.y.toFloat(), 0f, 0f) },
             renderComponent { textures, animations ->
                 textures += game.getSpriteSheetTexture("enemies", "spinner")
                 animations += game.createAnimationFromRegions(gdxArrayOf(
@@ -238,8 +252,8 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
      * Permet de créer l'ennemi spider
      * @param pos La position de l'entité
      */
-    private fun createSpiderEnemy(pos: Point): Entity {
-        var goRight = false
+    private fun createSpiderEnemy(pos: Point, parameters: List<EntityParameter<*>>): Entity {
+        val goRightParam = if (parameters == ParametersComponent.defaultParameters) EntityParameter(0, "Go right on level start", false, true) else parameters.first { it.id == 0 }.cast()
 
         val dieSound = game.getGameSound(Gdx.files.internal("sounds/enemy/die.wav"))
 
@@ -247,14 +261,14 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
                 enemyComponent(EnemyType.Spider, {
                     Listener({ _, (entity, collideEntity, side) ->
                         if (side == CollisionSide.OnUp) {
-                            EntityEvent.onAddScore.invoke(2)
-                            EntityEvent.onEntityRemoved.invoke(entity) // remove this entity
+                            EntityEvent.addScore(2)
+                            EntityEvent.removeEntity(entity) // Supprime cette entité
                             dieSound.play()
                         } else
-                            collideEntity[LifeComponent::class.java].removeLife(1)
+                            LifeComponent.removeLifeTo(collideEntity, 1)
                     })
                 }),
-                TransformComponent(Rectangle(pos.x.toFloat(), pos.y.toFloat(), 0f, 0f)),
+                transformComponent { Rectangle(pos.x.toFloat(), pos.y.toFloat(), 0f, 0f) },
                 renderComponent { textures, animations ->
                     textures += game.getSpriteSheetTexture("enemies", "spider")
                     animations += game.getAnimation("spider_walk", 0.3f)
@@ -264,16 +278,18 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
                 , physicsComponent(false, { moveSpeed = 10 }, {
             Listener<CollisionListener>({ _, collision ->
                 if (collision.side == CollisionSide.OnLeft)
-                    goRight = true
+                    goRightParam.setValue(true)
                 else if (collision.side == CollisionSide.OnRight)
-                    goRight = false
+                    goRightParam.setValue(false)
             })
         }))
 
-        entity += updateComponent {
+        entity + updateComponent {
             Listener<UpdateListener>({ _, (_, e, _) ->
                 val phys = physicsMapper[e]
                 val render = renderMapper[e]
+
+                val goRight = goRightParam.getValue()
 
                 render.flipX = goRight
 
@@ -284,6 +300,8 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
             })
         }
 
+        entity + ParametersComponent(goRightParam)
+
         return entity
     }
 
@@ -293,9 +311,9 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
      */
     private fun createSnakeSlime(pos: Point) = createEnemy(
             enemyComponent(EnemyType.SnakeSlime, {
-                Listener<CollisionListener>({ _, collision -> collision.collideEntity[LifeComponent::class.java].removeLife(1) })
+                Listener<CollisionListener>({ _, collision -> LifeComponent.removeLifeTo(collision.collideEntity, 1) })
             }),
-            TransformComponent(Rectangle(pos.x.toFloat(), pos.y.toFloat(), 0f, 0f)),
+            transformComponent { Rectangle(pos.x.toFloat(), pos.y.toFloat(), 0f, 0f) },
             renderComponent { textures, animations ->
                 textures += game.getSpriteSheetTexture("enemies", "snakeSlime")
                 animations += game.createAnimationFromRegions(gdxArrayOf(
@@ -310,20 +328,20 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
      * @param fixedSizeEditor Spécifie si oui ou non l'entité peut-être redimensionner dans l'éditeur
      */
     private fun createSpecial(specialComponent: SpecialComponent, transformComponent: TransformComponent, renderComponent: RenderComponent? = null, physicsComponent: PhysicsComponent, fixedSizeEditor: Boolean = true) = entity {
-        this += transformComponent
-        this += physicsComponent
+        this + transformComponent
+        this + physicsComponent
 
         if (renderComponent != null)
-            this += renderComponent
+            this + renderComponent
 
         transformMapper[this].fixedSizeEditor = fixedSizeEditor
 
-        if(renderMapper.has(this))
-             renderMapper[this].fixedTextureEditor = true
+        if (renderMapper.has(this))
+            renderMapper[this].fixedTextureEditor = true
 
         setType(EntityType.Special)
 
-        this += specialComponent
+        this + specialComponent
     }
 
     /**
@@ -331,35 +349,35 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
      * @param specialType Le type spécial de l'entité
      * @param pos La position de l'entité
      */
-    fun createSpecialWithType(specialType: SpecialType, pos: Point) = when (specialType) {
+    fun createSpecialWithType(specialType: SpecialType, pos: Point, parameters: List<EntityParameter<*>> = ParametersComponent.defaultParameters) = when (specialType) {
         SpecialType.ExitLevel -> createSpecialExitLevel(pos)
         SpecialType.BlockEnemy -> createSpecialBlockEnemy(pos)
         SpecialType.GoldCoin -> createSpecialGoldCoin(pos)
-        SpecialType.Teleporter -> createSpecialTeleporter(pos)
+        SpecialType.Teleporter -> createSpecialTeleporter(pos, parameters)
     }
 
-    private fun createSpecialTeleporter(pos: Point): Entity {
-        val teleportPointParam = EntityParameter<Point>(null,"Teleporter point", true)
+    private fun createSpecialTeleporter(pos: Point, parameters: List<EntityParameter<*>>): Entity {
+        val teleportPointParam = if (parameters == ParametersComponent.defaultParameters) EntityParameter(0, "Teleporter point", Point(0, 0), true) else parameters.first { it.id == 0 }.cast()
 
         val entity = createSpecial(
                 SpecialComponent(SpecialType.Teleporter),
-                TransformComponent(Rectangle(pos.x.toFloat(), pos.y.toFloat(), 20f, 20f)),
+                transformComponent { Rectangle(pos.x.toFloat(), pos.y.toFloat(), 20f, 20f) },
                 null,
                 physicsComponent(true, {
                     maskCollision = MaskCollision.ONLY_PLAYER
                     isSensor = true
                 }, {
                     Listener<CollisionListener>({ _, collision ->
-                        if(collision.collideEntity isType EntityType.Player) {
-                            if(teleportPointParam.param != null) {
-                                transformMapper[collision.collideEntity].rectangle.setPosition(teleportPointParam.param!!.x.toFloat(), teleportPointParam.param!!.y.toFloat())
-                            }
+                        if (collision.collideEntity isType EntityType.Player) {
+                            transformMapper[collision.collideEntity].rectangle.setPosition(teleportPointParam.getValue().x.toFloat(), teleportPointParam.getValue().y.toFloat())
                         }
                     })
                 }))
 
 
-        entity += ParametersComponent(teleportPointParam)
+        entity + parametersComponent {
+            this + teleportPointParam
+        }
 
         return entity
     }
@@ -370,14 +388,15 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
      */
     private fun createSpecialExitLevel(pos: Point) = createSpecial(
             SpecialComponent(SpecialType.ExitLevel),
-            TransformComponent(Rectangle(pos.x.toFloat(), pos.y.toFloat(), 20f, 20f)), null,
+            transformComponent { Rectangle(pos.x.toFloat(), pos.y.toFloat(), 20f, 20f) },
+            null,
             physicsComponent(true, {
                 maskCollision = MaskCollision.ONLY_PLAYER
                 isSensor = true
             }, {
                 Listener<CollisionListener>({ _, collision ->
                     if (collision.collideEntity isType EntityFactory.EntityType.Player) {
-                        EntityEvent.onEndLevel.invoke(true)
+                        EntityEvent.endLevel(true)
                     }
                 })
             }))
@@ -388,7 +407,7 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
      */
     private fun createSpecialBlockEnemy(pos: Point) = createSpecial(
             SpecialComponent(SpecialType.BlockEnemy),
-            TransformComponent(Rectangle(pos.x.toFloat(), pos.y.toFloat(), 20f, 20f)), null,
+            transformComponent { Rectangle(pos.x.toFloat(), pos.y.toFloat(), 20f, 20f) }, null,
             physicsComponent(true, {
                 maskCollision = MaskCollision.ONLY_ENEMY
             }))
@@ -412,8 +431,8 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
                 }, {
                     Listener<CollisionListener>({ _, (entity, collideEntity) ->
                         if (collideEntity isType EntityType.Player) {
-                            EntityEvent.onAddScore.invoke(1)
-                            EntityEvent.onEntityRemoved.invoke(entity)
+                            EntityEvent.addScore(1)
+                            EntityEvent.removeEntity(entity) // Supprime cette entité
                             coinSound.play()
                         }
                     })

@@ -40,8 +40,8 @@ class PauseScene(game: MtrGame, levelFile: FileHandle, gameScene: GameScene) : B
 
                 textButton("Recommencer le niveau") {
                     addListener(onClick {
-                        val (success, level) = LevelFactory.loadLevel(game, levelFile)
-                        if (success) {
+                        val level = LevelFactory.loadLevel(game, levelFile)
+                        if (level != null) {
                             gameScene.dispose()
                             game.setScene(GameScene(game, level))
                         }

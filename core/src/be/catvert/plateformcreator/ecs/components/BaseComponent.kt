@@ -1,5 +1,6 @@
 package be.catvert.plateformcreator.ecs.components
 
+import be.catvert.plateformcreator.Copyable
 import com.badlogic.ashley.core.Component
 
 /**
@@ -7,12 +8,7 @@ import com.badlogic.ashley.core.Component
  */
 
 /**
- * Cette classe permet d'ajouter au component une variable pour savoir si il est actif ou non et une méthode de copie
+ * Cette classe permet d'ajouter au component une variable pour savoir si celui-ci est actif ou non
  * @property active Permet d'activer ou de désactiver le component
  */
-abstract class BaseComponent<out T : Component>(var active: Boolean = true) : Component {
-    /**
-     * Permet de copier le component en deep copy
-     */
-    abstract fun copy(): T
-}
+abstract class BaseComponent<T : Component>(var active: Boolean = true) : Component, Copyable<T>

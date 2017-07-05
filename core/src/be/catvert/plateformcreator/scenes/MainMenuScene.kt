@@ -188,8 +188,8 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
                     textButton("Jouer") {
                         addListener(onClick {
                             if (list.selected != null) {
-                                val (success, level) = LevelFactory.loadLevel(game, list.selected.file)
-                                if (success)
+                                val level = LevelFactory.loadLevel(game, list.selected.file)
+                                if (level != null)
                                     game.setScene(GameScene(game, level))
                             }
                         })
@@ -197,8 +197,8 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
                     textButton("Éditer") {
                         addListener(onClick {
                             if (list.selected != null) {
-                                val (success, level) = LevelFactory.loadLevel(game, list.selected.file)
-                                if (success)
+                                val level = LevelFactory.loadLevel(game, list.selected.file)
+                                if (level != null)
                                     game.setScene(EditorScene(game, level))
                             }
                         })
