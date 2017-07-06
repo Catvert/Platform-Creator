@@ -24,7 +24,7 @@ class EndLevelScene(game: MtrGame, levelFile: FileHandle, levelSuccess: Boolean)
         background = game.getMainBackground()
         entities += game.getLogo()
 
-        game.getGameSound(Gdx.files.internal(if (levelSuccess) "sounds/game-over-success.wav" else "sounds/game-over-fail.wav")).play()
+        game.getGameSound(Gdx.files.internal(if (levelSuccess) "sounds/game-over-success.wav" else "sounds/game-over-fail.wav")).play(game.soundVolume)
 
         stage + window("Fin de partie") {
             setSize(200f, 200f)

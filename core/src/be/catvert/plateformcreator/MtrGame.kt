@@ -38,11 +38,12 @@ import java.io.IOException
  * Classe du jeu
  * @param vsync Activer ou non la vsync au lancement du jeu
  */
-class MtrGame(vsync: Boolean) : Game() {
+class MtrGame(vsync: Boolean, var soundVolume: Float) : Game() {
     /**
-     * Le chemin vers le fichier de configuration de l'UI
+     * La projection du batch par défaut
      */
-    private val UISkinPath: String = "ui/tinted/x1/tinted.json"
+    lateinit var defaultProjection: Matrix4
+        private set
 
     /**
      * Le batch utilisé pour dessiner les entités
@@ -55,23 +56,6 @@ class MtrGame(vsync: Boolean) : Game() {
      */
     lateinit var stageBatch: SpriteBatch
         private set
-
-    /**
-     * Le font principal du jeu
-     */
-    lateinit var mainFont: BitmapFont
-        private set
-
-    /**
-     * La projection du batch par défaut
-     */
-    lateinit var defaultProjection: Matrix4
-        private set
-
-    /**
-     * La scène en cour
-     */
-    private lateinit var currentScene: BaseScene
 
     /**
      * Permet d'activer ou non la synchronisation vertical
@@ -96,6 +80,23 @@ class MtrGame(vsync: Boolean) : Game() {
      * L'engine utilisé pour le ECS
      */
     val engine = Engine()
+
+    /**
+     * Le font principal du jeu
+     */
+    lateinit var mainFont: BitmapFont
+        private set
+
+    /**
+     * La scène en cour
+     */
+    private lateinit var currentScene: BaseScene
+
+    /**
+     * Le chemin vers le fichier de configuration de l'UI
+     */
+    private val UISkinPath: String = "ui/tinted/x1/tinted.json"
+
 
     /**
      * Les textures chargées depuis les spritesheets
@@ -436,17 +437,11 @@ class MtrGame(vsync: Boolean) : Game() {
 
             writer.`object`()
 
-            writer.name("width")
-            writer.value(Gdx.graphics.width)
-
-            writer.name("height")
-            writer.value(Gdx.graphics.height)
-
-            writer.name("vsync")
-            writer.value(vsync)
-
-            writer.name("fullscreen")
-            writer.value(Gdx.graphics.isFullscreen)
+            writer.name("width").value(Gdx.graphics.width)
+            writer.name("height").value(Gdx.graphics.height)
+            writer.name("vsync").value(vsync)
+            writer.name("fullscreen").value(Gdx.graphics.isFullscreen)
+            writer.name("soundvolume").value(soundVolume)
 
             writer.pop()
 

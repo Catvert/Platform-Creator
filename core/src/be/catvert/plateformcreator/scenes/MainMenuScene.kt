@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane
 import com.kotcrab.vis.ui.widget.*
+import ktx.actors.onChange
 import ktx.actors.onClick
 import ktx.actors.onKeyUp
 import ktx.actors.plus
@@ -277,6 +278,26 @@ class MainMenuScene(game: MtrGame) : BaseScene(game, systems = RenderingSystem(g
                 }
                 val vsync = checkBox("VSync") {
                     isChecked = game.vsync
+                }
+
+                horizontalGroup {
+                    space(10f)
+                    setPosition(0f, 10f)
+
+                    label("Audio")
+
+                    val labelPourcentageAudio = VisLabel("${(game.soundVolume * 100).toInt()}%")
+
+                    val slider = VisSlider(0.0f, 1.0f, 0.1f, false)
+                    slider.value = game.soundVolume
+                    slider.addListener(slider.onChange {
+                        game.soundVolume = slider.value
+                        labelPourcentageAudio.setText("${(game.soundVolume * 100).toInt()}%")
+                    })
+
+                    this + slider
+
+                    this + labelPourcentageAudio
                 }
 
                 textButton("Appliquer") {

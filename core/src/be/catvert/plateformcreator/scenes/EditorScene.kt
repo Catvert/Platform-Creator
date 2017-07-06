@@ -17,6 +17,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.*
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.kotcrab.vis.ui.widget.*
 import ktx.actors.contains
@@ -115,6 +116,9 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
      */
     private val onSelectEntityUpdate: Signal<Entity?> = Signal()
 
+    /**
+     * Signal appelé quand un point a été sélectionné dans le mode SelectPoint
+     */
     private val onSelectPoint: Signal<Point> = Signal()
 
     /**
@@ -169,6 +173,17 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
      * L'entityFactory utilisé pour créer de nouvelle entités
      */
     private val entityFactory = EntityFactory(game, level.levelFile)
+
+
+    /**
+     * Permet de sauvegarder le dernier type d'entité utilisé dans la fenêtre AddEntity
+     */
+    private var latestAddEntityWindowEntityTypeIndex = 0
+
+    /**
+     * Permet de sauvegarder le dernier spriteSheet utilisé dans la fenêtre addEntity
+     */
+    private var latestSelectTextureWindowSpriteSheetIndex = 0
 
     /**
      * Permet d'ajouter une nouvelle entité sélectionnée
@@ -729,7 +744,7 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
      * Permet d'afficher la fenêtre pour sélectionner une texture
      * @param onTextureSelected Méthode appelée quand la texture a été correctement sélectionnée par le joueur
      */
-    private fun showSelectTextureWindow(onTextureSelected: (TextureInfo) -> Unit) {
+    private fun showSelectTextureWindow(spriteSheet: String? = null, onTextureSelected: (TextureInfo) -> Unit) {
         /**
          * Classe de donnée représentant la sélection d'une texture atlas
          */
@@ -751,20 +766,26 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
 
                 val selectedImage = VisImage()
 
-                selectBox<TextureAtlasSelect> {
+                val selectedBox = selectBox<TextureAtlasSelect> {
                     items = game.getTextureAtlasList().let {
                         val list = mutableListOf<TextureAtlasSelect>()
 
-                        it.forEach {
+                        it.forEachIndexed { i, it ->
+                            if(spriteSheet != null && spriteSheet == it.second) {
+                                latestSelectTextureWindowSpriteSheetIndex = i
+                            }
+
                             list += TextureAtlasSelect(it.first, it.second)
                         }
 
                         list.toGdxArray()
                     }
 
-                    addListener(onChange {
-                        table.clearChildren()
+                    if (latestSelectTextureWindowSpriteSheetIndex < this.items.size)
+                        this.selectedIndex = latestSelectTextureWindowSpriteSheetIndex
 
+                    val change = onChange {
+                        table.clearChildren()
                         var count = 0
                         selected.textureAtlas.regions.forEach {
                             val textureInfo = it
@@ -785,12 +806,11 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
                                 count = 0
                             }
                         }
-                    })
-
-                    if (items.size > 1) { // Permet de mettre a jour les acteurs pour créer l'entités
-                        selectedIndex = 1
-                        selectedIndex = 0
                     }
+
+                    addListener(change)
+
+                    change.changed(ChangeListener.ChangeEvent(), this)
                 }
                 row()
 
@@ -807,6 +827,7 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
                     addListener(onClick {
                         if (selectedImage.userObject != null && selectedImage.userObject is TextureInfo) {
                             onTextureSelected(selectedImage.userObject as TextureInfo)
+                            latestSelectTextureWindowSpriteSheetIndex = selectedBox.selectedIndex
                             this@window.remove()
                         }
                     })
@@ -836,6 +857,9 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
                             it
                         }
 
+                        if (latestAddEntityWindowEntityTypeIndex < this.items.size)
+                            this.selectedIndex = latestAddEntityWindowEntityTypeIndex
+
                         fun addSize(): Pair<VisTextField, VisTextField> {
                             val widthField: VisTextField = VisTextField()
                             val heightField: VisTextField = VisTextField()
@@ -861,7 +885,7 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
                                 val image = com.kotcrab.vis.ui.widget.VisImage()
                                 textButton("Sélectionner texture") {
                                     addListener(onClick {
-                                        showSelectTextureWindow({ texture ->
+                                        showSelectTextureWindow(null, { texture ->
                                             widthField.text = texture.texture.regionWidth.toString()
                                             heightField.text = texture.texture.regionHeight.toString()
 
@@ -887,11 +911,11 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
 
                         fun finishEntityBuild(entity: Entity) {
                             copyEntity = entity
-
+                            latestAddEntityWindowEntityTypeIndex = this.selectedIndex
                             this@window.remove()
                         }
 
-                        addListener(onChange {
+                        val change = onChange {
                             this@verticalSettingsGroup.clearChildren()
                             this@verticalSettingsGroup.addActor(this)
 
@@ -949,16 +973,14 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
                                         })
                                     }
                                 }
+
+                                this@verticalSettingsGroup.addActor(addButton)
                             }
-
-                            this@verticalSettingsGroup.addActor(addButton)
-                        })
-
-                        if (this.items.size > 1) { // Permet de mettre a jour les acteurs pour créer l'entités
-                            this.selectedIndex = 1
-                            this.selectedIndex = 0
                         }
 
+                        addListener(change)
+
+                        change.changed(ChangeListener.ChangeEvent(), this)
                     }
                 }
             }
@@ -1066,7 +1088,7 @@ class EditorScene(game: MtrGame, private val level: Level) : BaseScene(game, sys
                             }
 
                             image.addListener(image.onClick {
-                                showSelectTextureWindow {
+                                showSelectTextureWindow(firstSpriteSheet) {
                                     updateRegion(it)
                                 }
                             })

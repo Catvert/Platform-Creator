@@ -156,7 +156,7 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
                 if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
                     physics.nextActions += NextActions.JUMP
                     if (physics.jumpData!!.startJumping)
-                        jumpSound.play()
+                        jumpSound.play(game.soundVolume)
                 }
 
                 if (!physics.isOnGround)
@@ -263,7 +263,7 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
                         if (side == CollisionSide.OnUp) {
                             EntityEvent.addScore(2)
                             EntityEvent.removeEntity(entity) // Supprime cette entité
-                            dieSound.play()
+                            dieSound.play(game.soundVolume)
                         } else
                             LifeComponent.removeLifeTo(collideEntity, 1)
                     })
@@ -433,7 +433,7 @@ class EntityFactory(private val game: MtrGame, private val levelFile: FileHandle
                         if (collideEntity isType EntityType.Player) {
                             EntityEvent.addScore(1)
                             EntityEvent.removeEntity(entity) // Supprime cette entité
-                            coinSound.play()
+                            coinSound.play(game.soundVolume)
                         }
                     })
                 }))

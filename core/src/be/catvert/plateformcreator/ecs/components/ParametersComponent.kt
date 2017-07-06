@@ -105,10 +105,10 @@ class IntParameter(value: Int, var min: Int? = null, var max: Int? = null) : Par
         set(value) {
             var correctValue = true
 
-            if((min != null && value < min!!) || (max != null && value > max!!))
+            if ((min != null && value < min!!) || (max != null && value > max!!))
                 correctValue = false
 
-            if(correctValue)
+            if (correctValue)
                 field = value
         }
 

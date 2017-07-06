@@ -14,10 +14,10 @@ import javax.script.ScriptEngineFactory
 
 object DesktopLauncher {
 
-    data class GameConfig(val width: Int, val height: Int, val vsync: Boolean, val fullscreen: Boolean)
+    data class GameConfig(val width: Int, val height: Int, val vsync: Boolean, val fullscreen: Boolean, val soundVolume: Float)
 
     @JvmStatic fun main(arg: Array<String>) {
-        val (width, height, vsync, fullscreen) = loadConfig()
+        val (width, height, vsync, fullscreen, soundVolume) = loadConfig()
 
         loadKeysConfig()
 
@@ -29,7 +29,7 @@ object DesktopLauncher {
         config.title = "Plateform Creator"
         config.resizable = false
 
-        LwjglApplication(MtrGame(vsync), config)
+        LwjglApplication(MtrGame(vsync, soundVolume), config)
     }
 
     /**
@@ -61,12 +61,13 @@ object DesktopLauncher {
             val screenHeight = root.getInt("height")
             val vsync = root.getBoolean("vsync")
             val fullscreen = root.getBoolean("fullscreen")
+            val soundVolume = root.getFloat("soundvolume")
 
-            return GameConfig(screenWidth, screenHeight, vsync, fullscreen)
+            return GameConfig(screenWidth, screenHeight, vsync, fullscreen, soundVolume)
         } catch (e: Exception) {
             System.err.println("Erreur lors du chargement de la configuration du jeu ! Erreur : ${e.message}")
         }
 
-        return GameConfig(1280, 720, false, false)
+        return GameConfig(1280, 720, false, false, 1f)
     }
 }
