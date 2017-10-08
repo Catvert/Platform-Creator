@@ -1,10 +1,7 @@
 package be.catvert.pc.scenes
 
-import be.catvert.pc.GameKeys
 import be.catvert.pc.Level
 import be.catvert.pc.PCGame
-import be.catvert.pc.serialization.SerializationFactory
-import be.catvert.pc.utility.Point
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 

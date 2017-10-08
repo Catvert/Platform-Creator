@@ -1,6 +1,8 @@
 package be.catvert.pc.scenes
 
-import be.catvert.pc.*
+import be.catvert.pc.GameObject
+import be.catvert.pc.GameObjectContainer
+import be.catvert.pc.PCGame
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.OrthographicCamera
@@ -12,7 +14,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport
 import ktx.app.clearScreen
 
 abstract class Scene : Renderable, Updeatable, Resizable, Disposable, GameObjectContainer {
-    protected val camera = OrthographicCamera(Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
+    protected val camera = OrthographicCamera()
     protected val stage = Stage(ScreenViewport(), PCGame.hudBatch)
 
     protected val backgroundColors = Triple(0f, 0f, 0f)
@@ -24,9 +26,13 @@ abstract class Scene : Renderable, Updeatable, Resizable, Disposable, GameObject
 
     init {
         Gdx.input.inputProcessor = stage
+
+        camera.setToOrtho(false, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
     }
 
-    override fun render(batch: Batch) {
+    open fun additionalRender(batch: Batch) {}
+
+    final override fun render(batch: Batch) {
         clearScreen(backgroundColors.first, backgroundColors.second, backgroundColors.third)
 
         batch.begin()
@@ -38,6 +44,8 @@ abstract class Scene : Renderable, Updeatable, Resizable, Disposable, GameObject
 
         batch.projectionMatrix = camera.combined
         gameObjects.forEach { it.render(batch) }
+
+        additionalRender(batch)
 
         batch.end()
 

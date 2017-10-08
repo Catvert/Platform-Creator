@@ -1,6 +1,7 @@
 package be.catvert.pc.scenes
 
 import be.catvert.pc.PCGame
+import be.catvert.pc.utility.Size
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Texture
@@ -10,6 +11,8 @@ import ktx.assets.loadOnDemand
 import ktx.vis.window
 
 class PauseScene(private val gameScene: GameScene) : Scene() {
+    private val logo = PCGame.generateLogo(this)
+
     init {
         stage + window("Menu principal") {
             verticalGroup {
@@ -37,5 +40,10 @@ class PauseScene(private val gameScene: GameScene) : Scene() {
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
             PCGame.setScene(gameScene)
+    }
+
+    override fun resize(size: Size) {
+        super.resize(size)
+        logo.rectangle.set(PCGame.getLogoRect())
     }
 }

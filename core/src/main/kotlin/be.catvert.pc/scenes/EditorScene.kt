@@ -3,9 +3,7 @@ package be.catvert.pc.scenes
 import be.catvert.pc.GameKeys
 import be.catvert.pc.Level
 import be.catvert.pc.PCGame
-import be.catvert.pc.components.graphics.TextureComponent
 import be.catvert.pc.serialization.SerializationFactory
-import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 

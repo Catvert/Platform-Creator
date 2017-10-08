@@ -1,6 +1,9 @@
 package be.catvert.pc.scenes
 
-import be.catvert.pc.*
+import be.catvert.pc.GameKeys
+import be.catvert.pc.Level
+import be.catvert.pc.Log
+import be.catvert.pc.PCGame
 import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.Size
@@ -10,6 +13,7 @@ import com.badlogic.gdx.Input
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane
 import com.kotcrab.vis.ui.widget.*
@@ -29,7 +33,7 @@ import java.nio.file.StandardCopyOption
 class MainMenuScene : Scene() {
     private val glyphCreatedBy = GlyphLayout(PCGame.mainFont, "par Catvert")
 
-    private var logo = PCGame.generateLogo(this)
+    private val logo = PCGame.generateLogo(this)
 
     init {
         stage + window("Menu principal") {
@@ -57,6 +61,11 @@ class MainMenuScene : Scene() {
         }
 
         backgroundTexture = PCGame.assetManager.loadOnDemand<Texture>("assets/game/mainmenu.png").asset
+    }
+
+    override fun additionalRender(batch: Batch) {
+        super.additionalRender(batch)
+        PCGame.mainFont.draw(batch, glyphCreatedBy, Gdx.graphics.width - glyphCreatedBy.width, glyphCreatedBy.height)
     }
 
     override fun resize(size: Size) {
@@ -195,7 +204,7 @@ class MainMenuScene : Scene() {
                                         Files.copy(Paths.get(list.selected.file.path()), Paths.get(list.selected.file.parent().path() + "/$name.mtrlvl"), StandardCopyOption.REPLACE_EXISTING)
                                         list.setItems(getLevels())
                                         showDialog("Opération réussie !", "La copie s'est correctement effectuée !")
-                                    } catch(e: IOException) {
+                                    } catch (e: IOException) {
                                         showDialog("Opération échouée !", "Un problème s'est produit lors de la copie !")
                                         Log.error(e) { "Erreur survenue lors de la copie du niveau ! Erreur : $e" }
                                     }
@@ -212,7 +221,7 @@ class MainMenuScene : Scene() {
                                             Files.delete(Paths.get(list.selected.file.path()))
                                             list.setItems(getLevels())
                                             showDialog("Opération réussie !", "La suppression s'est correctement effectuée !")
-                                        } catch(e: IOException) {
+                                        } catch (e: IOException) {
                                             showDialog("Opération échouée !", "Un problème s'est produit lors de la suppression !")
                                             Log.error(e) { "Erreur survenue lors de la suppression du niveau !" }
                                         }
@@ -232,138 +241,124 @@ class MainMenuScene : Scene() {
     private fun showSettingsWindows() {
         stage + window("Options du jeu") {
             addCloseButton()
-            setSize(300f, 275f)
-            setPosition(Gdx.graphics.width / 2f - width - 1, Gdx.graphics.height / 2f - height / 2)
+            setSize(600f, 300f)
+            setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
 
             val widthArea = VisTextArea(Gdx.graphics.width.toString())
             val heightArea = VisTextArea(Gdx.graphics.height.toString())
-            verticalGroup {
-                space(10f)
-                horizontalGroup {
-                    label("Largeur de l'écran : ")
-                    addActor(widthArea)
-                }
-                horizontalGroup {
-                    label("Hauteur de l'écran : ")
-                    addActor(heightArea)
-                }
 
-                val fullscreen = checkBox("Plein écran") {
-                    isChecked = Gdx.graphics.isFullscreen
-                }
-                val vsync = checkBox("VSync") {
-                    isChecked = PCGame.vsync
-                }
+            val fullScreenCkbox = VisCheckBox("Plein écran", Gdx.graphics.isFullscreen)
+            val vSyncCkbox = VisCheckBox("VSync", PCGame.vsync)
 
-                horizontalGroup {
-                    space(10f)
-                    setPosition(0f, 10f)
+            val keyAreaList = mutableListOf<VisTextArea>()
+            table(defaultSpacing = true) {
+                table(defaultSpacing = true) {
+                    verticalGroup {
+                        space(10f)
+                        horizontalGroup {
+                            label("Largeur de l'écran : ")
+                            addActor(widthArea)
+                        }
+                        horizontalGroup {
+                            label("Hauteur de l'écran : ")
+                            addActor(heightArea)
+                        }
 
-                    label("Audio")
+                        addActor(fullScreenCkbox)
+                        addActor(vSyncCkbox)
 
-                    val labelPourcentageAudio = VisLabel("${(PCGame.soundVolume * 100).toInt()}%")
+                        horizontalGroup {
+                            space(10f)
+                            setPosition(0f, 10f)
 
-                    val slider = VisSlider(0.0f, 1.0f, 0.1f, false)
-                    slider.value = PCGame.soundVolume
-                    slider.addListener(slider.onChange {
-                        PCGame.soundVolume = slider.value
-                        labelPourcentageAudio.setText("${(PCGame.soundVolume * 100).toInt()}%")
+                            label("Audio")
+
+                            val labelPourcentageAudio = VisLabel("${(PCGame.soundVolume * 100).toInt()}%")
+
+                            val slider = VisSlider(0.0f, 1.0f, 0.1f, false)
+                            slider.value = PCGame.soundVolume
+                            slider.addListener(slider.onChange {
+                                PCGame.soundVolume = slider.value
+                                labelPourcentageAudio.setText("${(PCGame.soundVolume * 100).toInt()}%")
+                            })
+
+                            this + slider
+
+                            this + labelPourcentageAudio
+                        }
+                    }
+
+                    val pane = ScrollPane(table {
+                        GameKeys.values().forEach { key ->
+                            add(VisLabel(key.description))
+
+                            val keyArea = VisTextArea(Input.Keys.toString(key.key))
+                            keyArea.addListener(keyArea.onKeyUp {
+                                keyArea.text = Input.Keys.toString(it)
+                            })
+                            keyArea.isReadOnly = true
+                            keyArea.userObject = key
+                            keyAreaList += keyArea
+
+                            add(keyArea).width(50f)
+
+                            row()
+                        }
                     })
-
-                    this + slider
-
-                    this + labelPourcentageAudio
+                    pane.setScrollingDisabled(true, false)
+                    add(pane)
                 }
-
+                row()
                 textButton("Appliquer") {
-                    addListener(onClick {
-                        var success = true
+                    onClick {
+                        var successConfig = true
                         if (widthArea.text.toIntOrNull() == null) {
                             widthArea.color = Color.RED
-                            success = false
+                            successConfig = false
                         }
                         if (heightArea.text.toIntOrNull() == null) {
                             heightArea.color = Color.RED
-                            success = false
+                            successConfig = false
                         }
-                        if (success) {
+                        if (successConfig) {
                             widthArea.color = Color.WHITE
                             heightArea.color = Color.WHITE
 
-                            PCGame.vsync = vsync.isChecked
+                            PCGame.vsync = vSyncCkbox.isChecked
 
-                            if (fullscreen.isChecked)
+                            if (fullScreenCkbox.isChecked)
                                 Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
                             else
                                 Gdx.graphics.setWindowedMode(widthArea.text.toInt(), heightArea.text.toInt())
 
-                            if (PCGame.saveGameConfig())
-                                showDialog("Sauvegarde effectuée !", "Changement effectué !")
-                            else
+                            if (!PCGame.saveGameConfig())
                                 showDialog("Erreur lors de la sauvegarde !", "Une erreur est survenue lors de la sauvegarde de la config du jeu !")
                         }
-                    })
-                }
-            }
-        }
 
-        stage + window("Configuration des touches") {
-            addCloseButton()
-            setSize(325f, 275f)
-            setPosition(Gdx.graphics.width / 2f + 1, Gdx.graphics.height / 2f - height / 2)
+                        var successKeysConfig = true
+                        keyAreaList.forEach {
+                            val gameKey = it.userObject as GameKeys
 
-            val keyAreaList = mutableListOf<VisTextArea>()
+                            val newKey = Input.Keys.valueOf(it.text)
+                            if (newKey == -1 || newKey == Input.Keys.UNKNOWN) {
+                                successKeysConfig = false
+                                it.color = Color.RED
+                            } else
+                                gameKey.key = newKey
+                        }
 
-            val pane = ScrollPane(table {
-                GameKeys.values().forEach { key ->
-                    add(VisLabel(key.description))
+                        if (successKeysConfig) {
+                            keyAreaList.forEach { it.color = Color.WHITE }
+                            if (!PCGame.saveKeysConfig())
+                                showDialog("Erreur lors de la sauvegarde", "Une erreur est survenue lors de la sauvegarde du jeu !")
+                        } else {
+                            showDialog("Erreur lors de la sauvegarde !", "Une ou plusieurs touches sont invalides !")
+                        }
 
-                    val keyArea = VisTextArea(Input.Keys.toString(key.key))
-                    keyArea.addListener(keyArea.onKeyUp {
-                        keyArea.text = Input.Keys.toString(it)
-                    })
-                    keyArea.isReadOnly = true
-                    keyArea.userObject = key
-                    keyAreaList += keyArea
-
-                    add(keyArea).width(50f)
-
-                    row()
-                }
-            })
-            pane.setScrollingDisabled(true, false)
-
-            table {
-                add(pane)
-                row()
-
-                val saveButton = VisTextButton("Appliquer")
-                saveButton.addListener(saveButton.onClick {
-                    var success = true
-
-                    keyAreaList.forEach {
-                        val gameKey = it.userObject as GameKeys
-
-                        val newKey = Input.Keys.valueOf(it.text)
-                        if (newKey == -1 || newKey == Input.Keys.UNKNOWN) {
-                            success = false
-                            it.color = Color.RED
-                        } else
-                            gameKey.key = newKey
+                        if(successConfig && successKeysConfig)
+                            this@window.remove()
                     }
-
-                    if (success) {
-                        keyAreaList.forEach { it.color = Color.WHITE }
-                        if (PCGame.saveKeysConfig())
-                            showDialog("Sauvegarde effectuée !", "La sauvegarde des touches c'est correctement effectuée !")
-                        else
-                            showDialog("Erreur lors de la sauvegarde", "Une erreur est survenue lors de la sauvegarde du jeu !")
-                    } else {
-                        showDialog("Erreur lors de la sauvegarde !", "Une ou plusieurs touches sont invalides !")
-                    }
-                })
-
-                add(saveButton)
+                }
             }
         }
     }

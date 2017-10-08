@@ -1,13 +1,13 @@
 package be.catvert.pc.components.graphics
 
 import be.catvert.pc.GameObject
-import be.catvert.pc.serialization.InheritanceAdapter
 import be.catvert.pc.PCGame
+import be.catvert.pc.serialization.InheritanceAdapter
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Rectangle
-import com.google.gson.*
+import com.google.gson.JsonObject
 import com.google.gson.annotations.JsonAdapter
 import ktx.assets.getValue
 import ktx.assets.loadOnDemand

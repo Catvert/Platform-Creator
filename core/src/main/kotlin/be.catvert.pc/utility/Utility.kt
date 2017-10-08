@@ -1,10 +1,8 @@
 package be.catvert.pc.utility
 
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Graphics
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.math.Rectangle
-import org.w3c.dom.css.Rect
 
 fun Rectangle.position() = Point(this.x.toInt(), this.y.toInt())
 fun Rectangle.size() = Size(this.width.toInt(), this.height.toInt())

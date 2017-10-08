@@ -4,10 +4,13 @@ import be.catvert.pc.components.Component
 import be.catvert.pc.components.graphics.RenderableComponent
 import be.catvert.pc.components.logics.UpdeatableComponent
 import be.catvert.pc.serialization.PostDeserialization
-import be.catvert.pc.utility.*
+import be.catvert.pc.utility.Renderable
+import be.catvert.pc.utility.Updeatable
+import be.catvert.pc.utility.position
+import be.catvert.pc.utility.size
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Rectangle
-import com.google.gson.*
+import com.google.gson.InstanceCreator
 import java.lang.reflect.Type
 import java.util.*
 

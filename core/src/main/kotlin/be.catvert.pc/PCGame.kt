@@ -4,9 +4,7 @@ import be.catvert.pc.components.graphics.TextureComponent
 import be.catvert.pc.scenes.MainMenuScene
 import be.catvert.pc.scenes.Scene
 import be.catvert.pc.utility.Constants
-import be.catvert.pc.utility.Point
 import be.catvert.pc.utility.Size
-import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.g2d.BitmapFont
@@ -55,14 +53,14 @@ class PCGame(private val setFullScreenStartup: Boolean, private val initialVSync
          */
         fun generateLogo(container: GameObjectContainer): GameObject {
             return container.createGameObject(getLogoRect()) {
-                this += TextureComponent(Gdx.files.local(Constants.gameLogoPath), linkRectToGO = true)
+                this += TextureComponent(Gdx.files.local(Constants.gameLogoPath))
             }
         }
 
         /**
          * Permet de retourner la taille du logo au cas où la taille de l'écran changerait.
          */
-        fun getLogoSize(): Size {
+        private fun getLogoSize(): Size {
             return Size(Gdx.graphics.width / 3 * 2, Gdx.graphics.height / 4)
         }
 
@@ -168,7 +166,7 @@ class PCGame(private val setFullScreenStartup: Boolean, private val initialVSync
     override fun render() {
         super.render()
 
-        Gdx.graphics.setTitle(Constants.gameTitle + " - ${Gdx.graphics.framesPerSecond}")
+        Gdx.graphics.setTitle(Constants.gameTitle + " - ${Gdx.graphics.framesPerSecond} FPS")
 
         currentScene.update()
         currentScene.render(mainBatch)
@@ -176,6 +174,7 @@ class PCGame(private val setFullScreenStartup: Boolean, private val initialVSync
 
     override fun resize(width: Int, height: Int) {
         super.resize(width, height)
+
         currentScene.resize(Size(width, height))
         defaultProjection.setToOrtho2D(0f, 0f, width.toFloat(), height.toFloat())
     }

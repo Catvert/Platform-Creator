@@ -1,12 +1,10 @@
 package be.catvert.pc
 
 import com.badlogic.gdx.utils.Disposable
-import com.badlogic.gdx.utils.TimeUtils
 import ktx.async.ktxAsync
 import java.io.FileWriter
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
 
 object Log: Disposable {
     private val _writer = FileWriter("last_log.txt")
