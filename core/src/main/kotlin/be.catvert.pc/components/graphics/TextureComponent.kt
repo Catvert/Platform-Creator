@@ -1,8 +1,9 @@
 package be.catvert.pc.components.graphics
 
 import be.catvert.pc.GameObject
-import be.catvert.pc.utility.InheritanceAdapter
+import be.catvert.pc.serialization.InheritanceAdapter
 import be.catvert.pc.PCGame
+import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Rectangle
@@ -12,8 +13,8 @@ import ktx.assets.getValue
 import ktx.assets.loadOnDemand
 
 @JsonAdapter(TextureComponentAdapter::class)
-class TextureComponent(val texturePath: String, rectangle: Rectangle, val linkRectToGO: Boolean) : RenderableComponent() {
-    private val texture by PCGame.assetManager.loadOnDemand<Texture>(texturePath)
+class TextureComponent(val texturePath: FileHandle, rectangle: Rectangle = Rectangle(), val linkRectToGO: Boolean = true) : RenderableComponent() {
+    private val texture by PCGame.assetManager.loadOnDemand<Texture>(texturePath.path())
 
     var rectangle: Rectangle = rectangle
         private set
@@ -39,8 +40,11 @@ class TextureComponentAdapter : InheritanceAdapter<TextureComponent>() {
         customSerializer = { src, _, context ->
             val jsonObj = JsonObject()
 
-            jsonObj.addProperty(texturePathStr, src.texturePath)
-            jsonObj.add(rectangleStr, context.serialize(src.rectangle))
+            jsonObj.add(texturePathStr, context.serialize(src.texturePath))
+
+            if(!src.linkRectToGO)
+                jsonObj.add(rectangleStr, context.serialize(src.rectangle))
+
             jsonObj.addProperty(linkRectToGOStr, src.linkRectToGO)
 
             jsonObj
@@ -49,11 +53,12 @@ class TextureComponentAdapter : InheritanceAdapter<TextureComponent>() {
         customDeserializer = { json, _, context ->
             val jsonObj = json.asJsonObject
 
-            val texturePath = jsonObj.getAsJsonPrimitive(texturePathStr).asString
-            val rectangle = context.deserialize<Rectangle>(jsonObj.get(rectangleStr), Rectangle::class.java)
-            val linkRectToGOStr = jsonObj.getAsJsonPrimitive(linkRectToGOStr).asBoolean
+            val texturePath = context.deserialize<FileHandle>(jsonObj.get(texturePathStr), FileHandle::class.java)
+            val linkRectToGO = jsonObj.getAsJsonPrimitive(linkRectToGOStr).asBoolean
 
-            TextureComponent(texturePath, rectangle, linkRectToGOStr)
+            val rectangle = if(linkRectToGO) Rectangle() else context.deserialize<Rectangle>(jsonObj.get(rectangleStr), Rectangle::class.java)
+
+            TextureComponent(texturePath, rectangle, linkRectToGO)
         }
     }
 }

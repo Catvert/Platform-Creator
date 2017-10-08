@@ -1,13 +1,12 @@
 package be.catvert.pc.scenes
 
+import be.catvert.pc.GameKeys
 import be.catvert.pc.Level
 import be.catvert.pc.PCGame
-import be.catvert.pc.components.graphics.TextureComponent
-import be.catvert.pc.createGameObject
-import be.catvert.pc.factories.SerializationFactory
+import be.catvert.pc.serialization.SerializationFactory
+import be.catvert.pc.utility.Point
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
-import com.badlogic.gdx.math.Rectangle
 
 class GameScene(private val level: Level) : Scene() {
     init {

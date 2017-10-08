@@ -1,7 +1,7 @@
 package be.catvert.pc.components
 
 import be.catvert.pc.GameObject
-import be.catvert.pc.utility.InheritanceAdapter
+import be.catvert.pc.serialization.InheritanceAdapter
 import com.google.gson.annotations.JsonAdapter
 
 @JsonAdapter(ComponentResolverAdapter::class)

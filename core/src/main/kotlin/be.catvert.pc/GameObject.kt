@@ -3,24 +3,30 @@ package be.catvert.pc
 import be.catvert.pc.components.Component
 import be.catvert.pc.components.graphics.RenderableComponent
 import be.catvert.pc.components.logics.UpdeatableComponent
-import be.catvert.pc.utility.Renderable
-import be.catvert.pc.utility.Updeatable
+import be.catvert.pc.serialization.PostDeserialization
+import be.catvert.pc.utility.*
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Rectangle
-import com.google.gson.InstanceCreator
+import com.google.gson.*
 import java.lang.reflect.Type
+import java.util.*
 
-class GameObject(val name: String, var rectangle: Rectangle = Rectangle()) : Updeatable, Renderable{
-
-    @Transient
-    var container: GameObjectContainer? = null
-
-    private val components = mutableSetOf<Component>()
-
+class GameObject(id: UUID,
+                 var rectangle: Rectangle = Rectangle(),
+                 @Transient var container: GameObjectContainer? = null,
+                 @Transient val prefab: Prefab? = null) : Updeatable, Renderable, PostDeserialization {
     @Transient
     private val renderComponents = mutableSetOf<RenderableComponent>()
     @Transient
     private val updateComponents = mutableSetOf<UpdeatableComponent>()
+
+    private val components = mutableSetOf<Component>()
+
+    var id: UUID = id
+        private set
+
+    fun position() = rectangle.position()
+    fun size() = rectangle.size()
 
     fun getComponentsData() = components.toSet()
 
@@ -43,6 +49,11 @@ class GameObject(val name: String, var rectangle: Rectangle = Rectangle()) : Upd
         return getComponent<T>(index) != null
     }
 
+    fun removeFromParent() {
+        container?.removeGameObject(this)
+        container = null
+    }
+
     override fun update() {
         updateComponents.forEach { it.update() }
     }
@@ -51,21 +62,18 @@ class GameObject(val name: String, var rectangle: Rectangle = Rectangle()) : Upd
         renderComponents.forEach { it.render(batch) }
     }
 
-    fun removeFromParent() {
-        container?.removeGameObject(this)
-        container = null
-    }
-
-    fun reorganizeComponentsDeserialization() {
-        val copyComponents = mutableSetOf<Component>()
-
-        copyComponents.addAll(components)
-
+    override fun postDeserialization() {
+        val comps = mutableSetOf<Component>()
+        components.forEach {
+            comps += it
+        }
+        components.clear()
         renderComponents.clear()
         updateComponents.clear()
-        components.clear()
 
-        copyComponents.forEach { addComponent(it) }
+        comps.forEach {
+            addComponent(it)
+        }
     }
 
     operator fun plusAssign(component: Component) {
@@ -73,15 +81,6 @@ class GameObject(val name: String, var rectangle: Rectangle = Rectangle()) : Upd
     }
 }
 
-fun GameObjectContainer.createGameObject(name: String, rectangle: Rectangle = Rectangle(), init: GameObject.() -> Unit = {}): GameObject {
-    val go = GameObject(name, rectangle)
-    go.init()
-
-    addGameObject(go)
-
-    return go
-}
-
 class GameObjectInstanceCreator : InstanceCreator<GameObject> {
-    override fun createInstance(type: Type?) = GameObject(name = "uname go")
+    override fun createInstance(type: Type?) = GameObject(UUID.randomUUID())
 }

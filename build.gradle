@@ -1,4 +1,4 @@
-buildscript {
+sabuildscript {
   repositories {
     mavenLocal()
     mavenCentral()

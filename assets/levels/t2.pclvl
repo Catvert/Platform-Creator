@@ -1,0 +1,10 @@
+{
+  "gameObjects": [],
+  "levelPath": {
+    "file": {
+      "path": "assets/levels/t2.pclvl"
+    },
+    "type": "Local"
+  },
+  "levelName": "t2"
+}

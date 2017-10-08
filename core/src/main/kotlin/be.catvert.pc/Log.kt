@@ -21,6 +21,10 @@ object Log: Disposable {
         write("Erreur", error())
     }
 
+    fun error(e: Exception, message: () -> String) {
+        write("Erreur", message() + " -> ${e.message}")
+    }
+
     fun warn(warn: () -> String) {
         write("Attention", warn())
     }
