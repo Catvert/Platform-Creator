@@ -1,16 +1,29 @@
-apply plugin: "kotlin"
-
-sourceCompatibility = 1.8
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+eclipse.project.name = appName + '-core'
 
-sourceSets.main.java.srcDirs = [ "src/" ]
-
-
-eclipse.project {
-    name = appName + "-core"
-}
-buildscript {
-}
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-reflect:1.1.3-2"
+  compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+  compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+  compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+  compile "io.github.libktx:ktx-vis-style:$ktxVisStyleVersion"
+  compile "io.github.libktx:ktx-assets:$ktxAssetsVersion"
+  compile "io.github.libktx:ktx-style:$ktxStyleVersion"
+  compile "net.dermetfan.libgdx-utils:libgdx-utils:$utilsVersion"
+  compile "io.github.libktx:ktx-collections:$ktxCollectionsVersion"
+  compile "io.github.libktx:ktx-actors:$ktxActorsVersion"
+  compile "com.kotcrab.vis:vis-ui:$visUiVersion"
+  compile "io.github.libktx:ktx-vis:$ktxVisVersion"
+  compile "io.github.libktx:ktx-scene2d:$ktxScene2DVersion"
+  compile "io.github.libktx:ktx-math:$ktxMathVersion"
+  compile "io.github.libktx:ktx-i18n:$ktxI18nVersion"
+  compile "io.github.libktx:ktx-async:$ktxAsyncVersion"
+  compile "io.github.libktx:ktx-app:$ktxAppVersion"
+  compile group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: coroutinesVersion
+  compile "com.google.code.gson:gson:$gsonVersion"
+}
+
+kotlin {
+  experimental {
+    coroutines 'enable'
+  }
 }
