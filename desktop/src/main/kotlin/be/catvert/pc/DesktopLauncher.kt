@@ -6,10 +6,8 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration
 import com.badlogic.gdx.utils.JsonReader
 import java.io.FileReader
 
-
 object DesktopLauncher {
-
-    data class GameConfig(val width: Int, val height: Int, val vsync: Boolean, val fullscreen: Boolean, val soundVolume: Float)
+    private data class GameConfig(val width: Int, val height: Int, val vsync: Boolean, val fullscreen: Boolean, val soundVolume: Float)
 
     @JvmStatic fun main(arg: Array<String>) {
         val (width, height, vsync, fullscreen, soundVolume) = loadConfig()
@@ -21,7 +19,7 @@ object DesktopLauncher {
         config.height = height
         config.vSyncEnabled = vsync
         config.fullscreen = fullscreen
-        config.title = "Plateform Creator"
+        config.title = "Platform Creator"
         config.resizable = false
 
         LwjglApplication(PCGame(vsync, soundVolume), config)

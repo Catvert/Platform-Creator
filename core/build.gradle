@@ -19,7 +19,17 @@ dependencies {
   compile "io.github.libktx:ktx-async:$ktxAsyncVersion"
   compile "io.github.libktx:ktx-app:$ktxAppVersion"
   compile group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: coroutinesVersion
-  compile "com.google.code.gson:gson:$gsonVersion"
+
+  compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
+  compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
+  compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
+  compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: jacksonVersion
+  compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: jacksonVersion
+  compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: jacksonVersion
+  compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-afterburner', version: jacksonVersion
+  compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-smile', version: jacksonVersion
+
+
 }
 
 kotlin {

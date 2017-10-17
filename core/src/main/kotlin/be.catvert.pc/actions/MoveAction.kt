@@ -12,7 +12,7 @@ enum class Direction {
 /**
  * Action permettant de faire bouger le gameObject dans une direction et une vitesse donnée.
  */
-class MoveAction(val direction: Direction, val moveSpeed: Int) : Action {
+class MoveAction(val direction: Direction,val moveSpeed: Int) : Action {
     override fun perform(gameObject: GameObject) {
         var xSpeed = 0
         var ySpeed = 0

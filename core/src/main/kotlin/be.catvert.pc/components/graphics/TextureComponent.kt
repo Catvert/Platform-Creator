@@ -2,11 +2,11 @@ package be.catvert.pc.components.graphics
 
 import be.catvert.pc.GameObject
 import be.catvert.pc.PCGame
-import be.catvert.pc.serialization.PostDeserialization
-import com.badlogic.gdx.files.FileHandle
+import be.catvert.pc.utility.Rect
+import be.catvert.pc.utility.draw
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
-import com.badlogic.gdx.math.Rectangle
 import ktx.assets.loadOnDemand
 
 /**
@@ -15,11 +15,10 @@ import ktx.assets.loadOnDemand
  * @param rectangle Le rectangle dans lequel sera dessiné la texture
  * @param linkRectToGO Permet de spécifier si le rectangle à utiliser est celui du gameObject
  */
-class TextureComponent(val texturePath: FileHandle, rectangle: Rectangle = Rectangle(), val linkRectToGO: Boolean = true) : RenderableComponent(), PostDeserialization {
-    @Transient
+class TextureComponent(val texturePath: String, rectangle: Rect = Rect(), val linkRectToGO: Boolean = true) : RenderableComponent() {
     private var texture: Texture = loadTexture()
 
-    var rectangle: Rectangle = rectangle
+    var rectangle: Rect = rectangle
         private set
 
     override fun onGameObjectSet(gameObject: GameObject) {
@@ -29,13 +28,9 @@ class TextureComponent(val texturePath: FileHandle, rectangle: Rectangle = Recta
             rectangle = gameObject.rectangle
     }
 
-    override fun postDeserialization() {
-        texture = loadTexture()
-    }
-
     override fun render(batch: Batch) {
-        batch.draw(texture, rectangle.x, rectangle.y, rectangle.width, rectangle.height)
+        batch.draw(texture, rectangle)
     }
 
-    private fun loadTexture(): Texture = PCGame.assetManager.loadOnDemand<Texture>(texturePath.path()).asset
+    private fun loadTexture(): Texture = PCGame.assetManager.loadOnDemand<Texture>(Gdx.files.local(texturePath).path()).asset
 }

@@ -2,11 +2,11 @@ package be.catvert.pc.components.graphics
 
 import be.catvert.pc.GameObject
 import be.catvert.pc.PCGame
-import be.catvert.pc.serialization.PostDeserialization
-import com.badlogic.gdx.files.FileHandle
+import be.catvert.pc.utility.Rect
+import be.catvert.pc.utility.draw
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
-import com.badlogic.gdx.math.Rectangle
 import ktx.assets.loadOnDemand
 
 /**
@@ -16,20 +16,19 @@ import ktx.assets.loadOnDemand
  * @param rectangle Le rectangle dans lequel sera dessiné la texture
  * @param linkRectToGO Permet de spécifier si le rectangle à utiliser est celui du gameObject
  */
-class AtlasComponent(val atlasPath: FileHandle, region: String, rectangle: Rectangle = Rectangle(), val linkRectToGO: Boolean = true) : RenderableComponent(), PostDeserialization {
+
+class AtlasComponent(val atlasPath: String, region: String, rectangle: Rect = Rect(), val linkRectToGO: Boolean = true) : RenderableComponent() {
     var region: String = region
         set(value) {
             field = value
             atlasRegion = atlas.findRegion(value)
         }
 
-    @Transient
     private var atlas: TextureAtlas = loadAtlas()
 
-    @Transient
     private var atlasRegion: TextureAtlas.AtlasRegion = loadRegion()
 
-    var rectangle: Rectangle = rectangle
+    var rectangle: Rect = rectangle
         private set
 
     override fun onGameObjectSet(gameObject: GameObject) {
@@ -39,15 +38,10 @@ class AtlasComponent(val atlasPath: FileHandle, region: String, rectangle: Recta
             rectangle = gameObject.rectangle
     }
 
-    override fun postDeserialization() {
-        atlas = loadAtlas()
-        atlasRegion = loadRegion()
-    }
-
     override fun render(batch: Batch) {
-        batch.draw(atlasRegion, rectangle.x, rectangle.y, rectangle.width, rectangle.height)
+        batch.draw(atlasRegion, rectangle)
     }
 
-    private fun loadAtlas(): TextureAtlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(atlasPath.path()).asset
+    private fun loadAtlas(): TextureAtlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(Gdx.files.local(atlasPath).path()).asset
     private fun loadRegion(): TextureAtlas.AtlasRegion = atlas.findRegion(region)
 }

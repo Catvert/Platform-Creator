@@ -2,13 +2,14 @@ package be.catvert.pc.utility
 
 import com.badlogic.gdx.Graphics
 import com.badlogic.gdx.files.FileHandle
+import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Rectangle
 
-fun Rectangle.position() = Point(this.x.toInt(), this.y.toInt())
-fun Rectangle.size() = Size(this.width.toInt(), this.height.toInt())
-fun Rectangle.setSize(newSize: Size) = this.setSize(newSize.width.toFloat(), newSize.height.toFloat())
-fun Rectangle.setPosition(newPosition: Point) = this.setPosition(newPosition.x.toFloat(), newPosition.y.toFloat())
-fun Rectangle.contains(point: Point) = this.contains(point.x.toFloat(), point.y.toFloat())
+fun Batch.draw(texture: Texture, rect: Rect) = draw(texture, rect.position.x.toFloat(), rect.position.y.toFloat(), rect.size.width.toFloat(), rect.size.height.toFloat())
+fun Batch.draw(textureRegion: TextureRegion, rect: Rect) = draw(textureRegion, rect.position.x.toFloat(), rect.position.y.toFloat(), rect.size.width.toFloat(), rect.size.height.toFloat())
+
 
 fun Graphics.toSize() = Size(width, height)
 

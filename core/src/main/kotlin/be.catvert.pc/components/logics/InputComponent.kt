@@ -1,6 +1,7 @@
 package be.catvert.pc.components.logics
 
 import be.catvert.pc.actions.Action
+import be.catvert.pc.actions.EmptyAction
 import com.badlogic.gdx.Gdx
 
 /**
@@ -9,7 +10,7 @@ import com.badlogic.gdx.Gdx
  * @param justPressed Est-ce que la touche doit-être pressé qu'une seule fois ?
  * @param action L'action à utiliser
  */
-class InputComponent(val key: Int, val justPressed: Boolean, val action: Action) : UpdeatableComponent() {
+class InputComponent(val key: Int, val justPressed: Boolean,  val action: Action) : UpdeatableComponent() {
     override fun update() {
         if (justPressed) {
             if (Gdx.input.isKeyJustPressed(key))

@@ -1,11 +1,9 @@
 package be.catvert.pc.scenes
 
-import be.catvert.pc.GameKeys
-import be.catvert.pc.Level
-import be.catvert.pc.Log
-import be.catvert.pc.PCGame
+import be.catvert.pc.*
 import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.Constants
+import be.catvert.pc.utility.Rect
 import be.catvert.pc.utility.Size
 import be.catvert.pc.utility.Utility
 import com.badlogic.gdx.Gdx
@@ -15,6 +13,7 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
+import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane
 import com.kotcrab.vis.ui.widget.*
 import ktx.actors.onChange
@@ -33,6 +32,7 @@ import java.nio.file.StandardCopyOption
 /**
  * Scène du menu principal
  */
+
 class MainMenuScene : Scene() {
     private val glyphCreatedBy = GlyphLayout(PCGame.mainFont, "par Catvert - ${Constants.gameVersion.versionName}")
 
@@ -66,8 +66,8 @@ class MainMenuScene : Scene() {
         backgroundTexture = PCGame.assetManager.loadOnDemand<Texture>("assets/game/mainmenu.png").asset
     }
 
-    override fun additionalRender(batch: Batch) {
-        super.additionalRender(batch)
+    override fun preStageRender(batch: Batch) {
+        super.preStageRender(batch)
         PCGame.mainFont.draw(batch, glyphCreatedBy, Gdx.graphics.width - glyphCreatedBy.width, glyphCreatedBy.height)
     }
 

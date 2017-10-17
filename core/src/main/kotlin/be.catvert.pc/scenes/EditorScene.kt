@@ -6,12 +6,11 @@ import be.catvert.pc.Level
 import be.catvert.pc.PCGame
 import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.serialization.SerializationFactory
-import be.catvert.pc.utility.Point
-import be.catvert.pc.utility.contains
-import be.catvert.pc.utility.setPosition
+import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector3
 import ktx.assets.loadOnDemand
@@ -25,10 +24,6 @@ class EditorScene(private val level: Level) : Scene() {
     private var selectGameObject: GameObject? = null
 
     init {
-        allowUpdating = false
-
-        addContainer(level)
-
         if (level.backgroundPath != null)
             backgroundTexture = PCGame.assetManager.loadOnDemand<Texture>(Gdx.files.local(level.backgroundPath).path()).asset
     }
@@ -49,7 +44,7 @@ class EditorScene(private val level: Level) : Scene() {
             val mousePosVec3 = camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f))
             val mousePos = Point(mousePosVec3.x.toInt(), mousePosVec3.y.toInt())
             if (selectGameObject != null)
-                selectGameObject!!.rectangle.setPosition(Point(mousePos.x - selectGameObject!!.size().width / 2, mousePos.y - selectGameObject!!.size().height / 2))
+                selectGameObject!!.rectangle.position = Point(mousePos.x - selectGameObject!!.size().width / 2, mousePos.y - selectGameObject!!.size().height / 2)
             else {
                 gameObjects.forEach {
                     if (it.rectangle.contains(mousePos)) {
@@ -64,14 +59,18 @@ class EditorScene(private val level: Level) : Scene() {
         camera.update()
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
-            this += level.createGameObject(Rectangle(Gdx.input.x.toFloat(), Gdx.graphics.height - Gdx.input.y.toFloat(), 50f, 50f)) {
-                this += AtlasComponent(Gdx.files.local("assets/atlas/Abstract Plateform/spritesheet_complete.atlas"), "blockBrown")
+            level.createGameObject(Rect(Gdx.input.x, Gdx.graphics.height - Gdx.input.y, 50, 50)) {
+                this += AtlasComponent("assets/atlas/Abstract Plateform/spritesheet_complete.atlas", "blockBrown")
             }
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            SerializationFactory.serializeToFile(level, level.levelPath)
+            SerializationFactory.serializeToFile(level, Gdx.files.local(level.levelPath))
             PCGame.setScene(MainMenuScene())
         }
+    }
+
+    override fun preStageRender(batch: Batch) {
+        level.render(batch)
     }
 }

@@ -12,23 +12,19 @@ import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import ktx.app.clearScreen
+import ktx.app.use
 
 /**
  * Classe abstraite permettant l'implémentation d'une scène
  */
-abstract class Scene : Renderable, Updeatable, Resizable, Disposable, GameObjectContainer {
+abstract class Scene : Renderable, Updeatable, Resizable, Disposable, GameObjectContainer() {
     protected val camera = OrthographicCamera()
     protected val stage = Stage(ScreenViewport(), PCGame.hudBatch)
-
-    protected var allowRendering = true
-    protected var allowUpdating = true
 
     protected val backgroundColors = Triple(0f, 0f, 0f)
 
     protected var backgroundTexture: Texture? = null
     private var backgroundSize = Gdx.graphics.toSize()
-
-    override val gameObjects: MutableSet<GameObject> = mutableSetOf()
 
     init {
         Gdx.input.inputProcessor = stage
@@ -36,34 +32,26 @@ abstract class Scene : Renderable, Updeatable, Resizable, Disposable, GameObject
         camera.setToOrtho(false, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
     }
 
-    open fun additionalRender(batch: Batch) {}
+    open fun preStageRender(batch: Batch) {}
 
-    final override fun render(batch: Batch) {
+    override fun render(batch: Batch) {
         clearScreen(backgroundColors.first, backgroundColors.second, backgroundColors.third)
 
-        if (allowRendering) {
-            batch.begin()
-
-            batch.projectionMatrix = PCGame.defaultProjection
+        batch.projectionMatrix = PCGame.defaultProjection
+        batch.use {
             if (backgroundTexture != null) {
-                batch.draw(backgroundTexture, 0f, 0f, backgroundSize.width.toFloat(), backgroundSize.height.toFloat())
+                it.draw(backgroundTexture, 0f, 0f, backgroundSize.width.toFloat(), backgroundSize.height.toFloat())
             }
+            it.projectionMatrix = camera.combined
+            super.render(it)
 
-            batch.projectionMatrix = camera.combined
-            gameObjects.forEach { it.render(batch) }
-
-            additionalRender(batch)
-
-            batch.end()
+            preStageRender(it)
         }
-
         stage.draw()
     }
 
     override fun update() {
-        if (allowUpdating)
-            gameObjects.forEach { it.update() }
-
+        super.update()
         stage.act(Gdx.graphics.deltaTime)
     }
 

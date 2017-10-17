@@ -3,15 +3,10 @@ package be.catvert.pc
 import be.catvert.pc.components.Component
 import be.catvert.pc.components.graphics.RenderableComponent
 import be.catvert.pc.components.logics.UpdeatableComponent
-import be.catvert.pc.serialization.PostDeserialization
-import be.catvert.pc.utility.Renderable
-import be.catvert.pc.utility.Updeatable
-import be.catvert.pc.utility.position
-import be.catvert.pc.utility.size
+import be.catvert.pc.utility.*
 import com.badlogic.gdx.graphics.g2d.Batch
-import com.badlogic.gdx.math.Rectangle
-import com.google.gson.InstanceCreator
-import java.lang.reflect.Type
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.util.*
 
 /**
@@ -22,23 +17,39 @@ import java.util.*
  * @param prefab Le prefab utilisé pour créer l'objet
  */
 class GameObject(id: UUID,
-                 var rectangle: Rectangle = Rectangle(),
-                 @Transient var container: GameObjectContainer? = null,
-                 @Transient val prefab: Prefab? = null) : Updeatable, Renderable, PostDeserialization {
-    @Transient
-    private val renderComponents = mutableSetOf<RenderableComponent>()
-    @Transient
-    private val updateComponents = mutableSetOf<UpdeatableComponent>()
+                 components: MutableSet<Component> = mutableSetOf(),
+                 var rectangle: Rect = Rect(),
+                 @JsonIgnore var container: GameObjectContainer? = null,
+                 @JsonIgnore val prefab: Prefab? = null) : Updeatable, Renderable {
 
-    private val components = mutableSetOf<Component>()
+    @JsonProperty("comps")
+    private val components: MutableSet<Component> = components
+
+    @JsonIgnore
+    private val renderComponents = mutableSetOf<RenderableComponent>()
+    @JsonIgnore
+    private val updateComponents = mutableSetOf<UpdeatableComponent>()
 
     var id: UUID = id
         private set
 
-    fun position() = rectangle.position()
-    fun size() = rectangle.size()
+    @JsonIgnore
+    fun getComponents() = components.toSet()
 
-    fun getComponentsData() = components.toSet()
+    fun position() = rectangle.position
+    fun size() = rectangle.size
+
+    init {
+        val comps = mutableSetOf<Component>()
+        components.forEach {
+            comps += it
+        }
+        components.clear()
+
+        comps.forEach {
+            addComponent(it)
+        }
+    }
 
     fun addComponent(component: Component) {
         components.add(component)
@@ -51,7 +62,7 @@ class GameObject(id: UUID,
     }
 
     inline fun <reified T : Component> getComponent(index: Int = 0): T? {
-        val filtered = getComponentsData().filter { it is T }
+        val filtered = getComponents().filter { it is T }
         return if (filtered.size > index && index > -1) filtered[index] as T else null
     }
 
@@ -72,26 +83,7 @@ class GameObject(id: UUID,
         renderComponents.forEach { if (it.active) it.render(batch) }
     }
 
-    override fun postDeserialization() {
-        val comps = mutableSetOf<Component>()
-        components.forEach {
-            comps += it
-        }
-        components.clear()
-
-        comps.forEach {
-            addComponent(it)
-        }
-    }
-
     operator fun plusAssign(component: Component) {
         addComponent(component)
     }
-}
-
-/**
- * Classe permettant à gson de créer un gameObject
- */
-class GameObjectInstanceCreator : InstanceCreator<GameObject> {
-    override fun createInstance(type: Type?) = GameObject(UUID.randomUUID())
 }

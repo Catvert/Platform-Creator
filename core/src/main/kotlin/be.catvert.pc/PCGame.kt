@@ -4,6 +4,8 @@ import be.catvert.pc.components.graphics.TextureComponent
 import be.catvert.pc.scenes.MainMenuScene
 import be.catvert.pc.scenes.Scene
 import be.catvert.pc.utility.Constants
+import be.catvert.pc.utility.Point
+import be.catvert.pc.utility.Rect
 import be.catvert.pc.utility.Size
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
@@ -53,7 +55,7 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
          */
         fun generateLogo(container: GameObjectContainer): GameObject {
             return container.createGameObject(getLogoRect()) {
-                this += TextureComponent(Gdx.files.local(Constants.gameLogoPath))
+                this += TextureComponent(Constants.gameLogoPath)
             }
         }
 
@@ -64,9 +66,9 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
             return Size(Gdx.graphics.width / 3 * 2, Gdx.graphics.height / 4)
         }
 
-        fun getLogoRect(): Rectangle {
+        fun getLogoRect(): Rect {
             val size = getLogoSize()
-            return Rectangle(Gdx.graphics.width / 2f - size.width / 2f, Gdx.graphics.height.toFloat() - size.height.toFloat(), size.width.toFloat(), size.height.toFloat())
+            return Rect(Point(Gdx.graphics.width / 2 - size.width / 2, Gdx.graphics.height - size.height), size)
         }
 
         fun setScene(newScene: Scene, disposeCurrentScene: Boolean = true) {

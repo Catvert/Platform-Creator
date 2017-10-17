@@ -1,10 +1,20 @@
 package be.catvert.pc
 
-import com.badlogic.gdx.math.Rectangle
+import be.catvert.pc.utility.Rect
+import be.catvert.pc.utility.Renderable
+import be.catvert.pc.utility.Updeatable
+import com.badlogic.gdx.graphics.g2d.Batch
 import java.util.*
 
-interface GameObjectContainer {
-    val gameObjects: MutableSet<GameObject>
+abstract class GameObjectContainer(val useMatrix: Boolean = false) : Renderable, Updeatable {
+    val gameObjects: MutableSet<GameObject> = mutableSetOf()
+
+    var allowRendering = true
+    var allowUpdating = true
+
+    val matrixWidth = 1000
+    val matrixHeight = 1000
+    val matrixSizeCell = 300
 
     fun findGameObjectByID(id: UUID): GameObject? = gameObjects.firstOrNull { it.id == id }
 
@@ -20,8 +30,8 @@ interface GameObjectContainer {
         return gameObject
     }
 
-    fun createGameObject(rectangle: Rectangle = Rectangle(), prefab: Prefab? = null, init: GameObject.() -> Unit = {}): GameObject {
-        val go = GameObject(UUID.randomUUID(), rectangle, this, prefab)
+    fun createGameObject(rectangle: Rect = Rect(), prefab: Prefab? = null, init: GameObject.() -> Unit = {}): GameObject {
+        val go = GameObject(UUID.randomUUID(), mutableSetOf(), rectangle, this, prefab)
         go.init()
 
         addGameObject(go)
@@ -32,6 +42,17 @@ interface GameObjectContainer {
     fun addContainer(gameObjectContainer: GameObjectContainer) {
         gameObjects.addAll(gameObjectContainer.gameObjects)
     }
+
+    override fun render(batch: Batch) {
+        if (allowRendering)
+            gameObjects.forEach { it.render(batch) }
+    }
+
+    override fun update() {
+        if (allowUpdating)
+            gameObjects.forEach { it.update() }
+    }
+
 
     operator fun plusAssign(gameObject: GameObject) {
         addGameObject(gameObject)
