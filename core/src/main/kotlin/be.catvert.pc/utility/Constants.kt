@@ -21,4 +21,6 @@ object Constants {
 
     val levelDirPath = "assets/levels/"
     val levelExtension = ".pclvl"
+
+    val editorFont = "assets/fonts/editorFont.fnt"
 }

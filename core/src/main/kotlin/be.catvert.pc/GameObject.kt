@@ -23,7 +23,7 @@ class GameObject(id: UUID,
                  @JsonIgnore val prefab: Prefab? = null) : Updeatable, Renderable {
 
     @JsonProperty("comps")
-    private val components: MutableSet<Component> = components
+    private val components: MutableSet<Component> = mutableSetOf()
 
     @JsonIgnore
     private val renderComponents = mutableSetOf<RenderableComponent>()
@@ -34,19 +34,16 @@ class GameObject(id: UUID,
         private set
 
     @JsonIgnore
+    var gridCells: MutableList<GridCell> = mutableListOf()
+
+    @JsonIgnore
     fun getComponents() = components.toSet()
 
     fun position() = rectangle.position
     fun size() = rectangle.size
 
     init {
-        val comps = mutableSetOf<Component>()
         components.forEach {
-            comps += it
-        }
-        components.clear()
-
-        comps.forEach {
             addComponent(it)
         }
     }
@@ -68,6 +65,10 @@ class GameObject(id: UUID,
 
     inline fun <reified T : RenderableComponent> hasComponent(index: Int = 0): Boolean {
         return getComponent<T>(index) != null
+    }
+
+    fun setActive(value: Boolean) {
+        components.forEach { it.active = value }
     }
 
     fun removeFromParent() {

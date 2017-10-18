@@ -1,29 +1,32 @@
 package be.catvert.pc
 
+import be.catvert.pc.serialization.PostDeserialization
 import be.catvert.pc.utility.Rect
 import be.catvert.pc.utility.Renderable
 import be.catvert.pc.utility.Updeatable
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.util.StdConverter
 import java.util.*
 
-abstract class GameObjectContainer(val useMatrix: Boolean = false) : Renderable, Updeatable {
-    val gameObjects: MutableSet<GameObject> = mutableSetOf()
+abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization {
+    @JsonProperty("objects") protected val gameObjects: MutableSet<GameObject> = mutableSetOf()
 
-    var allowRendering = true
-    var allowUpdating = true
+    @JsonIgnore var allowRendering = true
+    @JsonIgnore var allowUpdating = true
 
-    val matrixWidth = 1000
-    val matrixHeight = 1000
-    val matrixSizeCell = 300
+    @JsonIgnore fun getGameObjectsData() = gameObjects.toSet()
 
     fun findGameObjectByID(id: UUID): GameObject? = gameObjects.firstOrNull { it.id == id }
 
-    fun removeGameObject(gameObject: GameObject) {
+    open fun removeGameObject(gameObject: GameObject) {
         gameObjects.remove(gameObject)
         gameObject.container = null
     }
 
-    fun addGameObject(gameObject: GameObject): GameObject {
+    open fun addGameObject(gameObject: GameObject): GameObject {
         gameObjects.add(gameObject)
         gameObject.container = this
 
@@ -39,10 +42,6 @@ abstract class GameObjectContainer(val useMatrix: Boolean = false) : Renderable,
         return go
     }
 
-    fun addContainer(gameObjectContainer: GameObjectContainer) {
-        gameObjects.addAll(gameObjectContainer.gameObjects)
-    }
-
     override fun render(batch: Batch) {
         if (allowRendering)
             gameObjects.forEach { it.render(batch) }
@@ -53,6 +52,11 @@ abstract class GameObjectContainer(val useMatrix: Boolean = false) : Renderable,
             gameObjects.forEach { it.update() }
     }
 
+    override fun onPostDeserialization() {
+        gameObjects.forEach {
+            it.container = this
+        }
+    }
 
     operator fun plusAssign(gameObject: GameObject) {
         addGameObject(gameObject)

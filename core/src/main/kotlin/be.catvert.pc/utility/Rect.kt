@@ -3,8 +3,22 @@ package be.catvert.pc.utility
 import com.badlogic.gdx.math.Rectangle
 import com.fasterxml.jackson.annotation.JsonIgnore
 
-data class Rect(@JsonIgnore var position: Point = Point(), @JsonIgnore var size: Size = Size()) {
+class Rect(position: Point = Point(), size: Size = Size()) {
     constructor(x: Int, y: Int, width: Int, height: Int): this(Point(x, y), Size(width, height))
+
+    @JsonIgnore var position = position
+        set(value) {
+            field = value
+            onPositionChange.invokeSignal(value)
+        }
+    @JsonIgnore var size = size
+        set(value) {
+            field = value
+            onSizeChange.invokeSignal(value)
+        }
+
+    @JsonIgnore val onPositionChange = Signal<Point>()
+    @JsonIgnore val onSizeChange = Signal<Size>()
 
     var x: Int
         get() = position.x
@@ -44,7 +58,7 @@ data class Rect(@JsonIgnore var position: Point = Point(), @JsonIgnore var size:
         return xmin > x && xmin < x + width && xmax > x && xmax < x + width && ymin > y && ymin < y + height && ymax > y && ymax < y + height
     }
 
-    fun contains(point: Point): Boolean {
-        return this.x <= point.x && this.x + this.width >= point.x && this.y <= point.y && this.y + this.height >= point.y
-    }
+    fun contains(point: Point) = this.x <= point.x && this.x + this.width >= point.x && this.y <= point.y && this.y + this.height >= point.y
+
+    fun overlaps(rect: Rect) =  this.x < rect.x + rect.width && this.x + this.width > rect.x && this.y < rect.y + rect.height && this.y + this.height > rect.y
 }

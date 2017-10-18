@@ -17,7 +17,7 @@ import ktx.app.use
 /**
  * Classe abstraite permettant l'implémentation d'une scène
  */
-abstract class Scene : Renderable, Updeatable, Resizable, Disposable, GameObjectContainer() {
+abstract class Scene : Renderable, Updeatable, Resizable, Disposable {
     protected val camera = OrthographicCamera()
     protected val stage = Stage(ScreenViewport(), PCGame.hudBatch)
 
@@ -26,13 +26,16 @@ abstract class Scene : Renderable, Updeatable, Resizable, Disposable, GameObject
     protected var backgroundTexture: Texture? = null
     private var backgroundSize = Gdx.graphics.toSize()
 
+    protected open val gameObjectContainer: GameObjectContainer = object : GameObjectContainer() {}
+
     init {
         Gdx.input.inputProcessor = stage
 
         camera.setToOrtho(false, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
     }
 
-    open fun preStageRender(batch: Batch) {}
+
+    protected open fun postBatchRender() {}
 
     override fun render(batch: Batch) {
         clearScreen(backgroundColors.first, backgroundColors.second, backgroundColors.third)
@@ -43,15 +46,16 @@ abstract class Scene : Renderable, Updeatable, Resizable, Disposable, GameObject
                 it.draw(backgroundTexture, 0f, 0f, backgroundSize.width.toFloat(), backgroundSize.height.toFloat())
             }
             it.projectionMatrix = camera.combined
-            super.render(it)
-
-            preStageRender(it)
+            gameObjectContainer.render(batch)
         }
+
+        postBatchRender()
+
         stage.draw()
     }
 
     override fun update() {
-        super.update()
+        gameObjectContainer.update()
         stage.act(Gdx.graphics.deltaTime)
     }
 

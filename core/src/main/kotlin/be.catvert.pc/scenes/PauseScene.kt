@@ -14,7 +14,7 @@ import ktx.vis.window
  * Scène du menu pause
  */
 class PauseScene(private val gameScene: GameScene) : Scene() {
-    private val logo = PCGame.generateLogo(this)
+    private val logo = PCGame.generateLogo(gameObjectContainer)
 
     init {
         stage + window("Menu principal") {

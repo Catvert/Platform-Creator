@@ -20,6 +20,7 @@ import ktx.actors.onChange
 import ktx.actors.onClick
 import ktx.actors.onKeyUp
 import ktx.actors.plus
+import ktx.app.use
 import ktx.assets.loadOnDemand
 import ktx.collections.GdxArray
 import ktx.collections.toGdxArray
@@ -36,7 +37,7 @@ import java.nio.file.StandardCopyOption
 class MainMenuScene : Scene() {
     private val glyphCreatedBy = GlyphLayout(PCGame.mainFont, "par Catvert - ${Constants.gameVersion.versionName}")
 
-    private val logo = PCGame.generateLogo(this)
+    private val logo = PCGame.generateLogo(gameObjectContainer)
 
     init {
         stage + window("Menu principal") {
@@ -66,9 +67,11 @@ class MainMenuScene : Scene() {
         backgroundTexture = PCGame.assetManager.loadOnDemand<Texture>("assets/game/mainmenu.png").asset
     }
 
-    override fun preStageRender(batch: Batch) {
-        super.preStageRender(batch)
-        PCGame.mainFont.draw(batch, glyphCreatedBy, Gdx.graphics.width - glyphCreatedBy.width, glyphCreatedBy.height)
+    override fun postBatchRender() {
+        super.postBatchRender()
+        PCGame.mainBatch.use {
+            PCGame.mainFont.draw(it, glyphCreatedBy, Gdx.graphics.width - glyphCreatedBy.width, glyphCreatedBy.height)
+        }
     }
 
     override fun resize(size: Size) {
