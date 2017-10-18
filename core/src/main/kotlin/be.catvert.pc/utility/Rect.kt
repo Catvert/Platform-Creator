@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 
 class Rect(position: Point = Point(), size: Size = Size()) {
     constructor(x: Int, y: Int, width: Int, height: Int): this(Point(x, y), Size(width, height))
+    constructor(rect: Rect): this(rect.x, rect.y, rect.width, rect.height)
 
     @JsonIgnore var position = position
         set(value) {

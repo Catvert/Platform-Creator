@@ -7,8 +7,6 @@ import be.catvert.pc.utility.Updeatable
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import com.fasterxml.jackson.databind.util.StdConverter
 import java.util.*
 
 abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization {
@@ -20,6 +18,8 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
     @JsonIgnore fun getGameObjectsData() = gameObjects.toSet()
 
     fun findGameObjectByID(id: UUID): GameObject? = gameObjects.firstOrNull { it.id == id }
+
+    fun findGameObjectsByTag(tag: GameObject.Tag): Set<GameObject> = gameObjects.filter { it.tag == tag }.toSet()
 
     open fun removeGameObject(gameObject: GameObject) {
         gameObjects.remove(gameObject)
@@ -33,8 +33,8 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
         return gameObject
     }
 
-    fun createGameObject(rectangle: Rect = Rect(), prefab: Prefab? = null, init: GameObject.() -> Unit = {}): GameObject {
-        val go = GameObject(UUID.randomUUID(), mutableSetOf(), rectangle, this, prefab)
+    fun createGameObject(rectangle: Rect = Rect(), tag: GameObject.Tag, prefab: Prefab? = null, init: GameObject.() -> Unit = {}): GameObject {
+        val go = GameObject(UUID.randomUUID(), mutableSetOf(), rectangle, tag,this, prefab)
         go.init()
 
         addGameObject(go)

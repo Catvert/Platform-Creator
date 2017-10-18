@@ -2,6 +2,7 @@ package be.catvert.pc.scenes
 
 import be.catvert.pc.*
 import be.catvert.pc.components.graphics.AtlasComponent
+import be.catvert.pc.components.logics.PhysicsComponent
 import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.Point
@@ -73,8 +74,9 @@ class EditorScene(private val level: Level) : Scene() {
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
             val posInWorld = camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f))
-            level.createGameObject(Rect(posInWorld.x.toInt(), posInWorld.y.toInt(), 50, 50)) {
+            level.createGameObject(Rect(posInWorld.x.toInt(), posInWorld.y.toInt(), 50, 50), GameObject.Tag.PhysicsSprite) {
                 this += AtlasComponent("assets/atlas/Abstract Plateform/spritesheet_complete.atlas", "blockBrown")
+                this += PhysicsComponent(true)
             }
         }
 

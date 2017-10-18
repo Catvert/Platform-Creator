@@ -2,9 +2,12 @@ package be.catvert.pc.components.logics
 
 import be.catvert.pc.GameObject
 import be.catvert.pc.GameObjectMatrixContainer
+import be.catvert.pc.Log
+import be.catvert.pc.actions.NextPhysicsActions
+import be.catvert.pc.utility.Point
+import be.catvert.pc.utility.Rect
 import be.catvert.pc.utility.Signal
 import com.badlogic.gdx.math.MathUtils
-import com.badlogic.gdx.math.Rectangle
 
 /**
  * Enmu permettant de définir le type de mouvement de l'entité (fluide ou linéaire)
@@ -42,12 +45,7 @@ enum class CollisionSide {
     }
 }
 
-/**
- * Enum permettant de choisir la prochaine "action" physique à appliquer sur l'entité
- */
-enum class NextActions {
-    GO_LEFT, GO_RIGHT, GO_UP, GO_DOWN, GRAVITY, JUMP
-}
+
 
 /**
  * Permet de déterminer quel mask l'entité doit utiliser pour les collisions
@@ -78,7 +76,7 @@ class PhysicsComponent(var isStatic: Boolean, var moveSpeed: Int = 0, var moveme
     /**
      * Les nextActions représentes les actions que doit faire l'entité pendant le prochain frame
      */
-    val nextActions = mutableSetOf<NextActions>()
+    val nextActions = mutableSetOf<NextPhysicsActions>()
 
     /**
      * Donnée de jump, si null, aucun jump sera disponible pour l'entité
@@ -110,178 +108,170 @@ class PhysicsComponent(var isStatic: Boolean, var moveSpeed: Int = 0, var moveme
      */
     var isSensor = false
 
+    val gravitySpeed = 15
+
     override fun update() {
+        if (isStatic || gameObject == null) return
 
-    }
+        val gameObject = gameObject!!
 
-    /*override fun update() {
+        if (gravity /*&& level.applyGravity*/) // TODO
+            nextActions += NextPhysicsActions.GRAVITY
 
+        if (jumpData?.forceJumping == true) {
+            nextActions += NextPhysicsActions.JUMP
+        }
 
-            if (physicsComp.isStatic || !physicsComp.active)
-                return@forEach
+        var moveSpeedX = 0f
+        var moveSpeedY = 0f
+        var addJumpAfterClear = false
 
-            if (physicsComp.gravity && level.applyGravity)
-                physicsComp.nextActions += NextActions.GRAVITY
+        nextActions.forEach action@ {
+            when (it) {
+                NextPhysicsActions.GO_LEFT -> moveSpeedX -= moveSpeed
+                NextPhysicsActions.GO_RIGHT -> moveSpeedX += moveSpeed
+                NextPhysicsActions.GO_UP -> moveSpeedY += moveSpeed
+                NextPhysicsActions.GO_DOWN -> moveSpeedY -= moveSpeed
+                NextPhysicsActions.GRAVITY -> if (gravity) moveSpeedY -= gravitySpeed
+                NextPhysicsActions.JUMP -> {
+                    if (jumpData == null) {
+                        Log.error { "L'entité essaye de sauter mais ne contient pas de jumpData !" }
+                        return@action
+                    }
 
-            if (physicsComp.jumpData?.forceJumping ?: false) {
-                physicsComp.nextActions += NextActions.JUMP
-            }
+                    val jumpData = jumpData!!
 
-            var moveSpeedX = 0f
-            var moveSpeedY = 0f
-            var addJumpAfterClear = false
-
-            physicsComp.nextActions.forEach action@ {
-                when (it) {
-                    NextActions.GO_LEFT -> moveSpeedX -= physicsComp.moveSpeed
-                    NextActions.GO_RIGHT -> moveSpeedX += physicsComp.moveSpeed
-                    NextActions.GO_UP -> moveSpeedY += physicsComp.moveSpeed
-                    NextActions.GO_DOWN -> moveSpeedY -= physicsComp.moveSpeed
-                    NextActions.GRAVITY -> if (physicsComp.gravity) moveSpeedY -= gravity
-                    NextActions.JUMP -> {
-                        if (physicsComp.jumpData == null) {
-                            ktx.log.error { "L'entité essaye de sauter mais ne contient pas de jumpData !" }
-                            return@action
-                        }
-
-                        val jumpData = physicsComp.jumpData!!
-
-                        if (!jumpData.isJumping) {
-                            if (!jumpData.forceJumping) {
-                                if (!checkIsOnGround(entity)) {
-                                    return@action
-                                }
-                            } else {
-                                jumpData.forceJumping = false
+                    if (!jumpData.isJumping) {
+                        if (!jumpData.forceJumping) {
+                            if (!checkIsOnGround(gameObject)) {
+                                return@action
                             }
-                            jumpData.isJumping = true
-                            jumpData.targetHeight = transformComp.rectangle.y.toInt() + jumpData.jumpHeight
-                            jumpData.startJumping = true
-
-                            physicsComp.gravity = false
-
-                            moveSpeedY = gravity.toFloat()
-                            addJumpAfterClear = true
                         } else {
-                            if (transformComp.rectangle.y >= jumpData.targetHeight || collideOnMove(0, gravity, entity)) {
-                                physicsComp.gravity = true
-                                jumpData.isJumping = false
-                            } else {
-
-                                moveSpeedY = gravity.toFloat()
-                                addJumpAfterClear = true
-                            }
-                            jumpData.startJumping = false
+                            jumpData.forceJumping = false
                         }
+                        jumpData.isJumping = true
+                        jumpData.targetHeight = gameObject.rectangle.y + jumpData.jumpHeight
+                        jumpData.startJumping = true
+
+                        gravity = false
+
+                        moveSpeedY = gravitySpeed.toFloat()
+                        addJumpAfterClear = true
+                    } else {
+                        if (gameObject.rectangle.y >= jumpData.targetHeight || collideOnMove(0, gravitySpeed, gameObject)) {
+                            gravity = true
+                            jumpData.isJumping = false
+                        } else {
+
+                            moveSpeedY = gravitySpeed.toFloat()
+                            addJumpAfterClear = true
+                        }
+                        jumpData.startJumping = false
                     }
                 }
             }
-
-            if (physicsComp.movementType == MovementType.SMOOTH) {
-                moveSpeedX = MathUtils.lerp(physicsComp.actualMoveSpeedX, moveSpeedX, 0.2f)
-                moveSpeedY = MathUtils.lerp(physicsComp.actualMoveSpeedY, moveSpeedY, 0.2f)
-            }
-
-            physicsComp.actualMoveSpeedX = moveSpeedX
-            physicsComp.actualMoveSpeedY = moveSpeedY
-
-            tryMove(moveSpeedX.toInt(), moveSpeedY.toInt(), entity) // move l'entité
-
-            physicsComp.nextActions.clear()
-
-            if (addJumpAfterClear)
-                physicsComp.nextActions += NextActions.JUMP
-
-            physicsComp.isOnGround = checkIsOnGround(entity)
         }
-    }
 
-    /**
-     * Permet d'essayer de déplacer une entité ayant un physicsComponent
-     * @param moveX : Le déplacement x
-     * @param moveY : Le déplacement y
-     */
-    private fun tryMove(moveX: Int, moveY: Int, entity: Entity) {
-        val transformTarget = transformMapper[entity]
-        val physicsTarget = physicsMapper[entity]
-
-        if (moveX != 0 || moveY != 0) {
-            var newMoveX = moveX
-            var newMoveY = moveY
-
-            if (!collideOnMove(moveX, 0, entity)) {
-                transformTarget.rectangle.x = Math.max(0f, transformTarget.rectangle.x + moveX)
-                level.setEntityGrid(entity)
-                physicsTarget.onMove.dispatch(MoveListener(entity, if (transformTarget.rectangle.x == 0f) 0 else moveX, moveY)) // TODO voir ici pour amélioration
-                newMoveX = 0
-            }
-            if (!collideOnMove(0, moveY, entity)) {
-                transformTarget.rectangle.y += moveY
-                level.setEntityGrid(entity)
-                physicsTarget.onMove.dispatch(MoveListener(entity, moveX, moveY))
-                newMoveY = 0
-            }
-
-            if (newMoveX > 0)
-                newMoveX -= 1
-            else if (newMoveX < 0)
-                newMoveX += 1
-
-            if (newMoveY > 0)
-                newMoveY -= 1
-            else if (newMoveY < 0)
-                newMoveY += 1
-            tryMove(newMoveX, newMoveY, entity)
+        if (movementType == MovementType.SMOOTH) {
+            moveSpeedX = MathUtils.lerp(actualMoveSpeedX, moveSpeedX, 0.2f)
+            moveSpeedY = MathUtils.lerp(actualMoveSpeedY, moveSpeedY, 0.2f)
         }
+
+        actualMoveSpeedX = moveSpeedX
+        actualMoveSpeedY = moveSpeedY
+
+        tryMove(moveSpeedX.toInt(), moveSpeedY.toInt(), gameObject) // move l'entité
+
+        nextActions.clear()
+
+        if (addJumpAfterClear)
+            nextActions += NextPhysicsActions.JUMP
+
+        isOnGround = checkIsOnGround(gameObject)
     }
+}
 
-    /**
-     * Permet de vérifier si l'entité est sur le sol ou pas
-     */
-    fun checkIsOnGround(entity: Entity) = collideOnMove(0, -1, entity)
+/**
+ * Permet d'essayer de déplacer une entité ayant un physicsComponent
+ * @param moveX : Le déplacement x
+ * @param moveY : Le déplacement y
+ */
+private fun tryMove(moveX: Int, moveY: Int, gameObject: GameObject) {
+    if (moveX != 0 || moveY != 0) {
+        var newMoveX = moveX
+        var newMoveY = moveY
 
-    /**
-     * Permet de tester si un déplacement est possible ou non
-     * @param moveX : Le déplacement x
-     * @param moveY : Le déplacement y
-     * @param entity : L'entité à tester
-     */
-    private fun collideOnMove(moveX: Int, moveY: Int, gameObject: GameObject): Boolean {
-        val physicsTarget = physicsMapper[entity]
-        val transformTarget = transformMapper[entity]
+        if (!collideOnMove(moveX, 0, gameObject)) {
+            gameObject.rectangle.x = Math.max(0, gameObject.rectangle.x + moveX)
+            //gameObject.getComponent<PhysicsComponent>()?.onMove.dispatch(MoveListener(entity, if (transformTarget.rectangle.x == 0f) 0 else moveX, moveY)) // TODO voir ici pour amélioration
+            newMoveX = 0
+        }
+        if (!collideOnMove(0, moveY, gameObject)) {
+            gameObject.rectangle.y += moveY
+            // physicsTarget.onMove.dispatch(MoveListener(entity, moveX, moveY))
+            newMoveY = 0
+        }
 
-        val newRect = Rectangle(transformTarget.rectangle)
-        newRect.setPosition(newRect.x + moveX, newRect.y + moveY)
+        if (newMoveX > 0)
+            newMoveX -= 1
+        else if (newMoveX < 0)
+            newMoveX += 1
 
-        level.getRectCells(newRect).forEach {
-            level.matrixGrid[it.x][it.y].first.filter {
-                transformMapper[it] != transformTarget  // On vérifie si la targetEntity n'est pas la même que celle dans l'itération
-                        && physicsMapper.has(it) // On vérifie si l'entité qu'on parcourt a un physicsComponent
-                        && when (physicsMapper[it].maskCollision) { // On vérifie si le mask est correcte
+        if (newMoveY > 0)
+            newMoveY -= 1
+        else if (newMoveY < 0)
+            newMoveY += 1
+        tryMove(newMoveX, newMoveY, gameObject)
+    }
+}
+
+/**
+ * Permet de vérifier si l'entité est sur le sol ou pas
+ */
+fun checkIsOnGround(gameObject: GameObject) = collideOnMove(0, -1, gameObject)
+
+/**
+ * Permet de tester si un déplacement est possible ou non
+ * @param moveX : Le déplacement x
+ * @param moveY : Le déplacement y
+ * @param entity : L'entité à tester
+ */
+private fun collideOnMove(moveX: Int, moveY: Int, gameObject: GameObject): Boolean {
+    val newRect = Rect(gameObject.rectangle)
+    newRect.position = Point(newRect.x + moveX, newRect.y + moveY)
+
+    if (gameObject.container != null && gameObject.container is GameObjectMatrixContainer) {
+        val container = gameObject.container!! as GameObjectMatrixContainer
+        container.getRectCells(newRect).forEach {
+            container.matrixGrid[it.x][it.y].first.filter {
+                it.id != gameObject.id
+                        && it.hasComponent<PhysicsComponent>()
+                        && when (it.getComponent<PhysicsComponent>()?.maskCollision) {
                     MaskCollision.ALL -> true
-                    MaskCollision.ONLY_PLAYER -> entity isType EntityFactory.EntityType.Player
-                    MaskCollision.ONLY_ENEMY -> entity isType EntityFactory.EntityType.Enemy
+                    MaskCollision.ONLY_PLAYER -> gameObject.tag == GameObject.Tag.Player
+                    MaskCollision.ONLY_ENEMY -> gameObject.tag == GameObject.Tag.Enemy
+                    null -> false
                 }
             }.forEach {
-                val transformComponent = transformMapper[it]
-
-                if (newRect.overlaps(transformComponent.rectangle)) {
+                if (newRect.overlaps(it.rectangle)) {
                     val side = if (moveX > 0) CollisionSide.OnRight else if (moveX < 0) CollisionSide.OnLeft else if (moveY > 0) CollisionSide.OnUp else if (moveY < 0) CollisionSide.OnDown else CollisionSide.Unknow
 
-                    if (entity isType EntityFactory.EntityType.Enemy && it isType EntityFactory.EntityType.Player)
-                        entity[EnemyComponent::class.java].onPlayerCollision.dispatch(CollisionListener(entity, it, side))
-                    else if (entity isType EntityFactory.EntityType.Player && it isType EntityFactory.EntityType.Enemy)
-                        it[EnemyComponent::class.java].onPlayerCollision.dispatch(CollisionListener(it, entity, -side)) // - side to inverse the side
-                    else if (!physicsMapper[it].isSensor)
-                        physicsTarget.onCollisionWith.dispatch(CollisionListener(entity, it, side))
+                    if (gameObject.tag == GameObject.Tag.Enemy && it.tag == GameObject.Tag.Player) {
+                    }
+                    //entity[EnemyComponent::class.java].onPlayerCollision.dispatch(CollisionListener(entity, it, side))
+                    else if (gameObject.tag == GameObject.Tag.Player && it.tag == GameObject.Tag.Enemy) {
+                    }
+                    // it[EnemyComponent::class.java].onPlayerCollision.dispatch(CollisionListener(it, entity, -side)) // - side to inverse the side
+                    else if (it.getComponent<PhysicsComponent>()?.isSensor == false)
+                        gameObject.getComponent<PhysicsComponent>()?.onCollisionWith?.invokeSignal(CollisionListener(gameObject, it, side))
                     else // is a sensor
-                        physicsMapper[it].onCollisionWith.dispatch(CollisionListener(it, entity, side))
+                        it.getComponent<PhysicsComponent>()?.onCollisionWith?.invokeSignal(CollisionListener(it, gameObject, side))
 
-                    if (!physicsMapper[it].isSensor)
+                    if (it.getComponent<PhysicsComponent>()?.isSensor == false)
                         return true
                 }
             }
         }
-        return false
-    }*/
+    }
+    return false
 }

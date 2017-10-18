@@ -12,7 +12,6 @@ import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Matrix4
-import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.utils.JsonWriter
 import com.kotcrab.vis.ui.VisUI
 import ktx.app.KtxApplicationAdapter
@@ -54,7 +53,7 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
          * Permet de retourner le logo du jeu
          */
         fun generateLogo(container: GameObjectContainer): GameObject {
-            return container.createGameObject(getLogoRect()) {
+            return container.createGameObject(getLogoRect(), GameObject.Tag.Sprite) {
                 this += TextureComponent(Constants.gameLogoPath)
             }
         }

@@ -19,19 +19,24 @@ import java.util.*
 class GameObject(id: UUID,
                  components: MutableSet<Component> = mutableSetOf(),
                  var rectangle: Rect = Rect(),
+                 var tag: Tag,
                  @JsonIgnore var container: GameObjectContainer? = null,
                  @JsonIgnore val prefab: Prefab? = null) : Updeatable, Renderable {
 
+    enum class Tag {
+        Sprite, PhysicsSprite, Player, Enemy
+    }
+
     @JsonProperty("comps")
     private val components: MutableSet<Component> = mutableSetOf()
+
+    var id: UUID = id
+        private set
 
     @JsonIgnore
     private val renderComponents = mutableSetOf<RenderableComponent>()
     @JsonIgnore
     private val updateComponents = mutableSetOf<UpdeatableComponent>()
-
-    var id: UUID = id
-        private set
 
     @JsonIgnore
     var gridCells: MutableList<GridCell> = mutableListOf()
@@ -63,7 +68,7 @@ class GameObject(id: UUID,
         return if (filtered.size > index && index > -1) filtered[index] as T else null
     }
 
-    inline fun <reified T : RenderableComponent> hasComponent(index: Int = 0): Boolean {
+    inline fun <reified T : Component> hasComponent(index: Int = 0): Boolean {
         return getComponent<T>(index) != null
     }
 

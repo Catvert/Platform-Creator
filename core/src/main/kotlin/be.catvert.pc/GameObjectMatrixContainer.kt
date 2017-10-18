@@ -129,7 +129,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
      * Permet de retourner les cellules présentes dans le rectangle spécifié
      * @param rect Le rectangle
      */
-    private fun getRectCells(rect: Rect): List<GridCell> {
+    fun getRectCells(rect: Rect): List<GridCell> {
         val cells = mutableListOf<GridCell>()
 
         fun rectContains(x: Int, y: Int): Boolean {
@@ -209,7 +209,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
      * Permet de retourner les entités présentent dans les cellules spécifiées
      * @param cells Les cellules où les entités sont présentes
      */
-    private fun getAllEntitiesInCells(cells: List<GridCell>): Set<GameObject> {
+    fun getAllEntitiesInCells(cells: List<GridCell>): Set<GameObject> {
         val list = mutableSetOf<GameObject>()
         cells.forEach {
             list += matrixGrid[it.x][it.y].first
@@ -222,7 +222,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
      * @param rect le rectangle dans lequel les entités seront retournées
      * @param overlaps permet de spécifier si le mode de détection est en overlaps ou contains
      */
-    private fun getAllGameObjectsInRect(rect: Rect, overlaps: Boolean = true): Set<GameObject> {
+    fun getAllGameObjectsInRect(rect: Rect, overlaps: Boolean = true): Set<GameObject> {
         val list = mutableSetOf<GameObject>()
         val gridCells = getRectCells(rect)
         gridCells.forEach {
