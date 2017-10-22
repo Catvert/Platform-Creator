@@ -1,6 +1,7 @@
 package be.catvert.pc.actions
 
 import be.catvert.pc.GameObject
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 
 /**

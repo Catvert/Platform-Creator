@@ -8,12 +8,9 @@ import be.catvert.pc.utility.Size
 import java.util.*
 
 
-class Prefab(val name: String, val custom: Boolean, val author: String, val tag: GameObject.Tag, val size: Size, val components: Set<Component>) {
+class Prefab(val name: String, val custom: Boolean, val author: String, val tag: GameObject.Tag, val size: Size, val components: Set<Component>, val init: GameObject.() -> Unit = {}) {
     fun generate(position: Point, container: GameObjectContainer) = container.createGameObject(Rect(position, size), tag,this) {
         components.forEach { addComponent(SerializationFactory.copy(it)) }
+        init()
     }
-
-    fun generateWithoutContainer(position: Point) = GameObject(UUID.randomUUID(), components.let {
-        it.map { SerializationFactory.copy(it) }.toMutableSet()
-    }, Rect(position, size), tag, null, this)
 }

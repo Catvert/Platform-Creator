@@ -10,12 +10,12 @@ class Rect(position: Point = Point(), size: Size = Size()) {
     @JsonIgnore var position = position
         set(value) {
             field = value
-            onPositionChange.invokeSignal(value)
+            onPositionChange(value)
         }
     @JsonIgnore var size = size
         set(value) {
             field = value
-            onSizeChange.invokeSignal(value)
+            onSizeChange(value)
         }
 
     @JsonIgnore val onPositionChange = Signal<Point>()

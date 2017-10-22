@@ -3,18 +3,17 @@ package be.catvert.pc
 import be.catvert.pc.components.graphics.TextureComponent
 import be.catvert.pc.scenes.MainMenuScene
 import be.catvert.pc.scenes.Scene
-import be.catvert.pc.utility.Constants
-import be.catvert.pc.utility.Point
-import be.catvert.pc.utility.Rect
-import be.catvert.pc.utility.Size
+import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
+import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Matrix4
 import com.badlogic.gdx.utils.JsonWriter
 import com.kotcrab.vis.ui.VisUI
 import ktx.app.KtxApplicationAdapter
+import ktx.assets.toLocalFile
 import ktx.async.enableKtxCoroutines
 import java.io.FileWriter
 import java.io.IOException
@@ -22,6 +21,8 @@ import java.io.IOException
 /** [com.badlogic.gdx.ApplicationListener] implementation shared by all platforms.  */
 class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: Float) : KtxApplicationAdapter {
     companion object {
+        private val backgroundsList = mutableListOf<FileHandle>()
+
         lateinit var mainBatch: SpriteBatch
             private set
 
@@ -48,6 +49,8 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
         val assetManager = AssetManager()
 
         private lateinit var currentScene: Scene
+
+        fun getBackgrounds() = backgroundsList.toList()
 
         /**
          * Permet de retourner le logo du jeu
@@ -81,7 +84,7 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
          */
         fun saveGameConfig(): Boolean {
             try {
-                val writer = JsonWriter(FileWriter(Gdx.files.local(Constants.configPath).path(), false))
+                val writer = JsonWriter(FileWriter(Constants.configPath.toLocalFile().path(), false))
                 writer.setOutputType(JsonWriter.OutputType.json)
 
                 writer.`object`()
@@ -108,7 +111,7 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
          */
         fun saveKeysConfig(): Boolean {
             try {
-                val writer = JsonWriter(FileWriter(Gdx.files.local(Constants.keysConfigPath).path(), false))
+                val writer = JsonWriter(FileWriter(Constants.keysConfigPath.toLocalFile().path(), false))
                 writer.setOutputType(JsonWriter.OutputType.json)
 
                 writer.`object`()
@@ -154,8 +157,11 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
         PCGame.soundVolume = initialSoundVolume
         PCGame.defaultProjection = mainBatch.projectionMatrix.cpy()
 
-        PCGame.mainFont = BitmapFont(Gdx.files.local(Constants.mainFontPath))
+        PCGame.mainFont = BitmapFont(Constants.mainFontPath.toLocalFile())
 
+        Utility.getFilesRecursivly(Constants.backgroundsDirPath.toLocalFile(), "png").forEach {
+            backgroundsList.add(it)
+        }
 
         currentScene = MainMenuScene()
     }

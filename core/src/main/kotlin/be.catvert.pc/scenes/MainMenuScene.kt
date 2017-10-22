@@ -22,6 +22,7 @@ import ktx.actors.onKeyUp
 import ktx.actors.plus
 import ktx.app.use
 import ktx.assets.loadOnDemand
+import ktx.assets.toLocalFile
 import ktx.collections.GdxArray
 import ktx.collections.toGdxArray
 import ktx.vis.window
@@ -64,7 +65,7 @@ class MainMenuScene : Scene() {
             setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
         }
 
-        backgroundTexture = PCGame.assetManager.loadOnDemand<Texture>("assets/game/mainmenu.png").asset
+        backgroundTexture = PCGame.assetManager.loadOnDemand<Texture>(Constants.gameBackgroundMenuPath).asset
     }
 
     override fun postBatchRender() {
@@ -156,7 +157,7 @@ class MainMenuScene : Scene() {
         }
 
         fun getLevels(): GdxArray<LevelItem> =
-                Utility.getFilesRecursivly(Gdx.files.local(Constants.levelDirPath), Constants.levelExtension).let {
+                Utility.getFilesRecursivly(Constants.levelDirPath.toLocalFile(), Constants.levelExtension).let {
                     val list = mutableListOf<LevelItem>()
                     it.forEach {
                         list += LevelItem(it)
@@ -181,8 +182,8 @@ class MainMenuScene : Scene() {
                     textButton("Jouer") {
                         addListener(onClick {
                             if (list.selected != null) {
-                                val level = SerializationFactory.deserializeFromFile<Level>(list.selected.file)
-                                if (level.gameVersion == Constants.gameVersion)
+                                val level = Level.loadFromFile(list.selected.file)
+                                if (level != null)
                                     PCGame.setScene(GameScene(level))
                                 else showWrongVersionLevelDialog()
                             }
@@ -191,8 +192,8 @@ class MainMenuScene : Scene() {
                     textButton("Éditer") {
                         addListener(onClick {
                             if (list.selected != null) {
-                                val level = SerializationFactory.deserializeFromFile<Level>(list.selected.file)
-                                if (level.gameVersion == Constants.gameVersion)
+                                val level = Level.loadFromFile(list.selected.file)
+                                if (level != null)
                                     PCGame.setScene(EditorScene(level))
                                 else showWrongVersionLevelDialog()
                             }

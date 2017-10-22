@@ -37,6 +37,22 @@ abstract class Scene : Renderable, Updeatable, Resizable, Disposable {
 
     protected open fun postBatchRender() {}
 
+    /**
+     * Permet de vérifier si l'utilisateur est sur l'UI ou non
+     */
+    protected fun isUIHover(): Boolean {
+        stage.actors.filter { it.isVisible }.forEach {
+            val mouseX = Gdx.input.x.toFloat()
+            val mouseY = Gdx.input.y.toFloat()
+
+            if ((mouseX >= it.x && mouseX <= it.x + it.width) && (Gdx.graphics.height - mouseY <= it.y + it.height && Gdx.graphics.height - mouseY >= it.y)) {
+                return true
+            }
+        }
+        return false
+    }
+
+
     override fun render(batch: Batch) {
         clearScreen(backgroundColors.first, backgroundColors.second, backgroundColors.third)
 

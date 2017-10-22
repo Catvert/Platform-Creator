@@ -9,18 +9,23 @@ object Constants {
     val gameTitle = "Platform Creator"
     val gameVersion = GameVersion.V1_0
 
-    val UISkinPath = "assets/ui/tinted/x1/tinted.json"
-    val mainFontPath = "assets/fonts/mainFont.fnt"
+    val assetsDirPath = "assets/"
 
-    val configPath = "assets/config.json"
-    val keysConfigPath = "assets/keysConfig.json"
+    val UISkinPath = assetsDirPath + "ui/tinted/x1/tinted.json"
+    val mainFontPath = assetsDirPath + "fonts/mainFont.fnt"
 
-    val atlasDirPath = "assets/atlas/"
+    val configPath = assetsDirPath + "config.json"
+    val keysConfigPath = assetsDirPath + "keysConfig.json"
 
-    val gameLogoPath = "assets/game/logo.png"
+    val atlasDirPath = assetsDirPath + "atlas/"
+    val soundsDirPath = assetsDirPath + "sounds/"
+    val backgroundsDirPath = assetsDirPath + "game/background/"
 
-    val levelDirPath = "assets/levels/"
+    val gameBackgroundMenuPath = assetsDirPath + "game/mainmenu.png"
+    val gameLogoPath = assetsDirPath + "game/logo.png"
+
+    val levelDirPath = assetsDirPath + "levels/"
     val levelExtension = ".pclvl"
 
-    val editorFont = "assets/fonts/editorFont.fnt"
+    val editorFont = assetsDirPath + "fonts/editorFont.fnt"
 }

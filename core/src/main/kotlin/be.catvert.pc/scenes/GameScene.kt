@@ -9,6 +9,7 @@ import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.math.MathUtils
 import ktx.assets.loadOnDemand
+import ktx.assets.toLocalFile
 
 /**
  * Scène du jeu
@@ -20,7 +21,7 @@ class GameScene(private val level: Level) : Scene() {
 
     init {
         if (level.backgroundPath != null)
-            backgroundTexture = PCGame.assetManager.loadOnDemand<Texture>(Gdx.files.local(level.backgroundPath).path()).asset
+            backgroundTexture = PCGame.assetManager.loadOnDemand<Texture>(level.backgroundPath!!.toLocalFile().path()).asset
     }
 
     override fun postBatchRender() {
@@ -35,6 +36,8 @@ class GameScene(private val level: Level) : Scene() {
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
             PCGame.setScene(PauseScene(this), false)
+        if(Gdx.input.isKeyJustPressed(GameKeys.GAME_SWITCH_GRAVITY.key))
+            level.applyGravity = !level.applyGravity
     }
 
     private fun updateCamera(lerp: Boolean) {

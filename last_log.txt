@@ -1,2 +1,2 @@
-18:16:52 -> Info. : Initialisation en cours.. 
+19:17:52 -> Info. : Initialisation en cours.. 
  Taille : 1280x720

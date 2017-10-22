@@ -1,7 +1,7 @@
 package be.catvert.pc.components.logics
 
 import be.catvert.pc.actions.Action
-import be.catvert.pc.actions.EmptyAction
+import be.catvert.pc.components.UpdeatableComponent
 import com.badlogic.gdx.Gdx
 
 /**
@@ -19,11 +19,9 @@ class InputComponent(val key: Int, val justPressed: Boolean,  val action: Action
             if (Gdx.input.isKeyPressed(key))
                 performAction()
         }
-
     }
 
     private fun performAction() {
-        if (gameObject != null)
-            action.perform(gameObject!!)
+        action.perform(gameObject)
     }
 }

@@ -1,7 +1,8 @@
 package be.catvert.pc.components
 
 import be.catvert.pc.GameObject
-import com.fasterxml.jackson.annotation.JsonFormat
+import be.catvert.pc.utility.Renderable
+import be.catvert.pc.utility.Updeatable
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 
@@ -10,19 +11,27 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
  * @param active Permet de spécifier si le component est actif ou non
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
-abstract class Component(@JsonIgnore var active: Boolean = true) {
+sealed class Component(@JsonIgnore var active: Boolean = true) {
     @JsonIgnore
-    var gameObject: GameObject? = null
+    lateinit var gameObject: GameObject
         private set
 
     fun linkGameObject(gameObject: GameObject) {
         this.gameObject = gameObject
-        onGameObjectSet(gameObject)
     }
 
-    fun unlinkGameObject() {
-        gameObject = null
-    }
-
-    protected open fun onGameObjectSet(gameObject: GameObject) {}
+    open fun onGOAddToContainer(gameObject: GameObject) {}
 }
+
+abstract class BasicComponent : Component()
+
+/**
+ * Classe abstraite permettant à un component d'être mis à jour
+ */
+abstract class UpdeatableComponent : Updeatable, Component()
+
+
+/**
+ * Classe abstraite permettant à un component d'être rendu à l'écran
+ */
+abstract class RenderableComponent(var flipX: Boolean = false, var flipY: Boolean = false) : Renderable, Component()

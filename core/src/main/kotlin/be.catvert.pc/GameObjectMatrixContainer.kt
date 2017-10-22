@@ -36,7 +36,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
      */
     @JsonIgnore private val activeGridCells = mutableListOf<GridCell>()
 
-    @JsonIgnore var drawDebugCells = true
+    @JsonIgnore private var drawDebugCells = false
 
     @JsonIgnore var followGameObject: GameObject? = null
 
@@ -83,8 +83,8 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
         return super.addGameObject(gameObject)
     }
 
-    override fun removeGameObject(gameObject: GameObject) {
-        super.removeGameObject(gameObject)
+    override fun onRemoveGameObject(gameObject: GameObject) {
+        super.onRemoveGameObject(gameObject)
         gameObject.gridCells.forEach {
             matrixGrid[it.x][it.y].first.remove(gameObject)
         }
@@ -107,9 +107,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     private fun updateActiveCells() {
         activeGridCells.forEach {
             matrixGrid[it.x][it.y].first.forEach matrix@ {
-                if (it.id == followGameObject?.id)
-                    return@matrix
-                it.setActive(false)
+                it.active = false
             }
         }
 
@@ -120,7 +118,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
         activeGridCells.forEach {
             for (i in 0 until matrixGrid[it.x][it.y].first.size) {
                 val go = matrixGrid[it.x][it.y].first[i]
-                go.setActive(true)
+                go.active = true
             }
         }
     }
@@ -172,6 +170,9 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
      * @param entity L'entité à mettre à jour
      */
     private fun setGameObjectToGrid(gameObject: GameObject) {
+        if(gameObject.gridCells.isEmpty())
+            gameObject.active = false
+
         gameObject.gridCells.forEach {
             matrixGrid[it.x][it.y].first.remove(gameObject)
         }
@@ -199,9 +200,6 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
             addRectListener(it)
 
             setGameObjectToGrid(it) // Besoin de setGrid car les entités n'ont pas encore été ajoutée à la matrix
-            if (it.id == followGameObject?.id)
-                return@forEach
-            it.setActive(false)
         }
     }
 

@@ -1,8 +1,9 @@
 package be.catvert.pc
 
+import be.catvert.pc.actions.Action
 import be.catvert.pc.components.Component
-import be.catvert.pc.components.graphics.RenderableComponent
-import be.catvert.pc.components.logics.UpdeatableComponent
+import be.catvert.pc.components.RenderableComponent
+import be.catvert.pc.components.UpdeatableComponent
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonIgnore
@@ -20,26 +21,52 @@ class GameObject(id: UUID,
                  components: MutableSet<Component> = mutableSetOf(),
                  var rectangle: Rect = Rect(),
                  var tag: Tag,
-                 @JsonIgnore var container: GameObjectContainer? = null,
+                 container: GameObjectContainer? = null,
                  @JsonIgnore val prefab: Prefab? = null) : Updeatable, Renderable {
 
     enum class Tag {
         Sprite, PhysicsSprite, Player, Enemy
     }
 
-    @JsonProperty("comps")
-    private val components: MutableSet<Component> = mutableSetOf()
-
     var id: UUID = id
         private set
+
+    @JsonIgnore var active: Boolean = true
+        set(value) {
+            if(!keepActive)
+                field = value
+        }
+
+    var keepActive: Boolean = false
+
+    @JsonIgnore
+    var gridCells: MutableList<GridCell> = mutableListOf()
+
+    @JsonProperty("comps")
+    private val components: MutableSet<Component> = mutableSetOf()
 
     @JsonIgnore
     private val renderComponents = mutableSetOf<RenderableComponent>()
     @JsonIgnore
     private val updateComponents = mutableSetOf<UpdeatableComponent>()
 
-    @JsonIgnore
-    var gridCells: MutableList<GridCell> = mutableListOf()
+    @JsonIgnore var container: GameObjectContainer? = container
+        set(value) {
+            field = value
+            if(field != null)
+                components.forEach { it.onGOAddToContainer(this) }
+        }
+
+    @JsonIgnore var isRemoving = false
+        set(value) {
+            field = value
+            if(value) {
+                onRemoveAction?.perform(this)
+                container = null
+            }
+        }
+
+    var onRemoveAction: Action? = null
 
     @JsonIgnore
     fun getComponents() = components.toSet()
@@ -72,21 +99,18 @@ class GameObject(id: UUID,
         return getComponent<T>(index) != null
     }
 
-    fun setActive(value: Boolean) {
-        components.forEach { it.active = value }
-    }
-
     fun removeFromParent() {
-        container?.removeGameObject(this)
-        container = null
+        isRemoving = true
     }
 
     override fun update() {
-        updateComponents.forEach { if (it.active) it.update() }
+        if(active)
+            updateComponents.forEach { if (it.active) it.update() }
     }
 
     override fun render(batch: Batch) {
-        renderComponents.forEach { if (it.active) it.render(batch) }
+        if(active)
+            renderComponents.forEach { if (it.active) it.render(batch) }
     }
 
     operator fun plusAssign(component: Component) {
