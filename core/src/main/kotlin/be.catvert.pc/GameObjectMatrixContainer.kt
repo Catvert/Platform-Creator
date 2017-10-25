@@ -36,7 +36,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
      */
     @JsonIgnore private val activeGridCells = mutableListOf<GridCell>()
 
-    @JsonIgnore private var drawDebugCells = false
+    @JsonIgnore var drawDebugCells = false
 
     @JsonIgnore var followGameObject: GameObject? = null
 
@@ -57,9 +57,6 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
         super.update()
     }
 
-    override fun render(batch: Batch) {
-        super.render(batch)
-    }
 
     fun drawDebug() {
         if (drawDebugCells) {
@@ -67,7 +64,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
             shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
             matrixGrid.forEach {
                 it.forEach {
-                    shapeRenderer.rect(it.second.x.toFloat(), it.second.y.toFloat(), it.second.width.toFloat(), it.second.height.toFloat())
+                    shapeRenderer.rect(it.second)
                 }
             }
             shapeRenderer.rect(activeRect.x.toFloat(), activeRect.y.toFloat(), activeRect.width.toFloat(), activeRect.height.toFloat())
@@ -97,8 +94,8 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     }
 
     private fun addRectListener(gameObject: GameObject) {
-        gameObject.rectangle.onPositionChange.register(SignalListener { setGameObjectToGrid(gameObject) })
-        gameObject.rectangle.onSizeChange.register(SignalListener { setGameObjectToGrid(gameObject) })
+        gameObject.rectangle.onPositionChange.register{ setGameObjectToGrid(gameObject) }
+        gameObject.rectangle.onSizeChange.register { setGameObjectToGrid(gameObject) }
     }
 
     /**
@@ -204,10 +201,10 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     }
 
     /**
-     * Permet de retourner les entités présentent dans les cellules spécifiées
+     * Permet de retourner les gameObjects présents dans les cellules spécifiées
      * @param cells Les cellules où les entités sont présentes
      */
-    fun getAllEntitiesInCells(cells: List<GridCell>): Set<GameObject> {
+    fun getAllGameObjectsInCells(cells: List<GridCell>): Set<GameObject> {
         val list = mutableSetOf<GameObject>()
         cells.forEach {
             list += matrixGrid[it.x][it.y].first
@@ -229,7 +226,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
                     if (rect.overlaps(it.rectangle))
                         list += it
                 } else {
-                    if (it.rectangle.contains(rect))
+                    if (rect.contains(it.rectangle))
                         list += it
                 }
 

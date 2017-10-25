@@ -47,6 +47,11 @@ class Rect(position: Point = Point(), size: Size = Size()) {
         this.position = position
     }
 
+    fun move(moveX: Int, moveY: Int) {
+        x += moveX
+        y += moveY
+    }
+
     fun set(rect: Rect) = this.set(rect.size, rect.position)
 
     fun contains(rect: Rect): Boolean {

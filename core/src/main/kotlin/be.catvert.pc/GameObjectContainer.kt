@@ -12,12 +12,16 @@ import java.util.*
 abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization {
     @JsonProperty("objects") protected val gameObjects: MutableSet<GameObject> = mutableSetOf()
 
-    @JsonIgnore var allowRendering = true
-    @JsonIgnore var allowUpdating = true
+    @JsonIgnore
+    var allowRenderingGO = true
+    @JsonIgnore
+    var allowUpdatingGO = true
 
-    @JsonIgnore var removeEntityBelowY0 = true
+    @JsonIgnore
+    var removeEntityBelowY0 = true
 
-    @JsonIgnore fun getGameObjectsData() = gameObjects.toSet()
+    @JsonIgnore
+    fun getGameObjectsData() = gameObjects.toSet()
 
     fun findGameObjectByID(id: UUID): GameObject? = gameObjects.firstOrNull { it.id == id }
 
@@ -37,7 +41,7 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
     }
 
     fun createGameObject(rectangle: Rect = Rect(), tag: GameObject.Tag, prefab: Prefab? = null, init: GameObject.() -> Unit = {}): GameObject {
-        val go = GameObject(UUID.randomUUID(), mutableSetOf(), rectangle, tag,this, prefab)
+        val go = GameObject(UUID.randomUUID(), mutableSetOf(), rectangle, tag, this, prefab)
         go.init()
 
         addGameObject(go)
@@ -48,23 +52,24 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
     protected open fun onRemoveGameObject(gameObject: GameObject) {}
 
     override fun render(batch: Batch) {
-        if (allowRendering)
-            gameObjects.forEach { it.render(batch) }
+        if (allowRenderingGO)
+            gameObjects.sortedBy { it.layer }.forEach { it.render(batch) }
     }
 
     override fun update() {
-        if (allowUpdating) {
-            val iter = gameObjects.iterator()
-            while(iter.hasNext()) {
-                val it = iter.next()
+        val iter = gameObjects.iterator()
+        while (iter.hasNext()) {
+            val it = iter.next()
+
+            if(allowUpdatingGO)
                 it.update()
-                if(removeEntityBelowY0 && it.position().y < 0) {
-                    it.isRemoving = true
-                }
-                if(it.isRemoving) {
-                    onRemoveGameObject(it)
-                    iter.remove()
-                }
+
+            if (removeEntityBelowY0 && it.position().y < 0) {
+                it.isRemoving = true
+            }
+            if (it.isRemoving) {
+                onRemoveGameObject(it)
+                iter.remove()
             }
         }
     }

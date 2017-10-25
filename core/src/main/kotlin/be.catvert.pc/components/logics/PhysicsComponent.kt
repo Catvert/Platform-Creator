@@ -7,6 +7,7 @@ import be.catvert.pc.Log
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.NextPhysicsActions
 import be.catvert.pc.components.UpdeatableComponent
+import be.catvert.pc.utility.ExposeEditor
 import be.catvert.pc.utility.Point
 import be.catvert.pc.utility.Rect
 import be.catvert.pc.utility.Signal
@@ -66,7 +67,7 @@ data class CollisionListener(val gameObject: GameObject, val collideGameObject: 
  * @param movementType : Permet de définir le type de déplacement de l'entité
  * @param gravity : Permet de spécifier si la gravité est appliquée à l'entité
  */
-class PhysicsComponent(var isStatic: Boolean, var moveSpeed: Int = 0, var movementType: MovementType = MovementType.LINEAR, var gravity: Boolean = !isStatic, var maskCollision: MaskCollision = MaskCollision.ALL) : UpdeatableComponent() {
+class PhysicsComponent(@ExposeEditor var isStatic: Boolean, var moveSpeed: Int = 0, var movementType: MovementType = MovementType.LINEAR, var gravity: Boolean = !isStatic, var maskCollision: MaskCollision = MaskCollision.ALL) : UpdeatableComponent() {
     /**
      * Donnée de jump, si null, aucun jump sera disponible pour l'entité
      */

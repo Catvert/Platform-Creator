@@ -62,6 +62,7 @@ enum class PrefabFactory(val generate: () -> Prefab) {
                 }, {
                     onRemoveAction = LevelAction(LevelAction.LevelActions.FAIL_EXIT)
                     keepActive = true
+                    unique = true
                 })
             }),
     Spider({

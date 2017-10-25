@@ -3,6 +3,7 @@ package be.catvert.pc.components.graphics
 import be.catvert.pc.GameObject
 import be.catvert.pc.PCGame
 import be.catvert.pc.components.RenderableComponent
+import be.catvert.pc.utility.ExposeEditor
 import be.catvert.pc.utility.Rect
 import be.catvert.pc.utility.draw
 import com.badlogic.gdx.Gdx

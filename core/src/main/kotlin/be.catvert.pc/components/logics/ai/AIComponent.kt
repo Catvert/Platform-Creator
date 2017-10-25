@@ -18,7 +18,7 @@ abstract class AIComponent(val applyActionCollisionToPlayer: Pair<Action, List<C
 
         physicsComponent = gameObject.getComponent()
         if(physicsComponent != null) {
-            physicsComponent!!.onCollisionWith.register(SignalListener {
+            physicsComponent!!.onCollisionWith.register {
                 if(it.collideGameObject.tag == GameObject.Tag.Player) {
                     for(i in 0 until applyActionCollisionToPlayer.second.size) {
                         if(applyActionCollisionToPlayer.second[i] == it.side) {
@@ -34,7 +34,7 @@ abstract class AIComponent(val applyActionCollisionToPlayer: Pair<Action, List<C
                         }
                     }
                 }
-            })
+            }
         }
         else {
             Log.error { "Impossible de d'utiliser un SimpleAIComponent si l'objet n'a pas de PhysicsComponent" }

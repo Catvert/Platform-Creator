@@ -39,6 +39,12 @@ class GameObject(id: UUID,
 
     var keepActive: Boolean = false
 
+    var unique: Boolean = false
+
+    var layer: Int = 0
+
+    var fixedSize = false
+
     @JsonIgnore
     var gridCells: MutableList<GridCell> = mutableListOf()
 
@@ -80,6 +86,17 @@ class GameObject(id: UUID,
         }
     }
 
+    override fun update() {
+        if(active)
+            updateComponents.forEach { if (it.active) it.update() }
+    }
+
+    override fun render(batch: Batch) {
+        if(active)
+            renderComponents.forEach { if (it.active) it.render(batch) }
+    }
+
+
     fun addComponent(component: Component) {
         components.add(component)
         component.linkGameObject(this)
@@ -103,14 +120,22 @@ class GameObject(id: UUID,
         isRemoving = true
     }
 
-    override fun update() {
-        if(active)
-            updateComponents.forEach { if (it.active) it.update() }
+    fun setFlipRenderable(x: Boolean, y: Boolean) {
+        getComponents().filter { it is RenderableComponent }.forEach {
+            val renderComp = it as RenderableComponent
+            renderComp.flipX = x
+            renderComp.flipY = y
+        }
     }
 
-    override fun render(batch: Batch) {
-        if(active)
-            renderComponents.forEach { if (it.active) it.render(batch) }
+    fun inverseFlipRenderable(inverseX: Boolean, inverseY: Boolean) {
+        getComponents().filter { it is RenderableComponent }.forEach {
+            val renderComp = it as RenderableComponent
+            if(inverseX)
+                renderComp.flipX = !renderComp.flipX
+            if(inverseY)
+                renderComp.flipY = !renderComp.flipY
+        }
     }
 
     operator fun plusAssign(component: Component) {

@@ -15,12 +15,12 @@ class SimpleAIComponent(var goRight: Boolean = true) : AIComponent(RemoveAction(
 
     override fun onGOAddToContainer(gameObject: GameObject) {
         super.onGOAddToContainer(gameObject)
-        physicsComponent?.onCollisionWith?.register(SignalListener {
+        physicsComponent?.onCollisionWith?.register {
             if(it.side == CollisionSide.OnLeft)
                 goRight = true
             else if(it.side == CollisionSide.OnRight)
                 goRight = false
-        })
+        }
     }
 
     override fun update() {
