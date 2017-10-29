@@ -59,7 +59,7 @@ If you scroll down to `TintedDrawable` section, you'll find a bunch of drawables
 
 If you ever looked through raw **VisUI** assets, you should recognize the drawable names - in fact, *every default drawable is available at runtime*. The rest of the skin file is nearly untouched: it still uses the same old drawable names, which are simply recreated at runtime.
 
-You can easily edit *how* they are recreated, of course. `name` is the name of actual image in the atlas. `color` is a reference to the tinting color. This is pretty much everything you need to know - by tweaking the colors and drawable names in `TintedDrawable` section, you can modify any widget without breaking the default styles.
+You can easily edit *how* they are recreated, of course. `name` is the name of actual image in the atlasPath. `color` is a reference to the tinting color. This is pretty much everything you need to know - by tweaking the colors and drawable names in `TintedDrawable` section, you can modify any widget without breaking the default styles.
 
 By copy-pasting the `Color` and `TintedDrawable` definitions into your previous **VisUI** skin, you can start using **Tinted** without sacrificing your custom styles.
 
@@ -77,7 +77,7 @@ The raw assets were taken from `1.3.0` **VisUI** version. Create an issue or pul
 - If you invert the scale by keeping `t-dark` color lighter and `t-light` darker, you'll create a theme with lighter backgrounds and darker widgets. As you probably know, some default desktop programs use such setups, usually with white(-ish) backgrounds and gray widgets.
 - The default `white` and `grey` colors are usually used as font colors of regular and disabled widgets respectively. By changing these, you can modify how the text is displayed on the screen. By default, `white` is an alias of `t-white`, and `grey` - of `t-light`.
 - Buttons, slider knobs and text fields now use shared drawable: `t-base`. Separate images for buttons, knobs and text fields were removed.
-- As soon as you remove one of the fonts, your atlas (of `X1` skin) can be as small as 256x256px.
+- As soon as you remove one of the fonts, your atlasPath (of `X1` skin) can be as small as 256x256px.
 - `TextButton`, `Window` and other widgets extending `Table` could use `t-dot` (a single pixel) instead of `t-base` or `t-window` (nine patches) and apply paddings directly in Java. For example, setting button paddings to `4` with `t-dot` background would have pretty much the same effect as using `t-base`. I doubt that drawing GUI is worth such "optimizations", but keep in mind that it can be done. I should stop talking.
 
 ## License

@@ -2,11 +2,12 @@ package be.catvert.pc
 
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.scenes.EndLevelScene
-import be.catvert.pc.scenes.GameScene
 import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.Point
 import com.badlogic.gdx.files.FileHandle
+import com.badlogic.gdx.graphics.OrthographicCamera
+import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonIgnore
 import java.util.*
 
@@ -15,7 +16,7 @@ class Level(val levelPath: String, val levelName: String, val gameVersion: GameV
         fun newLevel(levelName: String): Level {
             val level = Level(Constants.levelDirPath + levelName + Constants.levelExtension, levelName, Constants.gameVersion, null)
 
-            val player = PrefabFactory.Player.generate().generate(Point(100, 100), level)
+            val player = PrefabFactory.Player.generate().create(Point(100, 100), level)
             level.setPlayer(player)
 
             return level
@@ -41,6 +42,21 @@ class Level(val levelPath: String, val levelName: String, val gameVersion: GameV
 
     fun exitLevel(success: Boolean) {
         PCGame.setScene(EndLevelScene(levelPath, success))
+    }
+
+    fun moveCameraToFollowGameObject(camera: OrthographicCamera, lerp: Boolean): Boolean {
+        if(followGameObject != null) {
+            val go = followGameObject!!
+
+            val posX = Math.max(0f + camera.viewportWidth / 2f, go.position().x + go.size().width / 2f)
+            val posY = Math.max(0f + camera.viewportHeight / 2f, go.position().y + go.size().height / 2f)
+
+            val lerpX = MathUtils.lerp(camera.position.x, posX, 0.1f)
+            val lerpY = MathUtils.lerp(camera.position.y, posY, 0.1f)
+            camera.position.set(if (lerp) lerpX else posX, if (lerp) lerpY else posY, 0f)
+        }
+
+        return followGameObject != null
     }
 
     override fun onPostDeserialization() {

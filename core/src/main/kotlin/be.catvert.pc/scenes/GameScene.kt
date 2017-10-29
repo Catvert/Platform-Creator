@@ -15,7 +15,7 @@ import ktx.assets.toLocalFile
  * Scène du jeu
  */
 class GameScene(private val level: Level) : Scene() {
-    override val gameObjectContainer: GameObjectContainer = level
+    override var gameObjectContainer: GameObjectContainer = level
 
     private val cameraMoveSpeed = 10f
 
@@ -51,16 +51,7 @@ class GameScene(private val level: Level) : Scene() {
             camera.zoom = 1f
         }
 
-        if (level.followGameObject != null) {
-            val go = level.followGameObject!!
-
-            val posX = Math.max(0f + camera.viewportWidth / 2f, go.position().x + go.size().width / 2f)
-            val posY = Math.max(0f + camera.viewportHeight / 2f, go.position().y + go.size().height / 2f)
-
-            val lerpX = MathUtils.lerp(camera.position.x, posX, 0.1f)
-            val lerpY = MathUtils.lerp(camera.position.y, posY, 0.1f)
-            camera.position.set(if (lerp) lerpX else posX, if (lerp) lerpY else posY, 0f)
-        } else {
+        if (!level.moveCameraToFollowGameObject(camera, true)) {
             if (Gdx.input.isKeyPressed(GameKeys.GAME_CAMERA_LEFT.key)) {
                 camera.position.x -= cameraMoveSpeed
             }

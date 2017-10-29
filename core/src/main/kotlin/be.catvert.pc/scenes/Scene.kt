@@ -26,7 +26,7 @@ abstract class Scene : Renderable, Updeatable, Resizable, Disposable {
     protected var backgroundTexture: Texture? = null
     private var backgroundSize = Gdx.graphics.toSize()
 
-    protected open val gameObjectContainer: GameObjectContainer = object : GameObjectContainer() {}
+    protected open var gameObjectContainer: GameObjectContainer = object : GameObjectContainer() {}
 
     init {
         Gdx.input.inputProcessor = stage

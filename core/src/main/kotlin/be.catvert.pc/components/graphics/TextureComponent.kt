@@ -3,12 +3,16 @@ package be.catvert.pc.components.graphics
 import be.catvert.pc.GameObject
 import be.catvert.pc.PCGame
 import be.catvert.pc.components.RenderableComponent
-import be.catvert.pc.utility.ExposeEditor
-import be.catvert.pc.utility.Rect
-import be.catvert.pc.utility.draw
+import be.catvert.pc.scenes.EditorScene
+import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.graphics.g2d.TextureAtlas
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
+import com.kotcrab.vis.ui.widget.VisImageButton
+import com.kotcrab.vis.ui.widget.VisTable
+import ktx.actors.onClick
 import ktx.assets.getValue
 import ktx.assets.loadOnDemand
 import ktx.assets.toLocalFile
@@ -19,11 +23,20 @@ import ktx.assets.toLocalFile
  * @param rectangle Le rectangle dans lequel sera dessiné la texture
  * @param linkRectToGO Permet de spécifier si le rectangle à utiliser est celui du gameObject
  */
-class TextureComponent(val texturePath: String, rectangle: Rect = Rect(), val linkRectToGO: Boolean = true) : RenderableComponent() {
-    private val texture: Texture by PCGame.assetManager.loadOnDemand(texturePath.toLocalFile().path())
+class TextureComponent(texturePath: String, rectangle: Rect = Rect(), val linkRectToGO: Boolean = true) : RenderableComponent() {
+    private var texture = PCGame.assetManager.loadOnDemand<Texture>(texturePath.toLocalFile().path()).asset
+
+    var texturePath: String = texturePath
+        private set
 
     var rectangle: Rect = rectangle
         private set
+
+    fun updateTexture(texturePath: String) {
+        this.texturePath = texturePath
+
+        texture = PCGame.assetManager.loadOnDemand<Texture>(texturePath.toLocalFile().path()).asset
+    }
 
     override fun onGOAddToContainer(gameObject: GameObject) {
         super.onGOAddToContainer(gameObject)
@@ -34,5 +47,46 @@ class TextureComponent(val texturePath: String, rectangle: Rect = Rect(), val li
 
     override fun render(batch: Batch) {
         batch.draw(texture, rectangle, flipX, flipY)
+    }
+
+    companion object : CustomEditorImpl<TextureComponent> {
+        override fun createInstance(table: VisTable, editorScene: EditorScene, onCreate: (newInstance: TextureComponent) -> Unit) {
+            val texture = PCGame.assetManager.loadOnDemand<Texture>(Constants.noTextureFoundTexturePath).asset
+            val imageButton = VisImageButton(TextureRegionDrawable(TextureAtlas.AtlasRegion(texture, 0, 0, texture.width, texture.height)))
+            imageButton.onClick {
+                editorScene.showSelectTextureWindow { textureFile ->
+                    val newTexture = PCGame.assetManager.loadOnDemand<Texture>(textureFile.path()).asset
+                    val imgBtnDrawable = TextureRegionDrawable(TextureAtlas.AtlasRegion(newTexture, 0, 0, newTexture.width, newTexture.height))
+
+                    imageButton.style.imageUp = imgBtnDrawable
+                    imageButton.style.imageDown = imgBtnDrawable
+
+                    onCreate(TextureComponent(textureFile.path()))
+                }
+            }
+
+            table.add(imageButton)
+
+            table.row()
+        }
+
+        override fun insertChangeProperties(table: VisTable, editorScene: EditorScene, instance: TextureComponent) {
+            val texture = instance.texture
+            val imageButton = VisImageButton(TextureRegionDrawable(TextureAtlas.AtlasRegion(texture, 0, 0, texture.width, texture.height)))
+            imageButton.onClick {
+                editorScene.showSelectTextureWindow { textureFile ->
+                    instance.updateTexture(textureFile.path())
+
+                    val texture = instance.texture
+
+                    val imgBtnDrawable = TextureRegionDrawable(TextureAtlas.AtlasRegion(texture, 0, 0, texture.width, texture.height))
+
+                    imageButton.style.imageUp = imgBtnDrawable
+                    imageButton.style.imageDown = imgBtnDrawable
+                }
+            }
+
+            table.add(imageButton)
+        }
     }
 }

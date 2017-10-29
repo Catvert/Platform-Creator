@@ -12,6 +12,7 @@ buildscript {
   }
 }
 
+
 allprojects {
   apply plugin: 'eclipse'
   apply plugin: 'idea'
@@ -24,8 +25,8 @@ configure(subprojects) {
 }
 
 subprojects {
-  version = '0.0.1-SNAPSHOT'
-  ext.appName = 'Plateform-Creator'
+  version = '2.0'
+  ext.appName = 'Platform-Creator'
   repositories {
     mavenLocal()
     mavenCentral()

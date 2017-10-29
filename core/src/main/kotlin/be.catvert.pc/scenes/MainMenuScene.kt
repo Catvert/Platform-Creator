@@ -2,10 +2,7 @@ package be.catvert.pc.scenes
 
 import be.catvert.pc.*
 import be.catvert.pc.serialization.SerializationFactory
-import be.catvert.pc.utility.Constants
-import be.catvert.pc.utility.Rect
-import be.catvert.pc.utility.Size
-import be.catvert.pc.utility.Utility
+import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.files.FileHandle
@@ -26,6 +23,7 @@ import ktx.assets.toLocalFile
 import ktx.collections.GdxArray
 import ktx.collections.toGdxArray
 import ktx.vis.window
+import sun.plugin.util.UIUtil
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -80,38 +78,7 @@ class MainMenuScene : Scene() {
         logo.rectangle.set(PCGame.getLogoRect())
     }
 
-    /**
-     * Affiche un dialogue complexe
-     * @param title : Le titre
-     * @param content : Le contenu du dialogue
-     * @param buttons : Les boutons disponibles dans le dialogue
-     * @param onClose : Fonction appelée quand l'utilisateur a appuié sur un bouton
-     */
-    private fun showDialog(title: String, content: String, buttons: List<VisTextButton> = listOf(), onClose: (button: Int) -> Unit = {}) {
-        stage + window(title) {
-            isModal = true
-            setSize(400f, 150f)
-            setPosition(Gdx.graphics.width / 2f - width / 2, Gdx.graphics.height / 2f - height / 2)
-            addCloseButton()
-
-            verticalGroup {
-                space(10f)
-
-                label(content)
-
-                horizontalGroup {
-                    space(10f)
-                    buttons.forEachIndexed { i, button ->
-                        addActor(button)
-                        button.addListener(button.onClick {
-                            this@window.remove()
-                            onClose(i)
-                        })
-                    }
-                }
-            }
-        }
-    }
+    //region UI
 
     /**
      * Affiche une fenêtre pour sélectionner le nom du niveau
@@ -214,9 +181,9 @@ class MainMenuScene : Scene() {
                                     try {
                                         Files.copy(Paths.get(list.selected.file.path()), Paths.get(list.selected.file.parent().path() + "/$name.mtrlvl"), StandardCopyOption.REPLACE_EXISTING)
                                         list.setItems(getLevels())
-                                        showDialog("Opération réussie !", "La copie s'est correctement effectuée !")
+                                        UIUtility.showDialog(stage, "Opération réussie !", "La copie s'est correctement effectuée !")
                                     } catch (e: IOException) {
-                                        showDialog("Opération échouée !", "Un problème s'est produit lors de la copie !")
+                                        UIUtility.showDialog(stage, "Opération échouée !", "Un problème s'est produit lors de la copie !")
                                         Log.error(e) { "Erreur survenue lors de la copie du niveau ! Erreur : $e" }
                                     }
                                 }
@@ -226,18 +193,18 @@ class MainMenuScene : Scene() {
                     textButton("Supprimer") {
                         addListener(onClick {
                             if (list.selected != null) {
-                                showDialog("Supprimer le niveau ?", "Etes-vous sur de vouloir supprimer ${list.selected} ?", listOf(VisTextButton("Oui"), VisTextButton("Non")), { button ->
-                                    if (button == 0) {
+                                UIUtility.showDialog(stage,"Supprimer le niveau ?", "Etes-vous sur de vouloir supprimer ${list.selected} ?", listOf("Oui", "Non")) {
+                                    if (it == 0) {
                                         try {
                                             Files.delete(Paths.get(list.selected.file.path()))
                                             list.setItems(getLevels())
-                                            showDialog("Opération réussie !", "La suppression s'est correctement effectuée !")
+                                            UIUtility.showDialog(stage, "Opération réussie !", "La suppression s'est correctement effectuée !")
                                         } catch (e: IOException) {
-                                            showDialog("Opération échouée !", "Un problème s'est produit lors de la suppression !")
+                                            UIUtility.showDialog(stage, "Opération échouée !", "Un problème s'est produit lors de la suppression !")
                                             Log.error(e) { "Erreur survenue lors de la suppression du niveau !" }
                                         }
                                     }
-                                })
+                                }
                             }
                         })
                     }
@@ -343,7 +310,7 @@ class MainMenuScene : Scene() {
                                 Gdx.graphics.setWindowedMode(widthArea.text.toInt(), heightArea.text.toInt())
 
                             if (!PCGame.saveGameConfig())
-                                showDialog("Erreur lors de la sauvegarde !", "Une erreur est survenue lors de la sauvegarde de la config du jeu !")
+                                UIUtility.showDialog(stage, "Erreur lors de la sauvegarde !", "Une erreur est survenue lors de la sauvegarde de la config du jeu !")
                         }
 
                         var successKeysConfig = true
@@ -361,9 +328,9 @@ class MainMenuScene : Scene() {
                         if (successKeysConfig) {
                             keyAreaList.forEach { it.color = Color.WHITE }
                             if (!PCGame.saveKeysConfig())
-                                showDialog("Erreur lors de la sauvegarde", "Une erreur est survenue lors de la sauvegarde du jeu !")
+                                UIUtility.showDialog(stage, "Erreur lors de la sauvegarde", "Une erreur est survenue lors de la sauvegarde du jeu !")
                         } else {
-                            showDialog("Erreur lors de la sauvegarde !", "Une ou plusieurs touches sont invalides !")
+                            UIUtility.showDialog(stage, "Erreur lors de la sauvegarde !", "Une ou plusieurs touches sont invalides !")
                         }
 
                         if (successConfig && successKeysConfig)
@@ -374,5 +341,6 @@ class MainMenuScene : Scene() {
         }
     }
 
-    private fun showWrongVersionLevelDialog() = showDialog("Mauvaise version !", "Le niveau n'a pas la meme version que celle du jeu ! :(")
+    private fun showWrongVersionLevelDialog() = UIUtility.showDialog(stage, "Mauvaise version !", "Le niveau n'a pas la meme version que celle du jeu ! :(")
+    //endregion
 }

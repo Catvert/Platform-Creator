@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.util.*
+import kotlin.reflect.KClass
 
 /**
  * Classe représentant un objet en jeu
@@ -101,10 +102,22 @@ class GameObject(id: UUID,
         components.add(component)
         component.linkGameObject(this)
 
+        if(container != null)
+            component.onGOAddToContainer(this)
+
         if (component is RenderableComponent)
             renderComponents.add(component)
         else if (component is UpdeatableComponent)
             updateComponents.add(component)
+    }
+
+    fun removeComponent(component: Component) {
+        components.remove(component)
+
+        if(component is RenderableComponent)
+            renderComponents.remove(component)
+        else if(component is UpdeatableComponent)
+            updateComponents.remove(component)
     }
 
     inline fun <reified T : Component> getComponent(index: Int = 0): T? {
@@ -115,6 +128,12 @@ class GameObject(id: UUID,
     inline fun <reified T : Component> hasComponent(index: Int = 0): Boolean {
         return getComponent<T>(index) != null
     }
+
+    inline fun <reified T : Component> getNumberOfSameComponent(klass: KClass<T> = T::class) : Int {
+        Log.info  { "test : " + getComponents().filter { it.javaClass.kotlin == klass}.size }
+        return 0
+    }
+
 
     fun removeFromParent() {
         isRemoving = true

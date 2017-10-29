@@ -4,6 +4,7 @@ import be.catvert.pc.utility.Constants
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration
 import com.badlogic.gdx.utils.JsonReader
+import java.io.File
 import java.io.FileReader
 
 object DesktopLauncher {

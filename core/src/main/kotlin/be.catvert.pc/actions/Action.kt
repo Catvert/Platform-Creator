@@ -11,3 +11,4 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 interface Action {
     fun perform(gameObject: GameObject)
 }
+

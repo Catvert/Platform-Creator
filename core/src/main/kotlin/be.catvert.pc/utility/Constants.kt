@@ -11,13 +11,16 @@ object Constants {
 
     val assetsDirPath = "assets/"
 
-    val UISkinPath = assetsDirPath + "ui/tinted/x1/tinted.json"
+    val UISkinPath = assetsDirPath + "ui/neutralizer-fix/neutralizer.json" // "ui/tinted/x1/tinted.json"
+
     val mainFontPath = assetsDirPath + "fonts/mainFont.fnt"
+    val editorFontPath = assetsDirPath + "fonts/editorFont.fnt"
 
     val configPath = assetsDirPath + "config.json"
     val keysConfigPath = assetsDirPath + "keysConfig.json"
 
     val atlasDirPath = assetsDirPath + "atlas/"
+    val texturesDirPath = assetsDirPath + "textures/"
     val soundsDirPath = assetsDirPath + "sounds/"
     val backgroundsDirPath = assetsDirPath + "game/background/"
 
@@ -27,5 +30,7 @@ object Constants {
     val levelDirPath = assetsDirPath + "levels/"
     val levelExtension = ".pclvl"
 
-    val editorFont = assetsDirPath + "fonts/editorFont.fnt"
+
+
+    val noTextureFoundTexturePath = assetsDirPath + "game/notexture.png"
 }

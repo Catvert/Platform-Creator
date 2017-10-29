@@ -1,6 +1,7 @@
 package be.catvert.pc.actions
 
 import be.catvert.pc.GameObject
+import be.catvert.pc.utility.ExposeEditor
 
 /**
  * Représente les différentes directions possible
@@ -9,7 +10,7 @@ import be.catvert.pc.GameObject
 /**
  * Action permettant de faire bouger le gameObject dans une direction et une vitesse donnée.
  */
-class MoveAction(val direction: Direction,val moveSpeed: Int) : Action{
+class MoveAction(val direction: Direction, @ExposeEditor(maxInt = 100) val moveSpeed: Int) : Action{
     enum class Direction {
         LEFT, RIGHT, UP, DOWN
     }

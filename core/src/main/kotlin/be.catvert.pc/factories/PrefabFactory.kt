@@ -23,14 +23,14 @@ enum class PrefabFactory(val generate: () -> Prefab) {
     Sprite({
         Prefab("sprite", false, "Catvert", GameObject.Tag.Sprite, Size(50, 50), run {
             val comps = mutableSetOf<Component>()
-            comps += AtlasComponent("assets/atlas/Abstract Plateform/spritesheet_complete.atlas", "blockBrown")
+            comps += AtlasComponent(Constants.atlasDirPath + "Abstract Plateform/spritesheet_complete.atlas", "blockBrown")
             comps
         })
     }),
     PhysicsSprite({
         Prefab("physicsSprite", false, "Catvert", GameObject.Tag.PhysicsSprite, Size(50, 50), run {
             val comps = mutableSetOf<Component>()
-            comps += AtlasComponent("assets/atlas/Abstract Plateform/spritesheet_complete.atlas", "blockBrown")
+            comps += AtlasComponent(Constants.atlasDirPath + "Abstract Plateform/spritesheet_complete.atlas", "blockBrown")
             comps += PhysicsComponent(true)
             comps
         })
@@ -53,8 +53,8 @@ enum class PrefabFactory(val generate: () -> Prefab) {
 
                     physics.jumpAction = SoundAction(jumpSoundIndex)
 
-                    comps += InputComponent(GameKeys.GAME_PLAYER_LEFT.key, false, MultiplexerAction(listOf(PhysicsAction(NextPhysicsActions.GO_LEFT), RenderAction(RenderAction.RenderActions.FLIP_X))))
-                    comps += InputComponent(GameKeys.GAME_PLAYER_RIGHT.key, false, MultiplexerAction(listOf(PhysicsAction(NextPhysicsActions.GO_RIGHT), RenderAction(RenderAction.RenderActions.UNFLIP_X))))
+                    comps += InputComponent(GameKeys.GAME_PLAYER_LEFT.key, false, MultiplexerAction(arrayOf(PhysicsAction(NextPhysicsActions.GO_LEFT), RenderAction(RenderAction.RenderActions.FLIP_X))))
+                    comps += InputComponent(GameKeys.GAME_PLAYER_RIGHT.key, false, MultiplexerAction(arrayOf(PhysicsAction(NextPhysicsActions.GO_RIGHT), RenderAction(RenderAction.RenderActions.UNFLIP_X))))
                     comps += InputComponent(GameKeys.GAME_PLAYER_GOD_UP.key, false, PhysicsAction(NextPhysicsActions.GO_UP))
                     comps += InputComponent(GameKeys.GAME_PLAYER_GOD_DOWN.key, false, PhysicsAction(NextPhysicsActions.GO_DOWN))
                     comps += InputComponent(GameKeys.GAME_PLAYER_JUMP.key, true, PhysicsAction(NextPhysicsActions.JUMP))
@@ -68,7 +68,7 @@ enum class PrefabFactory(val generate: () -> Prefab) {
     Spider({
         Prefab("spider", false, "Catvert", GameObject.Tag.Enemy, Size(48, 48), run {
             val comps = mutableSetOf<Component>()
-            comps += AnimationComponent("assets/atlas/More Enemies Animations/enemies.atlas", "spider_walk", 0.33f)
+            comps += AnimationComponent(Constants.atlasDirPath + "More Enemies Animations/enemies.atlas", "spider_walk", 0.33f)
             comps += PhysicsComponent(false, 5)
             comps += SimpleAIComponent()
             comps

@@ -67,7 +67,11 @@ data class CollisionListener(val gameObject: GameObject, val collideGameObject: 
  * @param movementType : Permet de définir le type de déplacement de l'entité
  * @param gravity : Permet de spécifier si la gravité est appliquée à l'entité
  */
-class PhysicsComponent(@ExposeEditor var isStatic: Boolean, var moveSpeed: Int = 0, var movementType: MovementType = MovementType.LINEAR, var gravity: Boolean = !isStatic, var maskCollision: MaskCollision = MaskCollision.ALL) : UpdeatableComponent() {
+class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
+                       @ExposeEditor(minInt = 0, maxInt = 100) var moveSpeed: Int = 0,
+                       @ExposeEditor var movementType: MovementType = MovementType.LINEAR,
+                       @ExposeEditor var gravity: Boolean = !isStatic,
+                       @ExposeEditor var maskCollision: MaskCollision = MaskCollision.ALL) : UpdeatableComponent() {
     /**
      * Donnée de jump, si null, aucun jump sera disponible pour l'entité
      */

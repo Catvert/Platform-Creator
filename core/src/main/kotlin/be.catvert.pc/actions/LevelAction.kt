@@ -2,8 +2,9 @@ package be.catvert.pc.actions
 
 import be.catvert.pc.GameObject
 import be.catvert.pc.Level
+import be.catvert.pc.utility.ExposeEditor
 
-class LevelAction(val action: LevelActions) : Action {
+class LevelAction(@ExposeEditor val action: LevelActions) : Action {
     enum class LevelActions {
         SUCCESS_EXIT, FAIL_EXIT
     }
