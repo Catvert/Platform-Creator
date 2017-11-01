@@ -57,7 +57,7 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
          */
         fun generateLogo(container: GameObjectContainer): GameObject {
             return container.createGameObject(getLogoRect(), GameObject.Tag.Sprite) {
-                this += TextureComponent(Constants.gameLogoPath)
+                this += TextureComponent().apply { updateTexture(Constants.gameLogoPath.toLocalFile()) }
             }
         }
 

@@ -9,11 +9,13 @@ import be.catvert.pc.utility.CustomEditorImpl
 import be.catvert.pc.utility.Rect
 import be.catvert.pc.utility.draw
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.kotcrab.vis.ui.widget.VisImageButton
 import com.kotcrab.vis.ui.widget.VisTable
@@ -32,38 +34,37 @@ import ktx.vis.tab
  * @param linkRectToGO Permet de spécifier si le rectangle à utiliser est celui du gameObject
  */
 
-class AtlasComponent(atlasPath: String, region: String, rectangle: Rect = Rect(), val linkRectToGO: Boolean = true) : RenderableComponent() {
-    var rectangle: Rect = rectangle
+class AtlasComponent(atlasPath: FileHandle, region: String) : RenderableComponent() {
+    @JsonCreator constructor(): this(Constants.noTextureAtlasFoundPath.toLocalFile(), "notexture")
+
+    var atlasPath: String = atlasPath.path()
         private set
 
     var region: String = region
         private set
 
-    var atlasPath: String = atlasPath
-        private set
-
-    @JsonIgnore private var textureAtlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(atlasPath.toLocalFile().path()).asset
+    @JsonIgnore private var textureAtlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(this.atlasPath).asset
 
     @JsonIgnore private var atlasRegion: TextureAtlas.AtlasRegion = textureAtlas.findRegion(region)
 
     fun getAtlasRegion() = atlasRegion
 
-    fun updateAtlas(atlasPath: String, region: String) {
-        this.atlasPath = atlasPath
+    fun updateAtlas(atlasPath: FileHandle = this.atlasPath.toLocalFile(), region: String = this.region) {
+        this.atlasPath = atlasPath.path()
         this.region = region
 
-        textureAtlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(atlasPath.toLocalFile().path()).asset
+        textureAtlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(atlasPath.path()).asset
         atlasRegion = textureAtlas.findRegion(region)
     }
 
     override fun onGOAddToContainer(gameObject: GameObject) {
         super.onGOAddToContainer(gameObject)
-        if (linkRectToGO)
-            this.rectangle = gameObject.rectangle
+
+        updateAtlas()
     }
 
     override fun render(batch: Batch) {
-        batch.draw(atlasRegion, rectangle, flipX, flipY)
+        batch.draw(atlasRegion, gameObject.rectangle, flipX, flipY)
     }
 
     companion object : CustomEditorImpl<AtlasComponent> {
@@ -77,7 +78,7 @@ class AtlasComponent(atlasPath: String, region: String, rectangle: Rect = Rect()
                     imageButton.style.imageUp = imgBtnDrawable
                     imageButton.style.imageDown = imgBtnDrawable
 
-                    onCreate(AtlasComponent(atlasFile.path(), region))
+                    onCreate(AtlasComponent(atlasFile, region))
                 }
             }
 
@@ -90,7 +91,7 @@ class AtlasComponent(atlasPath: String, region: String, rectangle: Rect = Rect()
             val imageButton = VisImageButton(TextureRegionDrawable(instance.getAtlasRegion()))
             imageButton.onClick {
                 editorScene.showSelectAtlasRegionWindow(instance.atlasPath.toLocalFile()) { atlasFile, region ->
-                    instance.updateAtlas(atlasFile.path(), region)
+                    instance.updateAtlas(atlasFile, region)
 
                     val imgBtnDrawable = TextureRegionDrawable(instance.getAtlasRegion())
 

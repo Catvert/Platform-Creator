@@ -8,9 +8,12 @@ import be.catvert.pc.components.logics.CollisionSide
 import be.catvert.pc.components.logics.PhysicsComponent
 import be.catvert.pc.utility.ExposeEditor
 import be.catvert.pc.utility.SignalListener
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 
-class SimpleAIComponent(@ExposeEditor var goRight: Boolean = true) : AIComponent(RemoveAction() to listOf(CollisionSide.OnLeft, CollisionSide.OnRight, CollisionSide.OnDown), RemoveAction() to listOf(CollisionSide.OnUp)) {
+class SimpleAIComponent(@ExposeEditor var goRight: Boolean) : AIComponent(RemoveAction() to listOf(CollisionSide.OnLeft, CollisionSide.OnRight, CollisionSide.OnDown), RemoveAction() to listOf(CollisionSide.OnUp)) {
+    @JsonCreator private constructor(): this(true)
+
     @JsonIgnore val goLeftAction = MultiplexerAction(arrayOf(PhysicsAction(NextPhysicsActions.GO_LEFT), RenderAction(RenderAction.RenderActions.UNFLIP_X)))
     @JsonIgnore val goRightAction = MultiplexerAction(arrayOf(PhysicsAction(NextPhysicsActions.GO_RIGHT), RenderAction(RenderAction.RenderActions.FLIP_X)))
 

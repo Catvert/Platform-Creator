@@ -7,11 +7,9 @@ import be.catvert.pc.Log
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.NextPhysicsActions
 import be.catvert.pc.components.UpdeatableComponent
-import be.catvert.pc.utility.ExposeEditor
-import be.catvert.pc.utility.Point
-import be.catvert.pc.utility.Rect
-import be.catvert.pc.utility.Signal
+import be.catvert.pc.utility.*
 import com.badlogic.gdx.math.MathUtils
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 
 /**
@@ -71,13 +69,10 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                        @ExposeEditor(minInt = 0, maxInt = 100) var moveSpeed: Int = 0,
                        @ExposeEditor var movementType: MovementType = MovementType.LINEAR,
                        @ExposeEditor var gravity: Boolean = !isStatic,
-                       @ExposeEditor var maskCollision: MaskCollision = MaskCollision.ALL) : UpdeatableComponent() {
-    /**
-     * Donnée de jump, si null, aucun jump sera disponible pour l'entité
-     */
-    var jumpData: JumpData? = null
-
-    var jumpAction: Action? = null
+                       @ExposeEditor var maskCollision: MaskCollision = MaskCollision.ALL,
+                       var jumpData: JumpData? = null,
+                       @ExposeEditor var jumpAction: Action? = null) : UpdeatableComponent() {
+    @JsonCreator private constructor(): this(true)
 
     /**
      * Les nextActions représentes les actions que doit faire l'entité pendant le prochain frame
@@ -105,7 +100,8 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
      * Permet à l'entité de savoir si elle est sur le sol ou non
      */
     @JsonIgnore
-    var isOnGround = false
+    private var isOnGround = false
+        private set
 
     @JsonIgnore val gravitySpeed = 15
 
@@ -154,7 +150,15 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
 
                         moveSpeedY = gravitySpeed.toFloat()
                         addJumpAfterClear = true
-
+fun physicsComponent(isStatic: Boolean, moveSpeed: Int = 0, movementType: MovementType = MovementType.LINEAR, gravity: Boolean = !isStatic, maskCollision: MaskCollision = MaskCollision.ALL, jumpData: JumpData? = null, jumpAction: Action? = null) = PhysicsComponent().apply {
+    this.isStatic = isStatic
+    this.moveSpeed = moveSpeed
+    this.movementType = movementType
+    this.gravity = gravity
+    this.maskCollision = maskCollision
+    this.jumpData = jumpData
+    this.jumpAction = jumpAction
+}
                         jumpAction?.perform(gameObject)
                     } else {
                         // Vérifie si le go est arrivé à la bonne hauteur de saut ou s'il rencontre un obstacle au dessus de lui

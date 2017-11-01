@@ -6,10 +6,12 @@ import be.catvert.pc.components.RenderableComponent
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.kotcrab.vis.ui.widget.VisImageButton
 import com.kotcrab.vis.ui.widget.VisTable
 import ktx.actors.onClick
@@ -23,30 +25,28 @@ import ktx.assets.toLocalFile
  * @param rectangle Le rectangle dans lequel sera dessiné la texture
  * @param linkRectToGO Permet de spécifier si le rectangle à utiliser est celui du gameObject
  */
-class TextureComponent(texturePath: String, rectangle: Rect = Rect(), val linkRectToGO: Boolean = true) : RenderableComponent() {
-    private var texture = PCGame.assetManager.loadOnDemand<Texture>(texturePath.toLocalFile().path()).asset
+class TextureComponent(texturePath: FileHandle) : RenderableComponent() {
+    @JsonCreator constructor(): this(Constants.noTextureFoundTexturePath.toLocalFile())
 
-    var texturePath: String = texturePath
+    var texturePath: String = texturePath.path()
         private set
 
-    var rectangle: Rect = rectangle
-        private set
+    private var texture = PCGame.assetManager.loadOnDemand<Texture>(this.texturePath).asset
 
-    fun updateTexture(texturePath: String) {
-        this.texturePath = texturePath
+    fun updateTexture(texturePath: FileHandle = this.texturePath.toLocalFile()) {
+        this.texturePath = texturePath.path()
 
-        texture = PCGame.assetManager.loadOnDemand<Texture>(texturePath.toLocalFile().path()).asset
+        texture = PCGame.assetManager.loadOnDemand<Texture>(this.texturePath).asset
     }
 
     override fun onGOAddToContainer(gameObject: GameObject) {
         super.onGOAddToContainer(gameObject)
 
-        if (linkRectToGO)
-            rectangle = gameObject.rectangle
+        updateTexture()
     }
 
     override fun render(batch: Batch) {
-        batch.draw(texture, rectangle, flipX, flipY)
+        batch.draw(texture, gameObject.rectangle, flipX, flipY)
     }
 
     companion object : CustomEditorImpl<TextureComponent> {
@@ -61,7 +61,7 @@ class TextureComponent(texturePath: String, rectangle: Rect = Rect(), val linkRe
                     imageButton.style.imageUp = imgBtnDrawable
                     imageButton.style.imageDown = imgBtnDrawable
 
-                    onCreate(TextureComponent(textureFile.path()))
+                    onCreate(TextureComponent(textureFile))
                 }
             }
 
@@ -75,7 +75,7 @@ class TextureComponent(texturePath: String, rectangle: Rect = Rect(), val linkRe
             val imageButton = VisImageButton(TextureRegionDrawable(TextureAtlas.AtlasRegion(texture, 0, 0, texture.width, texture.height)))
             imageButton.onClick {
                 editorScene.showSelectTextureWindow { textureFile ->
-                    instance.updateTexture(textureFile.path())
+                    instance.updateTexture(textureFile)
 
                     val texture = instance.texture
 

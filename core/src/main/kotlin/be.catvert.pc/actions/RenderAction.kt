@@ -2,8 +2,12 @@ package be.catvert.pc.actions
 
 import be.catvert.pc.GameObject
 import be.catvert.pc.components.RenderableComponent
+import be.catvert.pc.utility.ExposeEditor
+import com.fasterxml.jackson.annotation.JsonCreator
 
-class RenderAction(val action: RenderActions): Action {
+class RenderAction(@ExposeEditor var action: RenderActions) : Action {
+    @JsonCreator private constructor(): this(RenderActions.FLIP_X)
+
     enum class RenderActions {
         FLIP_X, UNFLIP_X, FLIP_Y, UNFLIP_Y
     }

@@ -30,7 +30,7 @@ object Constants {
     val levelDirPath = assetsDirPath + "levels/"
     val levelExtension = ".pclvl"
 
-
-
+    val noTextureAtlasFoundPath = assetsDirPath + "game/notexture_atlas.atlas"
     val noTextureFoundTexturePath = assetsDirPath + "game/notexture.png"
+    val noSoundPath = assetsDirPath + "game/nosound.wav"
 }

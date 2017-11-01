@@ -2,8 +2,10 @@ package be.catvert.pc.scenes
 
 import be.catvert.pc.*
 import be.catvert.pc.actions.Action
+import be.catvert.pc.actions.EmptyAction
 import be.catvert.pc.components.Component
 import be.catvert.pc.components.RenderableComponent
+import be.catvert.pc.components.graphics.AnimationComponent
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.*
@@ -24,6 +26,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane
 import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener
 import com.kotcrab.vis.ui.widget.*
+import com.kotcrab.vis.ui.widget.spinner.FloatSpinnerModel
 import com.kotcrab.vis.ui.widget.spinner.IntSpinnerModel
 import com.kotcrab.vis.ui.widget.spinner.Spinner
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner
@@ -37,13 +40,10 @@ import ktx.assets.toLocalFile
 import ktx.collections.gdxArrayOf
 import ktx.collections.toGdxArray
 import ktx.vis.window
+import java.lang.reflect.Field
 import kotlin.reflect.KClass
 import kotlin.reflect.full.companionObjectInstance
-import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.isSubclassOf
-import kotlin.reflect.full.valueParameters
-import kotlin.reflect.jvm.javaConstructor
-import kotlin.reflect.jvm.jvmErasure
+import kotlin.reflect.full.createInstance
 
 /**
  * Scène de l'éditeur de niveau
@@ -224,7 +224,8 @@ class EditorScene(private val level: Level) : Scene() {
                     shapeRenderer.rect(selectGameObject!!.rectangle)
                 }
             }
-            EditorMode.TRY_LEVEL -> {}
+            EditorMode.TRY_LEVEL -> {
+            }
         /*
         EditorScene.EditorMode.SelectPoint -> {
             game.batch.projectionMatrix = game.defaultProjection
@@ -239,12 +240,11 @@ class EditorScene(private val level: Level) : Scene() {
         PCGame.mainBatch.use {
             it.projectionMatrix = PCGame.defaultProjection
             with(editorFont) {
-                if(editorMode != EditorMode.TRY_LEVEL) {
+                if (editorMode != EditorMode.TRY_LEVEL) {
                     draw(it, "Layer sélectionné : $selectLayer", 10f, Gdx.graphics.height - editorFont.lineHeight)
                     draw(it, "Nombre d'entités : ${level.getGameObjectsData().size}", 10f, Gdx.graphics.height - editorFont.lineHeight * 2)
                     draw(it, "Resize mode : ${resizeGameObjectMode.name}", 10f, Gdx.graphics.height - editorFont.lineHeight * 3)
-                }
-                else {
+                } else {
                     draw(it, "Test du niveau..", 10f, Gdx.graphics.height - lineHeight)
                 }
             }
@@ -255,7 +255,7 @@ class EditorScene(private val level: Level) : Scene() {
     override fun update() {
         super.update()
 
-        if(!isUIHover())
+        if (!isUIHover())
             updateCamera()
 
         if (!isUIHover() && editorMode != EditorMode.TRY_LEVEL) {
@@ -476,7 +476,7 @@ class EditorScene(private val level: Level) : Scene() {
                                         Math.max(0, mousePosInWorld.y - height / 2))
 
                                 // Permet de vérifier si le gameObject copié est nouveau ou pas (si il est nouveau, ça veut dire qu'il n'a pas encore de container)è
-                                if(selectGameObject!!.container != null)
+                                if (selectGameObject!!.container != null)
                                     moveToNextEntity = false
                             }
                         }
@@ -529,10 +529,9 @@ class EditorScene(private val level: Level) : Scene() {
         var moveCameraX = 0f
         var moveCameraY = 0f
 
-        if(editorMode == EditorMode.TRY_LEVEL) {
+        if (editorMode == EditorMode.TRY_LEVEL) {
             (gameObjectContainer as Level).moveCameraToFollowGameObject(camera, true)
-        }
-        else {
+        } else {
             if (Gdx.input.isKeyPressed(GameKeys.EDITOR_CAMERA_LEFT.key))
                 moveCameraX -= cameraMoveSpeed
             if (Gdx.input.isKeyPressed(GameKeys.EDITOR_CAMERA_RIGHT.key))
@@ -695,6 +694,7 @@ class EditorScene(private val level: Level) : Scene() {
         }
 
         stage + window("Paramètres du niveau") {
+            setSize(200f, 100f)
             setPosition(Gdx.graphics.width / 2f - width / 2, Gdx.graphics.height / 2f - height / 2)
             addCloseButton()
 
@@ -767,9 +767,14 @@ class EditorScene(private val level: Level) : Scene() {
         }
     }
 
-    fun addWidgetForField(parent: Table, type: KClass<*>, exposeEditor: ExposeEditor?, getValue: () -> Any?, setValue: (Any) -> Unit) {
+    fun addWidgetForField(parent: Table, field: Field, instance: Any, exposeEditor: ExposeEditor?) {
+
+        fun setValue(value: Any) {
+            field.set(instance, value)
+        }
+
         fun <T : Any> getValueOrAssign(assign: T): T {
-            var value = getValue() as? T
+            var value = field.get(instance) as? T
             if (value == null) {
                 value = assign
                 setValue(assign)
@@ -777,8 +782,8 @@ class EditorScene(private val level: Level) : Scene() {
             return value
         }
 
-        when (type) {
-            Boolean::class -> {
+        when (field.type) {
+            Boolean::class.java -> {
                 val checkbox = VisCheckBox("", getValueOrAssign(true)).apply {
                     onChange {
                         setValue(isChecked)
@@ -786,23 +791,22 @@ class EditorScene(private val level: Level) : Scene() {
                 }
                 parent.add(checkbox)
             }
-            Int::class -> {
-                if(exposeEditor?.customType == CustomType.KEY_INT) {
+            Int::class.java -> {
+                if (exposeEditor?.customType == CustomType.KEY_INT) {
                     val keyArea = VisTextArea(Input.Keys.toString(getValueOrAssign(0))).apply {
                         isReadOnly = true
                         onKeyUp {
                             val keyStr = Input.Keys.toString(it)
                             val key = Input.Keys.valueOf(keyStr)
 
-                            if(key != -1) {
+                            if (key != -1) {
                                 text = keyStr
                                 setValue(key)
                             }
                         }
                     }
                     parent.add(keyArea).width(50f)
-                }
-                else {
+                } else {
                     val intModel = IntSpinnerModel(getValueOrAssign(0), exposeEditor?.minInt ?: 0, exposeEditor?.maxInt ?: 100)
                     val spinner = Spinner("", intModel).apply {
                         onChange {
@@ -812,7 +816,7 @@ class EditorScene(private val level: Level) : Scene() {
                     parent.add(spinner)
                 }
             }
-            String::class -> {
+            String::class.java -> {
                 val textField = VisTextField(getValueOrAssign("")).apply {
                     onChange {
                         setValue(text)
@@ -820,14 +824,14 @@ class EditorScene(private val level: Level) : Scene() {
                 }
                 parent.add(textField)
             }
-            Array<Action>::class -> {
+            Array<Action>::class.java -> {
 
             }
         }
 
-        if (type.java.isEnum) {
+        if (field.type.isEnum) {
             val selectBox = VisSelectBox<String>().apply {
-                val enumConstants = type.java.enumConstants
+                val enumConstants = field.type.enumConstants
 
                 this.items = enumConstants.map { (it as Enum<*>).name }.toGdxArray()
 
@@ -842,10 +846,10 @@ class EditorScene(private val level: Level) : Scene() {
             parent.add(selectBox)
         }
 
-        if (type.isSubclassOf(Action::class)) {
+        if (field.type.isAssignableFrom(Action::class.java)) {
             val editBtn = VisTextButton("Éditer").apply {
                 onClick {
-                    showEditActionWindow(getValue, setValue)
+                    showEditActionWindow(getValueOrAssign(EmptyAction()), { setValue(it) })
                 }
             }
 
@@ -853,8 +857,7 @@ class EditorScene(private val level: Level) : Scene() {
         }
     }
 
-    private fun showEditActionWindow(getAction: () -> Any?, setAction: (Action) -> Unit) {
-        //TODO faire en sorte de ne pas créer de nouvelle instance si l'action n'est pas changé, juste changer ses vars
+    private fun showEditActionWindow(action: Action, setAction: (Action) -> Unit) {
         stage + window("Éditer l'action") editActionWindow@ {
             setSize(300f, 250f)
             setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
@@ -865,19 +868,22 @@ class EditorScene(private val level: Level) : Scene() {
                 space(10f)
 
                 selectBox<String> {
+                    var instance = action
+
                     val actionsList = gdxArrayOf<KClass<out Action>>()
                     FastClasspathScanner(Action::class.java.`package`.name).matchClassesImplementing(Action::class.java, { actionsList.add(it.kotlin) }).scan()
 
-                    actionsList.removeAll { it.isAbstract }
+                    actionsList.removeAll { it.isAbstract}
 
                     this.items = actionsList.map { it.simpleName ?: "Nom inconnu" }.toGdxArray()
 
-                    val findIndex = actionsList.indexOfFirst { it.isInstance(getAction()) }
+                    val findIndex = actionsList.indexOfFirst { it.isInstance(instance) }
 
-                    this.selectedIndex = if(findIndex == -1) 0 else findIndex
+                    this.selectedIndex = if (findIndex == -1) 0 else findIndex
 
                     onChange {
-                        val action = actionsList[selectedIndex]
+                        if (!actionsList[selectedIndex].isInstance(instance))
+                            instance = Utility.findNoArgConstructor(actionsList[selectedIndex])!!.newInstance()
 
                         val constructorsParamsValue = mutableMapOf<Int, Any>()
 
@@ -885,20 +891,21 @@ class EditorScene(private val level: Level) : Scene() {
                         this@vgroup.addActor(this@selectBox)
 
                         this@vgroup.table(defaultSpacing = true) {
-                            action.constructors.elementAt(0).parameters.forEachIndexed { index, it ->
-                                // TODO BUG FIND ANNOTATION
-                                label(it.name ?: "Nom introuvable")
-                                addWidgetForField(this, it.type.jvmErasure, it.findAnnotation(), { null }, {
-                                    constructorsParamsValue[index] = it
-                                })
+                            instance.javaClass.declaredFields.filter { it.isAnnotationPresent(ExposeEditor::class.java) }.forEachIndexed { index, field ->
+                                field.isAccessible = true
+
+                                label(field.name ?: "Nom introuvable")
+
+                                addWidgetForField(this, field, instance, field.getAnnotation(ExposeEditor::class.java))
+
                                 row()
                             }
 
                             row()
 
-                            textButton("Modifier") {
+                            this@vgroup.textButton("Modifier") {
                                 onClick {
-                                    setAction(action.constructors.elementAt(0).call(*constructorsParamsValue.toSortedMap().values.toTypedArray()))
+                                    setAction(instance)
                                     this@editActionWindow.remove();
                                 }
                             }
@@ -921,7 +928,7 @@ class EditorScene(private val level: Level) : Scene() {
                     val componentsList = gdxArrayOf<KClass<out Component>>()
                     FastClasspathScanner(Component::class.java.`package`.name).matchSubclassesOf(Component::class.java, { componentsList.add(it.kotlin) }).scan()
 
-                    componentsList.removeAll { it.isAbstract }
+                    componentsList.removeAll { it.isAbstract || !Utility.hasNoArgConstructor(it) }
 
                     this.items = componentsList.map { it.simpleName ?: "Nom inconnu" }.toGdxArray()
 
@@ -945,27 +952,28 @@ class EditorScene(private val level: Level) : Scene() {
                                 this@editActionWindow.remove()
                             }
                         } else {
-                            // TODO BUG FIND ANNOTATION
+                            val instance = Utility.findNoArgConstructor(comp)!!.newInstance()
 
-                            val c = comp.constructors.elementAt(0)
+                            instance.javaClass.declaredFields.filter { it.isAnnotationPresent(ExposeEditor::class.java) }.forEach { field ->
+                                field.isAccessible = true
 
-                            comp.constructors.elementAt(0).parameters.forEachIndexed { index, it ->
-                                parametersTable.add(VisLabel(it.name ?: "Nom introuvable"))
-                                addWidgetForField(parametersTable, it.type.jvmErasure, it.findAnnotation(), { null }, {
-                                    constructorsParamsValue[index] = it
-                                })
+                                parametersTable.add(VisLabel(field.name))
+
+                                addWidgetForField(parametersTable, field, instance, field.getAnnotation(ExposeEditor::class.java))
+
                                 parametersTable.row()
                             }
+
+                            this@table.row()
+                            this@table.add(VisTextButton("Ajouter").apply {
+                                onClick {
+                                    onCreateComp(instance)
+                                    this@editActionWindow.remove();
+                                }
+                            })
+
                         }
 
-                        parametersTable.row()
-
-                        parametersTable.add(VisTextButton("Ajouter").apply {
-                            onClick {
-                                onCreateComp(comp.constructors.elementAt(0).call(*constructorsParamsValue.toSortedMap().values.toTypedArray()))
-                                this@editActionWindow.remove();
-                            }
-                        })
                     }.changed(ChangeListener.ChangeEvent(), this)
                 }
             }
@@ -1061,22 +1069,23 @@ class EditorScene(private val level: Level) : Scene() {
 
                             this@table.row()
 
-                            val comp = gameObject.getComponents().elementAt(selectedIndex)
+                            val instance = gameObject.getComponents().elementAt(selectedIndex)
 
                             val compPropertiesTable = VisTable().apply { setSize(250f, 500f); }
 
                             val scroll = ScrollPane(compPropertiesTable)
                             this@table.add(scroll).size(250f, 150f)
 
-                            if (comp.javaClass.kotlin.companionObjectInstance is CustomEditorImpl<*>) {
-                                (comp.javaClass.kotlin.companionObjectInstance!! as CustomEditorImpl<in Component>).insertChangeProperties(compPropertiesTable, this@EditorScene, comp)
+                            if (instance.javaClass.kotlin.companionObjectInstance is CustomEditorImpl<*>) {
+                                (instance.javaClass.kotlin.companionObjectInstance!! as CustomEditorImpl<in Component>).insertChangeProperties(compPropertiesTable, this@EditorScene, instance)
                             } else {
-                                comp.javaClass.declaredFields.filter { it.isAnnotationPresent(ExposeEditor::class.java) }.forEach { field ->
+
+                                instance.javaClass.declaredFields.filter { it.isAnnotationPresent(ExposeEditor::class.java) }.forEach { field ->
                                     field.isAccessible = true
 
                                     compPropertiesTable.add(VisLabel(field.name))
 
-                                    addWidgetForField(compPropertiesTable, field.type.kotlin, field.getAnnotation(ExposeEditor::class.java), { field.get(comp) }, { field.set(comp, it) })
+                                    addWidgetForField(compPropertiesTable, field, instance, field.getAnnotation(ExposeEditor::class.java))
 
                                     compPropertiesTable.row()
                                 }
@@ -1123,7 +1132,7 @@ class EditorScene(private val level: Level) : Scene() {
 
                         it.forEachIndexed { index, file ->
                             val loadAtlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(file.path()).asset to file.file().nameWithoutExtension
-                            if (atlasFile?.equals(loadAtlas.second) == true) {
+                            if (atlasFile?.equals(file) == true) {
                                 latestSelectTextureWindowAtlasIndex = index
                             }
 
@@ -1188,6 +1197,105 @@ class EditorScene(private val level: Level) : Scene() {
      * Permet d'afficher la fenêtre pour sélectionner une texture
      * @param onAtlasSelected Méthode appelée quand l'atlasPath et la region ont été correctement sélectionnés par le joueur
      */
+    fun showSelectAnimationWindow(atlasFile: FileHandle? = null, onAnimationSelected: (atlasFile: FileHandle, animationRegionName: String, frameDuration: Float) -> Unit) {
+        /**
+         * Classe de donnée représentant la sélection d'une texture atlasPath
+         */
+        data class TextureAtlasSelect(val textureAtlas: TextureAtlas, val atlasFile: FileHandle, val atlasName: String) {
+            override fun toString(): String {
+                return atlasName
+            }
+        }
+
+        stage + window("Sélectionner une animation") {
+            setSize(400f, 400f)
+            setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
+            isModal = true
+            addCloseButton()
+
+            table {
+                val table = VisTable()
+                table.setSize(350f, 200f)
+
+                val selectedImage = VisImage()
+
+                val selectedBox = selectBox<TextureAtlasSelect> {
+                    this.items = Utility.getFilesRecursivly(Constants.atlasDirPath.toLocalFile(), "atlas").let {
+                        val list = mutableListOf<TextureAtlasSelect>()
+
+                        it.forEachIndexed { index, file ->
+                            val loadAtlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(file.path()).asset to file.file().nameWithoutExtension
+                            if (atlasFile?.equals(file) == true) {
+                                latestSelectTextureWindowAtlasIndex = index
+                            }
+
+                            list += TextureAtlasSelect(loadAtlas.first, file, loadAtlas.second)
+                        }
+
+                        list.toGdxArray()
+                    }
+
+                    if (latestSelectTextureWindowAtlasIndex < this.items.size)
+                        this.selectedIndex = latestSelectTextureWindowAtlasIndex
+
+                    onChange {
+                        table.clearChildren()
+                        var count = 0
+
+                        AnimationComponent.findAnimationRegionsNameInAtlas(selected.textureAtlas).forEach {
+                            val image = VisImage(selected.textureAtlas.findRegion(it + "_0"))
+
+                            image.userObject = selected.atlasFile to it
+
+                            image.onClick {
+                                selectedImage.drawable = image.drawable
+                                selectedImage.userObject = image.userObject
+                            }
+
+                            table.add(image).size(50f, 50f).space(10f)
+
+                            ++count
+                            if (count >= 5) {
+                                table.row()
+                                count = 0
+                            }
+                        }
+                    }.changed(ChangeListener.ChangeEvent(), this)
+                }
+                row()
+
+                val scroll = ScrollPane(table)
+                add(scroll).size(300f, 200f).space(10f)
+
+                row()
+
+                add(selectedImage).size(50f, 50f).space(10f)
+
+                row()
+
+                val floatModel = FloatSpinnerModel(1f.toString(), 0f.toString(), 10f.toString(), 0.1f.toString())
+                spinner("Vitesse de l'animation", floatModel)
+
+                row()
+
+                textButton("Sélectionner") {
+                    onClick {
+                        if (selectedImage.userObject != null && selectedImage.userObject is Pair<*, *>) {
+                            val userObject = selectedImage.userObject as Pair<FileHandle, String>
+                            onAnimationSelected(userObject.first, userObject.second, floatModel.value.toFloat())
+                            latestSelectTextureWindowAtlasIndex = selectedBox.selectedIndex
+                            this@window.remove()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Permet d'afficher la fenêtre pour sélectionner une texture
+     * @param onAtlasSelected Méthode appelée quand l'atlasPath et la region ont été correctement sélectionnés par le joueur
+     */
     fun showSelectTextureWindow(onTextureSelected: (textureFile: FileHandle) -> Unit) {
         /**
          * Classe de donnée représentant la sélection d'une texture atlasPath
@@ -1216,10 +1324,10 @@ class EditorScene(private val level: Level) : Scene() {
 
                     image.userObject = it
 
-                    image.addListener(image.onClick {
+                    image.onClick {
                         selectedImage.drawable = image.drawable
                         selectedImage.userObject = image.userObject
-                    })
+                    }
 
                     table.add(image).size(50f, 50f).space(10f)
 
