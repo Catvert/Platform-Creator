@@ -7,7 +7,6 @@ import be.catvert.pc.PCGame
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.math.MathUtils
 import ktx.assets.loadOnDemand
 import ktx.assets.toLocalFile
 
@@ -36,8 +35,10 @@ class GameScene(private val level: Level) : Scene() {
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
             PCGame.setScene(PauseScene(this), false)
-        if(Gdx.input.isKeyJustPressed(GameKeys.GAME_SWITCH_GRAVITY.key))
+        if (Gdx.input.isKeyJustPressed(GameKeys.GAME_SWITCH_GRAVITY.key))
             level.applyGravity = !level.applyGravity
+        if (Gdx.input.isKeyJustPressed(GameKeys.GAME_EDIT_LEVEL.key))
+            PCGame.setScene(EditorScene(Level.loadFromFile(level.levelPath.toLocalFile())!!))
     }
 
     private fun updateCamera(lerp: Boolean) {

@@ -10,8 +10,7 @@ import be.catvert.pc.utility.SignalListener
 import com.fasterxml.jackson.annotation.JsonIgnore
 
 abstract class AIComponent(val applyActionCollisionToPlayer: Pair<Action, List<CollisionSide>>, val applyActionCollisionToEnemy: Pair<Action, List<CollisionSide>>) : UpdeatableComponent() {
-    @JsonIgnore
-    protected var physicsComponent: PhysicsComponent? = null
+    @JsonIgnore protected var physicsComponent: PhysicsComponent? = null
 
     override fun onGOAddToContainer(gameObject: GameObject) {
         super.onGOAddToContainer(gameObject)

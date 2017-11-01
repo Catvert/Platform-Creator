@@ -6,13 +6,13 @@ import com.badlogic.gdx.Input
  * Enumération des différentes touches utilisées dans le jeu
  */
 enum class GameKeys(var key: Int, val description: String) {
-    EDITOR_CAMERA_LEFT(Input.Keys.Q, "Editor camera left move"),
-    EDITOR_CAMERA_RIGHT(Input.Keys.D, "Editor camera right move"),
-    EDITOR_CAMERA_UP(Input.Keys.Z, "Editor camera up move"),
-    EDITOR_CAMERA_DOWN(Input.Keys.S, "Editor camera down move"),
+    EDITOR_CAMERA_LEFT(Input.Keys.Q, "Editor move camera left"),
+    EDITOR_CAMERA_RIGHT(Input.Keys.D, "Editor move camera right"),
+    EDITOR_CAMERA_UP(Input.Keys.Z, "Editor move camera up"),
+    EDITOR_CAMERA_DOWN(Input.Keys.S, "Editor move camera down"),
     CAMERA_ZOOM_UP(Input.Keys.P, "Camera zoom up"),
     CAMERA_ZOOM_DOWN(Input.Keys.M, "Camera zoom down"),
-    CAMERA_ZOOM_RESET(Input.Keys.L, "Camera zoom reset"),
+    CAMERA_ZOOM_RESET(Input.Keys.L, "Camera reset zoom"),
 
     EDITOR_REMOVE_ENTITY(Input.Keys.DEL, "Remove entity from editor"),
     EDITOR_COPY_MODE(Input.Keys.C, "Copy entity mode in editor"),
@@ -45,5 +45,7 @@ enum class GameKeys(var key: Int, val description: String) {
     GAME_PLAYER_RIGHT(Input.Keys.D, "Move player right"),
     GAME_PLAYER_JUMP(Input.Keys.SPACE, "Jump player"),
     GAME_PLAYER_GOD_UP(Input.Keys.Z, "God move player up"),
-    GAME_PLAYER_GOD_DOWN(Input.Keys.S, "God move player down")
+    GAME_PLAYER_GOD_DOWN(Input.Keys.S, "God move player down"),
+
+    GAME_EDIT_LEVEL(Input.Keys.F2, "Edit level in editor")
 }

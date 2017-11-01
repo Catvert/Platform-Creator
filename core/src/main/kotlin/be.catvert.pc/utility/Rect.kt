@@ -67,4 +67,8 @@ class Rect(position: Point = Point(), size: Size = Size()) {
     fun contains(point: Point) = this.x <= point.x && this.x + this.width >= point.x && this.y <= point.y && this.y + this.height >= point.y
 
     fun overlaps(rect: Rect) =  this.x < rect.x + rect.width && this.x + this.width > rect.x && this.y < rect.y + rect.height && this.y + this.height > rect.y
+
+    override fun toString(): String {
+        return "{ x: $x y: $y width: $width height: $height }"
+    }
 }

@@ -27,7 +27,7 @@ enum class MovementType {
  * @property startJumping : Débute le saut de l'entité
  * @property forceJumping : Permet de forcer le saut de l'entité
  */
-data class JumpData(var jumpHeight: Int, @JsonIgnore var isJumping: Boolean = false, @JsonIgnore var targetHeight: Int = 0, @JsonIgnore var startJumping: Boolean = false, @JsonIgnore var forceJumping: Boolean = false)
+data class JumpData(var isJumping: Boolean = false, var targetHeight: Int = 0, var startJumping: Boolean = false, var forceJumping: Boolean = false)
 
 /**
  * Enum permettant de connaître le côté toucher lors d'une collision
@@ -66,11 +66,11 @@ data class CollisionListener(val gameObject: GameObject, val collideGameObject: 
  * @param gravity : Permet de spécifier si la gravité est appliquée à l'entité
  */
 class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
-                       @ExposeEditor(minInt = 0, maxInt = 100) var moveSpeed: Int = 0,
+                       @ExposeEditor(maxInt = 100) var moveSpeed: Int = 0,
                        @ExposeEditor var movementType: MovementType = MovementType.LINEAR,
                        @ExposeEditor var gravity: Boolean = !isStatic,
                        @ExposeEditor var maskCollision: MaskCollision = MaskCollision.ALL,
-                       var jumpData: JumpData? = null,
+                       @ExposeEditor(maxInt = 1000) var jumpHeight: Int = 0,
                        @ExposeEditor var jumpAction: Action? = null) : UpdeatableComponent() {
     @JsonCreator private constructor(): this(true)
 
@@ -79,6 +79,8 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
      */
     @JsonIgnore
     val nextActions = mutableSetOf<NextPhysicsActions>()
+
+    @JsonIgnore private val jumpData: JumpData = JumpData()
 
     /**
      * La vitesse de déplacement x actuelle de l'entité (à titre d'information)
@@ -99,11 +101,9 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
     /**
      * Permet à l'entité de savoir si elle est sur le sol ou non
      */
-    @JsonIgnore
-    private var isOnGround = false
-        private set
+    @JsonIgnore private var isOnGround = false
 
-    @JsonIgnore val gravitySpeed = 15
+    @JsonIgnore private val gravitySpeed = 15
 
     override fun update() {
         if (isStatic) return
@@ -127,13 +127,6 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                 NextPhysicsActions.GO_DOWN -> moveSpeedY -= moveSpeed
                 NextPhysicsActions.GRAVITY -> if (gravity) moveSpeedY -= gravitySpeed
                 NextPhysicsActions.JUMP -> {
-                    if (jumpData == null) {
-                        Log.error { "L'entité essaye de sauter mais ne contient pas de jumpData !" }
-                        return@action
-                    }
-
-                    val jumpData = jumpData!!
-
                     if (!jumpData.isJumping) {
                         if (!jumpData.forceJumping) {
                             if (!checkIsOnGround(gameObject)) {
@@ -143,23 +136,14 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                             jumpData.forceJumping = false
                         }
                         jumpData.isJumping = true
-                        jumpData.targetHeight = gameObject.rectangle.y + jumpData.jumpHeight
+                        jumpData.targetHeight = gameObject.rectangle.y + jumpHeight
                         jumpData.startJumping = true
 
                         gravity = false
 
                         moveSpeedY = gravitySpeed.toFloat()
                         addJumpAfterClear = true
-fun physicsComponent(isStatic: Boolean, moveSpeed: Int = 0, movementType: MovementType = MovementType.LINEAR, gravity: Boolean = !isStatic, maskCollision: MaskCollision = MaskCollision.ALL, jumpData: JumpData? = null, jumpAction: Action? = null) = PhysicsComponent().apply {
-    this.isStatic = isStatic
-    this.moveSpeed = moveSpeed
-    this.movementType = movementType
-    this.gravity = gravity
-    this.maskCollision = maskCollision
-    this.jumpData = jumpData
-    this.jumpAction = jumpAction
-}
-                        jumpAction?.perform(gameObject)
+                         jumpAction?.perform(gameObject)
                     } else {
                         // Vérifie si le go est arrivé à la bonne hauteur de saut ou s'il rencontre un obstacle au dessus de lui
                         if (gameObject.rectangle.y >= jumpData.targetHeight || collideOnMove(0, gravitySpeed, gameObject)) {

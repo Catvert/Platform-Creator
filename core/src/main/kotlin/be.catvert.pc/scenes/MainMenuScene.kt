@@ -34,7 +34,7 @@ import java.nio.file.StandardCopyOption
  */
 
 class MainMenuScene : Scene() {
-    private val glyphCreatedBy = GlyphLayout(PCGame.mainFont, "par Catvert - ${Constants.gameVersion.versionName}")
+    private val glyphCreatedBy = GlyphLayout(PCGame.mainFont, "par Catvert - ${Constants.gameVersion}")
 
     private val logo = PCGame.generateLogo(gameObjectContainer)
 

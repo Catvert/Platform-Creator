@@ -11,7 +11,7 @@ import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonIgnore
 import java.util.*
 
-class Level(val levelPath: String, val levelName: String, val gameVersion: GameVersion, var playerUUID: UUID?, var backgroundPath: String? = null) : GameObjectMatrixContainer() {
+class Level(val levelPath: String, val levelName: String, val gameVersion: Float, var playerUUID: UUID?, var backgroundPath: String? = null) : GameObjectMatrixContainer() {
     companion object {
         fun newLevel(levelName: String): Level {
             val level = Level(Constants.levelDirPath + levelName + Constants.levelExtension, levelName, Constants.gameVersion, null)

@@ -52,10 +52,9 @@ class GameObject(id: UUID,
     @JsonProperty("comps")
     private val components: MutableSet<Component> = mutableSetOf()
 
-    @JsonIgnore
-    private val renderComponents = mutableSetOf<RenderableComponent>()
-    @JsonIgnore
-    private val updateComponents = mutableSetOf<UpdeatableComponent>()
+    @JsonIgnore private val renderComponents = mutableSetOf<RenderableComponent>()
+
+    @JsonIgnore private val updateComponents = mutableSetOf<UpdeatableComponent>()
 
     @JsonIgnore var container: GameObjectContainer? = container
         set(value) {
@@ -128,12 +127,6 @@ class GameObject(id: UUID,
     inline fun <reified T : Component> hasComponent(index: Int = 0): Boolean {
         return getComponent<T>(index) != null
     }
-
-    inline fun <reified T : Component> getNumberOfSameComponent(klass: KClass<T> = T::class) : Int {
-        Log.info  { "test : " + getComponents().filter { it.javaClass.kotlin == klass}.size }
-        return 0
-    }
-
 
     fun removeFromParent() {
         isRemoving = true

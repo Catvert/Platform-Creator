@@ -52,6 +52,13 @@ abstract class Scene : Renderable, Updeatable, Resizable, Disposable {
         return false
     }
 
+    protected fun hideUI() {
+        stage.actors.forEach { it.isVisible = false }
+    }
+
+    protected fun showUI() {
+        stage.actors.forEach { it.isVisible = true }
+    }
 
     override fun render(batch: Batch) {
         clearScreen(backgroundColors.first, backgroundColors.second, backgroundColors.third)

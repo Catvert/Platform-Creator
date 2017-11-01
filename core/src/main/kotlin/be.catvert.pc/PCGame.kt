@@ -74,6 +74,7 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
         }
 
         fun setScene(newScene: Scene, disposeCurrentScene: Boolean = true) {
+            Log.info { "Chargement de la scène : ${ReflectionUtility.simpleNameOf(newScene)}" }
             if (disposeCurrentScene)
                 currentScene.dispose()
             currentScene = newScene

@@ -18,9 +18,13 @@ import ktx.actors.onClick
 import ktx.actors.plus
 import ktx.vis.window
 import java.lang.reflect.Constructor
+import java.lang.reflect.Field
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaConstructor
+import java.util.ArrayList
+
+
 
 fun Batch.draw(texture: Texture, rect: Rect, flipX: Boolean = false, flipY: Boolean = false) = this.draw(texture, rect.position.x.toFloat(), rect.position.y.toFloat(), rect.size.width.toFloat(), rect.size.height.toFloat(), 0, 0, texture.width, texture.height, flipX, flipY)
 
@@ -59,7 +63,9 @@ object Utility {
         }
         return files
     }
+}
 
+object ReflectionUtility {
     inline fun <reified T: Any> hasNoArgConstructor(klass: KClass<out T>) = findNoArgConstructor(klass) != null
 
     inline fun <reified T: Any> findNoArgConstructor(klass: KClass<out T>): Constructor<T>? {
@@ -69,6 +75,21 @@ object Utility {
         }
         return null
     }
+
+    fun getAllFieldsOf(type: Class<*>): List<Field> {
+        val fields = mutableListOf<Field>()
+
+        var i: Class<*>? = type
+
+        while (i != null && i != Any::class.java) {
+            fields.addAll(i.declaredFields)
+            i = i.superclass
+        }
+
+        return fields
+    }
+
+    fun simpleNameOf(instance: Any) = instance.javaClass.kotlin.simpleName?: "Nom introuvable"
 }
 
 object UIUtility {

@@ -1,6 +1,8 @@
 package be.catvert.pc.components
 
 import be.catvert.pc.GameObject
+import be.catvert.pc.utility.ExposeEditor
+import be.catvert.pc.utility.ReflectionUtility
 import be.catvert.pc.utility.Renderable
 import be.catvert.pc.utility.Updeatable
 import com.fasterxml.jackson.annotation.JsonIgnore
@@ -11,7 +13,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
  * @param active Permet de spécifier si le component est actif ou non
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
-sealed class Component(@JsonIgnore var active: Boolean = true) {
+sealed class Component(@ExposeEditor var active: Boolean = true) {
+    @ExposeEditor var name = ReflectionUtility.simpleNameOf(this).removeSuffix("Component")
+
     @JsonIgnore
     lateinit var gameObject: GameObject
         private set

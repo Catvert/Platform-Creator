@@ -1,17 +1,15 @@
 package be.catvert.pc.utility
 
-import be.catvert.pc.GameVersion
-
 /**
  * Objet permettant d'accéder aux constantes du jeu
  */
 object Constants {
     val gameTitle = "Platform Creator"
-    val gameVersion = GameVersion.V1_0
+    val gameVersion = 2.0f
 
     val assetsDirPath = "assets/"
 
-    val UISkinPath = assetsDirPath + "ui/neutralizer-fix/neutralizer.json" // "ui/tinted/x1/tinted.json"
+    val UISkinPath = assetsDirPath + "ui/neutralizer-fix/neutralizer.json"
 
     val mainFontPath = assetsDirPath + "fonts/mainFont.fnt"
     val editorFontPath = assetsDirPath + "fonts/editorFont.fnt"

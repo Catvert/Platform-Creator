@@ -10,11 +10,11 @@ import sun.audio.AudioPlayer.player
 import java.util.*
 
 abstract class GameObjectMatrixContainer : GameObjectContainer() {
-    @JsonIgnore private val shapeRenderer = ShapeRenderer()
+    private val shapeRenderer = ShapeRenderer()
 
-    @JsonIgnore val matrixWidth = 300
-    @JsonIgnore val matrixHeight = 300
-    @JsonIgnore val matrixSizeCell = 200
+    private val matrixWidth = 300
+    private val matrixHeight = 300
+    private val matrixSizeCell = 200
 
     /**
      * La matrix permettant de stoquer les différentes entités selon leur position dans l'espace
@@ -34,7 +34,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     /**
      * Les cellules actives
      */
-    @JsonIgnore private val activeGridCells = mutableListOf<GridCell>()
+    private val activeGridCells = mutableListOf<GridCell>()
 
     @JsonIgnore var drawDebugCells = false
 

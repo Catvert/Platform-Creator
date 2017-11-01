@@ -46,7 +46,7 @@ enum class PrefabFactory(val generate: () -> Prefab) {
 
                     comps += AtlasComponent((Constants.atlasDirPath + "More Enemies Animations/aliens.atlas").toLocalFile(), "alienGreen_stand")
 
-                    comps += PhysicsComponent(false, 10, MovementType.SMOOTH, jumpData = JumpData(200), jumpAction = SoundAction(jumpSoundIndex))
+                    comps += PhysicsComponent(false, 10, MovementType.SMOOTH, jumpHeight = 200, jumpAction = SoundAction(jumpSoundIndex))
 
                     comps += SoundComponent((Constants.soundsDirPath + "player/jump.ogg").toLocalFile())
 

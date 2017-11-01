@@ -15,6 +15,7 @@ import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Circle
@@ -39,18 +40,17 @@ import ktx.assets.loadOnDemand
 import ktx.assets.toLocalFile
 import ktx.collections.gdxArrayOf
 import ktx.collections.toGdxArray
+import ktx.vis.verticalGroup
 import ktx.vis.window
 import java.lang.reflect.Field
 import kotlin.reflect.KClass
-import kotlin.reflect.full.companionObjectInstance
-import kotlin.reflect.full.createInstance
 
 /**
  * Scène de l'éditeur de niveau
  */
 class EditorScene(private val level: Level) : Scene() {
     private enum class EditorMode {
-        NO_MODE, SELECT_GO, COPY_GO, TRY_LEVEL
+        NO_MODE, SELECT_GO, COPY_GO, SELECT_POINT, TRY_LEVEL
     }
 
     private enum class ResizeMode {
@@ -84,17 +84,20 @@ class EditorScene(private val level: Level) : Scene() {
     private val cameraMoveSpeed = 10f
 
     private var editorMode = EditorMode.NO_MODE
-        set(value) {
-            field = value
-            onEditorModeChange(value)
-        }
+
     private var selectGameObjectMode = SelectGOMode.NO_MODE
     private var resizeGameObjectMode = ResizeMode.PROPORTIONAL
 
-    private val selectGameObjects = mutableListOf<GameObject>()
+    private val selectGameObjects = mutableSetOf<GameObject>()
     private var selectGameObject: GameObject? = null
+        set(value) {
+            field = value
+            onSelectGameObjectChange(value)
+        }
+
 
     private val onSelectGameObjectChange = Signal<GameObject?>()
+    private val onSelectPoint = Signal<Point>()
 
     private var selectLayer = 0
 
@@ -126,8 +129,6 @@ class EditorScene(private val level: Level) : Scene() {
     private var latestSelectTextureWindowAtlasIndex = 0
 
     private var backupTryModeCameraPos = Vector3()
-
-    private val onEditorModeChange = Signal<EditorMode>()
 
     init {
         gameObjectContainer.allowUpdatingGO = false
@@ -214,26 +215,23 @@ class EditorScene(private val level: Level) : Scene() {
                 }
             }
             EditorMode.COPY_GO -> {
-                /**
-                 * Dessine un rectangle autour du gameObject à copier
-                 * Vérifie si le gameObject se trouve bien dans le niveau, dans le cas contraire,
-                 * ça signifie que le gameObject vient d'être créer et qu'il ne faut donc pas afficher un rectangle car il n'est pas encore dans le niveau
-                 */
-                if (selectGameObject != null && level.getGameObjectsData().contains(selectGameObject!!)) {
-                    shapeRenderer.color = Color.GREEN
-                    shapeRenderer.rect(selectGameObject!!.rectangle)
+                selectGameObjects.forEach {
+                    if (it === selectGameObject)
+                        shapeRenderer.color = Color.GREEN
+                    else
+                        shapeRenderer.color = Color.OLIVE
+                    shapeRenderer.rect(it.rectangle)
                 }
             }
             EditorMode.TRY_LEVEL -> {
             }
-        /*
-        EditorScene.EditorMode.SelectPoint -> {
-            game.batch.projectionMatrix = game.defaultProjection
-            game.batch.use { gameBatch ->
-                val layout = GlyphLayout(game.mainFont, "Sélectionner un point")
-                game.mainFont.draw(gameBatch, layout, Gdx.graphics.width / 2f - layout.width / 2, Gdx.graphics.height - game.mainFont.lineHeight)
+            EditorMode.SELECT_POINT -> {
+                PCGame.mainBatch.projectionMatrix = PCGame.defaultProjection
+                PCGame.mainBatch.use {
+                    val layout = GlyphLayout(editorFont, "Sélectionner un point")
+                    editorFont.draw(it, layout, Gdx.graphics.width / 2f - layout.width / 2, Gdx.graphics.height - editorFont.lineHeight)
+                }
             }
-        }*/ //TODO
         }
         shapeRenderer.end()
 
@@ -244,6 +242,7 @@ class EditorScene(private val level: Level) : Scene() {
                     draw(it, "Layer sélectionné : $selectLayer", 10f, Gdx.graphics.height - editorFont.lineHeight)
                     draw(it, "Nombre d'entités : ${level.getGameObjectsData().size}", 10f, Gdx.graphics.height - editorFont.lineHeight * 2)
                     draw(it, "Resize mode : ${resizeGameObjectMode.name}", 10f, Gdx.graphics.height - editorFont.lineHeight * 3)
+                    draw(it, "Mode de l'éditeur : ${editorMode.name}", 10f, Gdx.graphics.height - editorFont.lineHeight * 4)
                 } else {
                     draw(it, "Test du niveau..", 10f, Gdx.graphics.height - lineHeight)
                 }
@@ -270,7 +269,7 @@ class EditorScene(private val level: Level) : Scene() {
             }
 
             if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_SWITCH_RESIZE_MODE.key)) {
-                if (resizeGameObjectMode == ResizeMode.PROPORTIONAL) resizeGameObjectMode = ResizeMode.FREE else resizeGameObjectMode = ResizeMode.PROPORTIONAL
+                resizeGameObjectMode = if (resizeGameObjectMode == ResizeMode.PROPORTIONAL) ResizeMode.FREE else ResizeMode.PROPORTIONAL
             }
 
             val mousePosVec2 = Vector2(Gdx.input.x.toFloat(), Gdx.input.y.toFloat())
@@ -284,9 +283,10 @@ class EditorScene(private val level: Level) : Scene() {
                             selectRectangleData.endPosition = mousePosInWorld
                         } else { // Select
                             val gameObject = findGameObjectUnderMouse()
-                            if (gameObject != null)
+                            if (gameObject != null) {
                                 addSelectGameObject(gameObject)
-                            else { // Maybe rectangle
+                                editorMode = EditorMode.SELECT_GO
+                            } else { // Maybe rectangle
                                 selectRectangleData.rectangleStarted = true
                                 selectRectangleData.startPosition = mousePosInWorld
                                 selectRectangleData.endPosition = selectRectangleData.startPosition
@@ -297,13 +297,14 @@ class EditorScene(private val level: Level) : Scene() {
 
                         level.getAllGameObjectsInRect(selectRectangleData.getRect(), false).forEach {
                             addSelectGameObject(it)
+                            editorMode = EditorMode.SELECT_GO
                         }
                     }
 
                     if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_COPY_MODE.key)) {
                         val gameObject = findGameObjectUnderMouse()
-                        if (gameObject != null && !gameObject.unique) {
-                            selectGameObject = gameObject
+                        if (gameObject != null) {
+                            addSelectGameObject(gameObject)
                             editorMode = EditorMode.COPY_GO
                         }
                     }
@@ -318,6 +319,11 @@ class EditorScene(private val level: Level) : Scene() {
                     }
                 }
                 EditorMode.SELECT_GO -> {
+                    if (selectGameObjects.isEmpty()) {
+                        editorMode = EditorMode.NO_MODE
+                        return
+                    }
+
                     /**
                      * Permet de déplacer les gameObjects sélectionnés
                      */
@@ -334,8 +340,6 @@ class EditorScene(private val level: Level) : Scene() {
                             selectGameObjects.forEach {
                                 it.rectangle.move(moveX, moveY)
                             }
-                            if (selectGameObjects.size == 1 && selectGameObject != null)
-                                onSelectGameObjectChange(selectGameObject) // TODO utilise le signal du rect
                         }
                     }
 
@@ -350,7 +354,7 @@ class EditorScene(private val level: Level) : Scene() {
                         return false
                     }
 
-                    if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+                    if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !Gdx.input.isKeyPressed(GameKeys.EDITOR_APPEND_SELECT_ENTITIES.key)) {
                         if (!latestLeftButtonClick) {
                             selectGameObjectMode = SelectGOMode.NO_MODE
 
@@ -358,15 +362,17 @@ class EditorScene(private val level: Level) : Scene() {
                                 selectGameObjectMode = SelectGOMode.RESIZE
                             } else {
                                 val gameObject = findGameObjectUnderMouse()
-                                if (gameObject == null) { // Se produit lorsque le joueur clique dans le vide, dans ce cas on désélectionne les gameObjects sélectionnés
-                                    clearSelectGameObjects()
-                                } else if (selectGameObjects.isEmpty() || Gdx.input.isKeyPressed(GameKeys.EDITOR_APPEND_SELECT_ENTITIES.key)) {
-                                    addSelectGameObject(gameObject)
-                                } else if (selectGameObjects.contains(gameObject)) { // Dans ce cas-ci, le joueur à sélectionné un autre gameObject dans ceux qui sont sélectionnés
-                                    selectGameObject = gameObject
-                                } else { // Dans ce cas-ci, il y a un groupe de gameObject sélectionné ou aucun et le joueur en sélectionne un nouveau ou un en dehors de la sélection
-                                    clearSelectGameObjects()
-                                    addSelectGameObject(gameObject)
+                                when {
+                                    gameObject == null -> { // Se produit lorsque le joueur clique dans le vide, dans ce cas on désélectionne les gameObjects sélectionnés
+                                        clearSelectGameObjects()
+                                        editorMode = EditorMode.NO_MODE
+                                    }
+                                    selectGameObjects.contains(gameObject) -> // Dans ce cas-ci, le joueur à sélectionné un autre gameObject dans ceux qui sont sélectionnés
+                                        selectGameObject = gameObject
+                                    else -> { // Dans ce cas-ci, il y a un groupe de gameObject sélectionné ou aucun et le joueur en sélectionne un nouveau ou un en dehors de la sélection
+                                        clearSelectGameObjects()
+                                        addSelectGameObject(gameObject)
+                                    }
                                 }
                             }
                         } else if (selectGameObject != null && latestMousePos != mousePos) { // Le joueur maintient le clique gauche durant plusieurs frames et a bougé la souris {
@@ -374,9 +380,10 @@ class EditorScene(private val level: Level) : Scene() {
                                 selectGameObjectMode = SelectGOMode.MOVE
 
                             val selectGORect = selectGameObject!!.rectangle
+
                             when (selectGameObjectMode) {
                                 SelectGOMode.NO_MODE -> {
-                                } // Ne devrait jamais ce produire
+                                }
                                 SelectGOMode.RESIZE -> {
                                     var resizeX = selectGORect.x + selectGORect.width - mousePosInWorld.x
                                     var resizeY = selectGORect.y + selectGORect.height - mousePosInWorld.y
@@ -409,9 +416,6 @@ class EditorScene(private val level: Level) : Scene() {
                                                     it.rectangle.height = newSizeY
                                             }
                                         }
-
-                                        if (selectGameObjects.size == 1 && selectGameObject != null)
-                                            onSelectGameObjectChange(selectGameObject)
                                     }
                                 }
                                 SelectGOMode.MOVE -> {
@@ -428,6 +432,7 @@ class EditorScene(private val level: Level) : Scene() {
 
                         if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && !latestRightButtonClick) {
                             clearSelectGameObjects()
+                            editorMode = EditorMode.NO_MODE
                         }
                         if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_MOVE_ENTITY_LEFT.key)) {
                             moveGameObjects(-1, 0)
@@ -441,65 +446,136 @@ class EditorScene(private val level: Level) : Scene() {
                         if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_MOVE_ENTITY_DOWN.key)) {
                             moveGameObjects(0, -1)
                         }
+
+                        if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_COPY_MODE.key))
+                            editorMode = EditorMode.COPY_GO
                     }
                 }
                 EditorMode.COPY_GO -> {
-                    if (selectGameObject == null) {
+                    if (selectGameObjects.isEmpty() && selectGameObject == null /* Permet de vérifier si on est pas entrain d'ajouter un nouveau gameObject */) {
                         editorMode = EditorMode.NO_MODE
                         return
                     }
-                    if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) || Gdx.input.isKeyJustPressed(GameKeys.EDITOR_COPY_MODE.key)) {
-                        selectGameObject = findGameObjectUnderMouse()
-                        if (selectGameObject == null)
-                            editorMode = EditorMode.NO_MODE
-                    }
-                    if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && !latestRightButtonClick) {
-                        val copyGameObject = SerializationFactory.copy(selectGameObject!!)
 
-                        var posX = copyGameObject.rectangle.x
-                        var posY = copyGameObject.rectangle.y
-
-                        val width = copyGameObject.rectangle.width
-                        val height = copyGameObject.rectangle.height
-
-                        var moveToNextEntity = true
-
-                        when {
-                            Gdx.input.isKeyPressed(GameKeys.EDITOR_SMARTCOPY_LEFT.key) -> posX -= width
-                            Gdx.input.isKeyPressed(GameKeys.EDITOR_SMARTCOPY_RIGHT.key) -> posX += width
-                            Gdx.input.isKeyPressed(GameKeys.EDITOR_SMARTCOPY_DOWN.key) -> posY -= height
-                            Gdx.input.isKeyPressed(GameKeys.EDITOR_SMARTCOPY_UP.key) -> posY += height
-                            else -> {
-                                posX = Math.min(level.matrixRect.width - width, // Les min et max permettent de rester dans le cadre de la matrix
-                                        Math.max(0, mousePosInWorld.x - width / 2))
-                                posY = Math.min(level.matrixRect.height - height,
-                                        Math.max(0, mousePosInWorld.y - height / 2))
-
-                                // Permet de vérifier si le gameObject copié est nouveau ou pas (si il est nouveau, ça veut dire qu'il n'a pas encore de container)è
-                                if (selectGameObject!!.container != null)
-                                    moveToNextEntity = false
+                    if ((Gdx.input.isButtonPressed(Input.Buttons.LEFT) || Gdx.input.isKeyJustPressed(GameKeys.EDITOR_COPY_MODE.key))
+                            && !Gdx.input.isKeyPressed(GameKeys.EDITOR_APPEND_SELECT_ENTITIES.key)) {
+                        val underMouseGO = findGameObjectUnderMouse()
+                        if (underMouseGO != null) {
+                            if (selectGameObjects.contains(underMouseGO))
+                                selectGameObject = underMouseGO
+                            else {
+                                clearSelectGameObjects()
+                                addSelectGameObject(underMouseGO)
                             }
+                        } else {
+                            clearSelectGameObjects()
+                            editorMode = EditorMode.NO_MODE
+                        }
+                    }
+
+                    if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && !latestRightButtonClick) {
+                        if (selectGameObject!!.unique)
+                            return
+                        val copySelectGO = SerializationFactory.copy(selectGameObject!!)
+
+                        var posX = copySelectGO.rectangle.x
+                        var posY = copySelectGO.rectangle.y
+
+                        val width = copySelectGO.rectangle.width
+                        val height = copySelectGO.rectangle.height
+
+                        var moveToCopyGO = true
+
+                        var useMousePos = false
+                        if (selectGameObject!!.container != null) {
+                            when {
+                                Gdx.input.isKeyPressed(GameKeys.EDITOR_SMARTCOPY_LEFT.key) -> {
+                                    val minXPos = let {
+                                        var x = selectGameObject!!.position().x
+                                        selectGameObjects.forEach {
+                                            x = Math.min(x, it.position().x)
+                                        }
+                                        x
+                                    }
+                                    posX = minXPos - width
+                                }
+                                Gdx.input.isKeyPressed(GameKeys.EDITOR_SMARTCOPY_RIGHT.key) -> {
+                                    val maxXPos = let {
+                                        var x = selectGameObject!!.position().x
+                                        selectGameObjects.forEach {
+                                            x = Math.max(x, it.position().x)
+                                        }
+                                        x
+                                    }
+                                    posX = maxXPos + width
+                                }
+                                Gdx.input.isKeyPressed(GameKeys.EDITOR_SMARTCOPY_DOWN.key) -> {
+                                    val minYPos = let {
+                                        var y = selectGameObject!!.position().y
+                                        selectGameObjects.forEach {
+                                            y = Math.min(y, it.position().y)
+                                        }
+                                        y
+                                    }
+                                    posY = minYPos - height
+                                }
+                                Gdx.input.isKeyPressed(GameKeys.EDITOR_SMARTCOPY_UP.key) -> {
+                                    val maxYPos = let {
+                                        var y = selectGameObject!!.position().y
+                                        selectGameObjects.forEach {
+                                            y = Math.max(y, it.position().y)
+                                        }
+                                        y
+                                    }
+                                    posY = maxYPos + height
+                                }
+                                else -> useMousePos = true
+                            }
+                        } else
+                            useMousePos = true
+
+                        if (useMousePos) {
+                            posX = Math.min(level.matrixRect.width - width, // Les min et max permettent de rester dans le cadre de la matrix
+                                    Math.max(0, mousePosInWorld.x - width / 2))
+                            posY = Math.min(level.matrixRect.height - height,
+                                    Math.max(0, mousePosInWorld.y - height / 2))
+
+                            // Permet de vérifier si le gameObject copié est nouveau ou pas (si il est nouveau, ça veut dire qu'il n'a pas encore de container)è
+                            if (selectGameObject!!.container != null)
+                                moveToCopyGO = false
                         }
 
-                        copyGameObject.rectangle.position = Point(posX, posY)
+                        copySelectGO.rectangle.position = Point(posX, posY)
 
-                        level.addGameObject(copyGameObject)
+                        level.addGameObject(copySelectGO)
 
-                        if (moveToNextEntity)
-                            selectGameObject = copyGameObject
+                        val copyGameObjects = mutableListOf(copySelectGO)
+
+                        selectGameObjects.filter { it !== selectGameObject && !it.unique }.forEach {
+                            val deltaX = it.position().x - selectGameObject!!.position().x
+                            val deltaY = it.position().y - selectGameObject!!.position().y
+
+                            level.addGameObject(SerializationFactory.copy(it).apply {
+                                this.rectangle.position = Point(copySelectGO.position().x + deltaX, copySelectGO.position().y + deltaY)
+                                copyGameObjects += this
+                            })
+                        }
+
+                        if (moveToCopyGO) {
+                            clearSelectGameObjects()
+                            copyGameObjects.forEach { addSelectGameObject(it) }
+                        }
                     }
                 }
-            /*EditorScene.EditorMode.SelectPoint -> {
-                if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !leftButtonPressedLastFrame) {
-                    onSelectPoint.dispatch(Point(mousePosInWorld.x.toInt(), mousePosInWorld.y.toInt()))
-                    editorMode = EditorMode.NoMode
+                EditorMode.SELECT_POINT -> {
+                    if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !latestLeftButtonClick) {
+                        onSelectPoint(mousePosInWorld)
+                        editorMode = EditorMode.NO_MODE
+                    }
                 }
-            }*/ // TODO
+                EditorMode.TRY_LEVEL -> {
+                }
             }
-
-            latestLeftButtonClick = Gdx.input.isButtonPressed(Input.Buttons.LEFT)
-            latestRightButtonClick = Gdx.input.isButtonPressed(Input.Buttons.RIGHT)
-            latestMousePos = mousePos
 
             if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_REMOVE_ENTITY.key)) {
                 val gameObject = findGameObjectUnderMouse()
@@ -507,9 +583,29 @@ class EditorScene(private val level: Level) : Scene() {
                     removeGameObject(gameObject)
                 } else if (selectGameObjects.isNotEmpty()) {
                     selectGameObjects.forEach { removeGameObject(it) }
+                    clearSelectGameObjects()
+                    editorMode = EditorMode.NO_MODE
                 }
                 selectGameObjects.removeAll { it.isRemoving }
             }
+
+            if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !latestLeftButtonClick && Gdx.input.isKeyPressed(GameKeys.EDITOR_APPEND_SELECT_ENTITIES.key)) {
+                if (selectGameObjects.isNotEmpty()) {
+                    val underMouseGO = findGameObjectUnderMouse()
+                    if (underMouseGO != null) {
+                        if (selectGameObjects.contains(underMouseGO)) {
+                            selectGameObjects.remove(underMouseGO)
+                            if (selectGameObject === underMouseGO)
+                                selectGameObject = null
+                        } else
+                            addSelectGameObject(underMouseGO)
+                    }
+                }
+            }
+
+            latestLeftButtonClick = Gdx.input.isButtonPressed(Input.Buttons.LEFT)
+            latestRightButtonClick = Gdx.input.isButtonPressed(Input.Buttons.RIGHT)
+            latestMousePos = mousePos
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
@@ -544,6 +640,8 @@ class EditorScene(private val level: Level) : Scene() {
                 camera.zoom -= 0.02f
             if (Gdx.input.isKeyPressed(GameKeys.CAMERA_ZOOM_DOWN.key))
                 camera.zoom += 0.02f
+            if (Gdx.input.isKeyPressed(GameKeys.CAMERA_ZOOM_RESET.key))
+                camera.zoom = 1f
 
             val x = MathUtils.lerp(camera.position.x, camera.position.x + moveCameraX, 0.5f)
             val y = MathUtils.lerp(camera.position.y, camera.position.y + moveCameraY, 0.5f)
@@ -560,11 +658,7 @@ class EditorScene(private val level: Level) : Scene() {
 
         if (selectGameObjects.size == 1) {
             selectGameObject = gameObject
-            onSelectGameObjectChange(gameObject)
-        } else
-            onSelectGameObjectChange(null)
-
-        editorMode = EditorMode.SELECT_GO
+        }
     }
 
     /**
@@ -573,9 +667,6 @@ class EditorScene(private val level: Level) : Scene() {
     private fun clearSelectGameObjects() {
         selectGameObjects.clear()
         selectGameObject = null
-        onSelectGameObjectChange(null)
-
-        editorMode = EditorMode.NO_MODE
     }
 
     /**
@@ -625,12 +716,18 @@ class EditorScene(private val level: Level) : Scene() {
                 }
             }
         }
+
+        hideUI()
     }
 
     private fun finishTryLevel() {
+        clearSelectGameObjects()
         editorMode = EditorMode.NO_MODE
+
         gameObjectContainer = level
         camera.position.set(backupTryModeCameraPos)
+
+        showUI()
     }
 
     //region UI
@@ -731,6 +828,7 @@ class EditorScene(private val level: Level) : Scene() {
             addCloseButton()
 
             fun finishBuild(gameObject: GameObject) {
+                clearSelectGameObjects()
                 selectGameObject = gameObject
                 editorMode = EditorMode.COPY_GO
                 this.remove()
@@ -767,13 +865,13 @@ class EditorScene(private val level: Level) : Scene() {
         }
     }
 
-    fun addWidgetForField(parent: Table, field: Field, instance: Any, exposeEditor: ExposeEditor?) {
-
+    private fun addWidgetForField(parent: Table, field: Field, instance: Any, exposeEditor: ExposeEditor) {
         fun setValue(value: Any) {
             field.set(instance, value)
         }
 
         fun <T : Any> getValueOrAssign(assign: T): T {
+            @Suppress("UNCHECKED_CAST")
             var value = field.get(instance) as? T
             if (value == null) {
                 value = assign
@@ -792,7 +890,7 @@ class EditorScene(private val level: Level) : Scene() {
                 parent.add(checkbox)
             }
             Int::class.java -> {
-                if (exposeEditor?.customType == CustomType.KEY_INT) {
+                if (exposeEditor.customType == CustomType.KEY_INT) {
                     val keyArea = VisTextArea(Input.Keys.toString(getValueOrAssign(0))).apply {
                         isReadOnly = true
                         onKeyUp {
@@ -807,7 +905,7 @@ class EditorScene(private val level: Level) : Scene() {
                     }
                     parent.add(keyArea).width(50f)
                 } else {
-                    val intModel = IntSpinnerModel(getValueOrAssign(0), exposeEditor?.minInt ?: 0, exposeEditor?.maxInt ?: 100)
+                    val intModel = IntSpinnerModel(getValueOrAssign(0), exposeEditor.minInt, exposeEditor.maxInt)
                     val spinner = Spinner("", intModel).apply {
                         onChange {
                             setValue(intModel.value)
@@ -824,8 +922,74 @@ class EditorScene(private val level: Level) : Scene() {
                 }
                 parent.add(textField)
             }
-            Array<Action>::class.java -> {
+            Point::class.java -> {
 
+                val labelPos = VisLabel(getValueOrAssign(Point()).toString())
+
+                parent.add(labelPos)
+
+                val selectBtn = VisTextButton("Sélectionner").apply {
+                    onClick {
+                        editorMode = EditorMode.SELECT_POINT
+                        onSelectPoint.register(true) {
+                            setValue(it)
+                            labelPos.setText(it.toString())
+                            showUI()
+                        }
+                        hideUI()
+                    }
+                }
+                parent.add(selectBtn)
+            }
+            Array<Action>::class.java -> {
+                data class ActionItem(val action: Action) {
+                    override fun toString(): String {
+                        return ReflectionUtility.simpleNameOf(action)
+                    }
+                }
+
+                var actions = getValueOrAssign(arrayOf<Action>())
+
+                val actionsList = VisList<ActionItem>()
+
+                fun updateActions() {
+                    actionsList.setItems((actions).map { ActionItem(it) }.toGdxArray())
+                    setValue(actions)
+                }
+                updateActions()
+
+                parent.add(actionsList)
+
+                parent.add(verticalGroup {
+                    space(10f)
+
+                    textButton("Modifier") {
+                        onClick {
+                            if (actionsList.selected != null) {
+                                showEditActionWindow(actionsList.selected.action, {
+                                    actions[actionsList.selectedIndex] = it
+                                    updateActions()
+                                })
+                            }
+                        }
+                    }
+                    textButton("Supprimer") {
+                        onClick {
+                            if (actionsList.selected != null) {
+                                actions = actions.toGdxArray().apply { this.removeIndex(actionsList.selectedIndex) }.toArray()
+                                updateActions()
+                            }
+                        }
+                    }
+                    textButton("Ajouter") {
+                        onClick {
+                            showEditActionWindow(null) { addAction ->
+                                actions = actions.toGdxArray().apply { this.add(addAction) }.toArray()
+                                updateActions()
+                            }
+                        }
+                    }
+                })
             }
         }
 
@@ -857,8 +1021,8 @@ class EditorScene(private val level: Level) : Scene() {
         }
     }
 
-    private fun showEditActionWindow(action: Action, setAction: (Action) -> Unit) {
-        stage + window("Éditer l'action") editActionWindow@ {
+    private fun showEditActionWindow(action: Action?, setAction: (Action) -> Unit) {
+        stage + window("Éditer l'action") {
             setSize(300f, 250f)
             setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
             isModal = true
@@ -868,12 +1032,12 @@ class EditorScene(private val level: Level) : Scene() {
                 space(10f)
 
                 selectBox<String> {
-                    var instance = action
+                    var instance = action ?: EmptyAction()
 
                     val actionsList = gdxArrayOf<KClass<out Action>>()
                     FastClasspathScanner(Action::class.java.`package`.name).matchClassesImplementing(Action::class.java, { actionsList.add(it.kotlin) }).scan()
 
-                    actionsList.removeAll { it.isAbstract}
+                    actionsList.removeAll { it.isAbstract || !ReflectionUtility.hasNoArgConstructor(it) }
 
                     this.items = actionsList.map { it.simpleName ?: "Nom inconnu" }.toGdxArray()
 
@@ -883,30 +1047,25 @@ class EditorScene(private val level: Level) : Scene() {
 
                     onChange {
                         if (!actionsList[selectedIndex].isInstance(instance))
-                            instance = Utility.findNoArgConstructor(actionsList[selectedIndex])!!.newInstance()
+                            instance = ReflectionUtility.findNoArgConstructor(actionsList[selectedIndex])!!.newInstance()
 
-                        val constructorsParamsValue = mutableMapOf<Int, Any>()
-
-                        this@vgroup.clear();
+                        this@vgroup.clear()
                         this@vgroup.addActor(this@selectBox)
 
                         this@vgroup.table(defaultSpacing = true) {
-                            instance.javaClass.declaredFields.filter { it.isAnnotationPresent(ExposeEditor::class.java) }.forEachIndexed { index, field ->
-                                field.isAccessible = true
-
-                                label(field.name ?: "Nom introuvable")
-
-                                addWidgetForField(this, field, instance, field.getAnnotation(ExposeEditor::class.java))
-
+                            if(instance is CustomEditorImpl<*>) {
+                                @Suppress("UNCHECKED_CAST")
+                                (instance as? CustomEditorImpl<Action>)?.insertChangeProperties(instance, this, this@EditorScene)
                                 row()
                             }
+                            insertExposeEditorFields(instance, this)
 
                             row()
 
-                            this@vgroup.textButton("Modifier") {
+                            this@vgroup.textButton(if (action == null) "Ajouter" else "Modifier") {
                                 onClick {
                                     setAction(instance)
-                                    this@editActionWindow.remove();
+                                    this@window.remove()
                                 }
                             }
                         }
@@ -916,8 +1075,20 @@ class EditorScene(private val level: Level) : Scene() {
         }
     }
 
+    private fun insertExposeEditorFields(instance: Any, table: VisTable) {
+        ReflectionUtility.getAllFieldsOf(instance.javaClass).filter { it.isAnnotationPresent(ExposeEditor::class.java) }.forEach { field ->
+            field.isAccessible = true
+
+            table.add(VisLabel("${field.name} : "))
+
+            addWidgetForField(table, field, instance, field.getAnnotation(ExposeEditor::class.java))
+
+            table.row()
+        }
+    }
+
     private fun showAddComponentWindow(onCreateComp: (Component) -> Unit) {
-        stage + window("Ajouter un component") editActionWindow@ {
+        stage + window("Ajouter un component") {
             setSize(300f, 250f)
             setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
             isModal = true
@@ -928,16 +1099,14 @@ class EditorScene(private val level: Level) : Scene() {
                     val componentsList = gdxArrayOf<KClass<out Component>>()
                     FastClasspathScanner(Component::class.java.`package`.name).matchSubclassesOf(Component::class.java, { componentsList.add(it.kotlin) }).scan()
 
-                    componentsList.removeAll { it.isAbstract || !Utility.hasNoArgConstructor(it) }
+                    componentsList.removeAll { it.isAbstract || !ReflectionUtility.hasNoArgConstructor(it) }
 
-                    this.items = componentsList.map { it.simpleName ?: "Nom inconnu" }.toGdxArray()
+                    this.items = componentsList.map { it.simpleName?.removeSuffix("Component") ?: "Nom inconnu" }.toGdxArray()
 
                     onChange {
                         val comp = componentsList[selectedIndex]
 
-                        val constructorsParamsValue = mutableMapOf<Int, Any>()
-
-                        this@table.clear();
+                        this@table.clear()
                         this@table.add(this@selectBox)
                         this@table.row()
 
@@ -946,33 +1115,23 @@ class EditorScene(private val level: Level) : Scene() {
                         val scroll = ScrollPane(parametersTable)
                         this@table.add(scroll).size(300f, 150f)
 
-                        if (comp.companionObjectInstance is CustomEditorImpl<*>) {
-                            (comp.companionObjectInstance as CustomEditorImpl<in Component>).createInstance(parametersTable, this@EditorScene) {
-                                onCreateComp(it as Component)
-                                this@editActionWindow.remove()
-                            }
-                        } else {
-                            val instance = Utility.findNoArgConstructor(comp)!!.newInstance()
+                        val instance = ReflectionUtility.findNoArgConstructor(comp)!!.newInstance()
 
-                            instance.javaClass.declaredFields.filter { it.isAnnotationPresent(ExposeEditor::class.java) }.forEach { field ->
-                                field.isAccessible = true
-
-                                parametersTable.add(VisLabel(field.name))
-
-                                addWidgetForField(parametersTable, field, instance, field.getAnnotation(ExposeEditor::class.java))
-
-                                parametersTable.row()
-                            }
-
-                            this@table.row()
-                            this@table.add(VisTextButton("Ajouter").apply {
-                                onClick {
-                                    onCreateComp(instance)
-                                    this@editActionWindow.remove();
-                                }
-                            })
-
+                        if (instance is CustomEditorImpl<*>) {
+                            @Suppress("UNCHECKED_CAST")
+                            (instance as? CustomEditorImpl<Component>)?.insertChangeProperties(instance, parametersTable, this@EditorScene)
+                            parametersTable.row()
                         }
+
+                        insertExposeEditorFields(instance, parametersTable)
+
+                        this@table.row()
+                        this@table.add(VisTextButton("Ajouter").apply {
+                            onClick {
+                                onCreateComp(instance)
+                                this@window.remove()
+                            }
+                        })
 
                     }.changed(ChangeListener.ChangeEvent(), this)
                 }
@@ -982,7 +1141,7 @@ class EditorScene(private val level: Level) : Scene() {
 
     private fun showEditGameObjectWindow(gameObject: GameObject) {
         stage + window("Éditer un gameObject") {
-            setSize(250f, 450f)
+            setSize(300f, 450f)
             isModal = true
             addCloseButton()
 
@@ -1040,7 +1199,10 @@ class EditorScene(private val level: Level) : Scene() {
                 }
 
                 table(defaultSpacing = true) {
-                    fun generateComponentsItems() = gameObject.getComponents().mapIndexed { index, component -> "${index + 1} : " + component.javaClass.simpleName }.toGdxArray()
+                    fun generateComponentsItems() = gameObject.getComponents().mapIndexed { index, component ->
+                        val className = ReflectionUtility.simpleNameOf(component).removeSuffix("Component")
+                        "${index + 1} : " + if (component.name == className) className else component.name + "[$className]"
+                    }.toGdxArray()
 
                     selectBox<String> {
                         this.items = generateComponentsItems()
@@ -1076,21 +1238,15 @@ class EditorScene(private val level: Level) : Scene() {
                             val scroll = ScrollPane(compPropertiesTable)
                             this@table.add(scroll).size(250f, 150f)
 
-                            if (instance.javaClass.kotlin.companionObjectInstance is CustomEditorImpl<*>) {
-                                (instance.javaClass.kotlin.companionObjectInstance!! as CustomEditorImpl<in Component>).insertChangeProperties(compPropertiesTable, this@EditorScene, instance)
-                            } else {
+                            if(instance is CustomEditorImpl<*>) {
+                                @Suppress("UNCHECKED_CAST")
+                                (instance as? CustomEditorImpl<Component>)?.insertChangeProperties(instance, compPropertiesTable, this@EditorScene)
 
-                                instance.javaClass.declaredFields.filter { it.isAnnotationPresent(ExposeEditor::class.java) }.forEach { field ->
-                                    field.isAccessible = true
-
-                                    compPropertiesTable.add(VisLabel(field.name))
-
-                                    addWidgetForField(compPropertiesTable, field, instance, field.getAnnotation(ExposeEditor::class.java))
-
-                                    compPropertiesTable.row()
-                                }
-
+                                compPropertiesTable.row()
                             }
+
+                            insertExposeEditorFields(instance, compPropertiesTable)
+
                         }.changed(ChangeListener.ChangeEvent(), this)
                     }
                 }
@@ -1182,10 +1338,13 @@ class EditorScene(private val level: Level) : Scene() {
                 textButton("Sélectionner") {
                     onClick {
                         if (selectedImage.userObject != null && selectedImage.userObject is Pair<*, *>) {
-                            val userObject = selectedImage.userObject as Pair<FileHandle, String>
-                            onAtlasSelected(userObject.first, userObject.second)
-                            latestSelectTextureWindowAtlasIndex = selectedBox.selectedIndex
-                            this@window.remove()
+                            @Suppress("UNCHECKED_CAST")
+                            val userObject = selectedImage.userObject as? Pair<FileHandle, String>
+                            if (userObject != null) {
+                                onAtlasSelected(userObject.first, userObject.second)
+                                latestSelectTextureWindowAtlasIndex = selectedBox.selectedIndex
+                                this@window.remove()
+                            }
                         }
                     }
                 }
@@ -1194,8 +1353,7 @@ class EditorScene(private val level: Level) : Scene() {
     }
 
     /**
-     * Permet d'afficher la fenêtre pour sélectionner une texture
-     * @param onAtlasSelected Méthode appelée quand l'atlasPath et la region ont été correctement sélectionnés par le joueur
+     * Permet d'afficher la fenêtre pour sélectionner une animation
      */
     fun showSelectAnimationWindow(atlasFile: FileHandle? = null, onAnimationSelected: (atlasFile: FileHandle, animationRegionName: String, frameDuration: Float) -> Unit) {
         /**
@@ -1281,10 +1439,13 @@ class EditorScene(private val level: Level) : Scene() {
                 textButton("Sélectionner") {
                     onClick {
                         if (selectedImage.userObject != null && selectedImage.userObject is Pair<*, *>) {
-                            val userObject = selectedImage.userObject as Pair<FileHandle, String>
-                            onAnimationSelected(userObject.first, userObject.second, floatModel.value.toFloat())
-                            latestSelectTextureWindowAtlasIndex = selectedBox.selectedIndex
-                            this@window.remove()
+                            @Suppress("UNCHECKED_CAST")
+                            val userObject = selectedImage.userObject as? Pair<FileHandle, String>
+                            if (userObject != null) {
+                                onAnimationSelected(userObject.first, userObject.second, floatModel.value.toFloat())
+                                latestSelectTextureWindowAtlasIndex = selectedBox.selectedIndex
+                                this@window.remove()
+                            }
                         }
                     }
                 }
@@ -1294,18 +1455,8 @@ class EditorScene(private val level: Level) : Scene() {
 
     /**
      * Permet d'afficher la fenêtre pour sélectionner une texture
-     * @param onAtlasSelected Méthode appelée quand l'atlasPath et la region ont été correctement sélectionnés par le joueur
      */
     fun showSelectTextureWindow(onTextureSelected: (textureFile: FileHandle) -> Unit) {
-        /**
-         * Classe de donnée représentant la sélection d'une texture atlasPath
-         */
-        data class TextureSelect(val texture: Texture, val textureName: String) {
-            override fun toString(): String {
-                return textureName
-            }
-        }
-
         stage + window("Sélectionner une texture") {
             setSize(400f, 400f)
             setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
@@ -1370,10 +1521,6 @@ class EditorScene(private val level: Level) : Scene() {
             setSize(250f, 275f)
             setPosition(Gdx.graphics.width - width, Gdx.graphics.height - height)
 
-            onEditorModeChange.register {
-                isVisible = it != EditorMode.TRY_LEVEL
-            }
-
             verticalGroup {
                 space(10f)
 
@@ -1405,8 +1552,9 @@ class EditorScene(private val level: Level) : Scene() {
                     onClick {
                         selectGameObject?.removeFromParent()
                         selectGameObject = null
-                        editorMode = EditorMode.NO_MODE
+
                         clearSelectGameObjects()
+                        editorMode = EditorMode.NO_MODE
                     }
                 }
 
