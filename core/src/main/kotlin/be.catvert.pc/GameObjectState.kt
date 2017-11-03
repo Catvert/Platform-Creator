@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 
-class GameObjectState(val name: String, @JsonIgnore var gameObject: GameObject?, components: MutableSet<Component> = mutableSetOf()) : Renderable, Updeatable {
+class GameObjectState(var name: String, @JsonIgnore var gameObject: GameObject?, components: MutableSet<Component> = mutableSetOf()) : Renderable, Updeatable {
     @JsonCreator private constructor(): this("State", null)
 
     @JsonProperty("comps")

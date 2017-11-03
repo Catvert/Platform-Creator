@@ -19,7 +19,7 @@ class Level(val levelPath: String, val levelName: String, val gameVersion: Float
         fun newLevel(levelName: String): Level {
             val level = Level(Constants.levelDirPath + levelName + Constants.levelExtension, levelName, Constants.gameVersion, null)
 
-            val player = PrefabFactory.Player.generate().create(Point(100, 100), level)
+            val player = PrefabFactory.Player.prefab.create(Point(100, 100), level)
             level.setPlayer(player)
 
             return level
@@ -30,7 +30,7 @@ class Level(val levelPath: String, val levelName: String, val gameVersion: Float
                 val level = SerializationFactory.deserializeFromFile<Level>(levelFile)
                 return if(level.gameVersion == Constants.gameVersion) level else null
             } catch(e: Exception) {
-                Log.error(e) { "Erreur lors du chargement du niveau !" }
+                Log.error(e) { "Erreur lors du chargement du niveau ! : ${e.message}" }
             }
             return null
         }

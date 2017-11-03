@@ -60,11 +60,9 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
          * Permet de retourner le logo du jeu
          */
         fun generateLogo(container: GameObjectContainer): GameObject {
-            return container.createGameObject(getLogoRect(), GameObject.Tag.Sprite) {
-                state("default") {
-                    this += TextureComponent().apply { updateTexture(Constants.gameLogoPath.toLocalFile()) }
-                }
-            }
+            return container.createGameObject(getLogoRect(), GameObject.Tag.Sprite, {
+                this += TextureComponent(Constants.gameLogoPath.toLocalFile())
+            })
         }
 
         /**

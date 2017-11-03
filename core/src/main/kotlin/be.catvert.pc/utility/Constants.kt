@@ -21,11 +21,13 @@ object Constants {
     const val texturesDirPath = assetsDirPath + "textures/"
     const val soundsDirPath = assetsDirPath + "sounds/"
     const val backgroundsDirPath = assetsDirPath + "game/background/"
+    const val prefabsDirPath = assetsDirPath + "prefabs/"
+    const val levelDirPath = assetsDirPath + "levels/"
 
     const val gameBackgroundMenuPath = assetsDirPath + "game/mainmenu.png"
     const val gameLogoPath = assetsDirPath + "game/logo.png"
 
-    const val levelDirPath = assetsDirPath + "levels/"
+   const val prefabExtension = ".prefab"
     const val levelExtension = ".pclvl"
 
     const val noTextureAtlasFoundPath = assetsDirPath + "game/notexture_atlas.atlas"

@@ -5,13 +5,18 @@
 - AIComponent amélioration + éditeur
 - Reflection prop pour le gameObject lui même
 - Pouvoir créer un gameObject vierge
+- Ajouter la possibilité à stateAction d'afficher la liste des actions à la place de l'index sous forme de slider
+- Traduire tout le texte visible en français
+- Javadoc + commentaires
 ## BUGS
 
 - is Array<*> dans addWidgetForField, vérifier si le type de l'array est bien une Action
 
 ## IDÉE
 
-- Implémentation des states pour les gameObjects, chaque state ayant son propre lot de components, on peut imaginer un state pour le jump, un state pour la mort ..
 - Ajout du pseudo de l'utilisateur au premier lancement
-- Ajouter la possibilité au joueur de créer un prefab depuis un gameObject
-- Ajouter les ressources par niveau(pour les textures, sons, prefabs..)
+- Ajouter les ressources par niveau(pour les textures, sons..)
+- Utiliser une bdd(json) pour la langue du jeu(anglais et français), avec la même forme que le GameKeys
+- [Optimisation] Créer une sorte de préfab par gameObject ayant les mêmes caractéristiques, ce qui pourrait améliorer les performances lors du chargement(dans le niveau, il y aurait une liste de "prefabs" et une liste de pos+numPrefab)
+- [Optimisation] de la taille de la matrix en invitant à l'utitilisateur à cliquer sur un rectangle qui fait la taille de cell\*hauteur pour la droite et largeur\*cell pour le haut, comme ça la taille de la matrix correspondra au besoin de l'utilisateur
+ 

@@ -6,4 +6,4 @@ enum class CustomType {
 
 @Target(AnnotationTarget.FIELD)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class ExposeEditor(val minInt: Int = 0, val maxInt: Int = 0, val customType: CustomType = CustomType.DEFAULT)
+annotation class ExposeEditor(val customName: String = "", val minInt: Int = 0, val maxInt: Int = 0, val customType: CustomType = CustomType.DEFAULT)

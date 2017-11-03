@@ -1,11 +1,7 @@
 package be.catvert.pc.components
 
 import be.catvert.pc.GameObject
-import be.catvert.pc.GameObjectState
-import be.catvert.pc.utility.ExposeEditor
-import be.catvert.pc.utility.ReflectionUtility
-import be.catvert.pc.utility.Renderable
-import be.catvert.pc.utility.Updeatable
+import be.catvert.pc.utility.*
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 
@@ -19,7 +15,6 @@ sealed class Component(@ExposeEditor var active: Boolean = true) {
 
     @JsonIgnore
     lateinit var gameObject: GameObject
-        private set
 
     fun linkGameObject(gameObject: GameObject) {
         this.gameObject = gameObject

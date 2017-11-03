@@ -1,6 +1,7 @@
 package be.catvert.pc.containers
 
 import be.catvert.pc.GameObject
+import be.catvert.pc.GameObjectState
 import be.catvert.pc.Prefab
 import be.catvert.pc.serialization.PostDeserialization
 import be.catvert.pc.utility.Rect
@@ -42,9 +43,8 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
         return gameObject
     }
 
-    fun createGameObject(rectangle: Rect = Rect(), tag: GameObject.Tag, prefab: Prefab? = null, init: GameObject.() -> Unit = {}): GameObject {
-        val go = GameObject(UUID.randomUUID(), rectangle, tag, mutableSetOf(),this, prefab)
-        go.init()
+    fun createGameObject(rectangle: Rect = Rect(), tag: GameObject.Tag, initDefaultState: GameObjectState.() -> Unit = {}, initGO: GameObject.() -> Unit = {}): GameObject {
+        val go = GameObject(tag, UUID.randomUUID(), rectangle, this, initDefaultState).apply(initGO)
 
         addGameObject(go)
 

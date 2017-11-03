@@ -20,19 +20,17 @@ import java.util.*
  * @param container Container dans lequel l'objet va être implémenté
  * @param prefab Le prefab utilisé pour créer l'objet
  */
-class GameObject(id: UUID,
-                 var rectangle: Rect = Rect(),
-                 var tag: Tag,
-                 @JsonProperty("states") val states: MutableSet<GameObjectState> = mutableSetOf(),
+class GameObject(var tag: Tag,
+                 id: UUID = UUID.randomUUID(),
+                 var rectangle: Rect = Rect(size = Size(1, 1)),
                  container: GameObjectContainer? = null,
-                 @JsonIgnore val prefab: Prefab? = null) : Updeatable, Renderable {
+                 initDefaultState: GameObjectState.()  -> Unit = {}) : Updeatable, Renderable {
 
     enum class Tag {
         Sprite, PhysicsSprite, Player, Enemy
     }
 
     var id: UUID = id
-        private set
 
     var keepActive: Boolean = false
 
@@ -43,6 +41,12 @@ class GameObject(id: UUID,
     var fixedSize = false
 
     var currentState: Int = 0
+        set(value) {
+            if(value in 0 until states.size - 1)
+                field = value
+        }
+
+    @JsonProperty("states") private val states: MutableSet<GameObjectState> = mutableSetOf(GameObjectState("default", this).apply(initDefaultState))
 
     @JsonIgnore var active: Boolean = true
         set(value) {
@@ -72,6 +76,9 @@ class GameObject(id: UUID,
 
     var onRemoveAction: Action? = null
 
+    @JsonIgnore fun getCurrentState() = states.elementAt(currentState)
+    @JsonIgnore fun getStates() = states.toSet()
+
     fun position() = rectangle.position
     fun size() = rectangle.size
 
@@ -80,16 +87,23 @@ class GameObject(id: UUID,
     }
 
     fun addState(state: GameObjectState) {
+        state.linkGameObject(this)
         states.add(state)
     }
 
-    fun state(name: String, initState: GameObjectState.() -> Unit) {
+    fun addState(name: String, initState: GameObjectState.() -> Unit) {
         val state = GameObjectState(name, this)
         state.initState()
         addState(state)
     }
 
-    @JsonIgnore fun getCurrentState() = states.elementAt(currentState)
+    fun removeState(state: GameObjectState) {
+        states.remove(state)
+    }
+
+    fun removeState(stateIndex: Int) {
+        states.remove(states.elementAt(stateIndex))
+    }
 
     override fun update() {
         if(active) {
