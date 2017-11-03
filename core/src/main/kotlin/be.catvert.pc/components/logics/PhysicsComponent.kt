@@ -1,12 +1,11 @@
 package be.catvert.pc.components.logics
 
 import be.catvert.pc.GameObject
-import be.catvert.pc.GameObjectMatrixContainer
-import be.catvert.pc.Level
-import be.catvert.pc.Log
+import be.catvert.pc.containers.GameObjectMatrixContainer
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.NextPhysicsActions
 import be.catvert.pc.components.UpdeatableComponent
+import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonCreator
@@ -230,8 +229,8 @@ private fun collideOnMove(moveX: Int, moveY: Int, gameObject: GameObject): Boole
         container.getRectCells(newRect).forEach {
             container.matrixGrid[it.x][it.y].first.filter {
                 it.id != gameObject.id
-                        && it.hasComponent<PhysicsComponent>()
-                        && when (it.getComponent<PhysicsComponent>()?.maskCollision) {
+                        && it.getCurrentState().hasComponent<PhysicsComponent>()
+                        && when (it.getCurrentState().getComponent<PhysicsComponent>()?.maskCollision) {
                     MaskCollision.ALL -> true
                     MaskCollision.ONLY_PLAYER -> gameObject.tag == GameObject.Tag.Player
                     MaskCollision.ONLY_ENEMY -> gameObject.tag == GameObject.Tag.Enemy
@@ -241,8 +240,8 @@ private fun collideOnMove(moveX: Int, moveY: Int, gameObject: GameObject): Boole
                 if (newRect.overlaps(it.rectangle)) {
                     val side = if (moveX > 0) CollisionSide.OnRight else if (moveX < 0) CollisionSide.OnLeft else if (moveY > 0) CollisionSide.OnUp else if (moveY < 0) CollisionSide.OnDown else CollisionSide.Unknow
 
-                    gameObject.getComponent<PhysicsComponent>()?.onCollisionWith?.invoke(CollisionListener(gameObject, it, side))
-                    it.getComponent<PhysicsComponent>()?.onCollisionWith?.invoke(CollisionListener(it, gameObject, -side))
+                    gameObject.getCurrentState().getComponent<PhysicsComponent>()?.onCollisionWith?.invoke(CollisionListener(gameObject, it, side))
+                    it.getCurrentState().getComponent<PhysicsComponent>()?.onCollisionWith?.invoke(CollisionListener(it, gameObject, -side))
 
                     return true
                 }

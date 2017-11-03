@@ -27,7 +27,7 @@ import ktx.assets.toLocalFile
  * @param rectangle Le rectangle dans lequel sera dessiné la texture
  * @param linkRectToGO Permet de spécifier si le rectangle à utiliser est celui du gameObject
  */
-class TextureComponent(texturePath: FileHandle) : RenderableComponent(), CustomEditorImpl<TextureComponent> {
+class TextureComponent(texturePath: FileHandle) : RenderableComponent(), CustomEditorImpl {
     @JsonCreator constructor() : this(Constants.noTextureFoundTexturePath.toLocalFile())
 
     var texturePath: String = texturePath.path()
@@ -51,16 +51,13 @@ class TextureComponent(texturePath: FileHandle) : RenderableComponent(), CustomE
         batch.draw(texture, gameObject.rectangle, flipX, flipY)
     }
 
-    override fun insertChangeProperties(instance: TextureComponent, table: VisTable, editorScene: EditorScene) {
+    override fun insertChangeProperties(table: VisTable, editorScene: EditorScene) {
         table.add(VisLabel("Texture : "))
 
-        val texture = instance.texture
         table.add(VisImageButton(TextureRegionDrawable(TextureAtlas.AtlasRegion(texture, 0, 0, texture.width, texture.height))).apply {
             onClick {
                 editorScene.showSelectTextureWindow { textureFile ->
-                    instance.updateTexture(textureFile)
-
-                    val texture = instance.texture
+                    updateTexture(textureFile)
 
                     val imgBtnDrawable = TextureRegionDrawable(TextureAtlas.AtlasRegion(texture, 0, 0, texture.width, texture.height))
 

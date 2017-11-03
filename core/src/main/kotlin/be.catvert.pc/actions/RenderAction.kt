@@ -1,6 +1,7 @@
 package be.catvert.pc.actions
 
 import be.catvert.pc.GameObject
+import be.catvert.pc.GameObjectState
 import be.catvert.pc.components.RenderableComponent
 import be.catvert.pc.utility.ExposeEditor
 import com.fasterxml.jackson.annotation.JsonCreator
@@ -13,7 +14,7 @@ class RenderAction(@ExposeEditor var action: RenderActions) : Action {
     }
 
     override fun perform(gameObject: GameObject) {
-        gameObject.getComponents().filter { it is RenderableComponent }.forEach {
+        gameObject.getCurrentState().getComponents().filter { it is RenderableComponent }.forEach {
             val renderComp = it as RenderableComponent
             when(action) {
                 RenderAction.RenderActions.FLIP_X -> renderComp.flipX = true

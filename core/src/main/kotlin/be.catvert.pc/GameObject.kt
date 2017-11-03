@@ -4,12 +4,14 @@ import be.catvert.pc.actions.Action
 import be.catvert.pc.components.Component
 import be.catvert.pc.components.RenderableComponent
 import be.catvert.pc.components.UpdeatableComponent
+import be.catvert.pc.containers.GameObjectContainer
+import be.catvert.pc.serialization.PostDeserialization
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.util.*
-import kotlin.reflect.KClass
+
 
 /**
  * Classe représentant un objet en jeu
@@ -19,9 +21,9 @@ import kotlin.reflect.KClass
  * @param prefab Le prefab utilisé pour créer l'objet
  */
 class GameObject(id: UUID,
-                 components: MutableSet<Component> = mutableSetOf(),
                  var rectangle: Rect = Rect(),
                  var tag: Tag,
+                 @JsonProperty("states") val states: MutableSet<GameObjectState> = mutableSetOf(),
                  container: GameObjectContainer? = null,
                  @JsonIgnore val prefab: Prefab? = null) : Updeatable, Renderable {
 
@@ -32,12 +34,6 @@ class GameObject(id: UUID,
     var id: UUID = id
         private set
 
-    @JsonIgnore var active: Boolean = true
-        set(value) {
-            if(!keepActive)
-                field = value
-        }
-
     var keepActive: Boolean = false
 
     var unique: Boolean = false
@@ -46,21 +42,23 @@ class GameObject(id: UUID,
 
     var fixedSize = false
 
+    var currentState: Int = 0
+
+    @JsonIgnore var active: Boolean = true
+        set(value) {
+            if(!keepActive)
+                field = value
+        }
+
     @JsonIgnore
     var gridCells: MutableList<GridCell> = mutableListOf()
-
-    @JsonProperty("comps")
-    private val components: MutableSet<Component> = mutableSetOf()
-
-    @JsonIgnore private val renderComponents = mutableSetOf<RenderableComponent>()
-
-    @JsonIgnore private val updateComponents = mutableSetOf<UpdeatableComponent>()
 
     @JsonIgnore var container: GameObjectContainer? = container
         set(value) {
             field = value
-            if(field != null)
-                components.forEach { it.onGOAddToContainer(this) }
+            if(field != null) {
+                states.forEach { it.linkGameObject(this) }
+            }
         }
 
     @JsonIgnore var isRemoving = false
@@ -74,83 +72,34 @@ class GameObject(id: UUID,
 
     var onRemoveAction: Action? = null
 
-    @JsonIgnore
-    fun getComponents() = components.toSet()
-
     fun position() = rectangle.position
     fun size() = rectangle.size
-
-    init {
-        components.forEach {
-            addComponent(it)
-        }
-    }
-
-    override fun update() {
-        if(active)
-            updateComponents.forEach { if (it.active) it.update() }
-    }
-
-    override fun render(batch: Batch) {
-        if(active)
-            renderComponents.forEach { if (it.active) it.render(batch) }
-    }
-
-
-    fun addComponent(component: Component) {
-        components.add(component)
-        component.linkGameObject(this)
-
-        if(container != null)
-            component.onGOAddToContainer(this)
-
-        if (component is RenderableComponent)
-            renderComponents.add(component)
-        else if (component is UpdeatableComponent)
-            updateComponents.add(component)
-    }
-
-    fun removeComponent(component: Component) {
-        components.remove(component)
-
-        if(component is RenderableComponent)
-            renderComponents.remove(component)
-        else if(component is UpdeatableComponent)
-            updateComponents.remove(component)
-    }
-
-    inline fun <reified T : Component> getComponent(index: Int = 0): T? {
-        val filtered = getComponents().filter { it is T }
-        return if (filtered.size > index && index > -1) filtered[index] as T else null
-    }
-
-    inline fun <reified T : Component> hasComponent(index: Int = 0): Boolean {
-        return getComponent<T>(index) != null
-    }
 
     fun removeFromParent() {
         isRemoving = true
     }
 
-    fun setFlipRenderable(x: Boolean, y: Boolean) {
-        getComponents().filter { it is RenderableComponent }.forEach {
-            val renderComp = it as RenderableComponent
-            renderComp.flipX = x
-            renderComp.flipY = y
+    fun addState(state: GameObjectState) {
+        states.add(state)
+    }
+
+    fun state(name: String, initState: GameObjectState.() -> Unit) {
+        val state = GameObjectState(name, this)
+        state.initState()
+        addState(state)
+    }
+
+    @JsonIgnore fun getCurrentState() = states.elementAt(currentState)
+
+    override fun update() {
+        if(active) {
+            getCurrentState().update()
         }
     }
 
-    fun inverseFlipRenderable(inverseX: Boolean, inverseY: Boolean) {
-        getComponents().filter { it is RenderableComponent }.forEach {
-            val renderComp = it as RenderableComponent
-            if(inverseX)
-                renderComp.flipX = !renderComp.flipX
-            if(inverseY)
-                renderComp.flipY = !renderComp.flipY
+    override fun render(batch: Batch) {
+        if(active) {
+            getCurrentState().render(batch)
         }
-    }
-
-    operator fun plusAssign(component: Component) {
-        addComponent(component)
     }
 }

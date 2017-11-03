@@ -1,13 +1,12 @@
-package be.catvert.pc
+package be.catvert.pc.containers
 
+import be.catvert.pc.GameKeys
+import be.catvert.pc.GameObject
+import be.catvert.pc.PCGame
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.math.Rectangle
 import com.fasterxml.jackson.annotation.JsonIgnore
-import sun.audio.AudioPlayer.player
-import java.util.*
 
 abstract class GameObjectMatrixContainer : GameObjectContainer() {
     private val shapeRenderer = ShapeRenderer()

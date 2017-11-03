@@ -2,7 +2,9 @@ package be.catvert.pc.serialization
 
 import com.badlogic.gdx.files.FileHandle
 import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.core.PrettyPrinter
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.smile.SmileFactory
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
@@ -30,3 +32,4 @@ object SerializationFactory {
     fun <T> serializeToFile(obj: T, file: FileHandle) = file.writeString(serialize(obj), false)
     inline fun <reified T> deserializeFromFile(file: FileHandle) = deserialize<T>(file.readString())
 }
+

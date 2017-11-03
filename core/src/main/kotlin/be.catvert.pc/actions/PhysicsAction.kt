@@ -1,6 +1,7 @@
 package be.catvert.pc.actions
 
 import be.catvert.pc.GameObject
+import be.catvert.pc.GameObjectState
 import be.catvert.pc.components.logics.PhysicsComponent
 import be.catvert.pc.utility.ExposeEditor
 import com.fasterxml.jackson.annotation.JsonCreator
@@ -16,6 +17,6 @@ class PhysicsAction(@ExposeEditor var physicsAction: NextPhysicsActions = NextPh
     @JsonCreator private constructor(): this(NextPhysicsActions.GO_LEFT)
 
     override fun perform(gameObject: GameObject) {
-        gameObject.getComponent<PhysicsComponent>()?.nextActions?.add(physicsAction)
+        gameObject.getCurrentState().getComponent<PhysicsComponent>()?.nextActions?.add(physicsAction)
     }
 }

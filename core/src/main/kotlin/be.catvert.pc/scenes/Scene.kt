@@ -1,7 +1,6 @@
 package be.catvert.pc.scenes
 
-import be.catvert.pc.GameObject
-import be.catvert.pc.GameObjectContainer
+import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.PCGame
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx

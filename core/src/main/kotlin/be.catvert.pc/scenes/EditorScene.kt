@@ -1,11 +1,16 @@
 package be.catvert.pc.scenes
 
-import be.catvert.pc.*
+import be.catvert.pc.GameKeys
+import be.catvert.pc.GameObject
+import be.catvert.pc.Log
+import be.catvert.pc.PCGame
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
 import be.catvert.pc.components.Component
 import be.catvert.pc.components.RenderableComponent
 import be.catvert.pc.components.graphics.AnimationComponent
+import be.catvert.pc.containers.GameObjectContainer
+import be.catvert.pc.containers.Level
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.*
@@ -24,7 +29,6 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane
-import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener
 import com.kotcrab.vis.ui.widget.*
 import com.kotcrab.vis.ui.widget.spinner.FloatSpinnerModel
@@ -121,8 +125,6 @@ class EditorScene(private val level: Level) : Scene() {
      */
     private val selectRectangleData = SelectRectangleData(Point(), Point())
 
-    private val maxGameObjectSize = 500
-
     /**
      * Permet de sauvegarder le dernier spriteSheet utilisé dans la fenêtre de sélection d'atlas
      */
@@ -160,7 +162,7 @@ class EditorScene(private val level: Level) : Scene() {
          * Dessine les gameObjects qui n'ont pas de renderableComponent avec un rectangle noir
          */
         gameObjectContainer.getGameObjectsData().filter { it.active }.forEach { gameObject ->
-            if (!gameObject.hasComponent<RenderableComponent>()) {
+            if (!gameObject.getCurrentState().hasComponent<RenderableComponent>()) {
                 shapeRenderer.color = Color.GRAY
                 shapeRenderer.rect(gameObject.rectangle)
             }
@@ -311,11 +313,17 @@ class EditorScene(private val level: Level) : Scene() {
 
                     if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_FLIPX.key)) {
                         val gameObject = findGameObjectUnderMouse()
-                        gameObject?.inverseFlipRenderable(true, false)
+                        gameObject?.getCurrentState()?.inverseFlipRenderable(true, false)
                     }
                     if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_FLIPY.key)) {
                         val gameObject = findGameObjectUnderMouse()
-                        gameObject?.inverseFlipRenderable(true, false)
+                        gameObject?.getCurrentState()?.inverseFlipRenderable(true, false)
+                    }
+
+                    if(Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && !latestRightButtonClick) {
+                        val gameOject = findGameObjectUnderMouse()
+                        if(gameOject != null)
+                            showEditGameObjectWindow(gameOject)
                     }
                 }
                 EditorMode.SELECT_GO -> {
@@ -410,9 +418,9 @@ class EditorScene(private val level: Level) : Scene() {
                                                 val newSizeX = it.rectangle.width - resizeX
                                                 val newSizeY = it.rectangle.height - resizeY
 
-                                                if (newSizeX in 1..maxGameObjectSize)
+                                                if (newSizeX in 1..Constants.maxGameObjectSize)
                                                     it.rectangle.width = newSizeX
-                                                if (newSizeY in 1..maxGameObjectSize)
+                                                if (newSizeY in 1..Constants.maxGameObjectSize)
                                                     it.rectangle.height = newSizeY
                                             }
                                         }
@@ -865,7 +873,7 @@ class EditorScene(private val level: Level) : Scene() {
         }
     }
 
-    private fun addWidgetForField(parent: Table, field: Field, instance: Any, exposeEditor: ExposeEditor) {
+    private fun addWidgetForField(parent: VisTable, field: Field, instance: Any, exposeEditor: ExposeEditor) {
         fun setValue(value: Any) {
             field.set(instance, value)
         }
@@ -880,18 +888,17 @@ class EditorScene(private val level: Level) : Scene() {
             return value
         }
 
-        when (field.type) {
-            Boolean::class.java -> {
-                val checkbox = VisCheckBox("", getValueOrAssign(true)).apply {
+        when (field.get(instance)) {
+            is Boolean -> {
+                parent.add(VisCheckBox("", getValueOrAssign(true)).apply {
                     onChange {
                         setValue(isChecked)
                     }
-                }
-                parent.add(checkbox)
+                })
             }
-            Int::class.java -> {
+            is Int -> {
                 if (exposeEditor.customType == CustomType.KEY_INT) {
-                    val keyArea = VisTextArea(Input.Keys.toString(getValueOrAssign(0))).apply {
+                    parent.add(VisTextArea(Input.Keys.toString(getValueOrAssign(Input.Keys.UNKNOWN))).apply {
                         isReadOnly = true
                         onKeyUp {
                             val keyStr = Input.Keys.toString(it)
@@ -902,46 +909,99 @@ class EditorScene(private val level: Level) : Scene() {
                                 setValue(key)
                             }
                         }
-                    }
-                    parent.add(keyArea).width(50f)
+                    }).width(50f)
                 } else {
-                    val intModel = IntSpinnerModel(getValueOrAssign(0), exposeEditor.minInt, exposeEditor.maxInt)
-                    val spinner = Spinner("", intModel).apply {
+                    val intModel = IntSpinnerModel(getValueOrAssign(exposeEditor.minInt), exposeEditor.minInt, exposeEditor.maxInt)
+                    parent.add(Spinner("", intModel).apply {
                         onChange {
                             setValue(intModel.value)
                         }
-                    }
-                    parent.add(spinner)
+                    })
                 }
             }
-            String::class.java -> {
-                val textField = VisTextField(getValueOrAssign("")).apply {
+            is String -> {
+                parent.add(VisTextField(getValueOrAssign("")).apply {
                     onChange {
                         setValue(text)
                     }
-                }
-                parent.add(textField)
+                })
             }
-            Point::class.java -> {
+            is Point -> {
+                var value = getValueOrAssign(Point())
 
-                val labelPos = VisLabel(getValueOrAssign(Point()).toString())
+                val label = parent.add(VisLabel(value.toString())).actor
 
-                parent.add(labelPos)
+                val xIntModel = IntSpinnerModel(value.x, 0, level.matrixRect.width)
+                val yIntModel = IntSpinnerModel(value.y, 0, level.matrixRect.height)
 
-                val selectBtn = VisTextButton("Sélectionner").apply {
+                fun setPointValue(newValue: Point) {
+                    value = newValue
+                    label.setText(newValue.toString())
+                    xIntModel.setValue(newValue.x, false)
+                    yIntModel.setValue(newValue.y, false)
+                    setValue(newValue)
+                }
+
+                parent.add(verticalGroup {
+                    space(10f)
+
+                    spinner("X", xIntModel) {
+                        onChange {
+                            setPointValue(value.copy(x = xIntModel.value, y = value.y))
+                        }
+                    }
+
+                    spinner("Y", yIntModel) {
+                        onChange {
+                            setPointValue(value.copy(x = value.x, y = yIntModel.value))
+                        }
+                    }
+                })
+
+                parent.add(VisTextButton("Sélectionner").apply {
                     onClick {
-                        editorMode = EditorMode.SELECT_POINT
+                        editorMode = EditorScene.EditorMode.SELECT_POINT
                         onSelectPoint.register(true) {
-                            setValue(it)
-                            labelPos.setText(it.toString())
+                            setPointValue(it)
                             showUI()
                         }
                         hideUI()
                     }
-                }
-                parent.add(selectBtn)
+                })
             }
-            Array<Action>::class.java -> {
+            is Size -> {
+                var value = getValueOrAssign(Size(exposeEditor.minInt, exposeEditor.minInt))
+
+                val label = parent.add(VisLabel(value.toString())).actor
+
+                val widthIntModel = IntSpinnerModel(value.width, exposeEditor.minInt, exposeEditor.maxInt)
+                val heightIntModel = IntSpinnerModel(value.height, exposeEditor.minInt, exposeEditor.maxInt)
+
+                fun setSizeValue(newValue: Size) {
+                    value = newValue
+                    label.setText(newValue.toString())
+                    widthIntModel.setValue(newValue.width, false)
+                    heightIntModel.setValue(newValue.height, false)
+                    setValue(newValue)
+                }
+
+                parent.add(verticalGroup {
+                    space(10f)
+
+                    spinner("L", widthIntModel) {
+                        onChange {
+                            setSizeValue(value.copy(width = widthIntModel.value, height = value.height))
+                        }
+                    }
+
+                    spinner("H", heightIntModel) {
+                        onChange {
+                            setSizeValue(value.copy(width = value.width, height = heightIntModel.value))
+                        }
+                    }
+                })
+            }
+            is Array<*> -> {
                 data class ActionItem(val action: Action) {
                     override fun toString(): String {
                         return ReflectionUtility.simpleNameOf(action)
@@ -950,15 +1010,13 @@ class EditorScene(private val level: Level) : Scene() {
 
                 var actions = getValueOrAssign(arrayOf<Action>())
 
-                val actionsList = VisList<ActionItem>()
+                val actionsList = parent.add(VisList<ActionItem>()).actor
 
                 fun updateActions() {
                     actionsList.setItems((actions).map { ActionItem(it) }.toGdxArray())
                     setValue(actions)
                 }
                 updateActions()
-
-                parent.add(actionsList)
 
                 parent.add(verticalGroup {
                     space(10f)
@@ -991,39 +1049,33 @@ class EditorScene(private val level: Level) : Scene() {
                     }
                 })
             }
-        }
+            is Enum<*> -> {
+                parent.add(VisSelectBox<String>().apply {
+                    val enumConstants = field.type.enumConstants
 
-        if (field.type.isEnum) {
-            val selectBox = VisSelectBox<String>().apply {
-                val enumConstants = field.type.enumConstants
+                    this.items = enumConstants.map { (it as Enum<*>).name }.toGdxArray()
 
-                this.items = enumConstants.map { (it as Enum<*>).name }.toGdxArray()
+                    val index = enumConstants.indexOfFirst { it == getValueOrAssign(enumConstants[0]) }
+                    selectedIndex = if (index == -1) 0 else index
 
-                val index = enumConstants.indexOfFirst { it == getValueOrAssign(enumConstants[0]) }
-                selectedIndex = if (index == -1) 0 else index
-
-                onChange {
-                    setValue(enumConstants[selectedIndex])
-                }
+                    onChange {
+                        setValue(enumConstants[selectedIndex])
+                    }
+                })
             }
-
-            parent.add(selectBox)
-        }
-
-        if (field.type.isAssignableFrom(Action::class.java)) {
-            val editBtn = VisTextButton("Éditer").apply {
-                onClick {
-                    showEditActionWindow(getValueOrAssign(EmptyAction()), { setValue(it) })
-                }
+            is Action -> {
+                parent.add(VisTextButton("Éditer").apply {
+                    onClick {
+                        showEditActionWindow(getValueOrAssign(EmptyAction()), { setValue(it) })
+                    }
+                })
             }
-
-            parent.add(editBtn)
         }
     }
 
     private fun showEditActionWindow(action: Action?, setAction: (Action) -> Unit) {
         stage + window("Éditer l'action") {
-            setSize(300f, 250f)
+            setSize(350f, 250f)
             setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
             isModal = true
             addCloseButton()
@@ -1053,11 +1105,6 @@ class EditorScene(private val level: Level) : Scene() {
                         this@vgroup.addActor(this@selectBox)
 
                         this@vgroup.table(defaultSpacing = true) {
-                            if(instance is CustomEditorImpl<*>) {
-                                @Suppress("UNCHECKED_CAST")
-                                (instance as? CustomEditorImpl<Action>)?.insertChangeProperties(instance, this, this@EditorScene)
-                                row()
-                            }
                             insertExposeEditorFields(instance, this)
 
                             row()
@@ -1076,6 +1123,11 @@ class EditorScene(private val level: Level) : Scene() {
     }
 
     private fun insertExposeEditorFields(instance: Any, table: VisTable) {
+        if (instance is CustomEditorImpl) {
+            instance.insertChangeProperties(table, this@EditorScene)
+            table.row()
+        }
+
         ReflectionUtility.getAllFieldsOf(instance.javaClass).filter { it.isAnnotationPresent(ExposeEditor::class.java) }.forEach { field ->
             field.isAccessible = true
 
@@ -1116,12 +1168,6 @@ class EditorScene(private val level: Level) : Scene() {
                         this@table.add(scroll).size(300f, 150f)
 
                         val instance = ReflectionUtility.findNoArgConstructor(comp)!!.newInstance()
-
-                        if (instance is CustomEditorImpl<*>) {
-                            @Suppress("UNCHECKED_CAST")
-                            (instance as? CustomEditorImpl<Component>)?.insertChangeProperties(instance, parametersTable, this@EditorScene)
-                            parametersTable.row()
-                        }
 
                         insertExposeEditorFields(instance, parametersTable)
 
@@ -1170,7 +1216,7 @@ class EditorScene(private val level: Level) : Scene() {
 
                     row()
 
-                    val widthIntModel = IntSpinnerModel(gameObject.size().width, 1, maxGameObjectSize)
+                    val widthIntModel = IntSpinnerModel(gameObject.size().width, 1, Constants.maxGameObjectSize)
                     spinner("Largeur", widthIntModel) {
                         onChange {
                             gameObject.rectangle.width = widthIntModel.value
@@ -1179,7 +1225,7 @@ class EditorScene(private val level: Level) : Scene() {
 
                     row()
 
-                    val heightIntModel = IntSpinnerModel(gameObject.size().height, 1, maxGameObjectSize)
+                    val heightIntModel = IntSpinnerModel(gameObject.size().height, 1, Constants.maxGameObjectSize)
                     spinner("Hauteur", heightIntModel) {
                         onChange {
                             gameObject.rectangle.height = heightIntModel.value
@@ -1191,7 +1237,7 @@ class EditorScene(private val level: Level) : Scene() {
                     textButton("Ajouter un component") {
                         onClick {
                             showAddComponentWindow {
-                                gameObject.addComponent(it)
+                                gameObject.getCurrentState().addComponent(it)
                                 onAddComponent(it)
                             }
                         }
@@ -1199,7 +1245,7 @@ class EditorScene(private val level: Level) : Scene() {
                 }
 
                 table(defaultSpacing = true) {
-                    fun generateComponentsItems() = gameObject.getComponents().mapIndexed { index, component ->
+                    fun generateComponentsItems() = gameObject.getCurrentState().getComponents().mapIndexed { index, component ->
                         val className = ReflectionUtility.simpleNameOf(component).removeSuffix("Component")
                         "${index + 1} : " + if (component.name == className) className else component.name + "[$className]"
                     }.toGdxArray()
@@ -1221,7 +1267,7 @@ class EditorScene(private val level: Level) : Scene() {
                             val removeBtn = VisTextButton("Supprimer").apply {
                                 onClick {
                                     if (selectedIndex > -1) {
-                                        gameObject.removeComponent(gameObject.getComponents().elementAt(selectedIndex))
+                                        gameObject.getCurrentState().removeComponent(gameObject.getCurrentState().getComponents().elementAt(selectedIndex))
                                         this@selectBox.items = generateComponentsItems()
                                     }
                                 }
@@ -1231,19 +1277,12 @@ class EditorScene(private val level: Level) : Scene() {
 
                             this@table.row()
 
-                            val instance = gameObject.getComponents().elementAt(selectedIndex)
+                            val instance = gameObject.getCurrentState().getComponents().elementAt(selectedIndex)
 
                             val compPropertiesTable = VisTable().apply { setSize(250f, 500f); }
 
                             val scroll = ScrollPane(compPropertiesTable)
                             this@table.add(scroll).size(250f, 150f)
-
-                            if(instance is CustomEditorImpl<*>) {
-                                @Suppress("UNCHECKED_CAST")
-                                (instance as? CustomEditorImpl<Component>)?.insertChangeProperties(instance, compPropertiesTable, this@EditorScene)
-
-                                compPropertiesTable.row()
-                            }
 
                             insertExposeEditorFields(instance, compPropertiesTable)
 
@@ -1607,6 +1646,5 @@ class EditorScene(private val level: Level) : Scene() {
             }
         }
     }
-
 //endregion
 }

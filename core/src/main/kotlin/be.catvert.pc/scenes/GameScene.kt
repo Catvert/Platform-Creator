@@ -1,8 +1,8 @@
 package be.catvert.pc.scenes
 
 import be.catvert.pc.GameKeys
-import be.catvert.pc.GameObjectContainer
-import be.catvert.pc.Level
+import be.catvert.pc.containers.GameObjectContainer
+import be.catvert.pc.containers.Level
 import be.catvert.pc.PCGame
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input

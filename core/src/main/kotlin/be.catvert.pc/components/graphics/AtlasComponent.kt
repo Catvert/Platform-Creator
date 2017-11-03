@@ -26,7 +26,7 @@ import ktx.vis.horizontalGroup
  * @param region La région à utiliser
  */
 
-class AtlasComponent(atlasPath: FileHandle, region: String) : RenderableComponent(), CustomEditorImpl<AtlasComponent> {
+class AtlasComponent(atlasPath: FileHandle, region: String) : RenderableComponent(), CustomEditorImpl {
     @JsonCreator constructor(): this(Constants.noTextureAtlasFoundPath.toLocalFile(), "notexture")
 
     var atlasPath: String = atlasPath.path()
@@ -57,22 +57,22 @@ class AtlasComponent(atlasPath: FileHandle, region: String) : RenderableComponen
         batch.draw(atlasRegion, gameObject.rectangle, flipX, flipY)
     }
 
-    override fun insertChangeProperties(instance: AtlasComponent, table: VisTable, editorScene: EditorScene) {
+    override fun insertChangeProperties(table: VisTable, editorScene: EditorScene) {
         table.add(VisLabel("Atlas : "))
 
         fun updateImageBtn(imgBtn: VisImageButton) {
-            val imgBtnDrawable = TextureRegionDrawable(instance.atlasRegion)
+            val imgBtnDrawable = TextureRegionDrawable(atlasRegion)
 
             imgBtn.style.imageUp = imgBtnDrawable
             imgBtn.style.imageDown = imgBtnDrawable
         }
 
-        val imageButton = VisImageButton(TextureRegionDrawable(instance.atlasRegion)).apply {
+        val imageButton = VisImageButton(TextureRegionDrawable(atlasRegion)).apply {
             onClick {
-                editorScene.showSelectAtlasRegionWindow(instance.atlasPath.toLocalFile()) { atlasFile, region ->
-                    instance.updateAtlas(atlasFile, region)
+                editorScene.showSelectAtlasRegionWindow(atlasPath.toLocalFile()) { atlasFile, region ->
+                    updateAtlas(atlasFile, region)
 
-                   updateImageBtn(this)
+                    updateImageBtn(this)
                 }
             }
         }

@@ -23,7 +23,7 @@ import ktx.assets.loadOnDemand
 import ktx.assets.toLocalFile
 import ktx.collections.toGdxArray
 
-class AnimationComponent(atlasPath: FileHandle, animationRegionName: String, var frameDuration: Float) : RenderableComponent(), CustomEditorImpl<AnimationComponent> {
+class AnimationComponent(atlasPath: FileHandle, animationRegionName: String, var frameDuration: Float) : RenderableComponent(), CustomEditorImpl {
     @JsonCreator private constructor() : this(Constants.noTextureAtlasFoundPath.toLocalFile(), "", 0f)
 
     var atlasPath: String = atlasPath.path()
@@ -60,15 +60,15 @@ class AnimationComponent(atlasPath: FileHandle, animationRegionName: String, var
         }
     }
 
-    override fun insertChangeProperties(instance: AnimationComponent, table: VisTable, editorScene: EditorScene) {
+    override fun insertChangeProperties(table: VisTable, editorScene: EditorScene) {
         table.add(VisLabel("Animation : "))
 
-        table.add(VisImageButton(TextureRegionDrawable(instance.animation?.getKeyFrame(0f) ?: PCGame.assetManager.loadOnDemand<TextureAtlas>(Constants.noTextureAtlasFoundPath).asset.findRegion("notexture"))).apply {
+        table.add(VisImageButton(TextureRegionDrawable(animation?.getKeyFrame(0f) ?: PCGame.assetManager.loadOnDemand<TextureAtlas>(Constants.noTextureAtlasFoundPath).asset.findRegion("notexture"))).apply {
             onClick {
-                editorScene.showSelectAnimationWindow(instance.atlasPath.toLocalFile()) { atlasFile, animationRegion, frameDuration ->
-                    instance.updateAnimation(atlasFile, animationRegion, frameDuration)
+                editorScene.showSelectAnimationWindow(atlasPath.toLocalFile()) { atlasFile, animationRegion, frameDuration ->
+                    updateAnimation(atlasFile, animationRegion, frameDuration)
 
-                    val imgBtnDrawable = TextureRegionDrawable(instance.atlas.findRegion(instance.animationRegionName + "_0"))
+                    val imgBtnDrawable = TextureRegionDrawable(atlas.findRegion(animationRegionName + "_0"))
 
                     this.style.imageUp = imgBtnDrawable
                     this.style.imageDown = imgBtnDrawable

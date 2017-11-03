@@ -10,6 +10,7 @@ import be.catvert.pc.components.Component
 import be.catvert.pc.components.graphics.*
 import be.catvert.pc.components.logics.*
 import be.catvert.pc.components.logics.ai.*
+import be.catvert.pc.GameObjectState
 import be.catvert.pc.components.SoundComponent
 import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.Size
@@ -23,23 +24,21 @@ import ktx.assets.toLocalFile
 
 enum class PrefabFactory(val generate: () -> Prefab) {
     Sprite({
-        Prefab("sprite", false, "Catvert", GameObject.Tag.Sprite, Size(50, 50), run {
+        Prefab("sprite", false, "Catvert", GameObject.Tag.Sprite, Size(50, 50), mutableSetOf(GameObjectState("default", null, run {
             val comps = mutableSetOf<Component>()
             comps += AtlasComponent()
             comps
-        })
-    }),
+        })))}),
     PhysicsSprite({
-        Prefab("physicsSprite", false, "Catvert", GameObject.Tag.PhysicsSprite, Size(50, 50), run {
+        Prefab("physicsSprite", false, "Catvert", GameObject.Tag.PhysicsSprite, Size(50, 50), mutableSetOf(GameObjectState("default", null, run {
             val comps = mutableSetOf<Component>()
             comps += AtlasComponent()
             comps += PhysicsComponent(true)
             comps
-        })
-    }),
+        })))}),
     Player(
             {
-                Prefab("player", false, "Catvert", GameObject.Tag.Player, Size(48, 98), run {
+                Prefab("player", false, "Catvert", GameObject.Tag.Player, Size(48, 98), mutableSetOf(GameObjectState("default", null, run {
                     val jumpSoundIndex = 0
 
                     val comps = mutableSetOf<Component>()
@@ -60,19 +59,19 @@ enum class PrefabFactory(val generate: () -> Prefab) {
                     comps += InputComponent(GameKeys.GAME_PLAYER_JUMP.key, true,  PhysicsAction(NextPhysicsActions.JUMP) )
 
                     comps
-                }, {
+                })), {
                     onRemoveAction = LevelAction(LevelAction.LevelActions.FAIL_EXIT)
                     keepActive = true
                     unique = true
                 })
             }),
     Spider({
-        Prefab("spider", false, "Catvert", GameObject.Tag.Enemy, Size(48, 48), run {
+        Prefab("spider", false, "Catvert", GameObject.Tag.Enemy, Size(48, 48), mutableSetOf(GameObjectState("default", null, run {
             val comps = mutableSetOf<Component>()
             comps += AnimationComponent((Constants.atlasDirPath + "More Enemies Animations/enemies.atlas").toLocalFile(), "spider_walk", 0.33f)
             comps += PhysicsComponent(false, 5)
             comps += SimpleAIComponent(true)
             comps
-        })
+        })))
     })
 }

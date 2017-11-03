@@ -1,5 +1,8 @@
-package be.catvert.pc
+package be.catvert.pc.containers
 
+import be.catvert.pc.GameObject
+import be.catvert.pc.Log
+import be.catvert.pc.PCGame
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.scenes.EndLevelScene
 import be.catvert.pc.serialization.SerializationFactory

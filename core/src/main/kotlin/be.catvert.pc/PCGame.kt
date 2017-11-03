@@ -1,8 +1,10 @@
 package be.catvert.pc
 
 import be.catvert.pc.components.graphics.TextureComponent
+import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.scenes.MainMenuScene
 import be.catvert.pc.scenes.Scene
+import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
@@ -11,6 +13,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Matrix4
 import com.badlogic.gdx.utils.JsonWriter
+import com.fasterxml.jackson.annotation.JsonBackReference
+import com.fasterxml.jackson.annotation.JsonManagedReference
 import com.kotcrab.vis.ui.VisUI
 import ktx.app.KtxApplicationAdapter
 import ktx.assets.toLocalFile
@@ -57,7 +61,9 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
          */
         fun generateLogo(container: GameObjectContainer): GameObject {
             return container.createGameObject(getLogoRect(), GameObject.Tag.Sprite) {
-                this += TextureComponent().apply { updateTexture(Constants.gameLogoPath.toLocalFile()) }
+                state("default") {
+                    this += TextureComponent().apply { updateTexture(Constants.gameLogoPath.toLocalFile()) }
+                }
             }
         }
 

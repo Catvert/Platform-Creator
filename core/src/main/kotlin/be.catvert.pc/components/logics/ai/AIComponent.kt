@@ -15,7 +15,7 @@ abstract class AIComponent(val applyActionCollisionToPlayer: Pair<Action, List<C
     override fun onGOAddToContainer(gameObject: GameObject) {
         super.onGOAddToContainer(gameObject)
 
-        physicsComponent = gameObject.getComponent()
+        physicsComponent = gameObject.getCurrentState().getComponent()
         if(physicsComponent != null) {
             physicsComponent!!.onCollisionWith.register {
                 if(it.collideGameObject.tag == GameObject.Tag.Player) {

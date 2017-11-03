@@ -1,6 +1,6 @@
 package be.catvert.pc.scenes
 
-import be.catvert.pc.Level
+import be.catvert.pc.containers.Level
 import be.catvert.pc.PCGame
 import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.Constants
