@@ -1,6 +1,7 @@
 package be.catvert.pc.components.graphics
 
 import be.catvert.pc.GameObject
+import be.catvert.pc.GameObjectState
 import be.catvert.pc.PCGame
 import be.catvert.pc.components.RenderableComponent
 import be.catvert.pc.scenes.EditorScene
@@ -46,13 +47,13 @@ class AnimationComponent(atlasPath: FileHandle, animationRegionName: String, var
         animation = loadAnimation(atlas, animationRegionName, frameDuration)
     }
 
-    override fun onGOAddToContainer(gameObject: GameObject) {
-        super.onGOAddToContainer(gameObject)
+    override fun onGOAddToContainer(state: GameObjectState, gameObject: GameObject) {
+        super.onGOAddToContainer(state, gameObject)
 
         updateAnimation()
     }
 
-    override fun render(batch: Batch) {
+    override fun render(gameObject: GameObject, batch: Batch) {
         if (animation != null) {
             stateTime += Gdx.graphics.deltaTime
             if (animation != null)

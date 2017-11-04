@@ -23,6 +23,8 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
     @JsonIgnore
     var removeEntityBelowY0 = true
 
+    @JsonIgnore private val removeGameObjects = mutableSetOf<GameObject>()
+
     @JsonIgnore
     fun getGameObjectsData() = gameObjects.toSet()
 
@@ -31,9 +33,7 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
     fun findGameObjectsByTag(tag: GameObject.Tag): Set<GameObject> = gameObjects.filter { it.tag == tag }.toSet()
 
     open fun removeGameObject(gameObject: GameObject) {
-        onRemoveGameObject(gameObject)
-        gameObjects.remove(gameObject)
-        gameObject.container = null
+        removeGameObjects.add(gameObject)
     }
 
     open fun addGameObject(gameObject: GameObject): GameObject {
@@ -60,26 +60,32 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
 
     override fun update() {
         val iter = gameObjects.iterator()
-        while (iter.hasNext()) {
-            val it = iter.next()
 
+        gameObjects.forEach {
             if(allowUpdatingGO)
                 it.update()
 
             if (removeEntityBelowY0 && it.position().y < 0) {
-                it.isRemoving = true
+                it.getCurrentState().isRemoving = true
             }
-            if (it.isRemoving) {
+        }
+
+        if(removeGameObjects.isNotEmpty()) {
+            removeGameObjects.forEach {
                 onRemoveGameObject(it)
-                iter.remove()
+                gameObjects.remove(it)
+                it.container = null
             }
+            removeGameObjects.clear()
         }
     }
 
     override fun onPostDeserialization() {
         gameObjects.forEach {
             it.container = this
-
+            it.onRemoveFromParent.register {
+                removeGameObjects.add(it)
+            }
         }
     }
 

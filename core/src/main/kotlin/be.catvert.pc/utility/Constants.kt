@@ -35,4 +35,7 @@ object Constants {
     const val noSoundPath = assetsDirPath + "game/nosound.wav"
 
     const val maxGameObjectSize = 500
+
+    const val minLayerIndex = -100
+    const val maxLayerIndex = 100
 }

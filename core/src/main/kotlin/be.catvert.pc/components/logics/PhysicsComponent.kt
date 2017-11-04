@@ -20,7 +20,6 @@ enum class MovementType {
 
 /**
  * Classe de données permettant de gérer les sauts notament en définissant la hauteur du saut
- * @property jumpHeight : La hauteur du saut
  * @property isJumping : Permet de savoir si l'entité est entrain de sauté
  * @property targetHeight : La hauteur en y à atteindre
  * @property startJumping : Débute le saut de l'entité
@@ -104,13 +103,13 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
 
     @JsonIgnore private val gravitySpeed = 15
 
-    override fun update() {
+    override fun update(gameObject: GameObject) {
         if (isStatic) return
 
         if (gravity && (gameObject.container as? Level)?.applyGravity == true)
             nextActions += NextPhysicsActions.GRAVITY
 
-        if (jumpData?.forceJumping == true) {
+        if (jumpData.forceJumping) {
             nextActions += NextPhysicsActions.JUMP
         }
 
@@ -218,7 +217,7 @@ private fun checkIsOnGround(gameObject: GameObject) = collideOnMove(0, -1, gameO
  * Permet de tester si un déplacement est possible ou non
  * @param moveX : Le déplacement x
  * @param moveY : Le déplacement y
- * @param entity : L'entité à tester
+ * @param gameObject : Le gameObject a testé
  */
 private fun collideOnMove(moveX: Int, moveY: Int, gameObject: GameObject): Boolean {
     val newRect = Rect(gameObject.rectangle)

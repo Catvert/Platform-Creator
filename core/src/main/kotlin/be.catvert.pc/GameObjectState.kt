@@ -1,8 +1,12 @@
 package be.catvert.pc
 
+import be.catvert.pc.actions.Action
+import be.catvert.pc.actions.EmptyAction
+import be.catvert.pc.actions.RemoveGOAction
 import be.catvert.pc.components.Component
 import be.catvert.pc.components.RenderableComponent
 import be.catvert.pc.components.UpdeatableComponent
+import be.catvert.pc.utility.ExposeEditor
 import be.catvert.pc.utility.Renderable
 import be.catvert.pc.utility.Updeatable
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -10,8 +14,13 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 
-class GameObjectState(var name: String, @JsonIgnore var gameObject: GameObject?, components: MutableSet<Component> = mutableSetOf()) : Renderable, Updeatable {
-    @JsonCreator private constructor(): this("State", null)
+class GameObjectState(var name: String, components: MutableSet<Component> = mutableSetOf()) : Renderable, Updeatable {
+    @JsonCreator private constructor(): this("State")
+
+    @JsonIgnore lateinit var gameObject: GameObject
+
+    @ExposeEditor var onStartAction: Action = EmptyAction()
+    @ExposeEditor var onRemoveAction: Action = RemoveGOAction()
 
     @JsonProperty("comps")
     private val components: MutableSet<Component> = components
@@ -20,27 +29,25 @@ class GameObjectState(var name: String, @JsonIgnore var gameObject: GameObject?,
 
     @JsonIgnore private val updateComponents = mutableSetOf<UpdeatableComponent>()
 
+    @JsonIgnore var isRemoving = false
+        set(value) {
+            field = value
+            if(value) {
+                onRemoveAction.perform(gameObject)
+            }
+        }
+
     @JsonIgnore
     fun getComponents() = components.toSet()
 
-    fun linkGameObject(gameObject: GameObject) {
+    fun onGOAddToContainer(gameObject: GameObject) {
         this.gameObject = gameObject
-        components.forEach {
-            addComponent(it)
-        }
+        components.forEach { sortComponent(it); it.onGOAddToContainer(this, gameObject) }
     }
 
     fun addComponent(component: Component) {
         components.add(component)
-
-        if(gameObject != null) {
-            linkCompToGO(component)
-        }
-
-        if (component is RenderableComponent)
-            renderComponents.add(component)
-        else if (component is UpdeatableComponent)
-            updateComponents.add(component)
+        sortComponent(component)
     }
 
     fun removeComponent(component: Component) {
@@ -50,6 +57,13 @@ class GameObjectState(var name: String, @JsonIgnore var gameObject: GameObject?,
             renderComponents.remove(component)
         else if(component is UpdeatableComponent)
             updateComponents.remove(component)
+    }
+
+    private fun sortComponent(component: Component) {
+        if (component is RenderableComponent)
+            renderComponents.add(component)
+        else if (component is UpdeatableComponent)
+            updateComponents.add(component)
     }
 
     inline fun <reified T : Component> getComponent(index: Int = 0): T? {
@@ -79,20 +93,12 @@ class GameObjectState(var name: String, @JsonIgnore var gameObject: GameObject?,
         }
     }
 
-    private fun linkCompToGO(component: Component) {
-        if(gameObject != null) {
-            component.linkGameObject(gameObject!!)
-            if(gameObject!!.container != null)
-                component.onGOAddToContainer(gameObject!!)
-        }
-    }
-
     override fun render(batch: Batch) {
-        renderComponents.forEach { if (it.active) it.render(batch) }
+        renderComponents.forEach { if (it.active) it.render(gameObject, batch) }
     }
 
     override fun update() {
-        updateComponents.forEach { if (it.active) it.update() }
+        updateComponents.forEach { if (it.active) it.update(gameObject) }
     }
 
     operator fun plusAssign(component: Component) {

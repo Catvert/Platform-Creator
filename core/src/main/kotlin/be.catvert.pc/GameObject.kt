@@ -1,15 +1,18 @@
 package be.catvert.pc
 
-import be.catvert.pc.actions.Action
-import be.catvert.pc.components.Component
-import be.catvert.pc.components.RenderableComponent
-import be.catvert.pc.components.UpdeatableComponent
 import be.catvert.pc.containers.GameObjectContainer
-import be.catvert.pc.serialization.PostDeserialization
+import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.kotcrab.vis.ui.widget.VisLabel
+import com.kotcrab.vis.ui.widget.VisSelectBox
+import com.kotcrab.vis.ui.widget.VisTable
+import com.kotcrab.vis.ui.widget.spinner.IntSpinnerModel
+import com.kotcrab.vis.ui.widget.spinner.Spinner
+import ktx.actors.onChange
+import ktx.collections.toGdxArray
 import java.util.*
 
 
@@ -20,11 +23,11 @@ import java.util.*
  * @param container Container dans lequel l'objet va être implémenté
  * @param prefab Le prefab utilisé pour créer l'objet
  */
-class GameObject(var tag: Tag,
+class GameObject(@ExposeEditor var tag: Tag,
                  id: UUID = UUID.randomUUID(),
                  var rectangle: Rect = Rect(size = Size(1, 1)),
                  container: GameObjectContainer? = null,
-                 initDefaultState: GameObjectState.()  -> Unit = {}) : Updeatable, Renderable {
+                 initDefaultState: GameObjectState.() -> Unit = {}) : Updeatable, Renderable, CustomEditorImpl {
 
     enum class Tag {
         Sprite, PhysicsSprite, Player, Enemy
@@ -32,67 +35,72 @@ class GameObject(var tag: Tag,
 
     var id: UUID = id
 
+    @ExposeEditor
     var keepActive: Boolean = false
 
+    @ExposeEditor
     var unique: Boolean = false
 
+    @ExposeEditor(minInt = -100, maxInt = 100)
     var layer: Int = 0
+        set(value) {
+            if (value in Constants.minLayerIndex until Constants.maxLayerIndex) field = value
+        }
 
-    var fixedSize = false
+    @JsonProperty("states") private val states: MutableSet<GameObjectState> = mutableSetOf(GameObjectState("default").apply(initDefaultState))
 
     var currentState: Int = 0
         set(value) {
-            if(value in 0 until states.size - 1)
+            if (value in 0 until states.size - 1) {
                 field = value
+                getCurrentState().onStartAction(this)
+            }
         }
 
-    @JsonProperty("states") private val states: MutableSet<GameObjectState> = mutableSetOf(GameObjectState("default", this).apply(initDefaultState))
+    @JsonIgnore val onRemoveFromParent = Signal<GameObject>()
 
-    @JsonIgnore var active: Boolean = true
+    @JsonIgnore
+    var active: Boolean = true
         set(value) {
-            if(!keepActive)
+            if (!keepActive)
                 field = value
         }
 
     @JsonIgnore
     var gridCells: MutableList<GridCell> = mutableListOf()
 
-    @JsonIgnore var container: GameObjectContainer? = container
+    @JsonIgnore
+    var container: GameObjectContainer? = container
         set(value) {
             field = value
-            if(field != null) {
-                states.forEach { it.linkGameObject(this) }
+            if (field != null) {
+                states.forEach { it.onGOAddToContainer(this) }
+                getCurrentState().onStartAction(this)
             }
         }
 
-    @JsonIgnore var isRemoving = false
-        set(value) {
-            field = value
-            if(value) {
-                onRemoveAction?.perform(this)
-                container = null
-            }
-        }
+    @JsonIgnore
+    fun getCurrentState() = states.elementAt(currentState)
 
-    var onRemoveAction: Action? = null
-
-    @JsonIgnore fun getCurrentState() = states.elementAt(currentState)
-    @JsonIgnore fun getStates() = states.toSet()
+    @JsonIgnore
+    fun getStates() = states.toSet()
 
     fun position() = rectangle.position
     fun size() = rectangle.size
 
     fun removeFromParent() {
-        isRemoving = true
+        onRemoveFromParent(this)
+        container?.removeGameObject(this)
     }
 
     fun addState(state: GameObjectState) {
-        state.linkGameObject(this)
+        if(container != null)
+            state.onGOAddToContainer(this)
         states.add(state)
     }
 
     fun addState(name: String, initState: GameObjectState.() -> Unit) {
-        val state = GameObjectState(name, this)
+        val state = GameObjectState(name)
         state.initState()
         addState(state)
     }
@@ -106,14 +114,70 @@ class GameObject(var tag: Tag,
     }
 
     override fun update() {
-        if(active) {
+        if (active) {
             getCurrentState().update()
         }
     }
 
     override fun render(batch: Batch) {
-        if(active) {
+        if (active) {
             getCurrentState().render(batch)
         }
+    }
+
+    override fun insertChangeProperties(table: VisTable, editorScene: EditorScene) {
+        table.add(VisLabel("Pos X : "))
+        val posXIntModel = IntSpinnerModel(position().x, 0, editorScene.level.matrixRect.width - size().width)
+        table.add(Spinner("", posXIntModel).apply {
+            onChange {
+                rectangle.x = posXIntModel.value
+            }
+        })
+
+        table.row()
+
+        table.add(VisLabel("Pos Y : "))
+        val posYIntModel = IntSpinnerModel(position().y, 0, editorScene.level.matrixRect.height - size().height)
+        table.add(Spinner("", posYIntModel).apply {
+            onChange {
+                rectangle.y = posYIntModel.value
+            }
+        })
+
+        table.row()
+
+        table.add(VisLabel("Largeur : "))
+        val widthIntModel = IntSpinnerModel(size().width, 1, Constants.maxGameObjectSize)
+        table.add(Spinner("", widthIntModel).apply {
+            onChange {
+                rectangle.width = widthIntModel.value
+            }
+        })
+
+        table.row()
+
+        table.add(VisLabel("Hauteur : "))
+        val heightIntModel = IntSpinnerModel(size().height, 1, Constants.maxGameObjectSize)
+        table.add(Spinner("", heightIntModel).apply {
+            onChange {
+                rectangle.height = heightIntModel.value
+            }
+        })
+
+        table.row()
+
+        table.add(VisLabel("State initial : "))
+        table.add(VisSelectBox<String>().apply {
+            fun generateItems() {
+                this.items = getStates().map { it.name }.toGdxArray()
+            }
+            generateItems()
+
+            this.selectedIndex = currentState
+
+            onChange {
+                currentState = selectedIndex
+            }
+        })
     }
 }

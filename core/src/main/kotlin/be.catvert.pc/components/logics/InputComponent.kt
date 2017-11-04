@@ -1,5 +1,6 @@
 package be.catvert.pc.components.logics
 
+import be.catvert.pc.GameObject
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
 import be.catvert.pc.components.UpdeatableComponent
@@ -18,17 +19,13 @@ import com.fasterxml.jackson.annotation.JsonCreator
 class InputComponent(@ExposeEditor(customType = CustomType.KEY_INT) var key: Int, @ExposeEditor var justPressed: Boolean, @ExposeEditor var action: Action) : UpdeatableComponent() {
     @JsonCreator private constructor(): this(Input.Keys.UNKNOWN, false, EmptyAction())
 
-    override fun update() {
+    override fun update(gameObject: GameObject) {
         if (justPressed) {
             if (Gdx.input.isKeyJustPressed(key))
-                performAction()
+                action(gameObject)
         } else {
             if (Gdx.input.isKeyPressed(key))
-                performAction()
+                action(gameObject)
         }
-    }
-
-    private fun performAction() {
-        action.perform(gameObject)
     }
 }

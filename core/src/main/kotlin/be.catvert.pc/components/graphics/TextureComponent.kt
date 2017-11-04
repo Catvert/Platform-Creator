@@ -1,6 +1,7 @@
 package be.catvert.pc.components.graphics
 
 import be.catvert.pc.GameObject
+import be.catvert.pc.GameObjectState
 import be.catvert.pc.PCGame
 import be.catvert.pc.components.RenderableComponent
 import be.catvert.pc.scenes.EditorScene
@@ -41,13 +42,13 @@ class TextureComponent(texturePath: FileHandle) : RenderableComponent(), CustomE
         texture = PCGame.assetManager.loadOnDemand<Texture>(this.texturePath).asset
     }
 
-    override fun onGOAddToContainer(gameObject: GameObject) {
-        super.onGOAddToContainer(gameObject)
+    override fun onGOAddToContainer(state: GameObjectState, gameObject: GameObject) {
+        super.onGOAddToContainer(state, gameObject)
 
         updateTexture()
     }
 
-    override fun render(batch: Batch) {
+    override fun render(gameObject: GameObject, batch: Batch) {
         batch.draw(texture, gameObject.rectangle, flipX, flipY)
     }
 

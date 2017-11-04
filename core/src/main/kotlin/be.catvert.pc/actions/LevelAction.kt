@@ -17,8 +17,8 @@ class LevelAction(@ExposeEditor var action: LevelActions = LevelActions.FAIL_EXI
         if(gameObject.container != null && gameObject.container is Level) {
             val level = gameObject.container as Level
             when(action) {
-                LevelAction.LevelActions.SUCCESS_EXIT -> level.exitLevel(true)
-                LevelAction.LevelActions.FAIL_EXIT -> level.exitLevel(false)
+                LevelAction.LevelActions.SUCCESS_EXIT -> level.exit(true)
+                LevelAction.LevelActions.FAIL_EXIT -> level.exit(false)
             }
         }
     }

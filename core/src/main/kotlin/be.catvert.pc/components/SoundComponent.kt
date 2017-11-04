@@ -1,6 +1,7 @@
 package be.catvert.pc.components
 
 import be.catvert.pc.GameObject
+import be.catvert.pc.GameObjectState
 import be.catvert.pc.PCGame
 import be.catvert.pc.utility.Constants
 import com.badlogic.gdx.Gdx
@@ -30,8 +31,8 @@ class SoundComponent(soundPath: FileHandle) : BasicComponent() {
         sound.play(PCGame.soundVolume)
     }
 
-    override fun onGOAddToContainer(gameObject: GameObject) {
-        super.onGOAddToContainer(gameObject)
+    override fun onGOAddToContainer(state: GameObjectState, gameObject: GameObject) {
+        super.onGOAddToContainer(state, gameObject)
 
         updateSound()
     }

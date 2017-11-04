@@ -49,8 +49,9 @@ enum class PrefabFactory(val prefab: Prefab) {
 
             this += InputComponent(GameKeys.GAME_PLAYER_GOD_DOWN.key, false, PhysicsAction(NextPhysicsActions.GO_DOWN))
             this += InputComponent(GameKeys.GAME_PLAYER_JUMP.key, true, PhysicsAction(NextPhysicsActions.JUMP))
-        }.apply {
+
             onRemoveAction = LevelAction(LevelAction.LevelActions.FAIL_EXIT)
+        }.apply {
             keepActive = true
             unique = true
         })

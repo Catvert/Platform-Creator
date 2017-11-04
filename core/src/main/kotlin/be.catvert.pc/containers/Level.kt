@@ -43,9 +43,7 @@ class Level(val levelPath: String, val levelName: String, val gameVersion: Float
         followGameObject = gameObject
     }
 
-    fun exitLevel(success: Boolean) {
-        PCGame.setScene(EndLevelScene(levelPath, success))
-    }
+    @JsonIgnore var exit : (success: Boolean) -> Unit = { PCGame.setScene(EndLevelScene(levelPath, it)) }
 
     fun moveCameraToFollowGameObject(camera: OrthographicCamera, lerp: Boolean): Boolean {
         if(followGameObject != null) {
