@@ -50,7 +50,7 @@ enum class PrefabFactory(val prefab: Prefab) {
             this += InputComponent(GameKeys.GAME_PLAYER_GOD_DOWN.key, false, PhysicsAction(NextPhysicsActions.GO_DOWN))
             this += InputComponent(GameKeys.GAME_PLAYER_JUMP.key, true, PhysicsAction(NextPhysicsActions.JUMP))
 
-            onRemoveAction = LevelAction(LevelAction.LevelActions.FAIL_EXIT)
+            this += LifeComponent(LevelAction(LevelAction.LevelActions.FAIL_EXIT), setOf())
         }.apply {
             keepActive = true
             unique = true
@@ -60,7 +60,8 @@ enum class PrefabFactory(val prefab: Prefab) {
         Prefab("spider", "Catvert", GameObject(GameObject.Tag.Enemy, UUID.randomUUID(), Rect(Point(), Size(48, 48)), null) {
             this += AnimationComponent((Constants.atlasDirPath + "More Enemies Animations/enemies.atlas").toLocalFile(), "spider_walk", 0.33f)
             this += PhysicsComponent(false, 5)
-            this += SimpleAIComponent(true)
+            this += LifeComponent(RemoveGOAction(), setOf())
+            this += AIComponent(LifeAction(LifeActions.REMOVE_LP) to listOf(CollisionSide.OnDown, CollisionSide.OnRight, CollisionSide.OnLeft), LifeAction(LifeActions.REMOVE_LP) to listOf(CollisionSide.OnUp))
         })
     )
 }

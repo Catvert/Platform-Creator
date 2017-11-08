@@ -17,9 +17,9 @@ import ktx.vis.verticalGroup
 class MultiplexerAction(var actions: Array<Action>) : Action, CustomEditorImpl {
     @JsonCreator private constructor(): this(arrayOf())
 
-    override fun perform(gameObject: GameObject) {
+    override fun invoke(gameObject: GameObject) {
         actions.forEach {
-            it.perform(gameObject)
+            it(gameObject)
         }
     }
 

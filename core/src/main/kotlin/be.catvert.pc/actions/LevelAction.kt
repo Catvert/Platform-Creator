@@ -13,7 +13,7 @@ class LevelAction(@ExposeEditor var action: LevelActions = LevelActions.FAIL_EXI
         SUCCESS_EXIT, FAIL_EXIT
     }
 
-    override fun perform(gameObject: GameObject) {
+    override fun invoke(gameObject: GameObject) {
         if(gameObject.container != null && gameObject.container is Level) {
             val level = gameObject.container as Level
             when(action) {

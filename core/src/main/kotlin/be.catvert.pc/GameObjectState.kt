@@ -19,8 +19,8 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
 
     @JsonIgnore lateinit var gameObject: GameObject
 
-    @ExposeEditor var onStartAction: Action = EmptyAction()
-    @ExposeEditor var onRemoveAction: Action = RemoveGOAction()
+    @ExposeEditor var onStartStateAction: Action = EmptyAction()
+    @ExposeEditor var onEndStateAction: Action = RemoveGOAction()
 
     @JsonProperty("comps")
     private val components: MutableSet<Component> = components
@@ -28,14 +28,6 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
     @JsonIgnore private val renderComponents = mutableSetOf<RenderableComponent>()
 
     @JsonIgnore private val updateComponents = mutableSetOf<UpdeatableComponent>()
-
-    @JsonIgnore var isRemoving = false
-        set(value) {
-            field = value
-            if(value) {
-                onRemoveAction.perform(gameObject)
-            }
-        }
 
     @JsonIgnore
     fun getComponents() = components.toSet()
@@ -46,8 +38,10 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
     }
 
     fun addComponent(component: Component) {
-        components.add(component)
-        sortComponent(component)
+        if(components.none { it.javaClass.isInstance(component) }) {
+            components.add(component)
+            sortComponent(component)
+        }
     }
 
     fun removeComponent(component: Component) {
@@ -94,11 +88,11 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
     }
 
     override fun render(batch: Batch) {
-        renderComponents.forEach { if (it.active) it.render(gameObject, batch) }
+        renderComponents.forEach { it.render(gameObject, batch) }
     }
 
     override fun update() {
-        updateComponents.forEach { if (it.active) it.update(gameObject) }
+        updateComponents.forEach { it.update(gameObject) }
     }
 
     operator fun plusAssign(component: Component) {

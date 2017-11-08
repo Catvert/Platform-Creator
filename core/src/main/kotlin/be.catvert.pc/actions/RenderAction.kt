@@ -13,7 +13,7 @@ class RenderAction(@ExposeEditor var action: RenderActions) : Action {
         FLIP_X, UNFLIP_X, FLIP_Y, UNFLIP_Y
     }
 
-    override fun perform(gameObject: GameObject) {
+    override fun invoke(gameObject: GameObject) {
         gameObject.getCurrentState().getComponents().filter { it is RenderableComponent }.forEach {
             val renderComp = it as RenderableComponent
             when(action) {

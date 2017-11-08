@@ -827,41 +827,29 @@ class EditorScene(val level: Level) : Scene() {
         }
     }
 
-    private fun addWidgetForField(parent: VisTable, field: Field, instance: Any, exposeEditor: ExposeEditor) {
-        fun setValue(value: Any) {
-            field.set(instance, value)
-        }
+    fun addWidgetForValue(table: VisTable, get: () -> Any, set: (newValue: Any) -> Unit, exposeEditor: ExposeEditor) {
+        val value = get()
 
-        fun <T : Any> getValueOrAssign(assign: T): T {
-            @Suppress("UNCHECKED_CAST")
-            var value = field.get(instance) as? T
-            if (value == null) {
-                value = assign
-                setValue(assign)
-            }
-            return value
-        }
-
-        when (field.get(instance)) {
+        when (value) {
             is Boolean -> {
-                parent.add(VisCheckBox("", getValueOrAssign(true)).apply {
+                table.add(VisCheckBox("", value).apply {
                     onChange {
-                        setValue(isChecked)
+                        set(isChecked)
                     }
                 })
             }
             is Int -> {
                 when (exposeEditor.customType) {
                     CustomType.DEFAULT -> {
-                        val intModel = IntSpinnerModel(getValueOrAssign(exposeEditor.minInt), exposeEditor.minInt, exposeEditor.maxInt)
-                        parent.add(Spinner("", intModel).apply {
+                        val intModel = IntSpinnerModel(value, exposeEditor.minInt, exposeEditor.maxInt)
+                        table.add(Spinner("", intModel).apply {
                             onChange {
-                                setValue(intModel.value)
+                                set(intModel.value)
                             }
                         })
                     }
                     CustomType.KEY_INT -> {
-                        parent.add(VisTextArea(Input.Keys.toString(getValueOrAssign(Input.Keys.UNKNOWN))).apply {
+                        table.add(VisTextArea(Input.Keys.toString(value)).apply {
                             isReadOnly = true
                             onKeyUp {
                                 val keyStr = Input.Keys.toString(it)
@@ -869,7 +857,7 @@ class EditorScene(val level: Level) : Scene() {
 
                                 if (key != -1) {
                                     text = keyStr
-                                    setValue(key)
+                                    set(key)
                                 }
                             }
                         }).width(50f)
@@ -877,16 +865,16 @@ class EditorScene(val level: Level) : Scene() {
                 }
             }
             is String -> {
-                parent.add(VisTextField(getValueOrAssign("")).apply {
+                table.add(VisTextField(value).apply {
                     onChange {
-                        setValue(text)
+                        set(text)
                     }
                 }).width(100f)
             }
             is Point -> {
-                var value = getValueOrAssign(Point())
+                var value: Point = value
 
-                val label = parent.add(VisLabel(value.toString())).actor
+                val label = table.add(VisLabel(value.toString())).actor
 
                 val xIntModel = IntSpinnerModel(value.x, 0, level.matrixRect.width)
                 val yIntModel = IntSpinnerModel(value.y, 0, level.matrixRect.height)
@@ -896,10 +884,10 @@ class EditorScene(val level: Level) : Scene() {
                     label.setText(newValue.toString())
                     xIntModel.setValue(newValue.x, false)
                     yIntModel.setValue(newValue.y, false)
-                    setValue(newValue)
+                    set(newValue)
                 }
 
-                parent.add(verticalGroup {
+                table.add(verticalGroup {
                     space(10f)
 
                     spinner("X", xIntModel) {
@@ -915,7 +903,7 @@ class EditorScene(val level: Level) : Scene() {
                     }
                 })
 
-                parent.add(VisTextButton("Sélectionner").apply {
+                table.add(VisTextButton("Sélectionner").apply {
                     onClick {
                         editorMode = EditorScene.EditorMode.SELECT_POINT
                         onSelectPoint.register(true) {
@@ -927,9 +915,9 @@ class EditorScene(val level: Level) : Scene() {
                 })
             }
             is Size -> {
-                var value = getValueOrAssign(Size(exposeEditor.minInt, exposeEditor.minInt))
+                var value: Size = value
 
-                val label = parent.add(VisLabel(value.toString())).actor
+                val label = table.add(VisLabel(value.toString())).actor
 
                 val widthIntModel = IntSpinnerModel(value.width, exposeEditor.minInt, exposeEditor.maxInt)
                 val heightIntModel = IntSpinnerModel(value.height, exposeEditor.minInt, exposeEditor.maxInt)
@@ -939,10 +927,10 @@ class EditorScene(val level: Level) : Scene() {
                     label.setText(newValue.toString())
                     widthIntModel.setValue(newValue.width, false)
                     heightIntModel.setValue(newValue.height, false)
-                    setValue(newValue)
+                    set(newValue)
                 }
 
-                parent.add(verticalGroup {
+                table.add(verticalGroup {
                     space(10f)
 
                     spinner("L", widthIntModel) {
@@ -959,23 +947,23 @@ class EditorScene(val level: Level) : Scene() {
                 })
             }
             is Enum<*> -> {
-                parent.add(VisSelectBox<String>().apply {
-                    val enumConstants = field.type.enumConstants
+                table.add(VisSelectBox<String>().apply {
+                    val enumConstants = value.javaClass.enumConstants
 
                     this.items = enumConstants.map { (it as Enum<*>).name }.toGdxArray()
 
-                    val index = enumConstants.indexOfFirst { it == getValueOrAssign(enumConstants[0]) }
+                    val index = enumConstants.indexOfFirst { it == value }
                     selectedIndex = if (index == -1) 0 else index
 
                     onChange {
-                        setValue(enumConstants[selectedIndex])
+                        set(enumConstants[selectedIndex])
                     }
                 }).width(125f)
             }
             is Action -> {
-                parent.add(VisTextButton("Éditer").apply {
+                table.add(VisTextButton("Éditer l'action").apply {
                     onClick {
-                        showEditActionWindow(getValueOrAssign(EmptyAction()), { setValue(it) })
+                        showEditActionWindow(value) { set(it) }
                     }
                 })
             }
@@ -995,7 +983,7 @@ class EditorScene(val level: Level) : Scene() {
 
             table.add(VisLabel("${if (exposeField.customName.isBlank()) field.name else exposeField.customName} : "))
 
-            addWidgetForField(table, field, instance, exposeField)
+            addWidgetForValue(table, { field.get(instance) }, { field.set(instance, it) }, exposeField)
 
             table.row()
         }

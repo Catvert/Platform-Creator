@@ -19,7 +19,7 @@ class MoveAction(@ExposeEditor var direction: Direction, @ExposeEditor(maxInt = 
         LEFT, RIGHT, UP, DOWN
     }
 
-    override fun perform(gameObject: GameObject) {
+    override fun invoke(gameObject: GameObject) {
         var xSpeed = 0
         var ySpeed = 0
 

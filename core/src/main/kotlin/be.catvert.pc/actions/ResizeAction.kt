@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 class ResizeAction(@ExposeEditor(minInt = 1, maxInt = Constants.maxGameObjectSize) var newSize: Size) : Action {
     @JsonCreator private constructor(): this(Size(1, 1))
 
-    override fun perform(gameObject: GameObject) {
+    override fun invoke(gameObject: GameObject) {
         gameObject.rectangle.size = newSize
     }
 }

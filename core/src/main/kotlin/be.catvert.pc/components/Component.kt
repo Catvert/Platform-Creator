@@ -10,10 +10,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 
 /**
  * Classe de base d'un component
- * @param active Permet de spécifier si le component est actif ou non
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
-sealed class Component(@ExposeEditor var active: Boolean = true) {
+sealed class Component {
     @ExposeEditor var name = ReflectionUtility.simpleNameOf(this).removeSuffix("Component")
 
     open fun onGOAddToContainer(state: GameObjectState, gameObject: GameObject) {}

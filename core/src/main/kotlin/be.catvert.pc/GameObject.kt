@@ -52,8 +52,9 @@ class GameObject(@ExposeEditor var tag: Tag,
     var currentState: Int = 0
         set(value) {
             if (value in 0 until states.size - 1) {
+                getCurrentState().onEndStateAction(this)
                 field = value
-                getCurrentState().onStartAction(this)
+                getCurrentState().onStartStateAction(this)
             }
         }
 
@@ -75,7 +76,7 @@ class GameObject(@ExposeEditor var tag: Tag,
             field = value
             if (field != null) {
                 states.forEach { it.onGOAddToContainer(this) }
-                getCurrentState().onStartAction(this)
+                getCurrentState().onStartStateAction(this)
             }
         }
 

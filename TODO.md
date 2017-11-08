@@ -8,6 +8,7 @@
 - Ajouter la possibilité à stateAction d'afficher la liste des actions à la place de l'index sous forme de slider
 - Traduire tout le texte visible en français
 - Javadoc + commentaires
+
 ## BUGS
 
 - is Array<*> dans addWidgetForField, vérifier si le type de l'array est bien une Action

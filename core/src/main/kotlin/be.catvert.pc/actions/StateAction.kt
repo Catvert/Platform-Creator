@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 class StateAction(@ExposeEditor(maxInt = 100) val stateIndex: Int) : Action {
     @JsonCreator private constructor(): this(0)
 
-    override fun perform(gameObject: GameObject) {
+    override fun invoke(gameObject: GameObject) {
         gameObject.currentState = stateIndex
     }
 }

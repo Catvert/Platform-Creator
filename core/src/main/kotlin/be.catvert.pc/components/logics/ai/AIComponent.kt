@@ -4,14 +4,24 @@ import be.catvert.pc.GameObject
 import be.catvert.pc.GameObjectState
 import be.catvert.pc.Log
 import be.catvert.pc.actions.Action
-import be.catvert.pc.components.UpdeatableComponent
+import be.catvert.pc.actions.EmptyAction
+import be.catvert.pc.components.BasicComponent
 import be.catvert.pc.components.logics.CollisionSide
 import be.catvert.pc.components.logics.PhysicsComponent
-import be.catvert.pc.utility.SignalListener
+import be.catvert.pc.scenes.EditorScene
+import be.catvert.pc.utility.CustomEditorImpl
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.kotcrab.vis.ui.widget.VisTable
 
-abstract class AIComponent(val applyActionCollisionToPlayer: Pair<Action, List<CollisionSide>>, val applyActionCollisionToEnemy: Pair<Action, List<CollisionSide>>) : UpdeatableComponent() {
-    @JsonIgnore protected var physicsComponent: PhysicsComponent? = null
+class AIComponent(var actionOnCollisionWithPlayer: Pair<Action, List<CollisionSide>>, var actionOnPlayerCollision: Pair<Action, List<CollisionSide>>) : BasicComponent(), CustomEditorImpl {
+    @JsonCreator private constructor(): this(EmptyAction() to listOf(), EmptyAction() to listOf())
+
+    override fun insertChangeProperties(table: VisTable, editorScene: EditorScene) {
+        //editorScene.addWidgetForValue(table, {actionOnPlayerCollision.first}, {actionOnPlayerCollision = it as Action to actionOnPlayerCollision.second })
+    }
+
+    @JsonIgnore private var physicsComponent: PhysicsComponent? = null
 
     override fun onGOAddToContainer(state: GameObjectState, gameObject: GameObject) {
         super.onGOAddToContainer(state, gameObject)
@@ -20,24 +30,22 @@ abstract class AIComponent(val applyActionCollisionToPlayer: Pair<Action, List<C
         if(physicsComponent != null) {
             physicsComponent!!.onCollisionWith.register {
                 if(it.collideGameObject.tag == GameObject.Tag.Player) {
-                    for(i in 0 until applyActionCollisionToPlayer.second.size) {
-                        if(applyActionCollisionToPlayer.second[i] == it.side) {
-                            applyActionCollisionToPlayer.first(it.collideGameObject)
-                            break;
+                    actionOnCollisionWithPlayer.second.forEach { side ->
+                        if(side == it.side) {
+                            actionOnCollisionWithPlayer.first(it.collideGameObject)
                         }
                     }
 
-                    for(i in 0 until applyActionCollisionToEnemy.second.size) {
-                        if(applyActionCollisionToEnemy.second[i] == it.side) {
-                            applyActionCollisionToEnemy.first(gameObject)
-                            break;
+                    actionOnPlayerCollision.second.forEach { side ->
+                        if(side == it.side) {
+                            actionOnPlayerCollision.first(gameObject)
                         }
                     }
                 }
             }
         }
         else {
-            Log.error { "Impossible de d'utiliser un SimpleAIComponent si l'objet n'a pas de PhysicsComponent" }
+            Log.error { "Impossible de d'utiliser un AIComponent si l'objet n'a pas de PhysicsComponent" }
         }
     }
 }

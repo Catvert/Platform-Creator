@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 class SoundAction(@ExposeEditor var soundIndex: Int) : Action {
     @JsonCreator private constructor(): this(0)
 
-    override fun perform(gameObject: GameObject) {
+    override fun invoke(gameObject: GameObject) {
         gameObject.getCurrentState().getComponent<SoundComponent>(soundIndex)?.playSound()
     }
 }

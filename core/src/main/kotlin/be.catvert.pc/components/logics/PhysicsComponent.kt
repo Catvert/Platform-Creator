@@ -141,7 +141,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
 
                         moveSpeedY = gravitySpeed.toFloat()
                         addJumpAfterClear = true
-                         jumpAction?.perform(gameObject)
+                         jumpAction?.invoke(gameObject)
                     } else {
                         // Vérifie si le go est arrivé à la bonne hauteur de saut ou s'il rencontre un obstacle au dessus de lui
                         if (gameObject.rectangle.y >= jumpData.targetHeight || collideOnMove(0, gravitySpeed, gameObject)) {

@@ -1,7 +1,5 @@
 package be.catvert.pc.utility
 
-import be.catvert.pc.GameObject
-
 enum class CustomType {
     DEFAULT, KEY_INT
 }
