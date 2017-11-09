@@ -43,7 +43,6 @@ import ktx.collections.gdxArrayOf
 import ktx.collections.toGdxArray
 import ktx.vis.verticalGroup
 import ktx.vis.window
-import java.lang.reflect.Field
 import kotlin.reflect.KClass
 
 /**
@@ -827,10 +826,45 @@ class EditorScene(val level: Level) : Scene() {
         }
     }
 
-    fun addWidgetForValue(table: VisTable, get: () -> Any, set: (newValue: Any) -> Unit, exposeEditor: ExposeEditor) {
+    inline fun <reified T : Any> addWidgetArray(table: VisTable, gameObject: GameObject, crossinline getItemName: (index: Int) -> String, crossinline getItemExposeEditor: (index: Int) -> ExposeEditor, crossinline createItem: () -> T, crossinline getArray: () -> Array<T>, crossinline setArray: (newArray: Array<T>) -> Unit) {
+        val valueTables = table.add(VisTable()).height(100f).actor
+
+        var onListChanged: () -> Unit = {}
+        val setArray: (Array<T>) -> Unit = { setArray(it); onListChanged() }
+
+        onListChanged = {
+            valueTables.clear()
+
+            valueTables.add(VisScrollPane(ktx.vis.table() {
+                getArray().forEachIndexed { index, it ->
+                    addWidgetValue(this, gameObject, getItemName(index), { it }, { setArray(getArray().apply { set(index, it as T) }) }, getItemExposeEditor(index), false)
+
+                    textButton("Suppr.") {
+                        onClick {
+                            setArray(getArray().toGdxArray().apply { removeIndex(index) }.toArray())
+                        }
+                    }
+
+                    row()
+                }
+            })).height(100f)
+        }
+        onListChanged()
+
+        table.row()
+
+        table.add(VisTextButton("Ajouter").apply { onClick { setArray(getArray() + createItem()); } })
+
+        table.row()
+    }
+
+    fun addWidgetValue(table: VisTable, gameObject: GameObject, labelName: String, get: () -> Any, set: (newValue: Any) -> Unit, exposeEditor: ExposeEditor, rowWhenConstruct: Boolean = true) {
+        table.add(VisLabel(labelName))
+
         val value = get()
 
         when (value) {
+            is CustomEditorImpl -> value.insertChangeProperties(table, gameObject, this@EditorScene)
             is Boolean -> {
                 table.add(VisCheckBox("", value).apply {
                     onChange {
@@ -963,17 +997,22 @@ class EditorScene(val level: Level) : Scene() {
             is Action -> {
                 table.add(VisTextButton("Éditer l'action").apply {
                     onClick {
-                        showEditActionWindow(value) { set(it) }
+                        showEditActionWindow(gameObject, value) { set(it) }
                     }
                 })
             }
+            else -> {
+                throw Exception("Impossible d'insérer le type : ${value.javaClass.simpleName}")
+            }
         }
+
+        if(rowWhenConstruct)
+            table.row()
     }
 
-    private fun insertExposeEditorFields(instance: Any, table: VisTable) {
+    private fun insertExposeEditorFields(instance: Any, gameObject: GameObject, table: VisTable) {
         if (instance is CustomEditorImpl) {
-            instance.insertChangeProperties(table, this@EditorScene)
-            table.row()
+            instance.insertChangeProperties(table, gameObject, this@EditorScene)
         }
 
         ReflectionUtility.getAllFieldsOf(instance.javaClass).filter { it.isAnnotationPresent(ExposeEditor::class.java) }.forEach { field ->
@@ -981,11 +1020,7 @@ class EditorScene(val level: Level) : Scene() {
 
             val exposeField = field.getAnnotation(ExposeEditor::class.java)
 
-            table.add(VisLabel("${if (exposeField.customName.isBlank()) field.name else exposeField.customName} : "))
-
-            addWidgetForValue(table, { field.get(instance) }, { field.set(instance, it) }, exposeField)
-
-            table.row()
+            addWidgetValue(table, gameObject,"${if (exposeField.customName.isBlank()) field.name else exposeField.customName} : ", { field.get(instance) }, { field.set(instance, it) }, exposeField)
         }
     }
 
@@ -1019,9 +1054,9 @@ class EditorScene(val level: Level) : Scene() {
         }
     }
 
-    fun showEditActionWindow(action: Action?, setAction: (Action) -> Unit) {
+    fun showEditActionWindow(gameObject: GameObject, action: Action?, setAction: (Action) -> Unit) {
         stage + window("Éditer l'action") {
-            setSize(300f, 225f)
+            setSize(300f, 300f)
             setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
             isModal = true
             addCloseButton()
@@ -1051,7 +1086,7 @@ class EditorScene(val level: Level) : Scene() {
                         this@vgroup.addActor(this@selectBox)
 
                         this@vgroup.table(defaultSpacing = true) {
-                            insertExposeEditorFields(instance, this)
+                            insertExposeEditorFields(instance, gameObject, this)
 
                             row()
 
@@ -1189,9 +1224,8 @@ class EditorScene(val level: Level) : Scene() {
                 table(defaultSpacing = true) gameObjectTable@ {
                     onStateChanged = {
                         this@gameObjectTable.clear()
-                        insertExposeEditorFields(gameObject, this@gameObjectTable)
 
-                        row()
+                        insertExposeEditorFields(gameObject, gameObject,this@gameObjectTable)
                     }
                     onStateChanged()
                 }
@@ -1238,7 +1272,7 @@ class EditorScene(val level: Level) : Scene() {
                             this@stateTable.row()
 
                             this@stateTable.table(defaultSpacing = true) {
-                                insertExposeEditorFields(gameObject.getCurrentState(), this)
+                                insertExposeEditorFields(gameObject.getCurrentState(), gameObject,this)
                             }
 
                             this@stateTable.row()
@@ -1298,7 +1332,7 @@ class EditorScene(val level: Level) : Scene() {
 
                                             this@compTable.add(VisScrollPane(compPropertiesTable)).height(150f)
 
-                                            insertExposeEditorFields(instance, compPropertiesTable)
+                                            insertExposeEditorFields(instance, gameObject, compPropertiesTable)
 
                                         }.changed(ChangeListener.ChangeEvent(), this)
                                     }

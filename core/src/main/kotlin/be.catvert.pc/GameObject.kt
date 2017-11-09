@@ -126,7 +126,7 @@ class GameObject(@ExposeEditor var tag: Tag,
         }
     }
 
-    override fun insertChangeProperties(table: VisTable, editorScene: EditorScene) {
+    override fun insertChangeProperties(table: VisTable, gameObject: GameObject, editorScene: EditorScene) {
         table.add(VisLabel("Pos X : "))
         val posXIntModel = IntSpinnerModel(position().x, 0, editorScene.level.matrixRect.width - size().width)
         table.add(Spinner("", posXIntModel).apply {
@@ -180,5 +180,7 @@ class GameObject(@ExposeEditor var tag: Tag,
                 currentState = selectedIndex
             }
         })
+
+        table.row()
     }
 }

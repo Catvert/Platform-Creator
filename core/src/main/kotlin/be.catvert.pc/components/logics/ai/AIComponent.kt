@@ -10,15 +10,22 @@ import be.catvert.pc.components.logics.CollisionSide
 import be.catvert.pc.components.logics.PhysicsComponent
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.CustomEditorImpl
+import be.catvert.pc.utility.ExposeEditorFactory
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.kotcrab.vis.ui.widget.VisTable
 
-class AIComponent(var actionOnCollisionWithPlayer: Pair<Action, List<CollisionSide>>, var actionOnPlayerCollision: Pair<Action, List<CollisionSide>>) : BasicComponent(), CustomEditorImpl {
-    @JsonCreator private constructor(): this(EmptyAction() to listOf(), EmptyAction() to listOf())
+class AIComponent(var actionOnCollisionWithPlayer: Pair<Action, Array<CollisionSide>>, var actionOnPlayerCollision: Pair<Action, Array<CollisionSide>>) : BasicComponent(), CustomEditorImpl {
+    @JsonCreator private constructor(): this(EmptyAction() to arrayOf(), EmptyAction() to arrayOf())
 
-    override fun insertChangeProperties(table: VisTable, editorScene: EditorScene) {
-        //editorScene.addWidgetForValue(table, {actionOnPlayerCollision.first}, {actionOnPlayerCollision = it as Action to actionOnPlayerCollision.second })
+    override fun insertChangeProperties(table: VisTable, gameObject: GameObject, editorScene: EditorScene) {
+        editorScene.addWidgetValue(table, gameObject,"Action sur le joueur : ", {actionOnCollisionWithPlayer.first}, {actionOnCollisionWithPlayer = it as Action to actionOnCollisionWithPlayer.second }, ExposeEditorFactory.createExposeEditor())
+        editorScene.addWidgetArray(table.add(VisTable()).actor, gameObject, { actionOnCollisionWithPlayer.second.elementAt(it).name }, { ExposeEditorFactory.createExposeEditor() }, { CollisionSide.OnLeft }, { actionOnCollisionWithPlayer.second }, { actionOnCollisionWithPlayer = actionOnCollisionWithPlayer.first to it })
+        table.row()
+
+        editorScene.addWidgetValue(table, gameObject,"Action sur ce gameObject : ", {actionOnCollisionWithPlayer.first}, {actionOnCollisionWithPlayer = it as Action to actionOnCollisionWithPlayer.second }, ExposeEditorFactory.createExposeEditor())
+        editorScene.addWidgetArray(table.add(VisTable()).actor, gameObject, { actionOnCollisionWithPlayer.second.elementAt(it).name }, { ExposeEditorFactory.createExposeEditor() }, { CollisionSide.OnLeft }, { actionOnCollisionWithPlayer.second }, { actionOnCollisionWithPlayer = actionOnCollisionWithPlayer.first to it })
+        table.row()
     }
 
     @JsonIgnore private var physicsComponent: PhysicsComponent? = null

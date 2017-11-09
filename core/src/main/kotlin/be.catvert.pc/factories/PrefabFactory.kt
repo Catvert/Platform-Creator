@@ -41,14 +41,13 @@ enum class PrefabFactory(val prefab: Prefab) {
 
             this += SoundComponent((Constants.soundsDirPath + "player/jump.ogg").toLocalFile())
 
-            this += InputComponent(GameKeys.GAME_PLAYER_LEFT.key, false, MultiplexerAction(arrayOf(PhysicsAction(NextPhysicsActions.GO_LEFT), RenderAction(RenderAction.RenderActions.FLIP_X))))
-
-            this += InputComponent(GameKeys.GAME_PLAYER_RIGHT.key, false, MultiplexerAction(arrayOf(PhysicsAction(NextPhysicsActions.GO_RIGHT), RenderAction(RenderAction.RenderActions.UNFLIP_X))))
-
-            this += InputComponent(GameKeys.GAME_PLAYER_GOD_UP.key, false, PhysicsAction(NextPhysicsActions.GO_UP))
-
-            this += InputComponent(GameKeys.GAME_PLAYER_GOD_DOWN.key, false, PhysicsAction(NextPhysicsActions.GO_DOWN))
-            this += InputComponent(GameKeys.GAME_PLAYER_JUMP.key, true, PhysicsAction(NextPhysicsActions.JUMP))
+            this += InputComponent(arrayOf(
+                    InputData(GameKeys.GAME_PLAYER_LEFT.key, false, MultiplexerAction(arrayOf(PhysicsAction(NextPhysicsActions.GO_LEFT), RenderAction(RenderAction.RenderActions.FLIP_X)))),
+                    InputData(GameKeys.GAME_PLAYER_RIGHT.key, false, MultiplexerAction(arrayOf(PhysicsAction(NextPhysicsActions.GO_RIGHT), RenderAction(RenderAction.RenderActions.UNFLIP_X)))),
+                    InputData(GameKeys.GAME_PLAYER_GOD_UP.key, false, PhysicsAction(NextPhysicsActions.GO_UP)),
+                    InputData(GameKeys.GAME_PLAYER_GOD_DOWN.key, false, PhysicsAction(NextPhysicsActions.GO_DOWN)),
+                    InputData(GameKeys.GAME_PLAYER_JUMP.key, true, PhysicsAction(NextPhysicsActions.JUMP))
+            ))
 
             this += LifeComponent(LevelAction(LevelAction.LevelActions.FAIL_EXIT), setOf())
         }.apply {
@@ -61,7 +60,8 @@ enum class PrefabFactory(val prefab: Prefab) {
             this += AnimationComponent((Constants.atlasDirPath + "More Enemies Animations/enemies.atlas").toLocalFile(), "spider_walk", 0.33f)
             this += PhysicsComponent(false, 5)
             this += LifeComponent(RemoveGOAction(), setOf())
-            this += AIComponent(LifeAction(LifeActions.REMOVE_LP) to listOf(CollisionSide.OnDown, CollisionSide.OnRight, CollisionSide.OnLeft), LifeAction(LifeActions.REMOVE_LP) to listOf(CollisionSide.OnUp))
+            this += AIComponent(LifeAction(LifeActions.REMOVE_LP) to arrayOf(CollisionSide.OnDown, CollisionSide.OnRight, CollisionSide.OnLeft), LifeAction(LifeActions.REMOVE_LP) to arrayOf(CollisionSide.OnUp))
+            this += SimpleMoverComponent(SimpleMoverOrientation.HORIZONTAL, false).apply { onReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X) }
         })
     )
 }

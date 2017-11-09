@@ -61,7 +61,7 @@ class AnimationComponent(atlasPath: FileHandle, animationRegionName: String, var
         }
     }
 
-    override fun insertChangeProperties(table: VisTable, editorScene: EditorScene) {
+    override fun insertChangeProperties(table: VisTable, gameObject: GameObject, editorScene: EditorScene) {
         table.add(VisLabel("Animation : "))
 
         table.add(VisImageButton(TextureRegionDrawable(animation?.getKeyFrame(0f) ?: PCGame.assetManager.loadOnDemand<TextureAtlas>(Constants.noTextureAtlasFoundPath).asset.findRegion("notexture"))).apply {
@@ -76,6 +76,8 @@ class AnimationComponent(atlasPath: FileHandle, animationRegionName: String, var
                 }
             }
         })
+
+        table.row()
     }
 
     companion object {

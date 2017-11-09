@@ -38,10 +38,10 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
     }
 
     fun addComponent(component: Component) {
-        if(components.none { it.javaClass.isInstance(component) }) {
+       // if(components.none { it.javaClass.isInstance(component) }) {
             components.add(component)
             sortComponent(component)
-        }
+      //  }
     }
 
     fun removeComponent(component: Component) {

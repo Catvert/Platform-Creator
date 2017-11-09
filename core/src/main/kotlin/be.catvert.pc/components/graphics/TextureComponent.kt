@@ -52,7 +52,7 @@ class TextureComponent(texturePath: FileHandle) : RenderableComponent(), CustomE
         batch.draw(texture, gameObject.rectangle, flipX, flipY)
     }
 
-    override fun insertChangeProperties(table: VisTable, editorScene: EditorScene) {
+    override fun insertChangeProperties(table: VisTable, gameObject: GameObject, editorScene: EditorScene) {
         table.add(VisLabel("Texture : "))
 
         table.add(VisImageButton(TextureRegionDrawable(TextureAtlas.AtlasRegion(texture, 0, 0, texture.width, texture.height))).apply {
@@ -67,5 +67,7 @@ class TextureComponent(texturePath: FileHandle) : RenderableComponent(), CustomE
                 }
             }
         })
+
+        table.row()
     }
 }

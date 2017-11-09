@@ -58,7 +58,7 @@ class AtlasComponent(atlasPath: FileHandle, region: String) : RenderableComponen
         batch.draw(atlasRegion, gameObject.rectangle, flipX, flipY)
     }
 
-    override fun insertChangeProperties(table: VisTable, editorScene: EditorScene) {
+    override fun insertChangeProperties(table: VisTable, gameObject: GameObject, editorScene: EditorScene) {
         table.add(VisLabel("Atlas : "))
 
         fun updateImageBtn(imgBtn: VisImageButton) {
@@ -103,5 +103,7 @@ class AtlasComponent(atlasPath: FileHandle, region: String) : RenderableComponen
                 }
             }
         })
+
+        table.row()
     }
 }

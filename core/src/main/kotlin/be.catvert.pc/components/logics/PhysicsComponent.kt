@@ -3,6 +3,7 @@ package be.catvert.pc.components.logics
 import be.catvert.pc.GameObject
 import be.catvert.pc.containers.GameObjectMatrixContainer
 import be.catvert.pc.actions.Action
+import be.catvert.pc.actions.EmptyAction
 import be.catvert.pc.actions.NextPhysicsActions
 import be.catvert.pc.components.UpdeatableComponent
 import be.catvert.pc.containers.Level
@@ -69,7 +70,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                        @ExposeEditor var gravity: Boolean = !isStatic,
                        @ExposeEditor var maskCollision: MaskCollision = MaskCollision.ALL,
                        @ExposeEditor(maxInt = 1000) var jumpHeight: Int = 0,
-                       @ExposeEditor var jumpAction: Action? = null) : UpdeatableComponent() {
+                       @ExposeEditor var jumpAction: Action = EmptyAction()) : UpdeatableComponent() {
     @JsonCreator private constructor(): this(true)
 
     /**
