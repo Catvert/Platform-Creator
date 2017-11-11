@@ -1,5 +1,7 @@
 package be.catvert.pc.utility
 
+import be.catvert.pc.GameKeys
+import be.catvert.pc.actions.Action
 import be.catvert.pc.scenes.Scene
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Graphics
@@ -13,10 +15,13 @@ import com.badlogic.gdx.math.Shape2D
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.Stage
+import com.badlogic.gdx.utils.JsonReader
 import com.kotcrab.vis.ui.widget.VisTextButton
+import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner
 import ktx.actors.onClick
 import ktx.actors.plus
 import ktx.vis.window
+import java.io.FileReader
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
 import kotlin.reflect.KClass
@@ -62,6 +67,46 @@ object Utility {
             }
         }
         return files
+    }
+
+    data class GameConfig(val width: Int, val height: Int, val vsync: Boolean, val fullscreen: Boolean, val soundVolume: Float)
+    /**
+     * Charge le fichier de configuration des touches du jeu
+     */
+    fun loadKeysConfig() {
+        try {
+            val root = JsonReader().parse(FileReader(Constants.keysConfigPath))
+
+            root["keys"].forEach {
+                val name = it.getString("name")
+                val key = it.getInt("key")
+
+                GameKeys.valueOf(name).key = key
+            }
+        } catch (e: Exception) {
+            System.err.println("Erreur lors du chargement du fichier de configuration des touches du jeu ! Erreur : ${e.message}")
+        }
+    }
+
+    /**
+     * Charge le fichier de configuration du jeu
+     */
+    fun loadConfig(): GameConfig {
+        try {
+            val root = JsonReader().parse(FileReader(Constants.configPath))
+
+            val screenWidth = root.getInt("width")
+            val screenHeight = root.getInt("height")
+            val vsync = root.getBoolean("vsync")
+            val fullscreen = root.getBoolean("fullscreen")
+            val soundVolume = root.getFloat("soundvolume")
+
+            return GameConfig(screenWidth, screenHeight, vsync, fullscreen, soundVolume)
+        } catch (e: Exception) {
+            System.err.println("Erreur lors du chargement de la configuration du jeu ! Erreur : ${e.message}")
+        }
+
+        return GameConfig(1280, 720, false, false, 1f)
     }
 }
 

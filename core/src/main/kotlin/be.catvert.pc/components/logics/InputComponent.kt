@@ -14,17 +14,6 @@ import com.kotcrab.vis.ui.widget.VisTextButton
 import ktx.actors.onClick
 import kotlin.reflect.full.findAnnotation
 
-data class InputData(var key: Int = Input.Keys.UNKNOWN, var justPressed: Boolean = false, var action: Action = EmptyAction()): CustomEditorImpl {
-    override fun insertChangeProperties(table: VisTable, gameObject: GameObject, editorScene: EditorScene) {
-        editorScene.addWidgetValue(table, gameObject, "Touche : ", { key }, { key = it as Int }, ExposeEditorFactory.createExposeEditor(customType = CustomType.KEY_INT), false)
-        editorScene.addWidgetValue(table, gameObject, "Pressé : ", { justPressed }, { justPressed = it as Boolean }, ExposeEditorFactory.createExposeEditor(), false)
-        table.add(VisTextButton("Éditer l'action").apply {
-            onClick {
-                editorScene.showEditActionWindow(gameObject, action, { action = it })
-            }
-        })
-    }
-}
 
 /**
  * Component permettant d'effectuer une action quand l'utilisateur appuie sur une touche
@@ -34,6 +23,18 @@ data class InputData(var key: Int = Input.Keys.UNKNOWN, var justPressed: Boolean
  */
 class InputComponent(var inputsData: Array<InputData>) : UpdeatableComponent(), CustomEditorImpl {
     @JsonCreator private constructor(): this(arrayOf())
+
+    data class InputData(var key: Int = Input.Keys.UNKNOWN, var justPressed: Boolean = false, var action: Action = EmptyAction()): CustomEditorImpl {
+        override fun insertChangeProperties(table: VisTable, gameObject: GameObject, editorScene: EditorScene) {
+            editorScene.addWidgetValue(table, gameObject, "Touche : ", { key }, { key = it as Int }, ExposeEditorFactory.createExposeEditor(customType = CustomType.KEY_INT), false)
+            editorScene.addWidgetValue(table, gameObject, "Pressé : ", { justPressed }, { justPressed = it as Boolean }, ExposeEditorFactory.createExposeEditor(), false)
+            table.add(VisTextButton("Éditer l'action").apply {
+                onClick {
+                    editorScene.showEditActionWindow(gameObject, action, { action = it })
+                }
+            })
+        }
+    }
 
     override fun update(gameObject: GameObject) {
         inputsData.forEach {

@@ -38,10 +38,10 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
     }
 
     fun addComponent(component: Component) {
-       // if(components.none { it.javaClass.isInstance(component) }) {
+        if(components.none { it.javaClass.isInstance(component) }) {
             components.add(component)
             sortComponent(component)
-      //  }
+        }
     }
 
     fun removeComponent(component: Component) {
@@ -60,14 +60,9 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
             updateComponents.add(component)
     }
 
-    inline fun <reified T : Component> getComponent(index: Int = 0): T? {
-        val filtered = getComponents().filter { it is T }
-        return if (filtered.size > index && index > -1) filtered[index] as T else null
-    }
+    inline fun <reified T : Component> getComponent(): T? = getComponents().firstOrNull { it is T } as? T
 
-    inline fun <reified T : Component> hasComponent(index: Int = 0): Boolean {
-        return getComponent<T>(index) != null
-    }
+    inline fun <reified T : Component> hasComponent(): Boolean = getComponent<T>() != null
 
     fun setFlipRenderable(x: Boolean, y: Boolean) {
         getComponents().filter { it is RenderableComponent }.forEach {
@@ -94,6 +89,8 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
     override fun update() {
         updateComponents.forEach { it.update(gameObject) }
     }
+
+    override fun toString(): String = name
 
     operator fun plusAssign(component: Component) {
         addComponent(component)

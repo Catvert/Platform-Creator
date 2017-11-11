@@ -6,6 +6,10 @@ import be.catvert.pc.components.RenderableComponent
 import be.catvert.pc.utility.ExposeEditor
 import com.fasterxml.jackson.annotation.JsonCreator
 
+/**
+ * Action permettant d'appliquer une action sur les components dessinables d'un gameObject
+ * @see RenderableComponent
+ */
 class RenderAction(@ExposeEditor var action: RenderActions) : Action {
     @JsonCreator private constructor(): this(RenderActions.FLIP_X)
 

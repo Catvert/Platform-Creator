@@ -1,32 +1,32 @@
 apply plugin: 'application'
 apply plugin: 'kotlin'
-sourceSets.main.resources.srcDirs += [ rootProject.file('assets').absolutePath ]
+sourceSets.main.resources.srcDirs += [rootProject.file('assets').absolutePath]
 mainClassName = 'be.catvert.pc.DesktopLauncher'
 eclipse.project.name = appName + '-desktop'
 sourceCompatibility = 1.8
 
 dependencies {
-  compile project(':core')
-  compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
-  compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
-  compile "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
-  compile "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
-  compile "com.badlogicgames.gdx:gdx-controllers-desktop:$gdxVersion"
-  compile "com.badlogicgames.gdx:gdx-controllers-platform:$gdxVersion:natives-desktop"
+    compile project(':core')
+    compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+    compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+    compile "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
+    compile "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
+    compile "com.badlogicgames.gdx:gdx-controllers-desktop:$gdxVersion"
+    compile "com.badlogicgames.gdx:gdx-controllers-platform:$gdxVersion:natives-desktop"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
 }
 
 jar {
-  archiveName "${appName}-${version}.jar"
-  from { configurations.compile.collect { zipTree(it) } }
-  manifest {
-    attributes 'Main-Class': project.mainClassName
-  }
+    archiveName "${appName}-${version}.jar"
+    from { configurations.compile.collect { zipTree(it) } }
+    manifest {
+        attributes 'Main-Class': project.mainClassName
+    }
 }
 
 run {
-  setWorkingDir(workingDir.absolutePath + "/../")
-  ignoreExitValue = true
+    setWorkingDir(workingDir.absolutePath + "/../")
+    ignoreExitValue = true
 }
 buildscript {
     ext.kotlin_version = '1.1.51'

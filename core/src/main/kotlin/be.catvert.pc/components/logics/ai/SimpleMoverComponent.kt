@@ -17,8 +17,8 @@ enum class SimpleMoverOrientation {
 class SimpleMoverComponent(orientation: SimpleMoverOrientation, reverse: Boolean) : UpdeatableComponent() {
     @JsonCreator private constructor(): this(SimpleMoverOrientation.HORIZONTAL, false)
 
-    private var firstAction = PhysicsAction(NextPhysicsActions.GO_LEFT)
-    private var secondAction = PhysicsAction(NextPhysicsActions.GO_RIGHT)
+    private var firstAction = PhysicsAction(PhysicsAction.PhysicsActions.GO_LEFT)
+    private var secondAction = PhysicsAction(PhysicsAction.PhysicsActions.GO_RIGHT)
 
     @JsonIgnore private lateinit var gameObject: GameObject
 
@@ -43,12 +43,12 @@ class SimpleMoverComponent(orientation: SimpleMoverOrientation, reverse: Boolean
     private fun updateActions() {
         when(orientation) {
             SimpleMoverOrientation.HORIZONTAL -> {
-                firstAction.physicsAction = NextPhysicsActions.GO_LEFT
-                secondAction.physicsAction = NextPhysicsActions.GO_RIGHT
+                firstAction.physicsAction = PhysicsAction.PhysicsActions.GO_LEFT
+                secondAction.physicsAction = PhysicsAction.PhysicsActions.GO_RIGHT
             }
             SimpleMoverOrientation.VERTICAL -> {
-                firstAction.physicsAction = NextPhysicsActions.GO_UP
-                secondAction.physicsAction = NextPhysicsActions.GO_DOWN
+                firstAction.physicsAction = PhysicsAction.PhysicsActions.GO_UP
+                secondAction.physicsAction = PhysicsAction.PhysicsActions.GO_DOWN
             }
         }
     }

@@ -4,13 +4,14 @@ import be.catvert.pc.GameObject
 import be.catvert.pc.containers.GameObjectMatrixContainer
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
-import be.catvert.pc.actions.NextPhysicsActions
+import be.catvert.pc.actions.PhysicsAction
 import be.catvert.pc.components.UpdeatableComponent
 import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
+import be.catvert.pc.actions.PhysicsAction.PhysicsActions
 
 /**
  * Enmu permettant de définir le type de mouvement de l'entité (fluide ou linéaire)
@@ -77,7 +78,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
      * Les nextActions représentes les actions que doit faire l'entité pendant le prochain frame
      */
     @JsonIgnore
-    val nextActions = mutableSetOf<NextPhysicsActions>()
+    val nextActions = mutableSetOf<PhysicsActions>()
 
     @JsonIgnore private val jumpData: JumpData = JumpData()
 
@@ -108,10 +109,10 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         if (isStatic) return
 
         if (gravity && (gameObject.container as? Level)?.applyGravity == true)
-            nextActions += NextPhysicsActions.GRAVITY
+            nextActions += PhysicsAction.PhysicsActions.GRAVITY
 
         if (jumpData.forceJumping) {
-            nextActions += NextPhysicsActions.JUMP
+            nextActions += PhysicsAction.PhysicsActions.JUMP
         }
 
         var moveSpeedX = 0f
@@ -120,12 +121,12 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
 
         nextActions.forEach action@ {
             when (it) {
-                NextPhysicsActions.GO_LEFT -> moveSpeedX -= moveSpeed
-                NextPhysicsActions.GO_RIGHT -> moveSpeedX += moveSpeed
-                NextPhysicsActions.GO_UP -> moveSpeedY += moveSpeed
-                NextPhysicsActions.GO_DOWN -> moveSpeedY -= moveSpeed
-                NextPhysicsActions.GRAVITY -> if (gravity) moveSpeedY -= gravitySpeed
-                NextPhysicsActions.JUMP -> {
+                PhysicsActions.GO_LEFT -> moveSpeedX -= moveSpeed
+                PhysicsActions.GO_RIGHT -> moveSpeedX += moveSpeed
+                PhysicsActions.GO_UP -> moveSpeedY += moveSpeed
+                PhysicsActions.GO_DOWN -> moveSpeedY -= moveSpeed
+                PhysicsActions.GRAVITY -> if (gravity) moveSpeedY -= gravitySpeed
+                PhysicsActions.JUMP -> {
                     if (!jumpData.isJumping) {
                         if (!jumpData.forceJumping) {
                             if (!checkIsOnGround(gameObject)) {
@@ -171,7 +172,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         nextActions.clear()
 
         if (addJumpAfterClear)
-            nextActions += NextPhysicsActions.JUMP
+            nextActions += PhysicsActions.JUMP
 
         isOnGround = checkIsOnGround(gameObject)
     }

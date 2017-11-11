@@ -41,6 +41,7 @@ class LifeComponent(onDeathAction: Action, lifePointsActions: Set<Pair<Action, A
     }
 
     override fun onGOAddToContainer(state: GameObjectState, gameObject: GameObject) {
+        super.onGOAddToContainer(state, gameObject)
         this.gameObject = gameObject
     }
 }

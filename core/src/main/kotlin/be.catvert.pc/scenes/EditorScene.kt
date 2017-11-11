@@ -861,12 +861,21 @@ class EditorScene(val level: Level) : Scene() {
     fun addWidgetValue(table: VisTable, gameObject: GameObject, labelName: String, get: () -> Any, set: (newValue: Any) -> Unit, exposeEditor: ExposeEditor, rowWhenConstruct: Boolean = true) {
         table.add(VisLabel(labelName))
 
-        val value = get()
+        fun<T> value() = get() as T
 
-        when (value) {
-            is CustomEditorImpl -> value.insertChangeProperties(table, gameObject, this@EditorScene)
+        when (get()) {
+            is Action -> {
+                table.add(VisTextButton("Éditer l'action").apply {
+                    onClick {
+                        showEditActionWindow(gameObject, value()) {
+                            set(it)
+                        }
+                    }
+                })
+            }
+            is CustomEditorImpl -> value<CustomEditorImpl>().insertChangeProperties(table, gameObject, this@EditorScene)
             is Boolean -> {
-                table.add(VisCheckBox("", value).apply {
+                table.add(VisCheckBox("", value<Boolean>()).apply {
                     onChange {
                         set(isChecked)
                     }
@@ -875,7 +884,7 @@ class EditorScene(val level: Level) : Scene() {
             is Int -> {
                 when (exposeEditor.customType) {
                     CustomType.DEFAULT -> {
-                        val intModel = IntSpinnerModel(value, exposeEditor.minInt, exposeEditor.maxInt)
+                        val intModel = IntSpinnerModel(value(), exposeEditor.minInt, exposeEditor.maxInt)
                         table.add(Spinner("", intModel).apply {
                             onChange {
                                 set(intModel.value)
@@ -883,7 +892,7 @@ class EditorScene(val level: Level) : Scene() {
                         })
                     }
                     CustomType.KEY_INT -> {
-                        table.add(VisTextArea(Input.Keys.toString(value)).apply {
+                        table.add(VisTextArea(Input.Keys.toString(value())).apply {
                             isReadOnly = true
                             onKeyUp {
                                 val keyStr = Input.Keys.toString(it)
@@ -899,14 +908,14 @@ class EditorScene(val level: Level) : Scene() {
                 }
             }
             is String -> {
-                table.add(VisTextField(value).apply {
+                table.add(VisTextField(value()).apply {
                     onChange {
                         set(text)
                     }
                 }).width(100f)
             }
             is Point -> {
-                var value: Point = value
+                var value: Point = value()
 
                 val label = table.add(VisLabel(value.toString())).actor
 
@@ -949,7 +958,7 @@ class EditorScene(val level: Level) : Scene() {
                 })
             }
             is Size -> {
-                var value: Size = value
+                var value: Size = value()
 
                 val label = table.add(VisLabel(value.toString())).actor
 
@@ -982,11 +991,11 @@ class EditorScene(val level: Level) : Scene() {
             }
             is Enum<*> -> {
                 table.add(VisSelectBox<String>().apply {
-                    val enumConstants = value.javaClass.enumConstants
+                    val enumConstants = value<Enum<*>>().javaClass.enumConstants
 
                     this.items = enumConstants.map { (it as Enum<*>).name }.toGdxArray()
 
-                    val index = enumConstants.indexOfFirst { it == value }
+                    val index = enumConstants.indexOfFirst { it == value() }
                     selectedIndex = if (index == -1) 0 else index
 
                     onChange {
@@ -994,15 +1003,8 @@ class EditorScene(val level: Level) : Scene() {
                     }
                 }).width(125f)
             }
-            is Action -> {
-                table.add(VisTextButton("Éditer l'action").apply {
-                    onClick {
-                        showEditActionWindow(gameObject, value) { set(it) }
-                    }
-                })
-            }
             else -> {
-                throw Exception("Impossible d'insérer le type : ${value.javaClass.simpleName}")
+                throw Exception("Impossible d'insérer le type : ${ReflectionUtility.simpleNameOf(value())}")
             }
         }
 
@@ -1075,8 +1077,8 @@ class EditorScene(val level: Level) : Scene() {
                     this.items = actionsList.map { it.simpleName ?: "Nom inconnu" }.toGdxArray()
 
                     val findIndex = actionsList.indexOfFirst { it.isInstance(instance) }
-
-                    this.selectedIndex = if (findIndex == -1) 0 else findIndex
+                    if(findIndex in actionsList.items.indices)
+                        selectedIndex = findIndex
 
                     onChange {
                         if (!actionsList[selectedIndex].isInstance(instance))
@@ -1304,7 +1306,9 @@ class EditorScene(val level: Level) : Scene() {
 
                                         onAddComponent.register { comp ->
                                             this.items = generateComponentsItems()
-                                            this.selectedIndex = state.getComponents().indexOfFirst { it === comp }
+                                            val newIndex = state.getComponents().indexOfFirst { it === comp }
+                                            if(newIndex > -1)
+                                                this.selectedIndex = newIndex
                                         }
 
                                         onChange {

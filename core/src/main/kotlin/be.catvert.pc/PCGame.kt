@@ -13,8 +13,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Matrix4
 import com.badlogic.gdx.utils.JsonWriter
-import com.fasterxml.jackson.annotation.JsonBackReference
-import com.fasterxml.jackson.annotation.JsonManagedReference
 import com.kotcrab.vis.ui.VisUI
 import ktx.app.KtxApplicationAdapter
 import ktx.assets.toLocalFile
@@ -167,6 +165,7 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
         Utility.getFilesRecursivly(Constants.backgroundsDirPath.toLocalFile(), "png").forEach {
             backgroundsList.add(it)
         }
+
 
         currentScene = MainMenuScene()
     }

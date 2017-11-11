@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 sealed class Component {
     @ExposeEditor var name = ReflectionUtility.simpleNameOf(this).removeSuffix("Component")
 
-    open fun onGOAddToContainer(state: GameObjectState, gameObject: GameObject) {}
+    open fun onGOAddToContainer(state: GameObjectState, gameObject: GameObject) = Unit
 }
 
 abstract class BasicComponent : Component()

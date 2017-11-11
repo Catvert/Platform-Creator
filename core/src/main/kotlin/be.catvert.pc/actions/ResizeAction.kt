@@ -6,6 +6,9 @@ import be.catvert.pc.utility.ExposeEditor
 import be.catvert.pc.utility.Size
 import com.fasterxml.jackson.annotation.JsonCreator
 
+/**
+ * Action permettant de redimensionner un gameObject
+ */
 class ResizeAction(@ExposeEditor(minInt = 1, maxInt = Constants.maxGameObjectSize) var newSize: Size) : Action {
     @JsonCreator private constructor(): this(Size(1, 1))
 

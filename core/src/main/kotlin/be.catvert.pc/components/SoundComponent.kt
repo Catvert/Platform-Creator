@@ -13,27 +13,20 @@ import ktx.assets.getValue
 import ktx.assets.loadOnDemand
 import ktx.assets.toLocalFile
 
-class SoundComponent(soundPath: FileHandle) : BasicComponent() {
-    @JsonCreator private constructor(): this(Constants.noSoundPath.toLocalFile())
 
-    var soundPath: String = soundPath.path()
-        private set
+class SoundComponent(val sounds: Array<SoundData>) : BasicComponent() {
+    @JsonCreator private constructor(): this(arrayOf())
 
-    @JsonIgnore private var sound: Sound = PCGame.assetManager.loadOnDemand<Sound>(this.soundPath).asset
+    data class SoundData(var soundPath: String) {
+        private var sound: Sound = PCGame.assetManager.loadOnDemand<Sound>(this.soundPath).asset
 
-    fun updateSound(soundPath: FileHandle = this.soundPath.toLocalFile()) {
-        this.soundPath = soundPath.path()
+        fun play() = sound.play(PCGame.soundVolume)
 
-        sound = PCGame.assetManager.loadOnDemand<Sound>(this.soundPath).asset
+        override fun toString(): String = soundPath.toLocalFile().nameWithoutExtension()
     }
 
-    fun playSound() {
-        sound.play(PCGame.soundVolume)
-    }
-
-    override fun onGOAddToContainer(state: GameObjectState, gameObject: GameObject) {
-        super.onGOAddToContainer(state, gameObject)
-
-        updateSound()
+    fun playSound(soundIndex: Int) {
+        if(soundIndex in sounds.indices)
+            sounds[soundIndex].play()
     }
 }

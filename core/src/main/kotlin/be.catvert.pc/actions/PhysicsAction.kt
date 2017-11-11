@@ -1,29 +1,29 @@
 package be.catvert.pc.actions
 
 import be.catvert.pc.GameObject
-import be.catvert.pc.GameObjectState
 import be.catvert.pc.components.logics.PhysicsComponent
 import be.catvert.pc.utility.ExposeEditor
 import com.fasterxml.jackson.annotation.JsonCreator
 
 /**
- * Enum permettant de choisir la prochaine "action" physique à appliquer sur l'entité
+ * Action permettant d'appliquer une action physique sur un gameObject ayant le component PhysicsComponent
+ * @see PhysicsComponent
  */
-enum class NextPhysicsActions {
-    GO_LEFT, GO_RIGHT, GO_UP, GO_DOWN, GRAVITY, JUMP;
+class PhysicsAction(@ExposeEditor var physicsAction: PhysicsActions = PhysicsActions.GO_LEFT) : Action {
+    @JsonCreator private constructor(): this(PhysicsActions.GO_LEFT)
 
-    operator fun unaryMinus(): NextPhysicsActions = when(this) {
-        NextPhysicsActions.GO_LEFT -> GO_RIGHT
-        NextPhysicsActions.GO_RIGHT -> GO_LEFT
-        NextPhysicsActions.GO_UP -> GO_DOWN
-        NextPhysicsActions.GO_DOWN -> GO_UP
-        NextPhysicsActions.GRAVITY -> GRAVITY
-        NextPhysicsActions.JUMP -> JUMP
+    enum class PhysicsActions {
+        GO_LEFT, GO_RIGHT, GO_UP, GO_DOWN, GRAVITY, JUMP;
+
+        operator fun unaryMinus(): PhysicsActions = when(this) {
+            PhysicsActions.GO_LEFT -> GO_RIGHT
+            PhysicsActions.GO_RIGHT -> GO_LEFT
+            PhysicsActions.GO_UP -> GO_DOWN
+            PhysicsActions.GO_DOWN -> GO_UP
+            PhysicsActions.GRAVITY -> GRAVITY
+            PhysicsActions.JUMP -> JUMP
+        }
     }
-}
-
-class PhysicsAction(@ExposeEditor var physicsAction: NextPhysicsActions = NextPhysicsActions.GO_LEFT) : Action {
-    @JsonCreator private constructor(): this(NextPhysicsActions.GO_LEFT)
 
     override fun invoke(gameObject: GameObject) {
         gameObject.getCurrentState().getComponent<PhysicsComponent>()?.nextActions?.add(physicsAction)

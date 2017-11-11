@@ -5,10 +5,13 @@ import be.catvert.pc.GameObjectState
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 
 /**
- * Représente une action qu'un gameObject peut subir selon le component utilisé
+ * Représente une "action" a appliqué sur un gameObject
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
 interface Action {
+    /**
+     * Permet d'invoquer l'action sur un gameObject quelconque
+     */
     operator fun invoke(gameObject: GameObject)
 }
 

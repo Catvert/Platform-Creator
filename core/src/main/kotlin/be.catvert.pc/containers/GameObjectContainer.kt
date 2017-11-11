@@ -4,7 +4,6 @@ import be.catvert.pc.GameObject
 import be.catvert.pc.GameObjectState
 import be.catvert.pc.Prefab
 import be.catvert.pc.actions.LifeAction
-import be.catvert.pc.actions.LifeActions
 import be.catvert.pc.serialization.PostDeserialization
 import be.catvert.pc.utility.Rect
 import be.catvert.pc.utility.Renderable
@@ -66,7 +65,7 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
                 it.update()
 
             if (removeEntityBelowY0 && it.position().y < 0) {
-                LifeAction(LifeActions.ONE_SHOT).invoke(it)
+                LifeAction(LifeAction.LifeActions.ONE_SHOT).invoke(it)
                 removeGameObject(it)
             }
         }

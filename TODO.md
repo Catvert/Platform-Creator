@@ -9,7 +9,7 @@
 ## BUGS
 
 ## IDÉE
-
+- Utiliser IMGUI pour l'UI de l'éditeur
 - Ajout du pseudo de l'utilisateur au premier lancement
 - Ajouter les ressources par niveau(pour les textures, sons..)
 - Utiliser une bdd(json) pour la langue du jeu(anglais et français), avec la même forme que le GameKeys

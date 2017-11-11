@@ -7,9 +7,9 @@ import be.catvert.pc.utility.Point
 import com.fasterxml.jackson.annotation.JsonCreator
 
 /**
- * Action permettant de téléporter le gameObject à un point précis
+ * Action permettant de téléporter un gameObject à un point précis
  */
-class TeleportAction( @ExposeEditor var teleportPoint: Point) : Action {
+class TeleportAction(@ExposeEditor var teleportPoint: Point) : Action {
     @JsonCreator private constructor(): this(Point())
 
     override fun invoke(gameObject: GameObject) {

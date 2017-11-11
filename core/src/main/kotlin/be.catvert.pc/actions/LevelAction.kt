@@ -6,6 +6,11 @@ import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.ExposeEditor
 import com.fasterxml.jackson.annotation.JsonCreator
 
+/**
+ * Une action a appliqué sur le niveau en lui-même
+ * Permet par exemple de terminer le niveau selon si le joueur est mort ou a réussi
+ * @see Level
+ */
 class LevelAction(@ExposeEditor var action: LevelActions = LevelActions.FAIL_EXIT) : Action {
     @JsonCreator private constructor(): this(LevelActions.FAIL_EXIT)
 

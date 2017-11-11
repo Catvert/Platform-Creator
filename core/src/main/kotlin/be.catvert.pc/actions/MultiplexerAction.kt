@@ -15,6 +15,9 @@ import ktx.actors.onClick
 import ktx.collections.toGdxArray
 import ktx.vis.verticalGroup
 
+/**
+ * Action permettant d'utiliser d'appliquer plusieurs actions sur un gameObject à la place d'une seule.
+ */
 class MultiplexerAction(var actions: Array<Action>) : Action, CustomEditorImpl {
     @JsonCreator private constructor(): this(arrayOf())
 
@@ -27,5 +30,4 @@ class MultiplexerAction(var actions: Array<Action>) : Action, CustomEditorImpl {
     override fun insertChangeProperties(table: VisTable, gameObject: GameObject, editorScene: EditorScene) {
         editorScene.addWidgetArray(table, gameObject, { ReflectionUtility.simpleNameOf(actions[it]) }, { ExposeEditorFactory.createExposeEditor() }, { EmptyAction() }, { actions }, { actions = it })
     }
-
 }
