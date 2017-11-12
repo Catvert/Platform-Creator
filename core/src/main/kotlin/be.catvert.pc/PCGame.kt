@@ -4,19 +4,22 @@ import be.catvert.pc.components.graphics.TextureComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.scenes.MainMenuScene
 import be.catvert.pc.scenes.Scene
-import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Matrix4
 import com.badlogic.gdx.utils.JsonWriter
 import com.kotcrab.vis.ui.VisUI
+import imgui.ImGui
+import imgui.impl.LwjglGL3
 import ktx.app.KtxApplicationAdapter
 import ktx.assets.toLocalFile
 import ktx.async.enableKtxCoroutines
+import uno.glfw.GlfwWindow
 import java.io.FileWriter
 import java.io.IOException
 
@@ -166,17 +169,26 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
             backgroundsList.add(it)
         }
 
-
         currentScene = MainMenuScene()
+
+        val handle = (Gdx.graphics as Lwjgl3Graphics).window.let {
+            it::class.java.getDeclaredField("windowHandle").apply { isAccessible = true }.getLong(it)
+        }
+        LwjglGL3.init(GlfwWindow(handle), false)
     }
 
     override fun render() {
         super.render()
 
+        LwjglGL3.newFrame()
+        ImGui.text("Hello, world!")
+
         Gdx.graphics.setTitle(Constants.gameTitle + " - ${Gdx.graphics.framesPerSecond} FPS")
 
         currentScene.update()
         currentScene.render(mainBatch)
+
+        ImGui.render()
     }
 
     override fun resize(width: Int, height: Int) {
@@ -197,5 +209,7 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
         VisUI.dispose()
 
         Log.dispose()
+
+        LwjglGL3.shutdown()
     }
 }
