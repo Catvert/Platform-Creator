@@ -37,6 +37,7 @@ import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import com.badlogic.gdx.math.Vector2
 import glm_.vec4.Vec4
+import imgui.Cond
 import imgui.WindowFlags
 import imgui.functionalProgramming
 import org.lwjgl.opengl.GL11
@@ -117,10 +118,7 @@ class MainMenuScene : Scene() {
     private fun drawUI() {
         with(ImGui) {
 
-            setNextWindowContentWidth(200f)
-            functionalProgramming.window("Menu principal", null) {
-                setWindowPos(Vec2(Gdx.graphics.width / 2f - windowWidth / 2f, Gdx.graphics.height / 2f - windowHeight / 2f))
-
+            functionalProgramming.window("Menu principal", null, WindowFlags.NoResize.i or WindowFlags.NoCollapse.i) {
                 if(button("Jouer", Vec2(200f, 20f))) {
 
                 }
@@ -130,6 +128,8 @@ class MainMenuScene : Scene() {
                 if(button("Quitter", Vec2(200f, 20f))) {
                     Gdx.app.exit()
                 }
+
+                setWindowPos(Vec2(Gdx.graphics.width / 2f - windowWidth / 2f, Gdx.graphics.height / 2f - windowHeight / 2f), Cond.FirstUseEver)
             }
 
         }

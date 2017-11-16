@@ -47,7 +47,7 @@ abstract class Scene : Renderable, Updeatable, Resizable, Disposable {
             }
         }
 
-        return ImGui.isAnyItemHovered
+        return false
     }
 
     protected fun hideUI() {
