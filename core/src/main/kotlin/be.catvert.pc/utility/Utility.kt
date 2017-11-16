@@ -71,27 +71,9 @@ object Utility {
 
     data class GameConfig(val width: Int, val height: Int, val vsync: Boolean, val fullscreen: Boolean, val soundVolume: Float)
     /**
-     * Charge le fichier de configuration des touches du jeu
-     */
-    fun loadKeysConfig() {
-        try {
-            val root = JsonReader().parse(FileReader(Constants.keysConfigPath))
-
-            root["keys"].forEach {
-                val name = it.getString("name")
-                val key = it.getInt("key")
-
-                GameKeys.valueOf(name).key = key
-            }
-        } catch (e: Exception) {
-            System.err.println("Erreur lors du chargement du fichier de configuration des touches du jeu ! Erreur : ${e.message}")
-        }
-    }
-
-    /**
      * Charge le fichier de configuration du jeu
      */
-    fun loadConfig(): GameConfig {
+    fun loadGameConfig(): GameConfig {
         try {
             val root = JsonReader().parse(FileReader(Constants.configPath))
 

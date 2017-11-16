@@ -6,22 +6,25 @@ import com.badlogic.gdx.Graphics
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics
+import imgui.impl.LwjglGL3
+import org.lwjgl.glfw.GLFW
+import uno.glfw.GlfwWindow
 
 /** Launches the desktop (LWJGL3) application.  */
 object Lwjgl3Launcher {
-
-
-
     private val configuration: Triple<Lwjgl3ApplicationConfiguration, Boolean, Float>
         get() {
             val configuration = Lwjgl3ApplicationConfiguration()
-            val (width, height, vsync, fullscreen, soundVolume) = Utility.loadConfig()
-
-            Utility.loadKeysConfig()
+            val (width, height, vsync, fullscreen, soundVolume) = Utility.loadGameConfig()
 
             configuration.setTitle(Constants.gameTitle)
-            configuration.setWindowedMode(width, height)
-          //  configuration.setWindowIcon("libgdx128.png", "libgdx64.png", "libgdx32.png", "libgdx16.png")
+            if(fullscreen) {
+                val primaryMode = Lwjgl3ApplicationConfiguration.getDisplayMode()
+                configuration.setFullscreenMode(primaryMode)
+            }
+            else
+                configuration.setWindowedMode(width, height)
+
             configuration.setResizable(false)
             configuration.useVsync(vsync)
 

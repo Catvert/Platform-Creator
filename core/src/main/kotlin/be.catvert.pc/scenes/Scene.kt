@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.viewport.ScreenViewport
+import imgui.ImGui
 import ktx.app.clearScreen
 import ktx.app.use
 
@@ -17,7 +18,7 @@ import ktx.app.use
  * Classe abstraite permettant l'implémentation d'une scène
  */
 abstract class Scene : Renderable, Updeatable, Resizable, Disposable {
-    protected val camera = OrthographicCamera()
+    protected open val camera = OrthographicCamera().apply { setToOrtho(false) }
     protected val stage = Stage(ScreenViewport(), PCGame.hudBatch)
 
     protected val backgroundColors = Triple(0f, 0f, 0f)
@@ -29,10 +30,7 @@ abstract class Scene : Renderable, Updeatable, Resizable, Disposable {
 
     init {
         Gdx.input.inputProcessor = stage
-
-        camera.setToOrtho(false, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
     }
-
 
     protected open fun postBatchRender() {}
 
@@ -48,7 +46,8 @@ abstract class Scene : Renderable, Updeatable, Resizable, Disposable {
                 return true
             }
         }
-        return false
+
+        return ImGui.isAnyItemHovered
     }
 
     protected fun hideUI() {
@@ -82,7 +81,7 @@ abstract class Scene : Renderable, Updeatable, Resizable, Disposable {
     }
 
     override fun resize(size: Size) {
-        camera.setToOrtho(false, size.width.toFloat(), size.height.toFloat())
+       // camera.setToOrtho(false, size.width.toFloat(), size.height.toFloat())
         stage.viewport.update(size.width, size.height)
         backgroundSize = Gdx.graphics.toSize()
     }

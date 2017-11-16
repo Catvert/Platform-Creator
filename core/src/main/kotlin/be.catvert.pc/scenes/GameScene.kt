@@ -4,8 +4,10 @@ import be.catvert.pc.GameKeys
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
 import be.catvert.pc.PCGame
+import be.catvert.pc.utility.Constants
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
+import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
 import ktx.assets.loadOnDemand
 import ktx.assets.toLocalFile
@@ -16,11 +18,15 @@ import ktx.assets.toLocalFile
 class GameScene(private val level: Level) : Scene() {
     override var gameObjectContainer: GameObjectContainer = level
 
+    //override val camera = OrthographicCamera().apply { setToOrtho(false, Gdx.graphics.width / Constants.PPM, Gdx.graphics.height / Constants.PPM) }
+
     private val cameraMoveSpeed = 10f
 
     init {
         if (level.backgroundPath != null)
             backgroundTexture = PCGame.assetManager.loadOnDemand<Texture>(level.backgroundPath!!.toLocalFile().path()).asset
+
+
     }
 
     override fun postBatchRender() {

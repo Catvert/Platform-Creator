@@ -27,7 +27,7 @@ object Constants {
     const val gameBackgroundMenuPath = assetsDirPath + "game/mainmenu.png"
     const val gameLogoPath = assetsDirPath + "game/logo.png"
 
-   const val prefabExtension = ".prefab"
+    const val prefabExtension = ".prefab"
     const val levelExtension = ".pclvl"
 
     const val noTextureAtlasFoundPath = assetsDirPath + "game/notexture_atlas.atlas"

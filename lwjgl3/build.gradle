@@ -1,20 +1,25 @@
 apply plugin: 'application'
 apply plugin: 'kotlin'
-sourceSets.main.resources.srcDirs += [ rootProject.file('assets').absolutePath ]
+sourceSets.main.resources.srcDirs += [rootProject.file('assets').absolutePath]
 mainClassName = 'be.catvert.pc.Lwjgl3Launcher'
 eclipse.project.name = appName + '-lwjgl3'
 sourceCompatibility = 1.8
 
 dependencies {
-  compile project(':core')
-  compile "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
-  compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+    compile project(':core')
+    compile "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
+    compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+    compile "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
+    compile "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
 }
 
 jar {
-  archiveName "${appName}-${version}.jar"
-  from { configurations.compile.collect { zipTree(it) } }
-  manifest {
-    attributes 'Main-Class': project.mainClassName
-  }
+    archiveName "${appName}-${version}.jar"
+    from { configurations.compile.collect { zipTree(it) } }
+    manifest {
+        attributes 'Main-Class': project.mainClassName
+    }
+}
+repositories {
+    mavenCentral()
 }

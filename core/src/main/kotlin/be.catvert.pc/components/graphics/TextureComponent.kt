@@ -25,8 +25,6 @@ import ktx.assets.toLocalFile
 /**
  * Component permettant d'afficher une texture chargée depuis un fichier
  * @param texturePath Le chemin vers la texture en question
- * @param rectangle Le rectangle dans lequel sera dessiné la texture
- * @param linkRectToGO Permet de spécifier si le rectangle à utiliser est celui du gameObject
  */
 class TextureComponent(texturePath: FileHandle) : RenderableComponent(), CustomEditorImpl {
     @JsonCreator constructor() : this(Constants.noTextureFoundTexturePath.toLocalFile())

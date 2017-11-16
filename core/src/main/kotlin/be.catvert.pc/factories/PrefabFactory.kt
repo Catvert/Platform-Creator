@@ -61,7 +61,7 @@ enum class PrefabFactory(val prefab: Prefab) {
             this += PhysicsComponent(false, 5)
             this += LifeComponent(RemoveGOAction(), setOf())
             this += AIComponent(LifeAction(LifeAction.LifeActions.REMOVE_LP) to arrayOf(CollisionSide.OnDown, CollisionSide.OnRight, CollisionSide.OnLeft), LifeAction(LifeAction.LifeActions.REMOVE_LP) to arrayOf(CollisionSide.OnUp))
-            this += SimpleMoverComponent(SimpleMoverOrientation.HORIZONTAL, false).apply { onReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X) }
+            this += SimpleMoverComponent(SimpleMoverComponent.SimpleMoverOrientation.HORIZONTAL, false).apply { onReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X) }
         })
     )
 }

@@ -24,6 +24,9 @@ import ktx.assets.loadOnDemand
 import ktx.assets.toLocalFile
 import ktx.collections.toGdxArray
 
+/**
+ * Component permettant d'ajouter une animation à un gameObject
+ */
 class AnimationComponent(atlasPath: FileHandle, animationRegionName: String, var frameDuration: Float) : RenderableComponent(), CustomEditorImpl {
     @JsonCreator private constructor() : this(Constants.noTextureAtlasFoundPath.toLocalFile(), "", 0f)
 

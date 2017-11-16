@@ -4,20 +4,22 @@ import be.catvert.pc.GameKeys
 import be.catvert.pc.Log
 import be.catvert.pc.PCGame
 import be.catvert.pc.containers.Level
-import be.catvert.pc.utility.Constants
-import be.catvert.pc.utility.Size
-import be.catvert.pc.utility.UIUtility
-import be.catvert.pc.utility.Utility
+import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.GL20
+import com.badlogic.gdx.graphics.GLTexture
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.GlyphLayout
+import com.badlogic.gdx.graphics.g2d.*
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.kotcrab.vis.ui.widget.VisCheckBox
 import com.kotcrab.vis.ui.widget.VisLabel
 import com.kotcrab.vis.ui.widget.VisList
 import com.kotcrab.vis.ui.widget.VisTextArea
+import glm_.vec2.Vec2
+import imgui.ImGui
 import ktx.actors.onChange
 import ktx.actors.onClick
 import ktx.actors.onKeyUp
@@ -28,10 +30,18 @@ import ktx.assets.toLocalFile
 import ktx.collections.GdxArray
 import ktx.collections.toGdxArray
 import ktx.vis.window
+import org.lwjgl.opengl.GL
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
+import com.badlogic.gdx.math.Vector2
+import glm_.vec4.Vec4
+import imgui.WindowFlags
+import imgui.functionalProgramming
+import org.lwjgl.opengl.GL11
+import java.io.Serializable
+
 
 /**
  * Scène du menu principal
@@ -41,6 +51,10 @@ class MainMenuScene : Scene() {
     private val glyphCreatedBy = GlyphLayout(PCGame.mainFont, "par Catvert - ${Constants.gameVersion}")
 
     private val logo = PCGame.generateLogo(gameObjectContainer)
+
+    var texID = 0
+
+    private val texture = PCGame.assetManager.loadOnDemand<Texture>("assets/test.jpg").asset
 
     init {
         stage + window("Menu principal") {
@@ -68,6 +82,15 @@ class MainMenuScene : Scene() {
         }
 
         backgroundTexture = PCGame.assetManager.loadOnDemand<Texture>(Constants.gameBackgroundMenuPath).asset
+
+        texID = Gdx.gl.glGenTexture()
+
+        Gdx.gl.glBindTexture(texture.glTarget, texID)
+        GLTexture.uploadImageData(texture.glTarget, texture.textureData, 0)
+
+        // The code below causes an OpenGL error (GL_INVALID_ENUM) at createFontsTexture
+       // Gdx.gl.glActiveTexture(texID)
+       //  backgroundTexture!!.bind()
     }
 
     override fun postBatchRender() {
@@ -77,12 +100,40 @@ class MainMenuScene : Scene() {
         }
     }
 
+    override fun render(batch: Batch) {
+        super.render(batch)
+
+        drawUI()
+
+        ImGui.image(texID, Vec2(300f, 300f))
+    }
+
     override fun resize(size: Size) {
         super.resize(size)
         logo.rectangle.set(PCGame.getLogoRect())
     }
-
     //region UI
+
+    private fun drawUI() {
+        with(ImGui) {
+
+            setNextWindowContentWidth(200f)
+            functionalProgramming.window("Menu principal", null) {
+                setWindowPos(Vec2(Gdx.graphics.width / 2f - windowWidth / 2f, Gdx.graphics.height / 2f - windowHeight / 2f))
+
+                if(button("Jouer", Vec2(200f, 20f))) {
+
+                }
+                if(button("Options", Vec2(200f, 20f))) {
+
+                }
+                if(button("Quitter", Vec2(200f, 20f))) {
+                    Gdx.app.exit()
+                }
+            }
+
+        }
+    }
 
     /**
      * Affiche une fenêtre pour sélectionner le nom du niveau
@@ -303,12 +354,15 @@ class MainMenuScene : Scene() {
 
                         PCGame.vsync = vSyncCkbox.isChecked
 
+                        val width = widthArea.text.toInt()
+                        val height = heightArea.text.toInt()
+
                         if (fullScreenCkbox.isChecked)
                             Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
                         else
-                            Gdx.graphics.setWindowedMode(widthArea.text.toInt(), heightArea.text.toInt())
+                            Gdx.graphics.setWindowedMode(width, height)
 
-                        if (!PCGame.saveGameConfig())
+                        if (!PCGame.saveGameConfig(width, height))
                             UIUtility.showDialog(stage, "Erreur lors de la sauvegarde !", "Une erreur est survenue lors de la sauvegarde de la config du jeu !")
                     }
 
@@ -326,7 +380,7 @@ class MainMenuScene : Scene() {
 
                     if (successKeysConfig) {
                         keyAreaList.forEach { it.color = Color.WHITE }
-                        if (!PCGame.saveKeysConfig())
+                        if (!GameKeys.saveKeysConfig())
                             UIUtility.showDialog(stage, "Erreur lors de la sauvegarde", "Une erreur est survenue lors de la sauvegarde du jeu !")
                     } else {
                         UIUtility.showDialog(stage, "Erreur lors de la sauvegarde !", "Une ou plusieurs touches sont invalides !")

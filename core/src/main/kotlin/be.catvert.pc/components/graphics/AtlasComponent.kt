@@ -22,11 +22,10 @@ import ktx.assets.toLocalFile
 import ktx.vis.horizontalGroup
 
 /**
- * Component permettant d'afficher une texture chargée au préalable dans un spritesheet
- * @param atlasPath Le chemin vers l'atlasPath en question
+ * Component permettant d'ajouter une texture chargée au préalable depuis un atlas et une région
+ * @param atlasPath Le chemin vers l'atlas en question
  * @param region La région à utiliser
  */
-
 class AtlasComponent(atlasPath: FileHandle, region: String) : RenderableComponent(), CustomEditorImpl {
     @JsonCreator constructor(): this(Constants.noTextureAtlasFoundPath.toLocalFile(), "notexture")
 
@@ -43,7 +42,6 @@ class AtlasComponent(atlasPath: FileHandle, region: String) : RenderableComponen
     fun updateAtlas(atlasPath: FileHandle = this.atlasPath.toLocalFile(), region: String = this.region) {
         this.atlasPath = atlasPath.path()
         this.region = region
-
         atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(atlasPath.path()).asset
         atlasRegion = atlas.findRegion(region)
     }
@@ -55,7 +53,7 @@ class AtlasComponent(atlasPath: FileHandle, region: String) : RenderableComponen
     }
 
     override fun render(gameObject: GameObject, batch: Batch) {
-        batch.draw(atlasRegion, gameObject.rectangle, flipX, flipY)
+        batch.draw(atlasRegion, gameObject.rectangle,flipX, flipY)
     }
 
     override fun insertChangeProperties(table: VisTable, gameObject: GameObject, editorScene: EditorScene) {

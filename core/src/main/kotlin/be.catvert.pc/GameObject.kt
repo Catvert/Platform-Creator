@@ -21,7 +21,6 @@ import java.util.*
  * @param id L'id du gameObject
  * @param rectangle Représente le rectangle de l'objet dans l'espace (position + taille)
  * @param container Container dans lequel l'objet va être implémenté
- * @param prefab Le prefab utilisé pour créer l'objet
  */
 class GameObject(@ExposeEditor var tag: Tag,
                  id: UUID = UUID.randomUUID(),

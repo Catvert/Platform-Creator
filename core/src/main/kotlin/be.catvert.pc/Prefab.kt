@@ -11,7 +11,5 @@ class Prefab(val name: String, val author: String, val prefabGO: GameObject) {
         container?.addGameObject(this)
     }
 
-    override fun toString(): String {
-        return this.name
-    }
+    override fun toString(): String = this.name
 }

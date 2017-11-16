@@ -7,15 +7,21 @@ import be.catvert.pc.scenes.Scene
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.math.Intersector
 import com.badlogic.gdx.math.Matrix4
+import com.badlogic.gdx.math.Polygon
+import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.utils.JsonWriter
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.kotcrab.vis.ui.VisUI
-import imgui.ImGui
+import javafx.geometry.Rectangle2D
 import imgui.impl.LwjglGL3
+import imgui.ImGui
 import ktx.app.KtxApplicationAdapter
 import ktx.assets.toLocalFile
 import ktx.async.enableKtxCoroutines
@@ -111,41 +117,6 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
                 return false
             }
         }
-
-        /**
-         * Permet de sauvegarder la configuration des touches
-         */
-        fun saveKeysConfig(): Boolean {
-            try {
-                val writer = JsonWriter(FileWriter(Constants.keysConfigPath.toLocalFile().path(), false))
-                writer.setOutputType(JsonWriter.OutputType.json)
-
-                writer.`object`()
-                writer.array("keys")
-
-                GameKeys.values().forEach {
-                    writer.`object`()
-
-                    writer.name("name")
-                    writer.value(it.name)
-
-                    writer.name("key")
-                    writer.value(it.key)
-
-                    writer.pop()
-                }
-
-                writer.pop()
-                writer.pop()
-
-                writer.flush()
-                writer.close()
-
-                return true
-            } catch (e: IOException) {
-                return false
-            }
-        }
     }
 
     override fun create() {
@@ -155,6 +126,11 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
         Log.info { "Initialisation en cours.. \n Taille : ${Gdx.graphics.width}x${Gdx.graphics.height}" }
 
         VisUI.load(Gdx.files.internal(Constants.UISkinPath))
+
+        val window = (Gdx.graphics as Lwjgl3Graphics).window
+        LwjglGL3.init(GlfwWindow("Platform-Creator", window.javaClass.getDeclaredField("windowHandle").apply { isAccessible = true }.getLong(window)), true)
+
+        GameKeys.loadKeysConfig()
 
         mainBatch = SpriteBatch()
         hudBatch = SpriteBatch()
@@ -187,8 +163,12 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
 
         currentScene.update()
         currentScene.render(mainBatch)
-
         ImGui.render()
+        ImGui.text("test")
+
+        ImGui.newFrame()
+
+
     }
 
     override fun resize(width: Int, height: Int) {
@@ -206,7 +186,11 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
 
         currentScene.dispose()
 
+        mainFont.dispose()
+
         VisUI.dispose()
+
+        assetManager.dispose()
 
         Log.dispose()
 

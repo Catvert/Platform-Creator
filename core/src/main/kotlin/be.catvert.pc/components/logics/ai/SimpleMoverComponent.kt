@@ -10,12 +10,14 @@ import be.catvert.pc.utility.ExposeEditor
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 
-enum class SimpleMoverOrientation {
-    HORIZONTAL, VERTICAL
-}
+
 
 class SimpleMoverComponent(orientation: SimpleMoverOrientation, reverse: Boolean) : UpdeatableComponent() {
     @JsonCreator private constructor(): this(SimpleMoverOrientation.HORIZONTAL, false)
+
+    enum class SimpleMoverOrientation {
+        HORIZONTAL, VERTICAL
+    }
 
     private var firstAction = PhysicsAction(PhysicsAction.PhysicsActions.GO_LEFT)
     private var secondAction = PhysicsAction(PhysicsAction.PhysicsActions.GO_RIGHT)

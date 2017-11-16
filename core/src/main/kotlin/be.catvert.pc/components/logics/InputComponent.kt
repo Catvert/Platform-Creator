@@ -5,6 +5,7 @@ import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
 import be.catvert.pc.components.UpdeatableComponent
 import be.catvert.pc.scenes.EditorScene
+import be.catvert.pc.serialization.PostDeserialization
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input

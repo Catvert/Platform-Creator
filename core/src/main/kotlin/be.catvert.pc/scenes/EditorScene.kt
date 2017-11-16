@@ -31,6 +31,14 @@ import com.kotcrab.vis.ui.widget.*
 import com.kotcrab.vis.ui.widget.spinner.FloatSpinnerModel
 import com.kotcrab.vis.ui.widget.spinner.IntSpinnerModel
 import com.kotcrab.vis.ui.widget.spinner.Spinner
+import glm_.vec2.Vec2
+import imgui.Cond
+import imgui.ImGui
+import imgui.WindowFlags
+import imgui.functionalProgramming
+import imgui.imgui.imgui_helpers
+import imgui.imgui.imgui_window
+import imgui.internal.ButtonFlags
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner
 import ktx.actors.onChange
 import ktx.actors.onClick
@@ -148,6 +156,8 @@ class EditorScene(val level: Level) : Scene() {
 
     override fun postBatchRender() {
         super.postBatchRender()
+
+        drawUI()
 
         level.drawDebug()
 
@@ -631,6 +641,7 @@ class EditorScene(val level: Level) : Scene() {
         editorFont.dispose()
     }
 
+
     private fun updateCamera() {
         var moveCameraX = 0f
         var moveCameraY = 0f
@@ -995,7 +1006,7 @@ class EditorScene(val level: Level) : Scene() {
 
                     this.items = enumConstants.map { (it as Enum<*>).name }.toGdxArray()
 
-                    val index = enumConstants.indexOfFirst { it == value() }
+                    val index = enumConstants.indexOfFirst { it == value<Enum<*>>() }
                     selectedIndex = if (index == -1) 0 else index
 
                     onChange {
@@ -1210,6 +1221,65 @@ class EditorScene(val level: Level) : Scene() {
                     }
                 }
             }
+        }
+    }
+
+
+    private fun drawMainMenuBar() {
+        with(ImGui) {
+            functionalProgramming.mainMenuBar {
+                functionalProgramming.menu("Fichier") {
+                    functionalProgramming.menuItem("Quitter") {
+                        showExitWindow()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun drawInfoGameObjectWindow(gameObject: GameObject) {
+        with(ImGui) {
+            setNextWindowContentSize(Vec2(200f, 200f))
+            setNextWindowPos(Vec2(Gdx.graphics.width - 200f, 0f), Cond.FirstUseEver)
+
+            functionalProgramming.window("Réglages du gameObject - ${gameObject.tag.name}", null, WindowFlags.AlwaysAutoResize.i) {
+                if(button("Supprimer ce gameObject")) {
+                    gameObject.removeFromParent()
+                    if(selectGameObject === gameObject) {
+                        selectGameObject = null
+                        clearSelectGameObjects()
+                        editorMode = EditorMode.NO_MODE
+                    }
+                }
+
+                text("Layer : ${gameObject.layer}")
+                sameLine()
+                if(button("+")) {
+                    ++gameObject.layer
+                }
+                sameLine()
+                if(button("-")) {
+                    --gameObject.layer
+                }
+
+                separator()
+
+                val selectState = intArrayOf(gameObject.currentState)
+                if(combo("state", selectState, gameObject.getStates().map { it.name })) {
+                    gameObject.currentState = selectState[0]
+                }
+
+            }
+        }
+    }
+
+    private fun drawUI() {
+        with(ImGui) {
+
+            drawMainMenuBar()
+
+            if(selectGameObject != null)
+                drawInfoGameObjectWindow(selectGameObject!!)
         }
     }
 
@@ -1615,7 +1685,6 @@ class EditorScene(val level: Level) : Scene() {
             }
         }
     }
-
 
     /**
      * Permet d'afficher la fenêtre comportant les informations de l'entité sélectionnée

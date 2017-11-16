@@ -1,10 +1,11 @@
 package be.catvert.pc.utility
 
+import com.badlogic.gdx.math.Polygon
 import com.badlogic.gdx.math.Rectangle
 import com.fasterxml.jackson.annotation.JsonIgnore
 
-class Rect(position: Point = Point(), size: Size = Size()) {
-    constructor(x: Int, y: Int, width: Int, height: Int): this(Point(x, y), Size(width, height))
+class Rect(position: Point = Point(), size: Size = Size(), var rotation: Float = 0f) {
+    constructor(x: Int, y: Int, width: Int, height: Int, rotation: Float = 0f): this(Point(x, y), Size(width, height), rotation)
     constructor(rect: Rect): this(rect.x, rect.y, rect.width, rect.height)
 
     @JsonIgnore var position = position
@@ -41,6 +42,14 @@ class Rect(position: Point = Point(), size: Size = Size()) {
         set(value) {
             size = Size(width, value)
         }
+
+    // En souvenir
+    fun toPolygon(): Polygon = Polygon(floatArrayOf(0f, 0f, width.toFloat(), 0.toFloat(), width.toFloat(), height.toFloat(), 0.toFloat(), height.toFloat())).apply {
+        setOrigin(width/2f, height/2f);
+        this.rotation = this@Rect.rotation
+        this.setPosition(this@Rect.x.toFloat(), this@Rect.y.toFloat())
+    }
+
 
     fun set(size: Size, position: Point) {
         this.size = size
