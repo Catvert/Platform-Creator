@@ -4,22 +4,26 @@ import be.catvert.pc.GameKeys
 import be.catvert.pc.Log
 import be.catvert.pc.PCGame
 import be.catvert.pc.containers.Level
-import be.catvert.pc.utility.*
+import be.catvert.pc.utility.Constants
+import be.catvert.pc.utility.Size
+import be.catvert.pc.utility.UIUtility
+import be.catvert.pc.utility.Utility
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.GL20
-import com.badlogic.gdx.graphics.GLTexture
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.*
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.kotcrab.vis.ui.widget.VisCheckBox
 import com.kotcrab.vis.ui.widget.VisLabel
 import com.kotcrab.vis.ui.widget.VisList
 import com.kotcrab.vis.ui.widget.VisTextArea
 import glm_.vec2.Vec2
+import imgui.Cond
 import imgui.ImGui
+import imgui.WindowFlags
+import imgui.functionalProgramming
 import ktx.actors.onChange
 import ktx.actors.onClick
 import ktx.actors.onKeyUp
@@ -30,18 +34,10 @@ import ktx.assets.toLocalFile
 import ktx.collections.GdxArray
 import ktx.collections.toGdxArray
 import ktx.vis.window
-import org.lwjgl.opengl.GL
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
-import com.badlogic.gdx.math.Vector2
-import glm_.vec4.Vec4
-import imgui.Cond
-import imgui.WindowFlags
-import imgui.functionalProgramming
-import org.lwjgl.opengl.GL11
-import java.io.Serializable
 
 
 /**
@@ -49,13 +45,23 @@ import java.io.Serializable
  */
 
 class MainMenuScene : Scene() {
+    private class LevelItem(val file: FileHandle) {
+        override fun toString(): String = file.nameWithoutExtension()
+    }
+
     private val glyphCreatedBy = GlyphLayout(PCGame.mainFont, "par Catvert - ${Constants.gameVersion}")
 
     private val logo = PCGame.generateLogo(gameObjectContainer)
 
-    var texID = 0
-
-    private val texture = PCGame.assetManager.loadOnDemand<Texture>("assets/test.jpg").asset
+    private var showSelectLevelWindow = false
+    private var selectedLevel = -1
+    private val levels = Utility.getFilesRecursivly(Constants.levelDirPath.toLocalFile(), Constants.levelExtension).let {
+        val list = mutableListOf<LevelItem>()
+        it.forEach {
+            list += LevelItem(it)
+        }
+        list.toList()
+    }
 
     init {
         stage + window("Menu principal") {
@@ -83,15 +89,6 @@ class MainMenuScene : Scene() {
         }
 
         backgroundTexture = PCGame.assetManager.loadOnDemand<Texture>(Constants.gameBackgroundMenuPath).asset
-
-        texID = Gdx.gl.glGenTexture()
-
-        Gdx.gl.glBindTexture(texture.glTarget, texID)
-        GLTexture.uploadImageData(texture.glTarget, texture.textureData, 0)
-
-        // The code below causes an OpenGL error (GL_INVALID_ENUM) at createFontsTexture
-       // Gdx.gl.glActiveTexture(texID)
-       //  backgroundTexture!!.bind()
     }
 
     override fun postBatchRender() {
@@ -105,8 +102,6 @@ class MainMenuScene : Scene() {
         super.render(batch)
 
         drawUI()
-
-        ImGui.image(texID, Vec2(300f, 300f))
     }
 
     override fun resize(size: Size) {
@@ -116,22 +111,47 @@ class MainMenuScene : Scene() {
     //region UI
 
     private fun drawUI() {
+        drawMainMenu()
+
+        if (showSelectLevelWindow)
+            drawSelectLevelWindow()
+    }
+
+    private fun drawMainMenu() {
         with(ImGui) {
-
             functionalProgramming.window("Menu principal", null, WindowFlags.NoResize.i or WindowFlags.NoCollapse.i) {
-                if(button("Jouer", Vec2(200f, 20f))) {
+                if (button("Jouer", Vec2(200f, 20f))) {
+                    showSelectLevelWindow = true
+                }
+                if (button("Options", Vec2(200f, 20f))) {
 
                 }
-                if(button("Options", Vec2(200f, 20f))) {
-
-                }
-                if(button("Quitter", Vec2(200f, 20f))) {
+                if (button("Quitter", Vec2(200f, 20f))) {
                     Gdx.app.exit()
                 }
 
-                setWindowPos(Vec2(Gdx.graphics.width / 2f - windowWidth / 2f, Gdx.graphics.height / 2f - windowHeight / 2f), Cond.FirstUseEver)
+                setWindowPos(Vec2(Gdx.graphics.width / 2f - windowWidth / 2f, Gdx.graphics.height / 2f - windowHeight / 2f), Cond.Once)
             }
+        }
+    }
 
+    private fun drawSelectLevelWindow() {
+        with(ImGui) {
+            functionalProgramming.window("Sélectionner un niveau", null) {
+                listBox("", this@MainMenuScene::selectedLevel, levels.map { it.toString() }.toTypedArray())
+                if (selectedLevel > -1) {
+                    if (button("Jouer ce niveau")) {
+                        val level = Level.loadFromFile(levels[selectedLevel].file)
+                        if (level != null)
+                            PCGame.setScene(GameScene(level))
+                        else showWrongVersionLevelDialog()
+                    }
+                    button("Éditer ce niveau")
+                    button("Supprimer ce niveau")
+                }
+                separator()
+                button("Créer un nouveau niveau")
+            }
         }
     }
 

@@ -1,2 +1,2 @@
-20:01:48 -> Info. : Initialisation en cours.. 
- Taille : 1280x720
+20:44:05 -> Info. : Initialisation en cours.. 
+ Taille : 1280x72020:44:09 -> Info. : Chargement de la scène : EditorScene20:44:12 -> Info. : Chargement de la scène : MainMenuScene
