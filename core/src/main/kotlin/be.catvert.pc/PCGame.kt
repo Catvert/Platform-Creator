@@ -94,15 +94,15 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
         /**
          * Permet de sauvegarder la configuration du jeu
          */
-        fun saveGameConfig(): Boolean {
+        fun saveGameConfig(width: Int, height: Int): Boolean {
             try {
                 val writer = JsonWriter(FileWriter(Constants.configPath.toLocalFile().path(), false))
                 writer.setOutputType(JsonWriter.OutputType.json)
 
                 writer.`object`()
 
-                writer.name("width").value(Gdx.graphics.width)
-                writer.name("height").value(Gdx.graphics.height)
+                writer.name("width").value(width)
+                writer.name("height").value(height)
                 writer.name("vsync").value(PCGame.vsync)
                 writer.name("fullscreen").value(Gdx.graphics.isFullscreen)
                 writer.name("soundvolume").value(PCGame.soundVolume)
@@ -128,7 +128,7 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
         VisUI.load(Gdx.files.internal(Constants.UISkinPath))
 
         val window = (Gdx.graphics as Lwjgl3Graphics).window
-        LwjglGL3.init(GlfwWindow("Platform-Creator", window.javaClass.getDeclaredField("windowHandle").apply { isAccessible = true }.getLong(window)), true)
+        LwjglGL3.init(GlfwWindow(window.javaClass.getDeclaredField("windowHandle").apply { isAccessible = true }.getLong(window)), true)
 
         GameKeys.loadKeysConfig()
 
@@ -157,18 +157,13 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
         super.render()
 
         LwjglGL3.newFrame()
-        ImGui.text("Hello, world!")
 
         Gdx.graphics.setTitle(Constants.gameTitle + " - ${Gdx.graphics.framesPerSecond} FPS")
 
         currentScene.update()
         currentScene.render(mainBatch)
+
         ImGui.render()
-        ImGui.text("test")
-
-        ImGui.newFrame()
-
-
     }
 
     override fun resize(width: Int, height: Int) {

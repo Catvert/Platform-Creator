@@ -2,24 +2,24 @@
 eclipse.project.name = appName + '-core'
 
 dependencies {
-  compile "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
-  compile "com.badlogicgames.gdx:gdx:$gdxVersion"
-  compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-  compile "com.kotcrab.vis:vis-ui:$visUiVersion"
-  compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
-  compile "io.github.libktx:ktx-vis-style:$ktxVersion"
-  compile "net.dermetfan.libgdx-utils:libgdx-utils:$utilsVersion"
-  compile "io.github.libktx:ktx-assets:$ktxVersion"
-  compile "io.github.libktx:ktx-collections:$ktxVersion"
-  compile "io.github.libktx:ktx-style:$ktxVersion"
-  compile "io.github.libktx:ktx-vis:$ktxVersion"
-  compile "io.github.libktx:ktx-actors:$ktxVersion"
-  compile "io.github.libktx:ktx-math:$ktxVersion"
-  compile "io.github.libktx:ktx-scene2d:$ktxVersion"
-  compile "io.github.libktx:ktx-i18n:$ktxVersion"
-  compile "io.github.libktx:ktx-async:$ktxVersion"
-  compile "io.github.libktx:ktx-app:$ktxVersion"
-  compile group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: coroutinesVersion
+    compile "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
+    compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    compile "com.kotcrab.vis:vis-ui:$visUiVersion"
+    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+    compile "io.github.libktx:ktx-vis-style:$ktxVersion"
+    compile "net.dermetfan.libgdx-utils:libgdx-utils:$utilsVersion"
+    compile "io.github.libktx:ktx-assets:$ktxVersion"
+    compile "io.github.libktx:ktx-collections:$ktxVersion"
+    compile "io.github.libktx:ktx-style:$ktxVersion"
+    compile "io.github.libktx:ktx-vis:$ktxVersion"
+    compile "io.github.libktx:ktx-actors:$ktxVersion"
+    compile "io.github.libktx:ktx-math:$ktxVersion"
+    compile "io.github.libktx:ktx-scene2d:$ktxVersion"
+    compile "io.github.libktx:ktx-i18n:$ktxVersion"
+    compile "io.github.libktx:ktx-async:$ktxVersion"
+    compile "io.github.libktx:ktx-app:$ktxVersion"
+    compile group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: coroutinesVersion
 
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
@@ -30,10 +30,10 @@ dependencies {
     compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-afterburner', version: jacksonVersion
     compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-smile', version: jacksonVersion
 
-  compile group: 'io.github.lukehutch', name: 'fast-classpath-scanner', version: fastclasspathscannerVersion
-  //compile 'com.github.kotlin-graphics:imgui:-SNAPSHOT'
-  compile "io.leangen.geantyref:geantyref:$geantyrefVersion"
-
+    compile group: 'io.github.lukehutch', name: 'fast-classpath-scanner', version: fastclasspathscannerVersion
+    compile 'com.github.kotlin-graphics:imgui:-SNAPSHOT'
+    compile "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
+    compile "io.leangen.geantyref:geantyref:$geantyrefVersion"
 }
 
 kotlin {
