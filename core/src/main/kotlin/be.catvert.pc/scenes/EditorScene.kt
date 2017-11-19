@@ -5,7 +5,6 @@ import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
 import be.catvert.pc.components.Component
 import be.catvert.pc.components.RenderableComponent
-import be.catvert.pc.components.graphics.AnimationComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
 import be.catvert.pc.factories.PrefabFactory
@@ -13,50 +12,30 @@ import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
-import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
-import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Circle
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
-import com.badlogic.gdx.scenes.scene2d.Touchable
-import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener
 import com.kotcrab.vis.ui.widget.*
-import com.kotcrab.vis.ui.widget.spinner.FloatSpinnerModel
-import com.kotcrab.vis.ui.widget.spinner.IntSpinnerModel
-import com.kotcrab.vis.ui.widget.spinner.Spinner
-import glm_.vec2.Vec2
-import imgui.Cond
 import imgui.ImGui
 import imgui.WindowFlags
 import imgui.functionalProgramming
-import imgui.imgui.imgui_helpers
-import imgui.imgui.imgui_window
-import imgui.internal.ButtonFlags
-import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner
-import ktx.actors.onChange
 import ktx.actors.onClick
-import ktx.actors.onKeyUp
 import ktx.actors.plus
 import ktx.app.use
 import ktx.assets.loadOnDemand
 import ktx.assets.toLocalFile
-import ktx.collections.gdxArrayOf
 import ktx.collections.toGdxArray
-import ktx.vis.verticalGroup
 import ktx.vis.window
-import kotlin.reflect.KClass
-
 /**
  * Scène de l'éditeur de niveau
  */
-class EditorScene(val level: Level) : Scene() {
+class EditorScene(private val level: Level) : Scene() {
     private enum class EditorMode {
         NO_MODE, SELECT_GO, COPY_GO, SELECT_POINT, TRY_LEVEL
     }
@@ -67,6 +46,15 @@ class EditorScene(val level: Level) : Scene() {
 
     private enum class SelectGOMode {
         NO_MODE, MOVE, RESIZE
+    }
+
+    private object EditorSceneUI {
+        var gameObjectAddStateComboIndex = 0
+        var gameObjectAddComponentComboIndex = 0
+
+        var gameObjectCurrentSelectedComponent = 0
+
+        var addGameObjectPrefabComboIndex = 0
     }
 
     /**
@@ -130,11 +118,6 @@ class EditorScene(val level: Level) : Scene() {
      */
     private val selectRectangleData = SelectRectangleData(Point(), Point())
 
-    /**
-     * Permet de sauvegarder le dernier spriteSheet utilisé dans la fenêtre de sélection d'atlas
-     */
-    private var latestSelectTextureWindowAtlasIndex = 0
-
     private var backupTryModeCameraPos = Vector3()
 
     init {
@@ -149,8 +132,6 @@ class EditorScene(val level: Level) : Scene() {
 
         level.removeEntityBelowY0 = false
 
-        showInfoGameObjectWindow()
-
         onSelectGameObjectChange(null)
     }
 
@@ -159,12 +140,12 @@ class EditorScene(val level: Level) : Scene() {
 
         drawUI()
 
-        level.drawDebug()
+        (gameObjectContainer as Level).drawDebug()
 
         shapeRenderer.projectionMatrix = camera.combined
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
 
-        if (!level.drawDebugCells && editorMode != EditorMode.TRY_LEVEL) {
+        if (!(gameObjectContainer as Level).drawDebugCells && editorMode != EditorMode.TRY_LEVEL) {
             shapeRenderer.line(0f, 0f, 10000f, 1f, Color.GOLD, Color.WHITE)
             shapeRenderer.line(0f, 0f, 1f, 10000f, Color.GOLD, Color.WHITE)
         }
@@ -252,12 +233,12 @@ class EditorScene(val level: Level) : Scene() {
             it.projectionMatrix = PCGame.defaultProjection
             with(editorFont) {
                 if (editorMode != EditorMode.TRY_LEVEL) {
-                    draw(it, "Layer sélectionné : $selectLayer", 10f, Gdx.graphics.height - editorFont.lineHeight)
-                    draw(it, "Nombre d'entités : ${level.getGameObjectsData().size}", 10f, Gdx.graphics.height - editorFont.lineHeight * 2)
-                    draw(it, "Resize mode : ${resizeGameObjectMode.name}", 10f, Gdx.graphics.height - editorFont.lineHeight * 3)
-                    draw(it, "Mode de l'éditeur : ${editorMode.name}", 10f, Gdx.graphics.height - editorFont.lineHeight * 4)
+                    draw(it, "Layer sélectionné : $selectLayer", 10f, Gdx.graphics.height - editorFont.lineHeight * 2)
+                    draw(it, "Nombre d'entités : ${level.getGameObjectsData().size}", 10f, Gdx.graphics.height - editorFont.lineHeight * 3)
+                    draw(it, "Resize mode : ${resizeGameObjectMode.name}", 10f, Gdx.graphics.height - editorFont.lineHeight * 4)
+                    draw(it, "Mode de l'éditeur : ${editorMode.name}", 10f, Gdx.graphics.height - editorFont.lineHeight * 5)
                 } else {
-                    draw(it, "Test du niveau..", 10f, Gdx.graphics.height - lineHeight)
+                    draw(it, "Test du niveau..", 10f, Gdx.graphics.height - lineHeight * 2)
                 }
             }
             it.projectionMatrix = camera.combined
@@ -267,10 +248,9 @@ class EditorScene(val level: Level) : Scene() {
     override fun update() {
         super.update()
 
-        if (!isUIHover())
-            updateCamera()
+        updateCamera()
 
-        if (!isUIHover() && editorMode != EditorMode.TRY_LEVEL) {
+        if (!isUIHover && editorMode != EditorMode.TRY_LEVEL) {
             level.activeRect.position = Point(Math.max(0, camera.position.x.toInt() - level.activeRect.width / 2), Math.max(0, camera.position.y.toInt() - level.activeRect.height / 2))
 
             if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_UP_LAYER.key)) {
@@ -332,9 +312,7 @@ class EditorScene(val level: Level) : Scene() {
                     }
 
                     if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && !latestRightButtonClick) {
-                        val gameOject = findGameObjectUnderMouse()
-                        if (gameOject != null)
-                            showEditGameObjectWindow(gameOject)
+
                     }
                 }
                 EditorMode.SELECT_GO -> {
@@ -837,7 +815,7 @@ class EditorScene(val level: Level) : Scene() {
         }
     }
 
-    inline fun <reified T : Any> addWidgetArray(table: VisTable, gameObject: GameObject, crossinline getItemName: (index: Int) -> String, crossinline getItemExposeEditor: (index: Int) -> ExposeEditor, crossinline createItem: () -> T, crossinline getArray: () -> Array<T>, crossinline setArray: (newArray: Array<T>) -> Unit) {
+    /*inline fun <reified T : Any> addWidgetArray(table: VisTable, gameObject: GameObject, crossinline getItemName: (index: Int) -> String, crossinline getItemExposeEditor: (index: Int) -> ExposeEditor, crossinline createItem: () -> T, crossinline getArray: () -> Array<T>, crossinline setArray: (newArray: Array<T>) -> Unit) {
         val valueTables = table.add(VisTable()).height(100f).actor
 
         var onListChanged: () -> Unit = {}
@@ -848,7 +826,7 @@ class EditorScene(val level: Level) : Scene() {
 
             valueTables.add(VisScrollPane(ktx.vis.table() {
                 getArray().forEachIndexed { index, it ->
-                    addWidgetValue(this, gameObject, getItemName(index), { it }, { setArray(getArray().apply { set(index, it as T) }) }, getItemExposeEditor(index), false)
+                    //addWidgetValue(this, gameObject, getItemName(index), { it }, { setArray(getArray().apply { set(index, it as T) }) }, getItemExposeEditor(index), false)
 
                     textButton("Suppr.") {
                         onClick {
@@ -867,409 +845,118 @@ class EditorScene(val level: Level) : Scene() {
         table.add(VisTextButton("Ajouter").apply { onClick { setArray(getArray() + createItem()); } })
 
         table.row()
-    }
+    }*/
 
-    fun addWidgetValue(table: VisTable, gameObject: GameObject, labelName: String, get: () -> Any, set: (newValue: Any) -> Unit, exposeEditor: ExposeEditor, rowWhenConstruct: Boolean = true) {
-        table.add(VisLabel(labelName))
+    fun addImguiWidget(gameObject: GameObject, labelName: String, get: () -> Any, set: (Any) -> Unit, exposeEditor: ExposeEditor) {
+        val value = get()
+        with(ImGui) {
+            when(value) {
+                is Action -> {
+                    if(treeNode(labelName)) {
+                        val index = intArrayOf(PCGame.actionsClasses.indexOfFirst { it.isInstance(value) })
 
-        fun<T> value() = get() as T
-
-        when (get()) {
-            is Action -> {
-                table.add(VisTextButton("Éditer l'action").apply {
-                    onClick {
-                        showEditActionWindow(gameObject, value()) {
-                            set(it)
+                        if(combo("action", index, PCGame.actionsClasses.map { it.simpleName ?: "Nom inconnu" })) {
+                            set(ReflectionUtility.findNoArgConstructor(PCGame.actionsClasses[index[0]])!!.newInstance())
                         }
-                    }
-                })
-            }
-            is CustomEditorImpl -> value<CustomEditorImpl>().insertChangeProperties(table, gameObject, this@EditorScene)
-            is Boolean -> {
-                table.add(VisCheckBox("", value<Boolean>()).apply {
-                    onChange {
-                        set(isChecked)
-                    }
-                })
-            }
-            is Int -> {
-                when (exposeEditor.customType) {
-                    CustomType.DEFAULT -> {
-                        val intModel = IntSpinnerModel(value(), exposeEditor.minInt, exposeEditor.maxInt)
-                        table.add(Spinner("", intModel).apply {
-                            onChange {
-                                set(intModel.value)
-                            }
-                        })
-                    }
-                    CustomType.KEY_INT -> {
-                        table.add(VisTextArea(Input.Keys.toString(value())).apply {
-                            isReadOnly = true
-                            onKeyUp {
-                                val keyStr = Input.Keys.toString(it)
-                                val key = Input.Keys.valueOf(keyStr)
 
-                                if (key != -1) {
-                                    text = keyStr
-                                    set(key)
-                                }
-                            }
-                        }).width(50f)
+                        if(treeNode("Propriétés")) {
+                            insertImguiExposeEditorField(value, gameObject)
+                            treePop()
+                        }
+                        treePop()
                     }
                 }
-            }
-            is String -> {
-                table.add(VisTextField(value()).apply {
-                    onChange {
-                        set(text)
-                    }
-                }).width(100f)
-            }
-            is Point -> {
-                var value: Point = value()
-
-                val label = table.add(VisLabel(value.toString())).actor
-
-                val xIntModel = IntSpinnerModel(value.x, 0, level.matrixRect.width)
-                val yIntModel = IntSpinnerModel(value.y, 0, level.matrixRect.height)
-
-                fun setPointValue(newValue: Point) {
-                    value = newValue
-                    label.setText(newValue.toString())
-                    xIntModel.setValue(newValue.x, false)
-                    yIntModel.setValue(newValue.y, false)
-                    set(newValue)
+                is CustomEditorImpl -> value.insertImgui(gameObject, this@EditorScene)
+                is Boolean -> {
+                    if(checkbox(labelName, booleanArrayOf(value)))
+                        set(!value)
                 }
-
-                table.add(verticalGroup {
-                    space(10f)
-
-                    spinner("X", xIntModel) {
-                        onChange {
-                            setPointValue(value.copy(x = xIntModel.value, y = value.y))
+                is Int -> {
+                    when(exposeEditor.customType) {
+                        CustomType.DEFAULT -> {
+                            val value = intArrayOf(value) // TODO changer en inputInt
+                            if(sliderInt(labelName, value, exposeEditor.minInt, exposeEditor.maxInt))
+                                set(value[0])
+                        }
+                        CustomType.KEY_INT -> {
+                            val value = Input.Keys.toString(value).toCharArray()
+                            if(inputText(labelName, value))
+                                set(Input.Keys.valueOf(String(value)))
                         }
                     }
-
-                    spinner("Y", yIntModel) {
-                        onChange {
-                            setPointValue(value.copy(x = value.x, y = yIntModel.value))
-                        }
-                    }
-                })
-
-                table.add(VisTextButton("Sélectionner").apply {
-                    onClick {
-                        editorMode = EditorScene.EditorMode.SELECT_POINT
-                        onSelectPoint.register(true) {
-                            setPointValue(it)
-                            showUI()
-                        }
-                        hideUI()
-                    }
-                })
-            }
-            is Size -> {
-                var value: Size = value()
-
-                val label = table.add(VisLabel(value.toString())).actor
-
-                val widthIntModel = IntSpinnerModel(value.width, exposeEditor.minInt, exposeEditor.maxInt)
-                val heightIntModel = IntSpinnerModel(value.height, exposeEditor.minInt, exposeEditor.maxInt)
-
-                fun setSizeValue(newValue: Size) {
-                    value = newValue
-                    label.setText(newValue.toString())
-                    widthIntModel.setValue(newValue.width, false)
-                    heightIntModel.setValue(newValue.height, false)
-                    set(newValue)
                 }
-
-                table.add(verticalGroup {
-                    space(10f)
-
-                    spinner("L", widthIntModel) {
-                        onChange {
-                            setSizeValue(value.copy(width = widthIntModel.value, height = value.height))
-                        }
+                is Rect -> {
+                    if(collapsingHeader(labelName)) {
+                        addImguiWidget(gameObject, "Position", { value.position }, { value.position = it as Point }, ExposeEditorFactory.createExposeEditor(maxInt = level.matrixRect.width))
+                        addImguiWidget(gameObject, "Taille", { value.size }, { value.size = it as Size }, ExposeEditorFactory.createExposeEditor(maxInt = Constants.maxGameObjectSize))
                     }
+                }
+                is Size -> {
+                    if(treeNode(labelName)) {
+                        val width = intArrayOf(value.width)
+                        if(sliderInt("Largeur", width, exposeEditor.minInt, exposeEditor.maxInt))
+                            set(value.copy(width = width[0], height = value.height))
 
-                    spinner("H", heightIntModel) {
-                        onChange {
-                            setSizeValue(value.copy(width = value.width, height = heightIntModel.value))
-                        }
+                        val height = intArrayOf(value.height)
+                        if(sliderInt("Hauteur", height, exposeEditor.minInt, exposeEditor.maxInt))
+                            set(value.copy(width = value.width, height = height[0]))
+
+                        treePop()
                     }
-                })
-            }
-            is Enum<*> -> {
-                table.add(VisSelectBox<String>().apply {
-                    val enumConstants = value<Enum<*>>().javaClass.enumConstants
+                }
+                is Point -> {
+                    if(treeNode(labelName)) {
+                        val x = intArrayOf(value.x)
+                        if (sliderInt("X", x, exposeEditor.minInt, exposeEditor.maxInt))
+                            set(value.copy(x = x[0], y = value.y))
 
-                    this.items = enumConstants.map { (it as Enum<*>).name }.toGdxArray()
+                        val y = intArrayOf(value.y)
+                        if(sliderInt("Y", y, exposeEditor.minInt, exposeEditor.maxInt))
+                            set(value.copy(x = value.x, y = y[0]))
 
-                    val index = enumConstants.indexOfFirst { it == value<Enum<*>>() }
-                    selectedIndex = if (index == -1) 0 else index
-
-                    onChange {
-                        set(enumConstants[selectedIndex])
+                        treePop()
                     }
-                }).width(125f)
-            }
-            else -> {
-                throw Exception("Impossible d'insérer le type : ${ReflectionUtility.simpleNameOf(value())}")
+                }
+                is String -> {
+                    val value = value.toCharArray()
+                    if(inputText(labelName, value))
+                        set(value.toString())
+                }
+                is Enum<*> -> {
+                    val enumConstants = value.javaClass.enumConstants
+
+                    val selectedIndex = intArrayOf(enumConstants.indexOfFirst { it == value })
+
+                    pushItemWidth(150f)
+                    if(combo(labelName, selectedIndex, enumConstants.map { (it as Enum<*>).name}))
+                        set(enumConstants[selectedIndex[0]])
+                    popItemWidth()
+                }
+                else -> {
+                    text(ReflectionUtility.simpleNameOf(value))
+                }
             }
         }
-
-        if(rowWhenConstruct)
-            table.row()
     }
 
-    private fun insertExposeEditorFields(instance: Any, gameObject: GameObject, table: VisTable) {
-        if (instance is CustomEditorImpl) {
-            instance.insertChangeProperties(table, gameObject, this@EditorScene)
-        }
-
+    private fun insertImguiExposeEditorField(instance: Any, gameObject: GameObject) {
+        val dialogsImgui = mutableListOf<CustomEditorImpl>()
         ReflectionUtility.getAllFieldsOf(instance.javaClass).filter { it.isAnnotationPresent(ExposeEditor::class.java) }.forEach { field ->
             field.isAccessible = true
 
             val exposeField = field.getAnnotation(ExposeEditor::class.java)
 
-            addWidgetValue(table, gameObject,"${if (exposeField.customName.isBlank()) field.name else exposeField.customName} : ", { field.get(instance) }, { field.set(instance, it) }, exposeField)
+            val value = field.get(instance)
+            if(value is CustomEditorImpl)
+                dialogsImgui.add(value)
+            addImguiWidget(gameObject, if (exposeField.customName.isBlank()) field.name else exposeField.customName, { field.get(instance) }, { field.set(instance, it) }, exposeField)
         }
-    }
 
-    private fun showAddPrefabWindow(gameObject: GameObject) {
-        stage + window("Ajouter un prefab") {
-            setSize(200f, 200f)
-            setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
+        if (instance is CustomEditorImpl) {
+            instance.insertImgui(gameObject, this@EditorScene)
+            instance.insertImguiPopup(gameObject, this@EditorScene)
 
-            addCloseButton()
-
-            table(defaultSpacing = true) {
-                verticalGroup {
-                    space(10f)
-
-                    label("Nom : ")
-                    val nameField = textField { }
-
-                    label("Auteur : ")
-                    val authorField = textField { }
-
-                    textButton("Ajouter") {
-                        onClick {
-                            if (!nameField.isEmpty) {
-                                addPrefab(Prefab(nameField.text, authorField.text, gameObject))
-                                this@window.remove()
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    fun showEditActionWindow(gameObject: GameObject, action: Action?, setAction: (Action) -> Unit) {
-        stage + window("Éditer l'action") {
-            setSize(300f, 300f)
-            setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
-            isModal = true
-            addCloseButton()
-
-            verticalGroup vgroup@ {
-                space(10f)
-
-                selectBox<String> {
-                    var instance = action ?: EmptyAction()
-
-                    val actionsList = gdxArrayOf<KClass<out Action>>()
-                    FastClasspathScanner(Action::class.java.`package`.name).matchClassesImplementing(Action::class.java, { actionsList.add(it.kotlin) }).scan()
-
-                    actionsList.removeAll { it.isAbstract || !ReflectionUtility.hasNoArgConstructor(it) }
-
-                    this.items = actionsList.map { it.simpleName ?: "Nom inconnu" }.toGdxArray()
-
-                    val findIndex = actionsList.indexOfFirst { it.isInstance(instance) }
-                    if(findIndex in actionsList.items.indices)
-                        selectedIndex = findIndex
-
-                    onChange {
-                        if (!actionsList[selectedIndex].isInstance(instance))
-                            instance = ReflectionUtility.findNoArgConstructor(actionsList[selectedIndex])!!.newInstance()
-
-                        this@vgroup.clear()
-                        this@vgroup.addActor(this@selectBox)
-
-                        this@vgroup.table(defaultSpacing = true) {
-                            insertExposeEditorFields(instance, gameObject, this)
-
-                            row()
-
-                            this@vgroup.textButton(if (action == null) "Ajouter" else "Modifier") {
-                                onClick {
-                                    setAction(instance)
-                                    this@window.remove()
-                                }
-                            }
-                        }
-                    }.changed(ChangeListener.ChangeEvent(), this)
-                }
-            }
-        }
-    }
-
-    /**
-     * Permet d'afficher la fenêtre pour créer une entité
-     */
-    private fun showAddGameObjectWindow() {
-        stage + window("Ajouter un gameObject") {
-            isModal = true
-            addCloseButton()
-
-            fun finishBuild(gameObject: GameObject) {
-                clearSelectGameObjects()
-                selectGameObject = gameObject
-                editorMode = EditorMode.COPY_GO
-                this.remove()
-            }
-
-            verticalGroup {
-                space(10f)
-                verticalGroup {
-                    space(10f)
-
-                    val prefabSelectBox = selectBox<Prefab> {
-                        this.items = prefabs.toGdxArray()
-                    }
-
-                    textButton("Ajouter") {
-                        onClick {
-                            val go = prefabSelectBox.selected.create(Point())
-                            finishBuild(go)
-
-                            UIUtility.showDialog(this@EditorScene.stage, "Éditer le gameObject?", "Voulez-vous éditer le gameObject créer?", listOf("Éditer", "Fermer")) {
-                                if (it == 0)
-                                    showEditGameObjectWindow(go)
-                            }
-
-                        }
-                    }
-                }
-            }
-
-            setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
-        }
-    }
-
-    private fun showAddGameObjectStateWindow(gameObjectStates: Set<GameObjectState>, onCreateState: (GameObjectState) -> Unit) {
-        stage + window("Ajouter un state") {
-            setSize(300f, 100f)
-            setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
-
-            addCloseButton()
-
-            table(defaultSpacing = true) {
-                val selectBox = selectBox<String> {
-                    this.items = gdxArrayOf("State vide", *gameObjectStates.map { "Copier de : ${it.name}" }.toTypedArray())
-                }
-
-                row()
-
-                horizontalGroup {
-                    space(10f)
-
-                    label("Nom : ")
-                    val nameField = textField { }
-
-                    textButton("Ajouter") {
-                        onClick {
-                            if (!nameField.isEmpty) {
-                                onCreateState(
-                                        if (selectBox.selectedIndex == 0)
-                                            GameObjectState(nameField.text)
-                                        else
-                                            SerializationFactory.copy(gameObjectStates.elementAt(selectBox.selectedIndex - 1)).apply { this.name = nameField.text }
-                                )
-                                this@window.remove()
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun showAddComponentWindow(onCreateComp: (Component) -> Unit) {
-        val componentsList = gdxArrayOf<KClass<out Component>>()
-        FastClasspathScanner(Component::class.java.`package`.name).matchSubclassesOf(Component::class.java, { componentsList.add(it.kotlin) }).scan()
-
-        componentsList.removeAll { it.isAbstract || !ReflectionUtility.hasNoArgConstructor(it) }
-
-        stage + window("Ajouter un component") {
-            setSize(250f, 100f)
-            setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
-            isModal = true
-            addCloseButton()
-
-            table(defaultSpacing = true) {
-                val selectBoxComp = selectBox<String> {
-                    this.items = componentsList.map { it.simpleName?.removeSuffix("Component") ?: "Nom inconnu" }.toGdxArray()
-                }
-
-                textButton("Ajouter") {
-                    onClick {
-                        onCreateComp(ReflectionUtility.findNoArgConstructor(componentsList[selectBoxComp.selectedIndex])!!.newInstance())
-                        this@window.remove()
-                    }
-                }
-            }
-        }
-    }
-
-
-    private fun drawMainMenuBar() {
-        with(ImGui) {
-            functionalProgramming.mainMenuBar {
-                functionalProgramming.menu("Fichier") {
-                    functionalProgramming.menuItem("Quitter") {
-                        showExitWindow()
-                    }
-                }
-            }
-        }
-    }
-
-    private fun drawInfoGameObjectWindow(gameObject: GameObject) {
-        with(ImGui) {
-            setNextWindowContentSize(Vec2(200f, 200f))
-            setNextWindowPos(Vec2(Gdx.graphics.width - 200f, 0f), Cond.FirstUseEver)
-
-            functionalProgramming.window("Réglages du gameObject - ${gameObject.tag.name}", null, WindowFlags.AlwaysAutoResize.i) {
-                if(button("Supprimer ce gameObject")) {
-                    gameObject.removeFromParent()
-                    if(selectGameObject === gameObject) {
-                        selectGameObject = null
-                        clearSelectGameObjects()
-                        editorMode = EditorMode.NO_MODE
-                    }
-                }
-
-                text("Layer : ${gameObject.layer}")
-                sameLine()
-                if(button("+")) {
-                    ++gameObject.layer
-                }
-                sameLine()
-                if(button("-")) {
-                    --gameObject.layer
-                }
-
-                separator()
-
-                val selectState = intArrayOf(gameObject.currentState)
-                if(combo("state", selectState, gameObject.getStates().map { it.name })) {
-                    gameObject.currentState = selectState[0]
-                }
-
-            }
+            dialogsImgui.forEach { it.insertImguiPopup(gameObject, this@EditorScene) }
         }
     }
 
@@ -1283,499 +970,139 @@ class EditorScene(val level: Level) : Scene() {
         }
     }
 
-    private fun showEditGameObjectWindow(gameObject: GameObject) {
-        stage + window("Éditer un gameObject") {
-            setSize(600f, 400f)
-            isModal = true
-            addCloseButton()
-
-            table(defaultSpacing = true) {
-
-                var onStateChanged: () -> Unit = {} // Permet de regénérer la liste de states pour le state initial
-
-                table(defaultSpacing = true) gameObjectTable@ {
-                    onStateChanged = {
-                        this@gameObjectTable.clear()
-
-                        insertExposeEditorFields(gameObject, gameObject,this@gameObjectTable)
-                    }
-                    onStateChanged()
-                }
-
-                table(defaultSpacing = true) stateTable@ {
-                    selectBox<String> stateSelectBox@ {
-                        fun generateItems() {
-                            this.items = gameObject.getStates().map { it.name }.toGdxArray()
-                        }
-                        generateItems()
-
-                        this.selectedIndex = gameObject.currentState
-
-                        onChange {
-                            this@stateTable.clear()
-
-                            this@stateTable.horizontalGroup {
-                                space(10f)
-
-                                label("State : ")
-
-                                addActor(this@stateSelectBox)
-
-                                textButton("+") {
-                                    onClick {
-                                        showAddGameObjectStateWindow(gameObject.getStates()) {
-                                            gameObject.addState(it)
-                                            generateItems()
-                                            this@stateSelectBox.selectedIndex = gameObject.getStates().indexOf(it)
-                                            onStateChanged()
-                                        }
-                                    }
-                                }
-                                textButton("-") {
-                                    this.touchable = if (this@stateSelectBox.items.size > 1) Touchable.enabled else Touchable.disabled
-                                    onClick {
-                                        gameObject.removeState(gameObject.currentState)
-                                        generateItems()
-                                        onStateChanged()
-                                    }
-                                }
-                            }
-
-                            this@stateTable.row()
-
-                            this@stateTable.table(defaultSpacing = true) {
-                                insertExposeEditorFields(gameObject.getCurrentState(), gameObject,this)
-                            }
-
-                            this@stateTable.row()
-
-                            this@stateTable.verticalGroup {
-                                space(10f)
-
-                                val state = gameObject.getStates().elementAt(this@stateSelectBox.selectedIndex)
-
-                                val onAddComponent = Signal<Component>()
-
-                                textButton("Ajouter un component") {
-                                    onClick {
-                                        showAddComponentWindow {
-                                            state.addComponent(it)
-                                            onAddComponent(it)
-                                        }
-                                    }
-                                }
-
-                                table(defaultSpacing = true) compTable@ {
-                                    fun generateComponentsItems() = state.getComponents().mapIndexed { index, component ->
-                                        val className = ReflectionUtility.simpleNameOf(component).removeSuffix("Component")
-                                        "${index + 1} : " + if (component.name == className) className else component.name + "[$className]"
-                                    }.toGdxArray()
-
-                                    selectBox<String> {
-                                        this.items = generateComponentsItems()
-
-                                        onAddComponent.register { comp ->
-                                            this.items = generateComponentsItems()
-                                            val newIndex = state.getComponents().indexOfFirst { it === comp }
-                                            if(newIndex > -1)
-                                                this.selectedIndex = newIndex
-                                        }
-
-                                        onChange {
-                                            this@compTable.clear()
-
-                                            if (selectedIndex == -1)
-                                                return@onChange
-
-                                            this@compTable.add(ktx.vis.horizontalGroup {
-                                                space(10f)
-                                                addActor(this@selectBox)
-                                                textButton("Supprimer") {
-                                                    onClick {
-                                                        state.removeComponent(state.getComponents().elementAt(this@selectBox.selectedIndex))
-                                                        this@selectBox.items = generateComponentsItems()
-                                                    }
-                                                }
-                                            })
-
-                                            this@compTable.row()
-
-                                            val instance = state.getComponents().elementAt(selectedIndex)
-
-                                            val compPropertiesTable = VisTable()
-
-                                            this@compTable.add(VisScrollPane(compPropertiesTable)).height(150f)
-
-                                            insertExposeEditorFields(instance, gameObject, compPropertiesTable)
-
-                                        }.changed(ChangeListener.ChangeEvent(), this)
-                                    }
-                                }
-                            }
-                        }.changed(ChangeListener.ChangeEvent(), this)
+    private fun drawMainMenuBar() {
+        val addGameObjectTitle = "Ajouter un gameObject"
+        with(ImGui) {
+            functionalProgramming.mainMenuBar {
+                functionalProgramming.menu("Fichier") {
+                    functionalProgramming.menuItem("Quitter") {
+                        showExitWindow()
                     }
                 }
 
-                row()
-
-                textButton("Créer un prefab") {
-                    onClick {
-                        showAddPrefabWindow(gameObject)
-                    }
+                functionalProgramming.menuItem("Ajouter un gameObject") {
+                    openPopup(addGameObjectTitle)
                 }
-            }
 
-            setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
-        }
-    }
+                if(beginPopupModal(addGameObjectTitle, extraFlags = WindowFlags.AlwaysAutoResize.i)) {
+                    combo("prefabs", EditorSceneUI::addGameObjectPrefabComboIndex, prefabs.map { it.name })
+                    if(button("Créer")) {
+                        val gameObject = prefabs.elementAt(EditorSceneUI.addGameObjectPrefabComboIndex).create(Point())
 
+                        clearSelectGameObjects()
+                        selectGameObject = gameObject
+                        editorMode = EditorMode.COPY_GO
 
-    /**
-     * Permet d'afficher la fenêtre pour sélectionner une texture
-     * @param onAtlasSelected Méthode appelée quand l'atlasPath et la region ont été correctement sélectionnés par le joueur
-     */
-    fun showSelectAtlasRegionWindow(atlasFile: FileHandle? = null, onAtlasSelected: (atlasFile: FileHandle, region: String) -> Unit) {
-        /**
-         * Classe de donnée représentant la sélection d'une texture atlasPath
-         */
-        data class TextureAtlasSelect(val textureAtlas: TextureAtlas, val atlasFile: FileHandle, val atlasName: String) {
-            override fun toString(): String {
-                return atlasName
-            }
-        }
-
-        stage + window("Sélectionner une atlas") {
-            setSize(400f, 400f)
-            setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
-            isModal = true
-            addCloseButton()
-
-            table {
-                val table = VisTable()
-                table.setSize(350f, 200f)
-
-                val selectedImage = VisImage()
-
-                val selectedBox = selectBox<TextureAtlasSelect> {
-                    this.items = Utility.getFilesRecursivly(Constants.atlasDirPath.toLocalFile(), "atlas").let {
-                        val list = mutableListOf<TextureAtlasSelect>()
-
-                        it.forEachIndexed { index, file ->
-                            val loadAtlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(file.path()).asset to file.file().nameWithoutExtension
-                            if (atlasFile?.equals(file) == true) {
-                                latestSelectTextureWindowAtlasIndex = index
-                            }
-
-                            list += TextureAtlasSelect(loadAtlas.first, file, loadAtlas.second)
-                        }
-
-                        list.toGdxArray()
+                        closeCurrentPopup()
                     }
-
-                    if (latestSelectTextureWindowAtlasIndex < this.items.size)
-                        this.selectedIndex = latestSelectTextureWindowAtlasIndex
-
-                    onChange {
-                        table.clearChildren()
-                        var count = 0
-                        selected.textureAtlas.regions.forEach {
-                            val image = VisImage(it)
-
-                            image.userObject = selected.atlasFile to it.name
-
-                            image.addListener(image.onClick {
-                                selectedImage.drawable = image.drawable
-                                selectedImage.userObject = image.userObject
-                            })
-
-                            table.add(image).size(50f, 50f).space(10f)
-
-                            ++count
-                            if (count >= 5) {
-                                table.row()
-                                count = 0
-                            }
-                        }
-                    }.changed(ChangeListener.ChangeEvent(), this)
-                }
-                row()
-
-                val scroll = ScrollPane(table)
-                add(scroll).size(300f, 200f).space(10f)
-
-                row()
-
-                add(selectedImage).size(50f, 50f).space(10f)
-
-                row()
-
-                textButton("Sélectionner") {
-                    onClick {
-                        if (selectedImage.userObject != null && selectedImage.userObject is Pair<*, *>) {
-                            @Suppress("UNCHECKED_CAST")
-                            val userObject = selectedImage.userObject as? Pair<FileHandle, String>
-                            if (userObject != null) {
-                                onAtlasSelected(userObject.first, userObject.second)
-                                latestSelectTextureWindowAtlasIndex = selectedBox.selectedIndex
-                                this@window.remove()
-                            }
-                        }
-                    }
+                    sameLine()
+                    if(button("Annuler"))
+                        closeCurrentPopup()
+                    endPopup()
                 }
             }
         }
     }
 
-    /**
-     * Permet d'afficher la fenêtre pour sélectionner une animation
-     */
-    fun showSelectAnimationWindow(atlasFile: FileHandle? = null, onAnimationSelected: (atlasFile: FileHandle, animationRegionName: String, frameDuration: Float) -> Unit) {
-        /**
-         * Classe de donnée représentant la sélection d'une texture atlasPath
-         */
-        data class TextureAtlasSelect(val textureAtlas: TextureAtlas, val atlasFile: FileHandle, val atlasName: String) {
-            override fun toString(): String {
-                return atlasName
-            }
-        }
+    private fun drawInfoGameObjectWindow(gameObject: GameObject) {
+        val createPrefabTitle = "Créer un prefab"
+        val newStateTitle = "Nouveau state"
+        val addComponentTitle = "Ajouter un component"
 
-        stage + window("Sélectionner une animation") {
-            setSize(400f, 400f)
-            setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
-            isModal = true
-            addCloseButton()
-
-            table {
-                val table = VisTable()
-                table.setSize(350f, 200f)
-
-                val selectedImage = VisImage()
-
-                val selectedBox = selectBox<TextureAtlasSelect> {
-                    this.items = Utility.getFilesRecursivly(Constants.atlasDirPath.toLocalFile(), "atlas").let {
-                        val list = mutableListOf<TextureAtlasSelect>()
-
-                        it.forEachIndexed { index, file ->
-                            val loadAtlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(file.path()).asset to file.file().nameWithoutExtension
-                            if (atlasFile?.equals(file) == true) {
-                                latestSelectTextureWindowAtlasIndex = index
-                            }
-
-                            list += TextureAtlasSelect(loadAtlas.first, file, loadAtlas.second)
-                        }
-
-                        list.toGdxArray()
-                    }
-
-                    if (latestSelectTextureWindowAtlasIndex < this.items.size)
-                        this.selectedIndex = latestSelectTextureWindowAtlasIndex
-
-                    onChange {
-                        table.clearChildren()
-                        var count = 0
-
-                        AnimationComponent.findAnimationRegionsNameInAtlas(selected.textureAtlas).forEach {
-                            val image = VisImage(selected.textureAtlas.findRegion(it + "_0"))
-
-                            image.userObject = selected.atlasFile to it
-
-                            image.onClick {
-                                selectedImage.drawable = image.drawable
-                                selectedImage.userObject = image.userObject
-                            }
-
-                            table.add(image).size(50f, 50f).space(10f)
-
-                            ++count
-                            if (count >= 5) {
-                                table.row()
-                                count = 0
-                            }
-                        }
-                    }.changed(ChangeListener.ChangeEvent(), this)
-                }
-                row()
-
-                val scroll = ScrollPane(table)
-                add(scroll).size(300f, 200f).space(10f)
-
-                row()
-
-                add(selectedImage).size(50f, 50f).space(10f)
-
-                row()
-
-                val floatModel = FloatSpinnerModel(1f.toString(), 0f.toString(), 10f.toString(), 0.1f.toString())
-                spinner("Vitesse de l'animation", floatModel)
-
-                row()
-
-                textButton("Sélectionner") {
-                    onClick {
-                        if (selectedImage.userObject != null && selectedImage.userObject is Pair<*, *>) {
-                            @Suppress("UNCHECKED_CAST")
-                            val userObject = selectedImage.userObject as? Pair<FileHandle, String>
-                            if (userObject != null) {
-                                onAnimationSelected(userObject.first, userObject.second, floatModel.value.toFloat())
-                                latestSelectTextureWindowAtlasIndex = selectedBox.selectedIndex
-                                this@window.remove()
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Permet d'afficher la fenêtre pour sélectionner une texture
-     */
-    fun showSelectTextureWindow(onTextureSelected: (textureFile: FileHandle) -> Unit) {
-        stage + window("Sélectionner une texture") {
-            setSize(400f, 400f)
-            setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
-            isModal = true
-            addCloseButton()
-
-            table {
-                val table = VisTable()
-                table.setSize(350f, 200f)
-
-                val selectedImage = VisImage()
-
-                var count = 0
-                Utility.getFilesRecursivly(Constants.texturesDirPath.toLocalFile(), "png").forEach {
-                    val image = VisImage(PCGame.assetManager.loadOnDemand<Texture>(it.path()).asset)
-
-                    image.userObject = it
-
-                    image.onClick {
-                        selectedImage.drawable = image.drawable
-                        selectedImage.userObject = image.userObject
-                    }
-
-                    table.add(image).size(50f, 50f).space(10f)
-
-                    ++count
-                    if (count >= 5) {
-                        table.row()
-                        count = 0
-                    }
-                }
-
-                row()
-
-                val scroll = ScrollPane(table)
-                add(scroll).size(300f, 200f).space(10f)
-
-                row()
-
-                add(selectedImage).size(50f, 50f).space(10f)
-
-                row()
-
-                textButton("Sélectionner") {
-                    addListener(onClick {
-                        if (selectedImage.userObject != null && selectedImage.userObject is FileHandle) {
-                            onTextureSelected(selectedImage.userObject as FileHandle)
-                            this@window.remove()
-                        }
-                    })
-                }
-            }
-        }
-    }
-
-    /**
-     * Permet d'afficher la fenêtre comportant les informations de l'entité sélectionnée
-     */
-    private fun showInfoGameObjectWindow() {
-        stage + window("Réglages des gameObjects") {
-            setSize(250f, 200f)
-            setPosition(Gdx.graphics.width - width, Gdx.graphics.height - height)
-
-            verticalGroup {
-                space(10f)
-
-                textButton("Ajouter un gameObject") {
-                    onClick { showAddGameObjectWindow() }
-                }
-
-                val noGOSelectedText = "Aucun gameObject sélectionné"
-                label(noGOSelectedText) {
-                    onSelectGameObjectChange.register { gameObject ->
-                        if (gameObject == null)
-                            setText(noGOSelectedText)
-                        else
-                            setText(gameObject.tag.name)
-                    }
-                }
-
-                textButton("Supprimer ce gameObject") {
-                    touchable = Touchable.disabled
-
-                    onSelectGameObjectChange.register { gameObject ->
-                        this.touchable =
-                                if (gameObject == null || gameObject.id == level.playerUUID)
-                                    Touchable.disabled
-                                else
-                                    Touchable.enabled
-                    }
-
-                    onClick {
-                        selectGameObject?.removeFromParent()
+        with(ImGui) {
+            functionalProgramming.window("Réglages du gameObject", null, WindowFlags.AlwaysAutoResize.i) {
+                if(button("Supprimer ce gameObject")) {
+                    gameObject.removeFromParent()
+                    if(selectGameObject === gameObject) {
                         selectGameObject = null
-
                         clearSelectGameObjects()
                         editorMode = EditorMode.NO_MODE
                     }
                 }
 
-                horizontalGroup {
-                    space(10f)
+                if(button("Créer un prefab"))
+                    openPopup(createPrefabTitle)
 
-                    val layerLabelStartStr = "Layer : "
-                    label(layerLabelStartStr) {
-                        onSelectGameObjectChange.register { gameObject ->
-                            this.setText(layerLabelStartStr + (gameObject?.layer ?: "/"))
-                        }
-                    }
+                insertImguiExposeEditorField(gameObject, gameObject)
 
-                    textButton("+") {
-                        onSelectGameObjectChange.register { gameObject ->
-                            this.touchable = if (gameObject == null) Touchable.disabled else Touchable.enabled
-                        }
+                separator()
 
-                        onClick {
-                            if (selectGameObject != null) {
-                                selectGameObject!!.layer++
-                                onSelectGameObjectChange(selectGameObject!!)
-                            }
-                        }
-                    }
-                    textButton("-") {
-                        onSelectGameObjectChange.register { gameObject ->
-                            this.touchable = if (gameObject == null) Touchable.disabled else Touchable.enabled
-                        }
+                pushItemWidth(100f)
+                combo("state", gameObject::currentState, gameObject.getStates().map { it.name })
+                popItemWidth()
 
-                        onClick {
-                            if (selectGameObject != null) {
-                                selectGameObject!!.layer--
-                                onSelectGameObjectChange(selectGameObject!!)
-                            }
-                        }
-                    }
+                sameLine()
+
+                if(button("Ajouter un state")) {
+                    openPopup(newStateTitle)
+                }
+                sameLine()
+                if(button("Suppr. cet state")) {
+                    if(gameObject.getStates().size > 1)
+                        gameObject.removeState(EditorSceneUI.gameObjectAddStateComboIndex - 1)
                 }
 
-                textButton("Éditer") {
-                    onSelectGameObjectChange.register { gameObject ->
-                        this.touchable = if (gameObject == null) Touchable.disabled else Touchable.enabled
+                pushItemWidth(100f)
+                combo("components", EditorSceneUI::gameObjectCurrentSelectedComponent, gameObject.getCurrentState().getComponents().map { it.name })
+                popItemWidth()
+
+                sameLine()
+                if(button("Ajouter un comp.")) {
+                    openPopup(addComponentTitle)
+                }
+                sameLine()
+                if(button("Suppr. ce comp.")) {
+                    gameObject.getCurrentState().removeComponent(gameObject.getCurrentState().getComponents().elementAt(EditorSceneUI.gameObjectCurrentSelectedComponent))
+                }
+
+                insertImguiExposeEditorField(gameObject.getCurrentState().getComponents().elementAt(EditorSceneUI.gameObjectCurrentSelectedComponent), gameObject)
+
+                if(beginPopupModal(createPrefabTitle, extraFlags = WindowFlags.AlwaysAutoResize.i)) {
+                    val name = "test".toCharArray() // TODO inputtext
+                    val author = "Catvert".toCharArray()
+
+                    inputText("Nom", name)
+                    inputText("Auteur", author)
+
+                    if(button("Ajouter")) {
+                        addPrefab(Prefab(String(name), String(author), gameObject))
+                        closeCurrentPopup()
                     }
 
-                    onClick {
-                        if (selectGameObject != null)
-                            showEditGameObjectWindow(selectGameObject!!)
+                    endPopup()
+                }
+
+                if(beginPopupModal(newStateTitle, extraFlags = WindowFlags.AlwaysAutoResize.i)) {
+                    val comboItems = mutableListOf("State vide").apply { addAll(gameObject.getStates().map { "Copier de : ${it.name}" }) }
+                    combo("type", EditorSceneUI::gameObjectAddStateComboIndex, comboItems)
+                    inputText("Nom", "test".toCharArray())
+
+                    if(button("Ajouter")) {
+                        val stateName = "test" // TODO wait for inputText imgui
+                        if(EditorSceneUI.gameObjectAddStateComboIndex == 0)
+                            gameObject.addState(stateName) {}
+                        else
+                            gameObject.addState(SerializationFactory.copy(gameObject.getStates().elementAt(EditorSceneUI.gameObjectAddStateComboIndex - 1)).apply { name = stateName })
+                        closeCurrentPopup()
                     }
+
+                    sameLine()
+
+                    if(button("Annuler"))
+                        closeCurrentPopup()
+
+                    endPopup()
+                }
+
+                if(beginPopupModal(addComponentTitle, extraFlags = WindowFlags.AlwaysAutoResize.i)) {
+                    combo("component", EditorSceneUI::gameObjectAddComponentComboIndex, PCGame.componentsClasses.map { it.simpleName?: "Nom inconnu" })
+
+                    if(button("Ajouter")) {
+                        gameObject.getCurrentState().addComponent(ReflectionUtility.findNoArgConstructor(PCGame.componentsClasses[EditorSceneUI.gameObjectAddComponentComboIndex])!!.newInstance())
+                        closeCurrentPopup()
+                    }
+
+                    endPopup()
                 }
             }
         }

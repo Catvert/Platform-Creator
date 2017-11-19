@@ -60,17 +60,19 @@ enum class GameKeys(var key: Int, val description: String) {
          * Charge le fichier de configuration des touches du jeu
          */
         fun loadKeysConfig() {
-            try {
-                val root = JsonReader().parse(FileReader(Constants.keysConfigPath))
+            if(Constants.keysConfigPath.toLocalFile().exists()) {
+                try {
+                    val root = JsonReader().parse(FileReader(Constants.keysConfigPath))
 
-                root["keys"].forEach {
-                    val name = it.getString("name")
-                    val key = it.getInt("key")
+                    root["keys"].forEach {
+                        val name = it.getString("name")
+                        val key = it.getInt("key")
 
-                    GameKeys.valueOf(name).key = key
+                        GameKeys.valueOf(name).key = key
+                    }
+                } catch (e: Exception) {
+                    Log.error(e) { "Erreur lors du chargement du fichier de configuration des touches du jeu !" }
                 }
-            } catch (e: Exception) {
-                Log.error(e) { "Erreur lors du chargement du fichier de configuration des touches du jeu !" }
             }
         }
 

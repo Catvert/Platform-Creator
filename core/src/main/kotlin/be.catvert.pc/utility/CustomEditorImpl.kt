@@ -6,5 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.kotcrab.vis.ui.widget.VisTable
 
 interface CustomEditorImpl {
-    fun insertChangeProperties(table: VisTable, gameObject: GameObject, editorScene: EditorScene)
+    fun insertImgui(gameObject: GameObject, editorScene: EditorScene)
+
+    fun insertImguiPopup(gameObject: GameObject, editorScene: EditorScene) = Unit
 }

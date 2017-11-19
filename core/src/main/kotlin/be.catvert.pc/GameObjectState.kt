@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
+import kotlin.reflect.KClass
 
 class GameObjectState(var name: String, components: MutableSet<Component> = mutableSetOf()) : Renderable, Updeatable {
     @JsonCreator private constructor(): this("State")
@@ -62,7 +63,7 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
 
     inline fun <reified T : Component> getComponent(): T? = getComponents().firstOrNull { it is T } as? T
 
-    inline fun <reified T : Component> hasComponent(): Boolean = getComponent<T>() != null
+    inline fun <reified T : Component> hasComponent(klass: KClass<T> = T::class): Boolean = getComponent<T>() != null
 
     fun setFlipRenderable(x: Boolean, y: Boolean) {
         getComponents().filter { it is RenderableComponent }.forEach {

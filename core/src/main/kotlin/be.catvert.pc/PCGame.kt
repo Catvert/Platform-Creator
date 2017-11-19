@@ -1,5 +1,7 @@
 package be.catvert.pc
 
+import be.catvert.pc.actions.Action
+import be.catvert.pc.components.Component
 import be.catvert.pc.components.graphics.TextureComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.scenes.MainMenuScene
@@ -11,6 +13,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.Matrix4
 import com.badlogic.gdx.utils.JsonWriter
 import com.kotcrab.vis.ui.VisUI
@@ -19,12 +22,16 @@ import glm_.vec4.Vec4
 import imgui.Col
 import imgui.ImGui
 import imgui.impl.LwjglGL3
+import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner
 import ktx.app.KtxApplicationAdapter
+import ktx.assets.loadOnDemand
 import ktx.assets.toLocalFile
 import ktx.async.enableKtxCoroutines
+import ktx.collections.gdxArrayOf
 import uno.glfw.GlfwWindow
 import java.io.FileWriter
 import java.io.IOException
+import kotlin.reflect.KClass
 
 /** [com.badlogic.gdx.ApplicationListener, implementation shared by all platforms.  */
 class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: Float) : KtxApplicationAdapter {
@@ -46,6 +53,29 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
         lateinit var defaultProjection: Matrix4
             private set
 
+        lateinit var loadedAtlas: List<FileHandle>
+            private set
+
+        lateinit var loadedTextures: List<FileHandle>
+
+        val actionsClasses = let {
+            val list = mutableListOf<KClass<out Action>>()
+            FastClasspathScanner(Action::class.java.`package`.name).matchClassesImplementing(Action::class.java, { list.add(it.kotlin); }).scan()
+
+            list.removeAll { it.isAbstract || !ReflectionUtility.hasNoArgConstructor(it) }
+
+            list.toList()
+        }
+
+        val componentsClasses = let {
+            val componentsList = mutableListOf<KClass<out Component>>()
+            FastClasspathScanner(Component::class.java.`package`.name).matchSubclassesOf(Component::class.java, { componentsList.add(it.kotlin) }).scan()
+
+            componentsList.removeAll { it.isAbstract || !ReflectionUtility.hasNoArgConstructor(it) }
+
+            componentsList.toList()
+        }
+
         var vsync = false
             set(value) {
                 field = value
@@ -53,6 +83,10 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
             }
 
         var soundVolume = 1f
+            set(value) {
+                if(value in 0.0..1.0)
+                    field = value
+            }
 
         val assetManager = AssetManager()
 
@@ -87,56 +121,29 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
                 currentScene.dispose()
             currentScene = newScene
         }
-
-        /**
-         * Permet de sauvegarder la configuration du jeu
-         */
-        fun saveGameConfig(width: Int, height: Int): Boolean {
-            try {
-                val writer = JsonWriter(FileWriter(Constants.configPath.toLocalFile().path(), false))
-                writer.setOutputType(JsonWriter.OutputType.json)
-
-                writer.`object`()
-
-                writer.name("width").value(width)
-                writer.name("height").value(height)
-                writer.name("vsync").value(PCGame.vsync)
-                writer.name("fullscreen").value(Gdx.graphics.isFullscreen)
-                writer.name("soundvolume").value(PCGame.soundVolume)
-
-                writer.pop()
-
-                writer.flush()
-                writer.close()
-
-                return true
-            } catch (e: IOException) {
-                return false
-            }
-        }
     }
 
     private fun setupImguiStyle() {
-        // Inspired by https://github.com/ocornut/imgui/issues/1269 -> berkay2578
+        //Inspiré de https://github.com/ocornut/imgui/issues/1269 -> berkay2578
         with(ImGui) {
             style.windowPadding = Vec2(10.0f, 10.0f)
-            style.windowRounding = 5.0f;
-            style.childWindowRounding = 5.0f;
-            style.framePadding = Vec2(5.0f, 4.0f);
-            style.frameRounding = 5.0f;
-            style.itemSpacing = Vec2(5.0f, 5.0f);
-            style.itemInnerSpacing = Vec2(10.0f, 10.0f);
-            style.indentSpacing = 15.0f;
-            style.scrollbarSize = 16.0f;
-            style.scrollbarRounding = 5.0f;
-            style.grabMinSize = 7.0f;
-            style.grabRounding = 2.0f;
+            style.windowRounding = 5.0f
+            style.childWindowRounding = 5.0f
+            style.framePadding = Vec2(5.0f, 4.0f)
+            style.frameRounding = 5.0f
+            style.itemSpacing = Vec2(5.0f, 5.0f)
+            style.itemInnerSpacing = Vec2(10.0f, 10.0f)
+            style.indentSpacing = 15.0f
+            style.scrollbarSize = 16.0f
+            style.scrollbarRounding = 5.0f
+            style.grabMinSize = 7.0f
+            style.grabRounding = 2.0f
 
             pushStyleColor(Col.Text, Vec4(0.00f, 0.00f, 0.00f, 1.00f))
             pushStyleColor(Col.TextDisabled, Vec4(0.59f, 0.59f, 0.59f, 1.00f))
-            pushStyleColor(Col.WindowBg, Vec4(1.00f, 1.00f, 1.00f, 0.95f))
+            pushStyleColor(Col.WindowBg, Vec4(1.00f, 1.00f, 1.00f, 0.90f))
             pushStyleColor(Col.ChildWindowBg, Vec4(0.92f, 0.92f, 0.92f, 1.00f))
-            pushStyleColor(Col.PopupBg, Vec4(1.00f, 1.00f, 1.00f, 0.95f))
+            pushStyleColor(Col.PopupBg, Vec4(1.00f, 1.00f, 1.00f, 0.90f))
             pushStyleColor(Col.Border, Vec4(0.00f, 0.00f, 0.00f, 0.80f))
             pushStyleColor(Col.BorderShadow, Vec4(0.00f, 0.00f, 0.00f, 0.00f))
             pushStyleColor(Col.FrameBg, Vec4(0.71f, 0.71f, 0.71f, 0.39f))
@@ -201,6 +208,10 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
             backgroundsList.add(it)
         }
 
+        loadedAtlas = Utility.getFilesRecursivly(Constants.atlasDirPath.toLocalFile(), "atlas")
+
+        loadedTextures = Utility.getFilesRecursivly(Constants.texturesDirPath.toLocalFile(), "png")
+
         currentScene = MainMenuScene()
 
         val handle = (Gdx.graphics as Lwjgl3Graphics).window.let {
@@ -219,9 +230,12 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
         Gdx.graphics.setTitle(Constants.gameTitle + " - ${Gdx.graphics.framesPerSecond} FPS")
 
         currentScene.update()
+
         currentScene.render(mainBatch)
 
         ImGui.render()
+
+        currentScene.calcIsUIHover()
     }
 
     override fun resize(width: Int, height: Int) {

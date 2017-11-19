@@ -19,6 +19,10 @@ import ktx.vis.verticalGroup
  * Action permettant d'utiliser d'appliquer plusieurs actions sur un gameObject à la place d'une seule.
  */
 class MultiplexerAction(var actions: Array<Action>) : Action, CustomEditorImpl {
+    override fun insertImgui(gameObject: GameObject, editorScene: EditorScene) {
+
+    }
+
     @JsonCreator private constructor(): this(arrayOf())
 
     override fun invoke(gameObject: GameObject) {
@@ -27,7 +31,7 @@ class MultiplexerAction(var actions: Array<Action>) : Action, CustomEditorImpl {
         }
     }
 
-    override fun insertChangeProperties(table: VisTable, gameObject: GameObject, editorScene: EditorScene) {
-        editorScene.addWidgetArray(table, gameObject, { ReflectionUtility.simpleNameOf(actions[it]) }, { ExposeEditorFactory.createExposeEditor() }, { EmptyAction() }, { actions }, { actions = it })
-    }
+    //override fun insertChangeProperties(table: VisTable, gameObject: GameObject, editorScene: EditorScene) {
+       // editorScene.addWidgetArray(table, gameObject, { ReflectionUtility.simpleNameOf(actions[it]) }, { ExposeEditorFactory.createExposeEditor() }, { EmptyAction() }, { actions }, { actions = it })
+    //}
 }

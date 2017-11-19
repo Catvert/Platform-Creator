@@ -77,7 +77,5 @@ class Rect(position: Point = Point(), size: Size = Size(), var rotation: Float =
 
     fun overlaps(rect: Rect) =  this.x < rect.x + rect.width && this.x + this.width > rect.x && this.y < rect.y + rect.height && this.y + this.height > rect.y
 
-    override fun toString(): String {
-        return "{ x: $x y: $y width: $width height: $height }"
-    }
+    override fun toString(): String = "{ x: $x y: $y width: $width height: $height }"
 }

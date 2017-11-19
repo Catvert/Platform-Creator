@@ -9,6 +9,12 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.Batch
+import glm_.vec2.Vec2
+import imgui.Cond
+import imgui.ImGui
+import imgui.WindowFlags
+import imgui.functionalProgramming
 import ktx.actors.onClick
 import ktx.actors.plus
 import ktx.assets.loadOnDemand
@@ -21,12 +27,10 @@ import ktx.vis.window
  * @param levelFile Le fichier utilisé pour charger le niveau
  * @param levelSuccess Permet de spécifier si oui ou non le joueur a réussi le niveau
  */
-class EndLevelScene(levelPath: String, levelSuccess: Boolean) : Scene() {
+class EndLevelScene(private val levelPath: String, levelSuccess: Boolean) : Scene() {
     private val logo = PCGame.generateLogo(gameObjectContainer)
 
     init {
-        PCGame.assetManager.loadOnDemand<Sound>((if(levelSuccess) "sounds/game-over-success.wav".toLocalFile() else "sounds/game-over-fail.wav".toLocalFile()).path()).asset.play(PCGame.soundVolume)
-
         stage + window("Fin de partie") {
             verticalGroup {
                 space(10f)
@@ -46,8 +50,11 @@ class EndLevelScene(levelPath: String, levelSuccess: Boolean) : Scene() {
             }
             setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
         }
+
+        PCGame.assetManager.loadOnDemand<Sound>((if(levelSuccess) "sounds/game-over-success.wav".toLocalFile() else "sounds/game-over-fail.wav".toLocalFile()).path()).asset.play(PCGame.soundVolume)
         backgroundTexture = PCGame.assetManager.loadOnDemand<Texture>(Constants.gameBackgroundMenuPath).asset
     }
+
 
     override fun resize(size: Size) {
         super.resize(size)

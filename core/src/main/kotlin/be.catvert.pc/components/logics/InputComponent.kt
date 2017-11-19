@@ -12,6 +12,7 @@ import com.badlogic.gdx.Input
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.kotcrab.vis.ui.widget.VisTable
 import com.kotcrab.vis.ui.widget.VisTextButton
+import imgui.ImGui
 import ktx.actors.onClick
 import kotlin.reflect.full.findAnnotation
 
@@ -26,14 +27,12 @@ class InputComponent(var inputsData: Array<InputData>) : UpdeatableComponent(), 
     @JsonCreator private constructor(): this(arrayOf())
 
     data class InputData(var key: Int = Input.Keys.UNKNOWN, var justPressed: Boolean = false, var action: Action = EmptyAction()): CustomEditorImpl {
-        override fun insertChangeProperties(table: VisTable, gameObject: GameObject, editorScene: EditorScene) {
-            editorScene.addWidgetValue(table, gameObject, "Touche : ", { key }, { key = it as Int }, ExposeEditorFactory.createExposeEditor(customType = CustomType.KEY_INT), false)
-            editorScene.addWidgetValue(table, gameObject, "Pressé : ", { justPressed }, { justPressed = it as Boolean }, ExposeEditorFactory.createExposeEditor(), false)
-            table.add(VisTextButton("Éditer l'action").apply {
-                onClick {
-                    editorScene.showEditActionWindow(gameObject, action, { action = it })
-                }
-            })
+        override fun insertImgui(gameObject: GameObject, editorScene: EditorScene) {
+            with(ImGui) {
+                editorScene.addImguiWidget(gameObject, "Touche", { key }, { key = it as Int }, ExposeEditorFactory.createExposeEditor(customType = CustomType.KEY_INT))
+                editorScene.addImguiWidget(gameObject, "Pressé", { justPressed }, { justPressed = it as Boolean }, ExposeEditorFactory.createExposeEditor())
+                editorScene.addImguiWidget(gameObject, "Action", { action }, { action = it as Action }, ExposeEditorFactory.createExposeEditor())
+            }
         }
     }
 
@@ -49,8 +48,12 @@ class InputComponent(var inputsData: Array<InputData>) : UpdeatableComponent(), 
         }
     }
 
-    override fun insertChangeProperties(table: VisTable, gameObject: GameObject, editorScene: EditorScene) {
-        editorScene.addWidgetArray(table, gameObject, { "" }, { ExposeEditorFactory.createExposeEditor() }, { InputData() }, { inputsData }, { inputsData = it })
+   // override fun insertChangeProperties(table: VisTable, gameObject: GameObject, editorScene: EditorScene) {
+       // editorScene.addWidgetArray(table, gameObject, { "" }, { ExposeEditorFactory.createExposeEditor() }, { InputData() }, { inputsData }, { inputsData = it })
+   // }
+
+    override fun insertImgui(gameObject: GameObject, editorScene: EditorScene) {
+
     }
 
 }

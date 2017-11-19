@@ -1,6 +1,7 @@
 package be.catvert.pc.utility
 
 import be.catvert.pc.GameKeys
+import be.catvert.pc.PCGame
 import be.catvert.pc.actions.Action
 import be.catvert.pc.scenes.Scene
 import com.badlogic.gdx.Gdx
@@ -16,19 +17,28 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.JsonReader
+import com.badlogic.gdx.utils.JsonWriter
 import com.kotcrab.vis.ui.widget.VisTextButton
+import com.sun.xml.internal.bind.v2.schemagen.episode.Klass
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner
 import ktx.actors.onClick
 import ktx.actors.plus
+import ktx.assets.toLocalFile
 import ktx.vis.window
+import java.io.File
 import java.io.FileReader
+import java.io.FileWriter
+import java.io.IOException
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaConstructor
 import java.util.ArrayList
-
+import kotlin.reflect.KMutableProperty0
+import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.full.superclasses
 
 
 fun Batch.draw(texture: Texture, rect: Rect, flipX: Boolean = false, flipY: Boolean = false) = this.draw(texture, rect.position.x.toFloat(), rect.position.y.toFloat(), rect.size.width.toFloat(), rect.size.height.toFloat(), 0, 0, texture.width, texture.height, flipX, flipY)
@@ -74,21 +84,50 @@ object Utility {
      * Charge le fichier de configuration du jeu
      */
     fun loadGameConfig(): GameConfig {
-        try {
-            val root = JsonReader().parse(FileReader(Constants.configPath))
+        if(File(Constants.configPath).exists()) {
+            try {
+                val root = JsonReader().parse(FileReader(Constants.configPath))
 
-            val screenWidth = root.getInt("width")
-            val screenHeight = root.getInt("height")
-            val vsync = root.getBoolean("vsync")
-            val fullscreen = root.getBoolean("fullscreen")
-            val soundVolume = root.getFloat("soundvolume")
+                val screenWidth = root.getInt("width")
+                val screenHeight = root.getInt("height")
+                val vsync = root.getBoolean("vsync")
+                val fullscreen = root.getBoolean("fullscreen")
+                val soundVolume = root.getFloat("soundvolume")
 
-            return GameConfig(screenWidth, screenHeight, vsync, fullscreen, soundVolume)
-        } catch (e: Exception) {
-            System.err.println("Erreur lors du chargement de la configuration du jeu ! Erreur : ${e.message}")
+                return GameConfig(screenWidth, screenHeight, vsync, fullscreen, soundVolume)
+            } catch (e: Exception) {
+                System.err.println("Erreur lors du chargement de la configuration du jeu ! Erreur : ${e.message}")
+            }
         }
 
-        return GameConfig(1280, 720, false, false, 1f)
+        return GameConfig(1280, 720, true, false, 1f)
+    }
+
+    /**
+     * Permet de sauvegarder la configuration du jeu
+     */
+    fun saveGameConfig(width: Int, height: Int): Boolean {
+        try {
+            val writer = JsonWriter(FileWriter(Constants.configPath.toLocalFile().path(), false))
+            writer.setOutputType(JsonWriter.OutputType.json)
+
+            writer.`object`()
+
+            writer.name("width").value(width)
+            writer.name("height").value(height)
+            writer.name("vsync").value(PCGame.vsync)
+            writer.name("fullscreen").value(Gdx.graphics.isFullscreen)
+            writer.name("soundvolume").value(PCGame.soundVolume)
+
+            writer.pop()
+
+            writer.flush()
+            writer.close()
+
+            return true
+        } catch (e: IOException) {
+            return false
+        }
     }
 }
 
@@ -120,6 +159,7 @@ object ReflectionUtility {
 }
 
 object UIUtility {
+
     /**
      * Affiche un dialogue complexe
      * @param title : Le titre

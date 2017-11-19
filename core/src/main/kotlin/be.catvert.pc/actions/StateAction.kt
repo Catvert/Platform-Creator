@@ -7,8 +7,10 @@ import be.catvert.pc.utility.CustomEditorImpl
 import be.catvert.pc.utility.CustomType
 import be.catvert.pc.utility.ExposeEditor
 import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.kotcrab.vis.ui.widget.VisSelectBox
 import com.kotcrab.vis.ui.widget.VisTable
+import imgui.ImGui
 import ktx.actors.onChange
 import ktx.collections.toGdxArray
 
@@ -19,22 +21,16 @@ class StateAction(var stateIndex: Int) : Action, CustomEditorImpl {
     @JsonCreator private constructor(): this(0)
 
     override fun invoke(gameObject: GameObject) {
+        gameObject.getCurrentState().onEndStateAction(gameObject)
         gameObject.currentState = stateIndex
+        gameObject.getCurrentState().onStartStateAction(gameObject)
     }
 
-
-    override fun insertChangeProperties(table: VisTable, gameObject: GameObject, editorScene: EditorScene) {
-        table.add(VisSelectBox<GameObjectState>().apply {
-            items = gameObject.getStates().toGdxArray()
-
-            if(stateIndex in gameObject.getStates().indices)
-                selectedIndex = stateIndex
-
-            onChange {
-                stateIndex = selectedIndex
-            }
-        })
-        table.row()
+    @JsonIgnore private var currentStateComboIndex = 0
+    override fun insertImgui(gameObject: GameObject, editorScene: EditorScene) {
+        with(ImGui) {
+            combo("state", this@StateAction::currentStateComboIndex, gameObject.getStates().map { it.name })
+        }
     }
 
 }

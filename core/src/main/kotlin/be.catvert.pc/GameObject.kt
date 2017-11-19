@@ -11,6 +11,7 @@ import com.kotcrab.vis.ui.widget.VisSelectBox
 import com.kotcrab.vis.ui.widget.VisTable
 import com.kotcrab.vis.ui.widget.spinner.IntSpinnerModel
 import com.kotcrab.vis.ui.widget.spinner.Spinner
+import imgui.ImGui
 import ktx.actors.onChange
 import ktx.collections.toGdxArray
 import java.util.*
@@ -24,9 +25,10 @@ import java.util.*
  */
 class GameObject(@ExposeEditor var tag: Tag,
                  id: UUID = UUID.randomUUID(),
-                 var rectangle: Rect = Rect(size = Size(1, 1)),
+                 @ExposeEditor var rectangle: Rect = Rect(size = Size(1, 1)),
                  container: GameObjectContainer? = null,
                  initDefaultState: GameObjectState.() -> Unit = {}) : Updeatable, Renderable, CustomEditorImpl {
+
 
     enum class Tag {
         Sprite, PhysicsSprite, Player, Enemy
@@ -50,10 +52,8 @@ class GameObject(@ExposeEditor var tag: Tag,
 
     var currentState: Int = 0
         set(value) {
-            if (value in 0 until states.size - 1) {
-                getCurrentState().onEndStateAction(this)
+            if (value in 0 until states.size) {
                 field = value
-                getCurrentState().onStartStateAction(this)
             }
         }
 
@@ -125,61 +125,9 @@ class GameObject(@ExposeEditor var tag: Tag,
         }
     }
 
-    override fun insertChangeProperties(table: VisTable, gameObject: GameObject, editorScene: EditorScene) {
-        table.add(VisLabel("Pos X : "))
-        val posXIntModel = IntSpinnerModel(position().x, 0, editorScene.level.matrixRect.width - size().width)
-        table.add(Spinner("", posXIntModel).apply {
-            onChange {
-                rectangle.x = posXIntModel.value
-            }
-        })
-
-        table.row()
-
-        table.add(VisLabel("Pos Y : "))
-        val posYIntModel = IntSpinnerModel(position().y, 0, editorScene.level.matrixRect.height - size().height)
-        table.add(Spinner("", posYIntModel).apply {
-            onChange {
-                rectangle.y = posYIntModel.value
-            }
-        })
-
-        table.row()
-
-        table.add(VisLabel("Largeur : "))
-        val widthIntModel = IntSpinnerModel(size().width, 1, Constants.maxGameObjectSize)
-        table.add(Spinner("", widthIntModel).apply {
-            onChange {
-                rectangle.width = widthIntModel.value
-            }
-        })
-
-        table.row()
-
-        table.add(VisLabel("Hauteur : "))
-        val heightIntModel = IntSpinnerModel(size().height, 1, Constants.maxGameObjectSize)
-        table.add(Spinner("", heightIntModel).apply {
-            onChange {
-                rectangle.height = heightIntModel.value
-            }
-        })
-
-        table.row()
-
-        table.add(VisLabel("State initial : "))
-        table.add(VisSelectBox<String>().apply {
-            fun generateItems() {
-                this.items = getStates().map { it.name }.toGdxArray()
-            }
-            generateItems()
-
-            this.selectedIndex = currentState
-
-            onChange {
-                currentState = selectedIndex
-            }
-        })
-
-        table.row()
+    override fun insertImgui(gameObject: GameObject, editorScene: EditorScene) {
+        with(ImGui) {
+            combo("State initial", this@GameObject::currentState, getStates().map { it.name })
+        }
     }
 }

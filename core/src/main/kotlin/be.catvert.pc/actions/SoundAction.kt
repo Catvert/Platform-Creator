@@ -9,7 +9,9 @@ import be.catvert.pc.utility.ExposeEditor
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.kotcrab.vis.ui.widget.VisSelectBox
 import com.kotcrab.vis.ui.widget.VisTable
+import imgui.ImGui
 import ktx.actors.onChange
+import ktx.assets.toLocalFile
 import ktx.collections.toGdxArray
 
 /**
@@ -18,22 +20,21 @@ import ktx.collections.toGdxArray
  */
 class SoundAction(var soundIndex: Int) : Action, CustomEditorImpl {
     @JsonCreator private constructor(): this(-1)
+
     override fun invoke(gameObject: GameObject) {
         gameObject.getCurrentState().getComponent<SoundComponent>()?.playSound(soundIndex)
     }
 
-    override fun insertChangeProperties(table: VisTable, gameObject: GameObject, editorScene: EditorScene) {
-        table.add(VisSelectBox<SoundComponent.SoundData>().apply {
-            val sounds = gameObject.getCurrentState().getComponent<SoundComponent>()?.sounds
-
-            this.items = sounds?.toGdxArray()?: ktx.collections.gdxArrayOf()
-
-            if(sounds?.indices?.contains(soundIndex) == true)
-                selectedIndex = soundIndex
-
-            onChange {
-                soundIndex = selectedIndex
+    override fun insertImgui(gameObject: GameObject, editorScene: EditorScene) {
+        with(ImGui) {
+            val sounds = let {
+                val list = mutableListOf<SoundComponent.SoundData>()
+                val soundsData = gameObject.getCurrentState().getComponent<SoundComponent>()?.sounds
+                if(soundsData != null)
+                    list.addAll(soundsData)
+                list.toList()
             }
-        })
+            combo("son", this@SoundAction::soundIndex, sounds.map { it.soundPath.toLocalFile().nameWithoutExtension() })
+        }
     }
 }

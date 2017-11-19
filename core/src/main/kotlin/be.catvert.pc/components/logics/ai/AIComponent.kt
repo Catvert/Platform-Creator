@@ -14,19 +14,10 @@ import be.catvert.pc.utility.ExposeEditorFactory
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.kotcrab.vis.ui.widget.VisTable
+import imgui.ImGui
 
 class AIComponent(var actionOnCollisionWithPlayer: Pair<Action, Array<CollisionSide>>, var actionOnPlayerCollision: Pair<Action, Array<CollisionSide>>) : BasicComponent(), CustomEditorImpl {
     @JsonCreator private constructor(): this(EmptyAction() to arrayOf(), EmptyAction() to arrayOf())
-
-    override fun insertChangeProperties(table: VisTable, gameObject: GameObject, editorScene: EditorScene) {
-        editorScene.addWidgetValue(table, gameObject,"Action sur le joueur : ", {actionOnCollisionWithPlayer.first}, {actionOnCollisionWithPlayer = it as Action to actionOnCollisionWithPlayer.second }, ExposeEditorFactory.createExposeEditor())
-        editorScene.addWidgetArray(table.add(VisTable()).actor, gameObject, { actionOnCollisionWithPlayer.second.elementAt(it).name }, { ExposeEditorFactory.createExposeEditor() }, { CollisionSide.OnLeft }, { actionOnCollisionWithPlayer.second }, { actionOnCollisionWithPlayer = actionOnCollisionWithPlayer.first to it })
-        table.row()
-
-        editorScene.addWidgetValue(table, gameObject,"Action sur ce gameObject : ", {actionOnCollisionWithPlayer.first}, {actionOnCollisionWithPlayer = it as Action to actionOnCollisionWithPlayer.second }, ExposeEditorFactory.createExposeEditor())
-        editorScene.addWidgetArray(table.add(VisTable()).actor, gameObject, { actionOnCollisionWithPlayer.second.elementAt(it).name }, { ExposeEditorFactory.createExposeEditor() }, { CollisionSide.OnLeft }, { actionOnCollisionWithPlayer.second }, { actionOnCollisionWithPlayer = actionOnCollisionWithPlayer.first to it })
-        table.row()
-    }
 
     @JsonIgnore private var physicsComponent: PhysicsComponent? = null
 
@@ -53,6 +44,24 @@ class AIComponent(var actionOnCollisionWithPlayer: Pair<Action, Array<CollisionS
         }
         else {
             Log.error { "Impossible de d'utiliser un AIComponent si l'objet n'a pas de PhysicsComponent" }
+        }
+    }
+
+
+    /*override fun insertChangeProperties(table: VisTable, gameObject: GameObject, editorScene: EditorScene) {
+        editorScene.addWidgetValue(table, gameObject,"Action sur le joueur : ", {actionOnCollisionWithPlayer.first}, {actionOnCollisionWithPlayer = it as Action to actionOnCollisionWithPlayer.second }, ExposeEditorFactory.createExposeEditor())
+        editorScene.addWidgetArray(table.add(VisTable()).actor, gameObject, { actionOnCollisionWithPlayer.second.elementAt(it).name }, { ExposeEditorFactory.createExposeEditor() }, { CollisionSide.OnLeft }, { actionOnCollisionWithPlayer.second }, { actionOnCollisionWithPlayer = actionOnCollisionWithPlayer.first to it })
+        table.row()
+
+        editorScene.addWidgetValue(table, gameObject,"Action sur ce gameObject : ", {actionOnCollisionWithPlayer.first}, {actionOnCollisionWithPlayer = it as Action to actionOnCollisionWithPlayer.second }, ExposeEditorFactory.createExposeEditor())
+        editorScene.addWidgetArray(table.add(VisTable()).actor, gameObject, { actionOnCollisionWithPlayer.second.elementAt(it).name }, { ExposeEditorFactory.createExposeEditor() }, { CollisionSide.OnLeft }, { actionOnCollisionWithPlayer.second }, { actionOnCollisionWithPlayer = actionOnCollisionWithPlayer.first to it })
+        table.row()
+    }*/
+
+    override fun insertImgui(gameObject: GameObject, editorScene: EditorScene) {
+        with(ImGui) {
+            editorScene.addImguiWidget(gameObject,"Action sur le joueur", {actionOnCollisionWithPlayer.first}, {actionOnCollisionWithPlayer = it as Action to actionOnCollisionWithPlayer.second }, ExposeEditorFactory.createExposeEditor())
+            editorScene.addImguiWidget(gameObject,"Action sur ce gameObject : ", {actionOnCollisionWithPlayer.first}, {actionOnCollisionWithPlayer = it as Action to actionOnCollisionWithPlayer.second }, ExposeEditorFactory.createExposeEditor())
         }
     }
 }

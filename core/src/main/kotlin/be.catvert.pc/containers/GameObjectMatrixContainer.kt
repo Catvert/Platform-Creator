@@ -49,7 +49,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
         if(Gdx.input.isKeyJustPressed(GameKeys.DEBUG_MODE.key))
             drawDebugCells = !drawDebugCells
 
-        if(followGameObject != null) {
+        if(followGameObject != null && allowUpdatingGO) {
             activeRect.position =  Point(Math.max(0, followGameObject!!.position().x - activeRect.width / 2 + followGameObject!!.size().width / 2), Math.max(0, followGameObject!!.position().y - activeRect.height / 2 + followGameObject!!.size().height / 2))
         }
 

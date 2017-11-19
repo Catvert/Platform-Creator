@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 /**
  * Action permettant de mouvoir un gameObject dans l'espace
  */
-class MoveAction(@ExposeEditor var moveX: Int, @ExposeEditor var moveY: Int) : Action {
+class MoveAction(@ExposeEditor(maxInt = 10000) var moveX: Int, @ExposeEditor(maxInt = 10000) var moveY: Int) : Action {
     @JsonCreator private constructor() : this(0, 0)
 
     override fun invoke(gameObject: GameObject) {

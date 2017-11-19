@@ -20,10 +20,7 @@ import com.kotcrab.vis.ui.widget.VisLabel
 import com.kotcrab.vis.ui.widget.VisList
 import com.kotcrab.vis.ui.widget.VisTextArea
 import glm_.vec2.Vec2
-import imgui.Cond
 import imgui.ImGui
-import imgui.WindowFlags
-import imgui.functionalProgramming
 import ktx.actors.onChange
 import ktx.actors.onClick
 import ktx.actors.onKeyUp
@@ -45,29 +42,14 @@ import java.nio.file.StandardCopyOption
  */
 
 class MainMenuScene : Scene() {
-    private class LevelItem(val file: FileHandle) {
-        override fun toString(): String = file.nameWithoutExtension()
-    }
-
     private val glyphCreatedBy = GlyphLayout(PCGame.mainFont, "par Catvert - ${Constants.gameVersion}")
 
     private val logo = PCGame.generateLogo(gameObjectContainer)
-
-    private var showSelectLevelWindow = false
-    private var selectedLevel = -1
-    private val levels = Utility.getFilesRecursivly(Constants.levelDirPath.toLocalFile(), Constants.levelExtension).let {
-        val list = mutableListOf<LevelItem>()
-        it.forEach {
-            list += LevelItem(it)
-        }
-        list.toList()
-    }
 
     init {
         stage + window("Menu principal") {
             verticalGroup {
                 space(10f)
-
                 textButton("Jouer !") {
                     onClick {
                         showSelectLevelsWindow()
@@ -87,7 +69,6 @@ class MainMenuScene : Scene() {
 
             setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
         }
-
         backgroundTexture = PCGame.assetManager.loadOnDemand<Texture>(Constants.gameBackgroundMenuPath).asset
     }
 
@@ -98,62 +79,12 @@ class MainMenuScene : Scene() {
         }
     }
 
-    override fun render(batch: Batch) {
-        super.render(batch)
-
-        drawUI()
-    }
-
     override fun resize(size: Size) {
         super.resize(size)
         logo.rectangle.set(PCGame.getLogoRect())
     }
+
     //region UI
-
-    private fun drawUI() {
-        drawMainMenu()
-
-        if (showSelectLevelWindow)
-            drawSelectLevelWindow()
-    }
-
-    private fun drawMainMenu() {
-        with(ImGui) {
-            functionalProgramming.window("Menu principal", null, WindowFlags.NoResize.i or WindowFlags.NoCollapse.i) {
-                if (button("Jouer", Vec2(200f, 20f))) {
-                    showSelectLevelWindow = true
-                }
-                if (button("Options", Vec2(200f, 20f))) {
-
-                }
-                if (button("Quitter", Vec2(200f, 20f))) {
-                    Gdx.app.exit()
-                }
-
-                setWindowPos(Vec2(Gdx.graphics.width / 2f - windowWidth / 2f, Gdx.graphics.height / 2f - windowHeight / 2f), Cond.Once)
-            }
-        }
-    }
-
-    private fun drawSelectLevelWindow() {
-        with(ImGui) {
-            functionalProgramming.window("Sélectionner un niveau", null) {
-                listBox("", this@MainMenuScene::selectedLevel, levels.map { it.toString() }.toTypedArray())
-                if (selectedLevel > -1) {
-                    if (button("Jouer ce niveau")) {
-                        val level = Level.loadFromFile(levels[selectedLevel].file)
-                        if (level != null)
-                            PCGame.setScene(GameScene(level))
-                        else showWrongVersionLevelDialog()
-                    }
-                    button("Éditer ce niveau")
-                    button("Supprimer ce niveau")
-                }
-                separator()
-                button("Créer un nouveau niveau")
-            }
-        }
-    }
 
     /**
      * Affiche une fenêtre pour sélectionner le nom du niveau
@@ -374,15 +305,12 @@ class MainMenuScene : Scene() {
 
                         PCGame.vsync = vSyncCkbox.isChecked
 
-                        val width = widthArea.text.toInt()
-                        val height = heightArea.text.toInt()
-
                         if (fullScreenCkbox.isChecked)
                             Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
                         else
-                            Gdx.graphics.setWindowedMode(width, height)
+                            Gdx.graphics.setWindowedMode(widthArea.text.toInt(), heightArea.text.toInt())
 
-                        if (!PCGame.saveGameConfig(width, height))
+                        if (!Utility.saveGameConfig(widthArea.text.toInt(), heightArea.text.toInt()))
                             UIUtility.showDialog(stage, "Erreur lors de la sauvegarde !", "Une erreur est survenue lors de la sauvegarde de la config du jeu !")
                     }
 

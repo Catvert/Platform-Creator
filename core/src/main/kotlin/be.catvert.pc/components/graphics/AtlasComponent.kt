@@ -15,7 +15,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.kotcrab.vis.ui.widget.VisImageButton
 import com.kotcrab.vis.ui.widget.VisLabel
 import com.kotcrab.vis.ui.widget.VisTable
-import com.kotcrab.vis.ui.widget.VisTextButton
+import glm_.vec2.Vec2
+import imgui.ImGui
+import imgui.WindowFlags
 import ktx.actors.onClick
 import ktx.assets.loadOnDemand
 import ktx.assets.toLocalFile
@@ -53,55 +55,69 @@ class AtlasComponent(atlasPath: FileHandle, region: String) : RenderableComponen
     }
 
     override fun render(gameObject: GameObject, batch: Batch) {
-        batch.draw(atlasRegion, gameObject.rectangle,flipX, flipY)
+        batch.draw(atlasRegion, gameObject.rectangle, flipX, flipY)
     }
 
-    override fun insertChangeProperties(table: VisTable, gameObject: GameObject, editorScene: EditorScene) {
-        table.add(VisLabel("Atlas : "))
+    @JsonIgnore private val selectAtlasTitle = "Sélection de l'atlas"
+    @JsonIgnore private var selectedAtlasIndex = -1
+    @JsonIgnore private var useAtlasSize = booleanArrayOf(false)
 
-        fun updateImageBtn(imgBtn: VisImageButton) {
-            val imgBtnDrawable = TextureRegionDrawable(atlasRegion)
+    override fun insertImgui(gameObject: GameObject, editorScene: EditorScene) {
 
-            imgBtn.style.imageUp = imgBtnDrawable
-            imgBtn.style.imageDown = imgBtnDrawable
-        }
+        with(ImGui) {
+            if(button("<-")) {
+                val index = atlas.regions.indexOfFirst { it.name == region }
+                if(index > 0) {
+                    updateAtlas(region = atlas.regions[index - 1].name)
+                }
+            }
 
-        val imageButton = VisImageButton(TextureRegionDrawable(atlasRegion)).apply {
-            onClick {
-                editorScene.showSelectAtlasRegionWindow(atlasPath.toLocalFile()) { atlasFile, region ->
-                    updateAtlas(atlasFile, region)
+            sameLine()
+            if(imageButton(atlasRegion.texture.textureObjectHandle, Vec2(gameObject.rectangle.width, gameObject.rectangle.height), Vec2(atlasRegion.u, atlasRegion.v), Vec2(atlasRegion.u2, atlasRegion.v2))) {
+                openPopup(selectAtlasTitle)
+            }
 
-                    updateImageBtn(this)
+            sameLine()
+            if(button("->")) {
+                val index = atlas.regions.indexOfFirst { it.name == region }
+                if(index in 0 until atlas.regions.size - 1) {
+                    updateAtlas(region = atlas.regions[index + 1].name)
                 }
             }
         }
+    }
 
-        table.add(horizontalGroup {
-            space(10f)
+    override fun insertImguiPopup(gameObject: GameObject, editorScene: EditorScene) {
+        super.insertImguiPopup(gameObject, editorScene)
 
-            textButton("<-") {
-                onClick {
-                    val index = atlas.regions.indexOfFirst { it.name == region }
-                    if(index > 0) {
-                        updateAtlas(region = atlas.regions[index - 1].name)
-                        updateImageBtn(imageButton)
-                    }
+        with(ImGui) {
+            if(beginPopupModal(selectAtlasTitle, extraFlags = WindowFlags.AlwaysHorizontalScrollbar.i or WindowFlags.AlwaysVerticalScrollbar.i)) {
+                if(selectedAtlasIndex == -1) {
+                    selectedAtlasIndex = PCGame.loadedAtlas.indexOfFirst { it == atlasPath.toLocalFile() }
+                    if(selectedAtlasIndex == -1)
+                        selectedAtlasIndex = 0
                 }
-            }
+                combo("atlas", this@AtlasComponent::selectedAtlasIndex, PCGame.loadedAtlas.map { it.nameWithoutExtension() })
+                checkbox("Mettre à jour la taille du gameObject", useAtlasSize)
 
-            addActor(imageButton)
+                separator()
 
-            textButton("->") {
-                onClick {
-                    val index = atlas.regions.indexOfFirst { it.name == region }
-                    if(index in 0 until atlas.regions.size - 1) {
-                        updateAtlas(region = atlas.regions[index + 1].name)
-                        updateImageBtn(imageButton)
+                var count = 0
+                PCGame.assetManager.loadOnDemand<TextureAtlas>(PCGame.loadedAtlas[selectedAtlasIndex].path()).asset.regions.forEach{ it ->
+                    if(imageButton(it.texture.textureObjectHandle, Vec2(it.regionWidth, it.regionHeight), Vec2(it.u, it.v), Vec2(it.u2, it.v2))) {
+                        updateAtlas(PCGame.loadedAtlas[selectedAtlasIndex], it.name)
+                        if(useAtlasSize[0])
+                            gameObject.rectangle.size = Size(it.regionWidth, it.regionHeight)
+                        closeCurrentPopup()
                     }
+                    if(++count <= 8)
+                        sameLine()
+                    else
+                        count = 0
                 }
-            }
-        })
 
-        table.row()
+                endPopup()
+            }
+        }
     }
 }

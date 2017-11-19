@@ -31,7 +31,7 @@ dependencies {
     compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-smile', version: jacksonVersion
 
     compile group: 'io.github.lukehutch', name: 'fast-classpath-scanner', version: fastclasspathscannerVersion
-    compile 'com.github.kotlin-graphics:imgui:-SNAPSHOT'
+    compile "com.github.kotlin-graphics:imgui:$imguiVersion"
     compile "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
     compile "io.leangen.geantyref:geantyref:$geantyrefVersion"
 }

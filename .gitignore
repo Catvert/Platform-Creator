@@ -62,3 +62,4 @@ nb-configuration.xml
 
 ## OS Specific
 .DS_Store
+imgui\.ini

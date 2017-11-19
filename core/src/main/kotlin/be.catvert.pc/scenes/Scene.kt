@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.viewport.ScreenViewport
+import glm_.vec2.Vec2
 import imgui.ImGui
 import ktx.app.clearScreen
 import ktx.app.use
@@ -28,26 +29,29 @@ abstract class Scene : Renderable, Updeatable, Resizable, Disposable {
 
     protected open var gameObjectContainer: GameObjectContainer = object : GameObjectContainer() {}
 
+    protected var isUIHover = false
+        private set
+
     init {
         Gdx.input.inputProcessor = stage
     }
 
     protected open fun postBatchRender() {}
 
-    /**
-     * Permet de vérifier si l'utilisateur est sur l'UI ou non
-     */
-    protected fun isUIHover(): Boolean {
-        stage.actors.filter { it.isVisible }.forEach {
-            val mouseX = Gdx.input.x.toFloat()
-            val mouseY = Gdx.input.y.toFloat()
+    fun calcIsUIHover() {
+        isUIHover = false
 
+        val mouseX = Gdx.input.x.toFloat()
+        val mouseY = Gdx.input.y.toFloat()
+
+        stage.actors.filter { it.isVisible }.forEach {
             if ((mouseX >= it.x && mouseX <= it.x + it.width) && (Gdx.graphics.height - mouseY <= it.y + it.height && Gdx.graphics.height - mouseY >= it.y)) {
-                return true
+                isUIHover = true
+                return
             }
         }
 
-        return false
+        isUIHover = imgui.findHoveredWindow(ImGui.mousePos) != null
     }
 
     protected fun hideUI() {
