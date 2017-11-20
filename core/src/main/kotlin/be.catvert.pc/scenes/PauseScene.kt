@@ -6,12 +6,6 @@ import be.catvert.pc.utility.Size
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.Batch
-import glm_.vec2.Vec2
-import imgui.Cond
-import imgui.ImGui
-import imgui.WindowFlags
-import imgui.functionalProgramming
 import ktx.actors.onClick
 import ktx.actors.plus
 import ktx.assets.loadOnDemand

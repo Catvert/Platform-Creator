@@ -1,17 +1,20 @@
 package be.catvert.pc.components.logics
 
 import be.catvert.pc.GameObject
-import be.catvert.pc.containers.GameObjectMatrixContainer
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
 import be.catvert.pc.actions.PhysicsAction
+import be.catvert.pc.actions.PhysicsAction.PhysicsActions
 import be.catvert.pc.components.UpdeatableComponent
+import be.catvert.pc.containers.GameObjectMatrixContainer
 import be.catvert.pc.containers.Level
-import be.catvert.pc.utility.*
+import be.catvert.pc.utility.ExposeEditor
+import be.catvert.pc.utility.Point
+import be.catvert.pc.utility.Rect
+import be.catvert.pc.utility.Signal
 import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
-import be.catvert.pc.actions.PhysicsAction.PhysicsActions
 
 /**
  * Enmu permettant de définir le type de mouvement de l'entité (fluide ou linéaire)

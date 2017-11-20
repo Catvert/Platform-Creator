@@ -9,20 +9,14 @@ import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.CustomEditorImpl
 import be.catvert.pc.utility.Size
 import be.catvert.pc.utility.draw
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
-import com.badlogic.gdx.graphics.g2d.TextureAtlas
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.kotcrab.vis.ui.widget.VisImageButton
-import com.kotcrab.vis.ui.widget.VisLabel
-import com.kotcrab.vis.ui.widget.VisTable
 import glm_.vec2.Vec2
 import imgui.ImGui
-import imgui.WindowFlags
-import ktx.actors.onClick
 import ktx.assets.loadOnDemand
 import ktx.assets.toLocalFile
 
@@ -57,7 +51,7 @@ class TextureComponent(texturePath: FileHandle) : RenderableComponent(), CustomE
     @JsonIgnore private val selectTextureTitle = "Sélection de la texture"
     @JsonIgnore private var useTextureSize = booleanArrayOf(false)
 
-    override fun insertImgui(gameObject: GameObject, editorScene: EditorScene) {
+    override fun insertImgui(gameObject: GameObject, labelName: String, editorScene: EditorScene) {
         with(ImGui) {
             if(imageButton(texture.textureObjectHandle, Vec2(gameObject.rectangle.width, gameObject.rectangle.height), uv1 = Vec2(1))) {
                 openPopup(selectTextureTitle)
@@ -69,25 +63,30 @@ class TextureComponent(texturePath: FileHandle) : RenderableComponent(), CustomE
         super.insertImguiPopup(gameObject, editorScene)
 
         with(ImGui) {
-            if(beginPopupModal(selectTextureTitle, extraFlags = WindowFlags.AlwaysHorizontalScrollbar.i or WindowFlags.AlwaysVerticalScrollbar.i)) {
+            val popupWidth = Gdx.graphics.width / 3 * 2
+            val popupHeight = Gdx.graphics.height / 3 * 2
+            setNextWindowSize(Vec2(popupWidth, popupHeight))
+            setNextWindowPos(Vec2(Gdx.graphics.width / 2f - popupWidth / 2f, Gdx.graphics.height / 2f - popupHeight / 2f))
+            if(beginPopup(selectTextureTitle)) {
                 checkbox("Mettre à jour la taille du gameObject", useTextureSize)
 
-                separator()
-
-                var count = 0
-
+                var sumImgsWidth = 0f
                 PCGame.loadedTextures.forEach {
                     val texture = PCGame.assetManager.loadOnDemand<Texture>(it.path()).asset
-                    if(imageButton(texture.textureObjectHandle, Vec2(texture.width, texture.height), uv1 = Vec2(1))) {
+                    val imgBtnSize = Vec2(texture.width, texture.height)
+                    if(imageButton(texture.textureObjectHandle, imgBtnSize, uv1 = Vec2(1))) {
                         updateTexture(it)
                         if(useTextureSize[0])
                             gameObject.rectangle.size = Size(texture.width, texture.height)
                         closeCurrentPopup()
                     }
-                    if(++count <= 8)
+
+                    sumImgsWidth += imgBtnSize.x
+
+                    if(sumImgsWidth + 400f < popupWidth)
                         sameLine()
                     else
-                        count = 0
+                        sumImgsWidth = 0f
                 }
 
                 endPopup()

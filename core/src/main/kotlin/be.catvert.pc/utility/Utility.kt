@@ -1,9 +1,6 @@
 package be.catvert.pc.utility
 
-import be.catvert.pc.GameKeys
 import be.catvert.pc.PCGame
-import be.catvert.pc.actions.Action
-import be.catvert.pc.scenes.Scene
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Graphics
 import com.badlogic.gdx.files.FileHandle
@@ -11,16 +8,12 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Shape2D
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.JsonReader
 import com.badlogic.gdx.utils.JsonWriter
-import com.kotcrab.vis.ui.widget.VisTextButton
-import com.sun.xml.internal.bind.v2.schemagen.episode.Klass
-import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner
 import ktx.actors.onClick
 import ktx.actors.plus
 import ktx.assets.toLocalFile
@@ -34,11 +27,6 @@ import java.lang.reflect.Field
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaConstructor
-import java.util.ArrayList
-import kotlin.reflect.KMutableProperty0
-import kotlin.reflect.KMutableProperty1
-import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.full.superclasses
 
 
 fun Batch.draw(texture: Texture, rect: Rect, flipX: Boolean = false, flipY: Boolean = false) = this.draw(texture, rect.position.x.toFloat(), rect.position.y.toFloat(), rect.size.width.toFloat(), rect.size.height.toFloat(), 0, 0, texture.width, texture.height, flipX, flipY)

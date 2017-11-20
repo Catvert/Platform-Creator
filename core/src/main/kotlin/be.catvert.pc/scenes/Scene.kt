@@ -1,7 +1,7 @@
 package be.catvert.pc.scenes
 
-import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.PCGame
+import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.OrthographicCamera
@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.viewport.ScreenViewport
-import glm_.vec2.Vec2
 import imgui.ImGui
 import ktx.app.clearScreen
 import ktx.app.use

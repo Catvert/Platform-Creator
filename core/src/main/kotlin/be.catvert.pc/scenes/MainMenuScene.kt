@@ -13,14 +13,11 @@ import com.badlogic.gdx.Input
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.kotcrab.vis.ui.widget.VisCheckBox
 import com.kotcrab.vis.ui.widget.VisLabel
 import com.kotcrab.vis.ui.widget.VisList
 import com.kotcrab.vis.ui.widget.VisTextArea
-import glm_.vec2.Vec2
-import imgui.ImGui
 import ktx.actors.onChange
 import ktx.actors.onClick
 import ktx.actors.onKeyUp
@@ -71,6 +68,13 @@ class MainMenuScene : Scene() {
         }
         backgroundTexture = PCGame.assetManager.loadOnDemand<Texture>(Constants.gameBackgroundMenuPath).asset
     }
+
+    /*var open = true
+    override fun render(batch: Batch) {
+        super.render(batch)
+
+        imgui.imgui.demo.ExampleApp.invoke(this::open)
+    }*/
 
     override fun postBatchRender() {
         super.postBatchRender()

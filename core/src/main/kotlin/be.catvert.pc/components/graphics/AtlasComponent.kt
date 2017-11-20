@@ -5,23 +5,20 @@ import be.catvert.pc.GameObjectState
 import be.catvert.pc.PCGame
 import be.catvert.pc.components.RenderableComponent
 import be.catvert.pc.scenes.EditorScene
-import be.catvert.pc.utility.*
+import be.catvert.pc.utility.Constants
+import be.catvert.pc.utility.CustomEditorImpl
+import be.catvert.pc.utility.Size
+import be.catvert.pc.utility.draw
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.kotcrab.vis.ui.widget.VisImageButton
-import com.kotcrab.vis.ui.widget.VisLabel
-import com.kotcrab.vis.ui.widget.VisTable
 import glm_.vec2.Vec2
 import imgui.ImGui
-import imgui.WindowFlags
-import ktx.actors.onClick
 import ktx.assets.loadOnDemand
 import ktx.assets.toLocalFile
-import ktx.vis.horizontalGroup
 
 /**
  * Component permettant d'ajouter une texture chargée au préalable depuis un atlas et une région
@@ -62,7 +59,7 @@ class AtlasComponent(atlasPath: FileHandle, region: String) : RenderableComponen
     @JsonIgnore private var selectedAtlasIndex = -1
     @JsonIgnore private var useAtlasSize = booleanArrayOf(false)
 
-    override fun insertImgui(gameObject: GameObject, editorScene: EditorScene) {
+    override fun insertImgui(gameObject: GameObject, labelName: String, editorScene: EditorScene) {
 
         with(ImGui) {
             if(button("<-")) {
@@ -91,7 +88,12 @@ class AtlasComponent(atlasPath: FileHandle, region: String) : RenderableComponen
         super.insertImguiPopup(gameObject, editorScene)
 
         with(ImGui) {
-            if(beginPopupModal(selectAtlasTitle, extraFlags = WindowFlags.AlwaysHorizontalScrollbar.i or WindowFlags.AlwaysVerticalScrollbar.i)) {
+            val popupWidth = Gdx.graphics.width / 3 * 2
+            val popupHeight = Gdx.graphics.height / 3 * 2
+            setNextWindowSize(Vec2(popupWidth, popupHeight))
+            setNextWindowPos(Vec2(Gdx.graphics.width / 2f - popupWidth / 2f, Gdx.graphics.height / 2f - popupHeight / 2f))
+            if(beginPopup(selectAtlasTitle)) {
+
                 if(selectedAtlasIndex == -1) {
                     selectedAtlasIndex = PCGame.loadedAtlas.indexOfFirst { it == atlasPath.toLocalFile() }
                     if(selectedAtlasIndex == -1)
@@ -100,22 +102,26 @@ class AtlasComponent(atlasPath: FileHandle, region: String) : RenderableComponen
                 combo("atlas", this@AtlasComponent::selectedAtlasIndex, PCGame.loadedAtlas.map { it.nameWithoutExtension() })
                 checkbox("Mettre à jour la taille du gameObject", useAtlasSize)
 
-                separator()
-
-                var count = 0
+                var sumImgsWidth = 0f
                 PCGame.assetManager.loadOnDemand<TextureAtlas>(PCGame.loadedAtlas[selectedAtlasIndex].path()).asset.regions.forEach{ it ->
-                    if(imageButton(it.texture.textureObjectHandle, Vec2(it.regionWidth, it.regionHeight), Vec2(it.u, it.v), Vec2(it.u2, it.v2))) {
+                    val imgBtnSize = Vec2(it.regionWidth, it.regionHeight)
+
+                    if(imageButton(it.texture.textureObjectHandle, imgBtnSize, Vec2(it.u, it.v), Vec2(it.u2, it.v2))) {
                         updateAtlas(PCGame.loadedAtlas[selectedAtlasIndex], it.name)
+
                         if(useAtlasSize[0])
                             gameObject.rectangle.size = Size(it.regionWidth, it.regionHeight)
                         closeCurrentPopup()
                     }
-                    if(++count <= 8)
+
+                    sumImgsWidth += imgBtnSize.x
+
+                    if(sumImgsWidth + 400f < popupWidth)
                         sameLine()
                     else
-                        count = 0
-                }
+                        sumImgsWidth = 0f
 
+                }
                 endPopup()
             }
         }

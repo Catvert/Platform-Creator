@@ -1,18 +1,12 @@
 package be.catvert.pc.actions
 
 import be.catvert.pc.GameObject
-import be.catvert.pc.GameObjectState
 import be.catvert.pc.components.SoundComponent
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.CustomEditorImpl
-import be.catvert.pc.utility.ExposeEditor
 import com.fasterxml.jackson.annotation.JsonCreator
-import com.kotcrab.vis.ui.widget.VisSelectBox
-import com.kotcrab.vis.ui.widget.VisTable
 import imgui.ImGui
-import ktx.actors.onChange
 import ktx.assets.toLocalFile
-import ktx.collections.toGdxArray
 
 /**
  * Action permettant de jouer un son à partir d'un gameObject ayant un SoundComponent
@@ -25,7 +19,7 @@ class SoundAction(var soundIndex: Int) : Action, CustomEditorImpl {
         gameObject.getCurrentState().getComponent<SoundComponent>()?.playSound(soundIndex)
     }
 
-    override fun insertImgui(gameObject: GameObject, editorScene: EditorScene) {
+    override fun insertImgui(gameObject: GameObject, labelName: String, editorScene: EditorScene) {
         with(ImGui) {
             val sounds = let {
                 val list = mutableListOf<SoundComponent.SoundData>()

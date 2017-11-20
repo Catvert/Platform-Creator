@@ -13,7 +13,6 @@ import be.catvert.pc.utility.CustomEditorImpl
 import be.catvert.pc.utility.ExposeEditorFactory
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.kotcrab.vis.ui.widget.VisTable
 import imgui.ImGui
 
 class AIComponent(var actionOnCollisionWithPlayer: Pair<Action, Array<CollisionSide>>, var actionOnPlayerCollision: Pair<Action, Array<CollisionSide>>) : BasicComponent(), CustomEditorImpl {
@@ -47,21 +46,14 @@ class AIComponent(var actionOnCollisionWithPlayer: Pair<Action, Array<CollisionS
         }
     }
 
-
-    /*override fun insertChangeProperties(table: VisTable, gameObject: GameObject, editorScene: EditorScene) {
-        editorScene.addWidgetValue(table, gameObject,"Action sur le joueur : ", {actionOnCollisionWithPlayer.first}, {actionOnCollisionWithPlayer = it as Action to actionOnCollisionWithPlayer.second }, ExposeEditorFactory.createExposeEditor())
-        editorScene.addWidgetArray(table.add(VisTable()).actor, gameObject, { actionOnCollisionWithPlayer.second.elementAt(it).name }, { ExposeEditorFactory.createExposeEditor() }, { CollisionSide.OnLeft }, { actionOnCollisionWithPlayer.second }, { actionOnCollisionWithPlayer = actionOnCollisionWithPlayer.first to it })
-        table.row()
-
-        editorScene.addWidgetValue(table, gameObject,"Action sur ce gameObject : ", {actionOnCollisionWithPlayer.first}, {actionOnCollisionWithPlayer = it as Action to actionOnCollisionWithPlayer.second }, ExposeEditorFactory.createExposeEditor())
-        editorScene.addWidgetArray(table.add(VisTable()).actor, gameObject, { actionOnCollisionWithPlayer.second.elementAt(it).name }, { ExposeEditorFactory.createExposeEditor() }, { CollisionSide.OnLeft }, { actionOnCollisionWithPlayer.second }, { actionOnCollisionWithPlayer = actionOnCollisionWithPlayer.first to it })
-        table.row()
-    }*/
-
-    override fun insertImgui(gameObject: GameObject, editorScene: EditorScene) {
+    override fun insertImgui(gameObject: GameObject, labelName: String, editorScene: EditorScene) {
         with(ImGui) {
-            editorScene.addImguiWidget(gameObject,"Action sur le joueur", {actionOnCollisionWithPlayer.first}, {actionOnCollisionWithPlayer = it as Action to actionOnCollisionWithPlayer.second }, ExposeEditorFactory.createExposeEditor())
-            editorScene.addImguiWidget(gameObject,"Action sur ce gameObject : ", {actionOnCollisionWithPlayer.first}, {actionOnCollisionWithPlayer = it as Action to actionOnCollisionWithPlayer.second }, ExposeEditorFactory.createExposeEditor())
+            editorScene.addImguiWidget(gameObject,"Action sur le joueur", {actionOnCollisionWithPlayer.first}, {actionOnCollisionWithPlayer = it to actionOnCollisionWithPlayer.second }, ExposeEditorFactory.createExposeEditor())
+            editorScene.addImguiWidgetsArray(gameObject, "Side action pour joueur", { actionOnCollisionWithPlayer.second }, { actionOnCollisionWithPlayer = actionOnCollisionWithPlayer.first to it }, { CollisionSide.OnLeft }, { actionOnCollisionWithPlayer.second.elementAt(it).name }, { ExposeEditorFactory.createExposeEditor() })
+            separator()
+            editorScene.addImguiWidget(gameObject,"Action sur ce gameObject", {actionOnPlayerCollision.first}, {actionOnPlayerCollision = it to actionOnPlayerCollision.second }, ExposeEditorFactory.createExposeEditor())
+            editorScene.addImguiWidgetsArray(gameObject, "Side action pour ce gameObject", { actionOnPlayerCollision.second }, { actionOnPlayerCollision = actionOnPlayerCollision.first to it }, { CollisionSide.OnLeft }, { actionOnPlayerCollision.second.elementAt(it).name }, { ExposeEditorFactory.createExposeEditor() })
+
         }
     }
 }

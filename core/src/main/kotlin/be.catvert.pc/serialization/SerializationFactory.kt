@@ -3,15 +3,15 @@ package be.catvert.pc.serialization
 import com.badlogic.gdx.files.FileHandle
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.*
+import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier
+import com.fasterxml.jackson.databind.deser.std.DelegatingDeserializer
+import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
-import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier
-import com.fasterxml.jackson.databind.module.SimpleModule
 import java.io.IOException
-import com.fasterxml.jackson.databind.deser.std.DelegatingDeserializer
-import com.fasterxml.jackson.databind.*
 
 private class PostDeserializer(private val deserializer: JsonDeserializer<*>) : DelegatingDeserializer(deserializer) {
     override fun newDelegatingInstance(newDelegatee: JsonDeserializer<*>): JsonDeserializer<*> = deserializer

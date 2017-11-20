@@ -1,20 +1,12 @@
 package be.catvert.pc.scenes
 
-import be.catvert.pc.containers.Level
 import be.catvert.pc.PCGame
-import be.catvert.pc.serialization.SerializationFactory
+import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.Size
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.audio.Sound
-import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.Batch
-import glm_.vec2.Vec2
-import imgui.Cond
-import imgui.ImGui
-import imgui.WindowFlags
-import imgui.functionalProgramming
 import ktx.actors.onClick
 import ktx.actors.plus
 import ktx.assets.loadOnDemand

@@ -2,10 +2,9 @@ package be.catvert.pc.components
 
 import be.catvert.pc.GameObject
 import be.catvert.pc.GameObjectState
-import be.catvert.pc.utility.*
+import be.catvert.pc.utility.ExposeEditor
+import be.catvert.pc.utility.ReflectionUtility
 import com.badlogic.gdx.graphics.g2d.Batch
-import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 
 /**

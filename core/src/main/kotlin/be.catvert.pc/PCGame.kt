@@ -13,9 +13,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.Matrix4
-import com.badlogic.gdx.utils.JsonWriter
 import com.kotcrab.vis.ui.VisUI
 import glm_.vec2.Vec2
 import glm_.vec4.Vec4
@@ -24,13 +22,9 @@ import imgui.ImGui
 import imgui.impl.LwjglGL3
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner
 import ktx.app.KtxApplicationAdapter
-import ktx.assets.loadOnDemand
 import ktx.assets.toLocalFile
 import ktx.async.enableKtxCoroutines
-import ktx.collections.gdxArrayOf
 import uno.glfw.GlfwWindow
-import java.io.FileWriter
-import java.io.IOException
 import kotlin.reflect.KClass
 
 /** [com.badlogic.gdx.ApplicationListener, implementation shared by all platforms.  */
@@ -203,6 +197,8 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
         PCGame.defaultProjection = mainBatch.projectionMatrix.cpy()
 
         PCGame.mainFont = BitmapFont(Constants.mainFontPath.toLocalFile())
+
+        imgui.IO.mouseDrawCursor = true
 
         Utility.getFilesRecursivly(Constants.backgroundsDirPath.toLocalFile(), "png").forEach {
             backgroundsList.add(it)

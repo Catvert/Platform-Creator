@@ -3,13 +3,11 @@ package be.catvert.pc.containers
 import be.catvert.pc.GameObject
 import be.catvert.pc.Log
 import be.catvert.pc.PCGame
-import be.catvert.pc.components.graphics.TextureComponent
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.scenes.EndLevelScene
 import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.Point
-import be.catvert.pc.utility.Rect
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.math.MathUtils

@@ -1,7 +1,6 @@
 package be.catvert.pc.actions
 
 import be.catvert.pc.GameObject
-import be.catvert.pc.GameObjectState
 import be.catvert.pc.utility.ExposeEditor
 import be.catvert.pc.utility.Point
 import com.fasterxml.jackson.annotation.JsonCreator

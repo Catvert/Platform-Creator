@@ -1,10 +1,21 @@
 package be.catvert.pc.utility
 
+import be.catvert.pc.GameObject
+import be.catvert.pc.scenes.EditorScene
 import com.badlogic.gdx.math.Polygon
-import com.badlogic.gdx.math.Rectangle
 import com.fasterxml.jackson.annotation.JsonIgnore
+import imgui.ImGui
 
-class Rect(position: Point = Point(), size: Size = Size(), var rotation: Float = 0f) {
+class Rect(position: Point = Point(), size: Size = Size(), var rotation: Float = 0f) : CustomEditorImpl {
+    override fun insertImgui(gameObject: GameObject, labelName: String, editorScene: EditorScene) {
+        with(ImGui) {
+            if (collapsingHeader(labelName)) {
+                editorScene.addImguiWidget(gameObject, "Position", { position }, { position = it }, ExposeEditorFactory.createExposeEditor(maxInt = editorScene.level.matrixRect.width))
+                editorScene.addImguiWidget(gameObject, "Taille", { size }, { size = it }, ExposeEditorFactory.createExposeEditor(maxInt = Constants.maxGameObjectSize))
+            }
+        }
+    }
+
     constructor(x: Int, y: Int, width: Int, height: Int, rotation: Float = 0f): this(Point(x, y), Size(width, height), rotation)
     constructor(rect: Rect): this(rect.x, rect.y, rect.width, rect.height)
 

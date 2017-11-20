@@ -6,14 +6,7 @@ import be.catvert.pc.utility.*
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.kotcrab.vis.ui.widget.VisLabel
-import com.kotcrab.vis.ui.widget.VisSelectBox
-import com.kotcrab.vis.ui.widget.VisTable
-import com.kotcrab.vis.ui.widget.spinner.IntSpinnerModel
-import com.kotcrab.vis.ui.widget.spinner.Spinner
 import imgui.ImGui
-import ktx.actors.onChange
-import ktx.collections.toGdxArray
 import java.util.*
 
 
@@ -125,7 +118,7 @@ class GameObject(@ExposeEditor var tag: Tag,
         }
     }
 
-    override fun insertImgui(gameObject: GameObject, editorScene: EditorScene) {
+    override fun insertImgui(gameObject: GameObject, labelName: String, editorScene: EditorScene) {
         with(ImGui) {
             combo("State initial", this@GameObject::currentState, getStates().map { it.name })
         }

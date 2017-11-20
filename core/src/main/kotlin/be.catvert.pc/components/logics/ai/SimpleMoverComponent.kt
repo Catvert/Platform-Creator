@@ -2,14 +2,15 @@ package be.catvert.pc.components.logics.ai
 
 import be.catvert.pc.GameObject
 import be.catvert.pc.GameObjectState
-import be.catvert.pc.actions.*
+import be.catvert.pc.actions.Action
+import be.catvert.pc.actions.EmptyAction
+import be.catvert.pc.actions.PhysicsAction
 import be.catvert.pc.components.UpdeatableComponent
 import be.catvert.pc.components.logics.CollisionSide
 import be.catvert.pc.components.logics.PhysicsComponent
 import be.catvert.pc.utility.ExposeEditor
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
-
 
 
 class SimpleMoverComponent(orientation: SimpleMoverOrientation, reverse: Boolean) : UpdeatableComponent() {

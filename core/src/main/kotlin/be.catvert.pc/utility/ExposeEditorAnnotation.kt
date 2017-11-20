@@ -1,7 +1,6 @@
 package be.catvert.pc.utility
 
 import io.leangen.geantyref.TypeFactory
-import kotlin.reflect.full.findAnnotation
 
 enum class CustomType {
     DEFAULT, KEY_INT

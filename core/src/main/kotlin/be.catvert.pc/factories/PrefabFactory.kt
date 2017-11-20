@@ -5,15 +5,18 @@ import be.catvert.pc.GameObject
 import be.catvert.pc.Prefab
 import be.catvert.pc.actions.*
 import be.catvert.pc.components.SoundComponent
+import be.catvert.pc.components.graphics.AnimationComponent
+import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.components.logics.*
-import be.catvert.pc.components.logics.ai.*
+import be.catvert.pc.components.logics.ai.AIComponent
+import be.catvert.pc.components.logics.ai.SimpleMoverComponent
 import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.Point
 import be.catvert.pc.utility.Rect
 import be.catvert.pc.utility.Size
 import ktx.assets.toLocalFile
 import java.util.*
-import be.catvert.pc.components.graphics.*
+
 /**
  * Objet permettant la création de prefab préfait
  */

@@ -14,16 +14,10 @@ import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.kotcrab.vis.ui.widget.VisImageButton
-import com.kotcrab.vis.ui.widget.VisLabel
-import com.kotcrab.vis.ui.widget.VisTable
 import glm_.vec2.Vec2
 import imgui.ImGui
-import imgui.WindowFlags
-import ktx.actors.onClick
 import ktx.assets.loadOnDemand
 import ktx.assets.toLocalFile
 import ktx.collections.toGdxArray
@@ -123,7 +117,7 @@ class AnimationComponent(atlasPath: FileHandle, animationRegionName: String, fra
     @JsonIgnore private var selectedAtlasIndex = -1
     @JsonIgnore private var useAtlasSize = booleanArrayOf(false)
 
-    override fun insertImgui(gameObject: GameObject, editorScene: EditorScene) {
+    override fun insertImgui(gameObject: GameObject, labelName: String, editorScene: EditorScene) {
 
         with(ImGui) {
             val region = animation.getKeyFrame(0f)
@@ -139,7 +133,11 @@ class AnimationComponent(atlasPath: FileHandle, animationRegionName: String, fra
         super.insertImguiPopup(gameObject, editorScene)
 
         with(ImGui) {
-            if (beginPopupModal(selectAnimationTitle, extraFlags = WindowFlags.AlwaysHorizontalScrollbar.i or WindowFlags.AlwaysVerticalScrollbar.i)) {
+            val popupWidth = Gdx.graphics.width / 3 * 2
+            val popupHeight = Gdx.graphics.height / 3 * 2
+            setNextWindowSize(Vec2(popupWidth, popupHeight))
+            setNextWindowPos(Vec2(Gdx.graphics.width / 2f - popupWidth / 2f, Gdx.graphics.height / 2f - popupHeight / 2f))
+            if (beginPopup(selectAnimationTitle)) {
                 if (selectedAtlasIndex == -1) {
                     selectedAtlasIndex = PCGame.loadedAtlas.indexOfFirst { it == atlasPath.toLocalFile() }
                     if (selectedAtlasIndex == -1)
@@ -148,24 +146,25 @@ class AnimationComponent(atlasPath: FileHandle, animationRegionName: String, fra
                 combo("atlas", this@AnimationComponent::selectedAtlasIndex, PCGame.loadedAtlas.map { it.nameWithoutExtension() })
                 checkbox("Mettre à jour la taille du gameObject", useAtlasSize)
 
-                separator()
-
-                var count = 0
-
+                var sumImgsWidth = 0f
                 val atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(PCGame.loadedAtlas[selectedAtlasIndex].path()).asset
 
                 findAnimationRegionsNameInAtlas(atlas).forEach { it ->
                     val region = atlas.findRegion(it + "_0")
-                    if (imageButton(region.texture.textureObjectHandle, Vec2(region.regionWidth, region.regionHeight), Vec2(region.u, region.v), Vec2(region.u2, region.v2))) {
+                    val imgBtnSize = Vec2(region.regionWidth, region.regionHeight)
+                    if (imageButton(region.texture.textureObjectHandle, imgBtnSize, Vec2(region.u, region.v), Vec2(region.u2, region.v2))) {
                         updateAnimation(PCGame.loadedAtlas[selectedAtlasIndex], it)
                         if (useAtlasSize[0])
                             gameObject.rectangle.size = Size(region.regionWidth, region.regionHeight)
                         closeCurrentPopup()
                     }
-                    if (++count <= 8)
+
+                    sumImgsWidth += imgBtnSize.x
+
+                    if(sumImgsWidth + 400f < popupWidth)
                         sameLine()
                     else
-                        count = 0
+                        sumImgsWidth = 0f
                 }
 
                 endPopup()

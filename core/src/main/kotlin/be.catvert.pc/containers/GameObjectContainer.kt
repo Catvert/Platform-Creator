@@ -2,7 +2,6 @@ package be.catvert.pc.containers
 
 import be.catvert.pc.GameObject
 import be.catvert.pc.GameObjectState
-import be.catvert.pc.Prefab
 import be.catvert.pc.actions.LifeAction
 import be.catvert.pc.serialization.PostDeserialization
 import be.catvert.pc.utility.Rect
