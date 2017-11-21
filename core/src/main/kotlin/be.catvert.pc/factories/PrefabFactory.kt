@@ -55,7 +55,6 @@ enum class PrefabFactory(val prefab: Prefab) {
             this += LifeComponent(LevelAction(LevelAction.LevelActions.FAIL_EXIT), setOf())
         }.apply {
             keepActive = true
-            unique = true
         })
     ),
     Spider(

@@ -23,6 +23,7 @@ enum class GameKeys(var key: Int, val description: String) {
 
     EDITOR_REMOVE_ENTITY(Input.Keys.DEL, "Remove entity from editor"),
     EDITOR_COPY_MODE(Input.Keys.C, "Copy entity mode in editor"),
+    EDITOR_GRID_MODE(Input.Keys.G, "Grid mode in editor"),
     EDITOR_APPEND_SELECT_ENTITIES(Input.Keys.CONTROL_LEFT, "Append select entities in editor"),
     EDITOR_SMARTCOPY_LEFT(Input.Keys.LEFT, "Editor smart copy left"),
     EDITOR_SMARTCOPY_RIGHT(Input.Keys.RIGHT, "Editor smart copy right"),

@@ -32,9 +32,6 @@ class GameObject(@ExposeEditor var tag: Tag,
     @ExposeEditor
     var keepActive: Boolean = false
 
-    @ExposeEditor
-    var unique: Boolean = false
-
     @ExposeEditor(minInt = -100, maxInt = 100)
     var layer: Int = 0
         set(value) {

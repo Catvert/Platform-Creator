@@ -122,7 +122,7 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
         with(ImGui) {
             style.windowPadding = Vec2(10.0f, 10.0f)
             style.windowRounding = 5.0f
-            style.childWindowRounding = 5.0f
+            style.childRounding = 5.0f
             style.framePadding = Vec2(5.0f, 4.0f)
             style.frameRounding = 5.0f
             style.itemSpacing = Vec2(5.0f, 5.0f)
@@ -136,7 +136,7 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
             pushStyleColor(Col.Text, Vec4(0.00f, 0.00f, 0.00f, 1.00f))
             pushStyleColor(Col.TextDisabled, Vec4(0.59f, 0.59f, 0.59f, 1.00f))
             pushStyleColor(Col.WindowBg, Vec4(1.00f, 1.00f, 1.00f, 0.90f))
-            pushStyleColor(Col.ChildWindowBg, Vec4(0.92f, 0.92f, 0.92f, 1.00f))
+            pushStyleColor(Col.ChildBg, Vec4(0.92f, 0.92f, 0.92f, 1.00f))
             pushStyleColor(Col.PopupBg, Vec4(1.00f, 1.00f, 1.00f, 0.90f))
             pushStyleColor(Col.Border, Vec4(0.00f, 0.00f, 0.00f, 0.80f))
             pushStyleColor(Col.BorderShadow, Vec4(0.00f, 0.00f, 0.00f, 0.00f))
@@ -151,7 +151,6 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
             pushStyleColor(Col.ScrollbarGrab, Vec4(0.00f, 0.00f, 0.00f, 0.39f))
             pushStyleColor(Col.ScrollbarGrabHovered, Vec4(0.00f, 0.00f, 0.00f, 0.59f))
             pushStyleColor(Col.ScrollbarGrabActive, Vec4(0.00f, 0.00f, 0.00f, 0.78f))
-            pushStyleColor(Col.ComboBg, Vec4(0.78f, 0.78f, 0.78f, 0.98f))
             pushStyleColor(Col.CheckMark, Vec4(0.27f, 0.59f, 0.75f, 1.00f))
             pushStyleColor(Col.SliderGrab, Vec4(0.00f, 0.00f, 0.00f, 0.35f))
             pushStyleColor(Col.SliderGrabActive, Vec4(0.00f, 0.00f, 0.00f, 0.59f))
@@ -216,6 +215,7 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
         LwjglGL3.init(GlfwWindow(handle), false)
 
         setupImguiStyle()
+        ImGui.styleColorsDark()
     }
 
     override fun render() {
