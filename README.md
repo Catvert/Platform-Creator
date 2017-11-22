@@ -1,13 +1,22 @@
 # Plateform Creator
 
 ## Description du jeu
-Plateform creator est un jeu de plateformes utilisant les resources de Kenney. Le jeu n'est pas encore **totalement utilisable** et de nombreux changements vont arriver.
+Plateform creator est un jeu de plateformes utilisant les ressources de Kenney. Le jeu n'est pas encore **totalement utilisable** et de nombreux changements vont arriver.
 
 ![Menu principal](FAQ/mainmenu.png)
 
 ![En jeu](FAQ/ingame.png)
 
 ![Editeur de niveau](FAQ/editor.png)
+
+## Licence
+
+Ce programme est un logiciel libre: il peut être partagé et/ou modifié sous les termes de la Licence Publique Generale ( GNU ), publiée par la Foundation des logiciels libres, sous version 3 comme sous toutes autres futures versions.
+
+Ce programme est distribu� dans le but d'être utile, mais SANS AUCUNE GARANTIE; sans même la garantie de COMMERCIABILITE ou de CONVENIR A UNE CERTAINE TACHE. Regardez la licence publique générale GNU pour plus de détails.
+
+Une copie de la Licence Publique Générale devrait vous être envoyée avec ce programme. Si ce n'est pas le cas, regardez [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/).
+
 
 ## Licence
 
