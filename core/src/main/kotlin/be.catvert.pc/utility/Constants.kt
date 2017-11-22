@@ -30,6 +30,12 @@ object Constants {
     const val prefabExtension = ".prefab"
     const val levelExtension = ".pclvl"
 
+    val levelTextureExtension = arrayOf("jpg", "png")
+    val levelAtlasExtension = arrayOf("atlas")
+    val levelSoundExtension = arrayOf("mp3", "wav")
+
+    const val levelDataFile = "data" + levelExtension
+
     const val noTextureAtlasFoundPath = assetsDirPath + "game/notexture_atlas.atlas"
     const val noTextureFoundTexturePath = assetsDirPath + "game/notexture.png"
     const val noSoundPath = assetsDirPath + "game/nosound.wav"
@@ -38,4 +44,6 @@ object Constants {
 
     const val minLayerIndex = -100
     const val maxLayerIndex = 100
+
+    const val SCALE_MKS = 45f
 }

@@ -1,14 +1,22 @@
 package be.catvert.pc.scenes
 
 import be.catvert.pc.GameKeys
+import be.catvert.pc.GameObject
 import be.catvert.pc.PCGame
+import be.catvert.pc.components.graphics.TextureComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
+import be.catvert.pc.utility.Constants
+import be.catvert.pc.utility.Rect
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.dongbat.jbump.Item
+import com.dongbat.jbump.Response
 import ktx.assets.loadOnDemand
 import ktx.assets.toLocalFile
+
 
 /**
  * Scène du jeu
@@ -19,6 +27,10 @@ class GameScene(private val level: Level) : Scene() {
     //override val camera = OrthographicCamera().apply { setToOrtho(false, Gdx.graphics.width / Constants.PPM, Gdx.graphics.height / Constants.PPM) }
 
     private val cameraMoveSpeed = 10f
+
+    val shapeRenderer = ShapeRenderer()
+
+    val goes = mutableListOf<GameObject>()
 
     init {
         if (level.backgroundPath != null)

@@ -53,14 +53,14 @@ fun Shape2D.contains(point: Point) = this.contains(point.x.toFloat(), point.y.to
 fun Graphics.toSize() = Size(width, height)
 
 object Utility {
-    fun getFilesRecursivly(dir: FileHandle, fileExt: String = ""): List<FileHandle> {
+    fun getFilesRecursivly(dir: FileHandle, vararg fileExt: String = arrayOf()): List<FileHandle> {
         val files = mutableListOf<FileHandle>()
 
         dir.list().forEach {
             if (it.isDirectory)
-                files += getFilesRecursivly(it, fileExt)
+                files += getFilesRecursivly(it, *fileExt)
             else {
-                if (fileExt.isBlank() || it.extension() == if (fileExt[0] == '.') fileExt.removePrefix(".") else fileExt)
+                if (fileExt.isEmpty() || fileExt.contains(it.extension()))
                     files += it
             }
         }

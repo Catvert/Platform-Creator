@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Polygon
 import com.fasterxml.jackson.annotation.JsonIgnore
 import imgui.ImGui
 
-class Rect(position: Point = Point(), size: Size = Size(), var rotation: Float = 0f) : CustomEditorImpl {
+class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
     override fun insertImgui(gameObject: GameObject, labelName: String, editorScene: EditorScene) {
         with(ImGui) {
             if (collapsingHeader(labelName)) {
@@ -16,7 +16,7 @@ class Rect(position: Point = Point(), size: Size = Size(), var rotation: Float =
         }
     }
 
-    constructor(x: Int, y: Int, width: Int, height: Int, rotation: Float = 0f): this(Point(x, y), Size(width, height), rotation)
+    constructor(x: Int, y: Int, width: Int, height: Int): this(Point(x, y), Size(width, height))
     constructor(rect: Rect): this(rect.x, rect.y, rect.width, rect.height)
 
     @JsonIgnore var position = position
@@ -53,14 +53,6 @@ class Rect(position: Point = Point(), size: Size = Size(), var rotation: Float =
         set(value) {
             size = Size(width, value)
         }
-
-    // En souvenir
-    fun toPolygon(): Polygon = Polygon(floatArrayOf(0f, 0f, width.toFloat(), 0.toFloat(), width.toFloat(), height.toFloat(), 0.toFloat(), height.toFloat())).apply {
-        setOrigin(width/2f, height/2f);
-        this.rotation = this@Rect.rotation
-        this.setPosition(this@Rect.x.toFloat(), this@Rect.y.toFloat())
-    }
-
 
     fun set(size: Size, position: Point) {
         this.size = size

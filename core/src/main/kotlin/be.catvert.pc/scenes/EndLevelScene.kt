@@ -29,7 +29,7 @@ class EndLevelScene(private val levelPath: String, levelSuccess: Boolean) : Scen
 
                 textButton("Recommencer") {
                     addListener(onClick {
-                        val level = Level.loadFromFile(levelPath.toLocalFile())
+                        val level = Level.loadFromFile(levelPath.toLocalFile().parent())
                         if (level != null)
                             PCGame.setScene(GameScene(level))
                     })

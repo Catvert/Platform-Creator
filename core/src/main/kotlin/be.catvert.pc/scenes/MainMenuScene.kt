@@ -121,20 +121,11 @@ class MainMenuScene : Scene() {
      * Affiche la fenêtre de sélection de niveau
      */
     private fun showSelectLevelsWindow() {
-        class LevelItem(val file: FileHandle) {
-            override fun toString(): String {
-                return file.nameWithoutExtension()
-            }
+        class LevelItem(val dir: FileHandle) {
+            override fun toString(): String = dir.name()
         }
 
-        fun getLevels(): GdxArray<LevelItem> =
-                Utility.getFilesRecursivly(Constants.levelDirPath.toLocalFile(), Constants.levelExtension).let {
-                    val list = mutableListOf<LevelItem>()
-                    it.forEach {
-                        list += LevelItem(it)
-                    }
-                    list.toGdxArray()
-                }
+        fun getLevels(): GdxArray<LevelItem> = Constants.levelDirPath.toLocalFile().list { dir -> dir.isDirectory && dir.list { _, s -> s == Constants.levelDataFile }.isNotEmpty() }.map { LevelItem(it) }.toGdxArray()
 
         val list = VisList<LevelItem>()
         list.setItems(getLevels())
@@ -153,7 +144,7 @@ class MainMenuScene : Scene() {
                     textButton("Jouer") {
                         onClick {
                             if (list.selected != null) {
-                                val level = Level.loadFromFile(list.selected.file)
+                                val level = Level.loadFromFile(list.selected.dir)
                                 if (level != null)
                                     PCGame.setScene(GameScene(level))
                                 else showWrongVersionLevelDialog()
@@ -163,7 +154,7 @@ class MainMenuScene : Scene() {
                     textButton("Éditer") {
                         onClick {
                             if (list.selected != null) {
-                                val level = Level.loadFromFile(list.selected.file)
+                                val level = Level.loadFromFile(list.selected.dir)
                                 if (level != null)
                                     PCGame.setScene(EditorScene(level))
                                 else showWrongVersionLevelDialog()
@@ -183,7 +174,7 @@ class MainMenuScene : Scene() {
                             if (list.selected != null) {
                                 showSetNameLevelWindow { name ->
                                     try {
-                                        Files.copy(Paths.get(list.selected.file.path()), Paths.get(list.selected.file.parent().path() + "/$name.mtrlvl"), StandardCopyOption.REPLACE_EXISTING)
+                                        Files.copy(Paths.get(list.selected.dir.path()), Paths.get(list.selected.dir.parent().path() + "/$name.mtrlvl"), StandardCopyOption.REPLACE_EXISTING)
                                         list.setItems(getLevels())
                                         UIUtility.showDialog(stage, "Opération réussie !", "La copie s'est correctement effectuée !")
                                     } catch (e: IOException) {
@@ -200,7 +191,7 @@ class MainMenuScene : Scene() {
                                 UIUtility.showDialog(stage, "Supprimer le niveau ?", "Etes-vous sur de vouloir supprimer ${list.selected} ?", listOf("Oui", "Non")) {
                                     if (it == 0) {
                                         try {
-                                            Files.delete(Paths.get(list.selected.file.path()))
+                                            list.selected.dir.deleteDirectory()
                                             list.setItems(getLevels())
                                             UIUtility.showDialog(stage, "Opération réussie !", "La suppression s'est correctement effectuée !")
                                         } catch (e: IOException) {

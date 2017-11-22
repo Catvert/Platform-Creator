@@ -115,7 +115,8 @@ class AnimationComponent(atlasPath: FileHandle, animationRegionName: String, fra
 
     @JsonIgnore private val selectAnimationTitle = "Sélection de l'animation"
     @JsonIgnore private var selectedAtlasIndex = -1
-    @JsonIgnore private var useAtlasSize = booleanArrayOf(false)
+    @JsonIgnore private var useAtlasSize = false
+    @JsonIgnore private var showLevelAnimations = false
 
     override fun insertImgui(gameObject: GameObject, labelName: String, editorScene: EditorScene) {
 
@@ -140,31 +141,42 @@ class AnimationComponent(atlasPath: FileHandle, animationRegionName: String, fra
             if (beginPopup(selectAnimationTitle)) {
                 if (selectedAtlasIndex == -1) {
                     selectedAtlasIndex = PCGame.loadedAtlas.indexOfFirst { it == atlasPath.toLocalFile() }
-                    if (selectedAtlasIndex == -1)
-                        selectedAtlasIndex = 0
+                    if (selectedAtlasIndex == -1) {
+                        selectedAtlasIndex = editorScene.level.resourcesAtlas().indexOfFirst { it == atlasPath.toLocalFile() }
+                        if (selectedAtlasIndex == -1)
+                            selectedAtlasIndex = 0
+                        else
+                            showLevelAnimations = true
+                    }
                 }
-                combo("atlas", this@AnimationComponent::selectedAtlasIndex, PCGame.loadedAtlas.map { it.nameWithoutExtension() })
-                checkbox("Mettre à jour la taille du gameObject", useAtlasSize)
+                checkbox("Utiliser les animations importées (atlas)", this@AnimationComponent::showLevelAnimations)
+                sameLine()
+                combo("atlas", this@AnimationComponent::selectedAtlasIndex, if(showLevelAnimations) editorScene.level.resourcesAtlas().map { it.nameWithoutExtension() } else PCGame.loadedAtlas.map { it.nameWithoutExtension() })
+                checkbox("Mettre à jour la taille du gameObject", this@AnimationComponent::useAtlasSize)
 
                 var sumImgsWidth = 0f
-                val atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(PCGame.loadedAtlas[selectedAtlasIndex].path()).asset
 
-                findAnimationRegionsNameInAtlas(atlas).forEach { it ->
-                    val region = atlas.findRegion(it + "_0")
-                    val imgBtnSize = Vec2(region.regionWidth, region.regionHeight)
-                    if (imageButton(region.texture.textureObjectHandle, imgBtnSize, Vec2(region.u, region.v), Vec2(region.u2, region.v2))) {
-                        updateAnimation(PCGame.loadedAtlas[selectedAtlasIndex], it)
-                        if (useAtlasSize[0])
-                            gameObject.rectangle.size = Size(region.regionWidth, region.regionHeight)
-                        closeCurrentPopup()
+                val atlasPath = if(showLevelAnimations) editorScene.level.resourcesAtlas().getOrNull(selectedAtlasIndex)?.path() else PCGame.loadedAtlas.getOrNull(selectedAtlasIndex)?.path()
+                if(atlasPath != null) {
+                    val atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(atlasPath).asset
+
+                    findAnimationRegionsNameInAtlas(atlas).forEach { it ->
+                        val region = atlas.findRegion(it + "_0")
+                        val imgBtnSize = Vec2(region.regionWidth, region.regionHeight)
+                        if (imageButton(region.texture.textureObjectHandle, imgBtnSize, Vec2(region.u, region.v), Vec2(region.u2, region.v2))) {
+                            updateAnimation(atlasPath.toLocalFile(), it)
+                            if (useAtlasSize)
+                                gameObject.rectangle.size = Size(region.regionWidth, region.regionHeight)
+                            closeCurrentPopup()
+                        }
+
+                        sumImgsWidth += imgBtnSize.x
+
+                        if(sumImgsWidth + 400f < popupWidth)
+                            sameLine()
+                        else
+                            sumImgsWidth = 0f
                     }
-
-                    sumImgsWidth += imgBtnSize.x
-
-                    if(sumImgsWidth + 400f < popupWidth)
-                        sameLine()
-                    else
-                        sumImgsWidth = 0f
                 }
 
                 endPopup()

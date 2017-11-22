@@ -10,6 +10,7 @@ import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
+import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
@@ -20,6 +21,8 @@ import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.kotcrab.vis.ui.widget.file.FileChooser
+import com.kotcrab.vis.ui.widget.file.FileChooserAdapter
+import com.kotcrab.vis.ui.widget.file.FileChooserListener
 import com.kotcrab.vis.ui.widget.file.internal.FileChooserText
 import glm_.vec2.Vec2
 import imgui.ImGui
@@ -931,6 +934,10 @@ class EditorScene(val level: Level) : Scene() {
                     }
                     sameLine()
                     if (button("Abandonner les modifications")) {
+                        if(!level.levelPath.toLocalFile().exists()) {
+                            level.levelPath.toLocalFile().parent().deleteDirectory()
+                        }
+
                         showMainMenu()
                     }
                     sameLine()
@@ -948,12 +955,31 @@ class EditorScene(val level: Level) : Scene() {
                 if (editorMode != EditorMode.TRY_LEVEL) {
                     menu("Fichier") {
                         menuItem("Importer une ressource..") {
-                            //FileChooserText
+                            //TODO FileChooserText
                             stage + FileChooser("Importer une ressource..", FileChooser.Mode.OPEN).apply {
-                                this.setFileFilter {
-                                    val extensions = listOf("png", "mp3")
+                                isMultiSelectionEnabled = true
+
+                                setFileFilter {
+                                    val extensions = arrayOf(*Constants.levelTextureExtension, *Constants.levelAtlasExtension, *Constants.levelSoundExtension)
                                     extensions.contains(it.extension) || it.isDirectory
                                 }
+
+                                setListener(object : FileChooserAdapter() {
+                                    override fun selected(files: com.badlogic.gdx.utils.Array<FileHandle>) {
+                                        super.selected(files)
+
+                                        files.forEach {
+                                            when {
+                                                Constants.levelTextureExtension.contains(it.extension()) -> it.copyTo(level.levelTexturesDir)
+                                                Constants.levelAtlasExtension.contains(it.extension()) -> {
+                                                    it.copyTo(level.levelAtlasDir)
+                                                    it.parent().child(it.nameWithoutExtension() + ".png").copyTo(level.levelAtlasDir)
+                                                }
+                                                Constants.levelSoundExtension.contains(it.extension()) -> it.copyTo(level.levelSoundDir)
+                                            }
+                                        }
+                                    }
+                                })
                             }
                         }
                         menuItem("Essayer le niveau") {

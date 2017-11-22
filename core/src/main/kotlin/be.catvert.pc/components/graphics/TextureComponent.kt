@@ -49,7 +49,8 @@ class TextureComponent(texturePath: FileHandle) : RenderableComponent(), CustomE
     }
 
     @JsonIgnore private val selectTextureTitle = "Sélection de la texture"
-    @JsonIgnore private var useTextureSize = booleanArrayOf(false)
+    @JsonIgnore private var useTextureSize = false
+    @JsonIgnore private var showLevelTextures = false
 
     override fun insertImgui(gameObject: GameObject, labelName: String, editorScene: EditorScene) {
         with(ImGui) {
@@ -68,15 +69,20 @@ class TextureComponent(texturePath: FileHandle) : RenderableComponent(), CustomE
             setNextWindowSize(Vec2(popupWidth, popupHeight))
             setNextWindowPos(Vec2(Gdx.graphics.width / 2f - popupWidth / 2f, Gdx.graphics.height / 2f - popupHeight / 2f))
             if(beginPopup(selectTextureTitle)) {
-                checkbox("Mettre à jour la taille du gameObject", useTextureSize)
+                checkbox("Afficher les textures importées", this@TextureComponent::showLevelTextures)
+                sameLine()
+                checkbox("Mettre à jour la taille du gameObject", this@TextureComponent::useTextureSize)
 
                 var sumImgsWidth = 0f
-                PCGame.loadedTextures.forEach {
+
+                val textures = if(showLevelTextures) editorScene.level.resourcesTextures() else PCGame.loadedTextures
+
+                textures.forEach {
                     val texture = PCGame.assetManager.loadOnDemand<Texture>(it.path()).asset
                     val imgBtnSize = Vec2(texture.width, texture.height)
                     if(imageButton(texture.textureObjectHandle, imgBtnSize, uv1 = Vec2(1))) {
                         updateTexture(it)
-                        if(useTextureSize[0])
+                        if(useTextureSize)
                             gameObject.rectangle.size = Size(texture.width, texture.height)
                         closeCurrentPopup()
                     }
