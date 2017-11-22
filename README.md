@@ -13,7 +13,7 @@ Plateform creator est un jeu de plateformes utilisant les ressources de Kenney. 
 
 Ce programme est un logiciel libre: il peut être partagé et/ou modifié sous les termes de la Licence Publique Generale ( GNU ), publiée par la Foundation des logiciels libres, sous version 3 comme sous toutes autres futures versions.
 
-Ce programme est distribu� dans le but d'être utile, mais SANS AUCUNE GARANTIE; sans même la garantie de COMMERCIABILITE ou de CONVENIR A UNE CERTAINE TACHE. Regardez la licence publique générale GNU pour plus de détails.
+Ce programme est distribué dans le but d'être utile, mais SANS AUCUNE GARANTIE; sans même la garantie de COMMERCIABILITE ou de CONVENIR A UNE CERTAINE TACHE. Regardez la licence publique générale GNU pour plus de détails.
 
 Une copie de la Licence Publique Générale devrait vous être envoyée avec ce programme. Si ce n'est pas le cas, regardez [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/).
 
