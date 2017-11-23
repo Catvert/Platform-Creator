@@ -6,6 +6,7 @@ import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
 import be.catvert.pc.actions.RemoveGOAction
 import be.catvert.pc.components.BasicComponent
+import be.catvert.pc.containers.GameObjectContainer
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -40,8 +41,9 @@ class LifeComponent(onDeathAction: Action, lifePointsActions: Set<Pair<Action, A
         }
     }
 
-    override fun onGOAddToContainer(state: GameObjectState, gameObject: GameObject) {
-        super.onGOAddToContainer(state, gameObject)
+    override fun onAddToContainer(gameObject: GameObject, container: GameObjectContainer) {
+        super.onAddToContainer(gameObject, container)
+
         this.gameObject = gameObject
     }
 }

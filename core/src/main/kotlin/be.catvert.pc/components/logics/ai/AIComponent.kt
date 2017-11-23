@@ -8,6 +8,7 @@ import be.catvert.pc.actions.EmptyAction
 import be.catvert.pc.components.BasicComponent
 import be.catvert.pc.components.logics.CollisionSide
 import be.catvert.pc.components.logics.PhysicsComponent
+import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.CustomEditorImpl
 import be.catvert.pc.utility.ExposeEditorFactory
@@ -20,10 +21,10 @@ class AIComponent(var actionOnCollisionWithPlayer: Pair<Action, Array<CollisionS
 
     @JsonIgnore private var physicsComponent: PhysicsComponent? = null
 
-    override fun onGOAddToContainer(state: GameObjectState, gameObject: GameObject) {
-        super.onGOAddToContainer(state, gameObject)
+    override fun onAddToContainer(gameObject: GameObject, container: GameObjectContainer) {
+        super.onAddToContainer(gameObject, container)
 
-        physicsComponent = state.getComponent()
+        physicsComponent = gameObject.getCurrentState().getComponent()
         if(physicsComponent != null) {
             physicsComponent!!.onCollisionWith.register {
                 if(it.collideGameObject.tag == GameObject.Tag.Player) {
@@ -53,7 +54,6 @@ class AIComponent(var actionOnCollisionWithPlayer: Pair<Action, Array<CollisionS
             separator()
             editorScene.addImguiWidget(gameObject,"Action sur ce gameObject", {actionOnPlayerCollision.first}, {actionOnPlayerCollision = it to actionOnPlayerCollision.second }, ExposeEditorFactory.createExposeEditor())
             editorScene.addImguiWidgetsArray(gameObject, "Side action pour ce gameObject", { actionOnPlayerCollision.second }, { actionOnPlayerCollision = actionOnPlayerCollision.first to it }, { CollisionSide.OnLeft }, { actionOnPlayerCollision.second.elementAt(it).name }, { ExposeEditorFactory.createExposeEditor() })
-
         }
     }
 }

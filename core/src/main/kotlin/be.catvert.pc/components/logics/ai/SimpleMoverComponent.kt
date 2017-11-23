@@ -5,15 +5,16 @@ import be.catvert.pc.GameObjectState
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
 import be.catvert.pc.actions.PhysicsAction
-import be.catvert.pc.components.UpdeatableComponent
+import be.catvert.pc.components.LogicsComponent
 import be.catvert.pc.components.logics.CollisionSide
 import be.catvert.pc.components.logics.PhysicsComponent
+import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.utility.ExposeEditor
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 
 
-class SimpleMoverComponent(orientation: SimpleMoverOrientation, reverse: Boolean) : UpdeatableComponent() {
+class SimpleMoverComponent(orientation: SimpleMoverOrientation, reverse: Boolean) : LogicsComponent() {
     @JsonCreator private constructor(): this(SimpleMoverOrientation.HORIZONTAL, false)
 
     enum class SimpleMoverOrientation {
@@ -60,12 +61,12 @@ class SimpleMoverComponent(orientation: SimpleMoverOrientation, reverse: Boolean
         updateActions()
     }
 
-    override fun onGOAddToContainer(state: GameObjectState, gameObject: GameObject) {
-        super.onGOAddToContainer(state, gameObject)
+    override fun onAddToContainer(gameObject: GameObject, container: GameObjectContainer) {
+        super.onAddToContainer(gameObject, container)
 
         this.gameObject = gameObject
 
-        val physicsComp: PhysicsComponent = state.getComponent()!!
+        val physicsComp: PhysicsComponent = gameObject.getCurrentState().getComponent()!!
         physicsComp.onCollisionWith.register {
             when(orientation) {
                 SimpleMoverOrientation.HORIZONTAL -> {

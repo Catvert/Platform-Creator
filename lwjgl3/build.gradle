@@ -23,3 +23,9 @@ jar {
 repositories {
     mavenCentral()
 }
+
+kotlin {
+    experimental {
+        coroutines 'enable'
+    }
+}

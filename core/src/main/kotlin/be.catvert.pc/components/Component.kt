@@ -2,6 +2,7 @@ package be.catvert.pc.components
 
 import be.catvert.pc.GameObject
 import be.catvert.pc.GameObjectState
+import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.utility.ExposeEditor
 import be.catvert.pc.utility.ReflectionUtility
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -14,7 +15,10 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 sealed class Component {
     @ExposeEditor var name = ReflectionUtility.simpleNameOf(this).removeSuffix("Component")
 
-    open fun onGOAddToContainer(state: GameObjectState, gameObject: GameObject) = Unit
+    open fun onAddToContainer(gameObject: GameObject, container: GameObjectContainer) = Unit
+
+    open fun onStateActive(gameObject: GameObject) = Unit
+    open fun onStateInactive(gameObject: GameObject) = Unit
 }
 
 abstract class BasicComponent : Component()
@@ -22,7 +26,7 @@ abstract class BasicComponent : Component()
 /**
  * Classe abstraite permettant à un component d'être mis à jour
  */
-abstract class UpdeatableComponent : Component() {
+abstract class LogicsComponent : Component() {
     abstract fun update(gameObject: GameObject)
 }
 

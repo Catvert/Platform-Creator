@@ -54,9 +54,11 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
             backgroundsList.add(it)
         }
 
-        loadedAtlas = Utility.getFilesRecursivly(Constants.atlasDirPath.toLocalFile(), *Constants.levelAtlasExtension)
+        gameAtlas = Utility.getFilesRecursivly(Constants.atlasDirPath.toLocalFile(), *Constants.levelAtlasExtension)
 
-        loadedTextures = Utility.getFilesRecursivly(Constants.texturesDirPath.toLocalFile(), *Constants.levelTextureExtension)
+        gameTextures = Utility.getFilesRecursivly(Constants.texturesDirPath.toLocalFile(), *Constants.levelTextureExtension)
+
+        gameSounds = Utility.getFilesRecursivly(Constants.soundsDirPath.toLocalFile(), *Constants.levelSoundExtension)
 
         currentScene = MainMenuScene()
 
@@ -191,10 +193,12 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
         lateinit var defaultProjection: Matrix4
             private set
 
-        lateinit var loadedAtlas: List<FileHandle>
+        lateinit var gameAtlas: List<FileHandle>
             private set
-
-        lateinit var loadedTextures: List<FileHandle>
+        lateinit var gameTextures: List<FileHandle>
+            private set
+        lateinit var gameSounds: List<FileHandle>
+            private set
 
         val actionsClasses = let {
             val list = mutableListOf<KClass<out Action>>()
@@ -250,7 +254,7 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
 
         fun getLogoRect(): Rect {
             val size = getLogoSize()
-            return Rect(Point(Gdx.graphics.width / 2 - size.width / 2, Gdx.graphics.height - size.height), size)
+            return Rect(Point(Gdx.graphics.width / 2f - size.width / 2, Gdx.graphics.height - size.height.toFloat()), size)
         }
 
         fun setScene(newScene: Scene, disposeCurrentScene: Boolean = true) {

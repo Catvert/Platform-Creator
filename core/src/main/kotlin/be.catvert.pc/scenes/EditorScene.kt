@@ -22,8 +22,6 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.kotcrab.vis.ui.widget.file.FileChooser
 import com.kotcrab.vis.ui.widget.file.FileChooserAdapter
-import com.kotcrab.vis.ui.widget.file.FileChooserListener
-import com.kotcrab.vis.ui.widget.file.internal.FileChooserText
 import glm_.vec2.Vec2
 import imgui.ImGui
 import imgui.WindowFlags
@@ -74,9 +72,9 @@ class EditorScene(val level: Level) : Scene() {
         }
 
         fun walkCells(walkRect: Rect, walk: (cellRect: Rect) -> Unit) {
-            for(x in (walkRect.x + offsetX)..(walkRect.x + walkRect.width + offsetX) step cellWidth) {
-                for(y in (walkRect.y + offsetY)..(walkRect.y + walkRect.height + offsetY) step cellHeight) {
-                    walk(Rect(x, y, cellWidth, cellHeight))
+            for(x in (walkRect.x.toInt() + offsetX)..(walkRect.x.toInt() + walkRect.width + offsetX) step cellWidth) {
+                for(y in (walkRect.y.toInt() + offsetY)..(walkRect.y.toInt() + walkRect.height + offsetY) step cellHeight) {
+                    walk(Rect(x.toFloat(), y.toFloat(), cellWidth, cellHeight))
                 }
             }
         }
@@ -92,7 +90,7 @@ class EditorScene(val level: Level) : Scene() {
             val maxX = Math.max(startPosition.x, endPosition.x)
             val maxY = Math.max(startPosition.y, endPosition.y)
 
-            return Rect(minX, minY, maxX - minX, maxY - minY)
+            return Rect(minX, minY, (maxX - minX).toInt(), (maxY - minY).toInt())
         }
     }
 
@@ -285,7 +283,7 @@ class EditorScene(val level: Level) : Scene() {
         updateCamera()
 
         if (!isUIHover && editorMode != EditorMode.TRY_LEVEL) {
-            level.activeRect.position = Point(Math.max(0, camera.position.x.toInt() - level.activeRect.width / 2), Math.max(0, camera.position.y.toInt() - level.activeRect.height / 2))
+            level.activeRect.position = Point(Math.max(0f, camera.position.x - level.activeRect.width / 2), Math.max(0f, camera.position.y - level.activeRect.height / 2))
 
             if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_UP_LAYER.key)) {
                 selectLayer += 1
@@ -429,7 +427,7 @@ class EditorScene(val level: Level) : Scene() {
                                     if (selectGameObjects.let {
                                         var canResize = true
                                         it.forEach {
-                                            if (!level.matrixRect.contains(Rect(it.rectangle.x, it.rectangle.y, it.rectangle.width - resizeX, it.rectangle.height - resizeY))) {
+                                            if (!level.matrixRect.contains(Rect(it.rectangle.x, it.rectangle.y, it.rectangle.width - resizeX.toInt(), it.rectangle.height - resizeY.toInt()))) {
                                                 canResize = false
                                             }
                                         }
@@ -442,9 +440,9 @@ class EditorScene(val level: Level) : Scene() {
                                                 val newSizeY = it.rectangle.height - resizeY
 
                                                 if (newSizeX in 1..Constants.maxGameObjectSize)
-                                                    it.rectangle.width = newSizeX
+                                                    it.rectangle.width = newSizeX.toInt()
                                                 if (newSizeY in 1..Constants.maxGameObjectSize)
-                                                    it.rectangle.height = newSizeY
+                                                    it.rectangle.height = newSizeY.toInt()
                                             }
                                         }
                                     }
@@ -453,7 +451,7 @@ class EditorScene(val level: Level) : Scene() {
                                     val moveX = selectGORect.x + selectGORect.width / 2 - mousePosInWorld.x
                                     val moveY = selectGORect.y + selectGORect.height / 2 - mousePosInWorld.y
 
-                                    moveGameObjects(-moveX, -moveY)
+                                    moveGameObjects(-moveX.toInt(), -moveY.toInt())
                                 }
                             }
                         }
@@ -564,10 +562,10 @@ class EditorScene(val level: Level) : Scene() {
                             useMousePos = true
 
                         if (useMousePos) {
-                                posX = Math.min(level.matrixRect.width - width, // Les min et max permettent de rester dans le cadre de la matrix
-                                        Math.max(0, mousePosInWorld.x - width / 2))
-                                posY = Math.min(level.matrixRect.height - height,
-                                        Math.max(0, mousePosInWorld.y - height / 2))
+                                posX = Math.min(level.matrixRect.width - width.toFloat(), // Les min et max permettent de rester dans le cadre de la matrix
+                                        Math.max(0f, mousePosInWorld.x - width / 2))
+                                posY = Math.min(level.matrixRect.height - height.toFloat(),
+                                        Math.max(0f, mousePosInWorld.y - height / 2))
 
                             // Permet de vérifier si le gameObject copié est nouveau ou pas (si il est nouveau, ça veut dire qu'il n'a pas encore de container)è
                             if (selectGameObject!!.container != null)
@@ -850,13 +848,13 @@ class EditorScene(val level: Level) : Scene() {
                 }
                 is Point -> {
                     if (treeNode(labelName)) {
-                        val x = intArrayOf(value.x)
+                        val x = intArrayOf(value.x.toInt())
                         if (sliderInt("X", x, exposeEditor.minInt, exposeEditor.maxInt))
-                            set(value.copy(x = x[0], y = value.y) as T)
+                            set(value.copy(x = x[0].toFloat(), y = value.y) as T)
 
-                        val y = intArrayOf(value.y)
+                        val y = intArrayOf(value.y.toInt())
                         if (sliderInt("Y", y, exposeEditor.minInt, exposeEditor.maxInt))
-                            set(value.copy(x = value.x, y = y[0]) as T)
+                            set(value.copy(x = value.x, y = y[0].toFloat()) as T)
 
                         if(button("Sélectionner", Vec2(-1, 20f))) {
                             editorMode = EditorMode.SELECT_POINT
@@ -876,10 +874,10 @@ class EditorScene(val level: Level) : Scene() {
                     val enumConstants = value.javaClass.enumConstants
                     val selectedIndex = intArrayOf(enumConstants.indexOfFirst { it == value })
 
-                    pushItemWidth(150f)
-                    if (combo(labelName, selectedIndex, enumConstants.map { (it as Enum<*>).name }))
-                        set(enumConstants[selectedIndex[0]] as T)
-                    popItemWidth()
+                    functionalProgramming.withItemWidth(100f) {
+                        if (combo(labelName, selectedIndex, enumConstants.map { (it as Enum<*>).name }))
+                            set(enumConstants[selectedIndex[0]] as T)
+                    }
                 }
                 else -> {
                     text(ReflectionUtility.simpleNameOf(value))
@@ -909,7 +907,6 @@ class EditorScene(val level: Level) : Scene() {
         }
     }
 
-    var open = true
     private fun drawUI() {
         with(ImGui) {
 
@@ -922,7 +919,7 @@ class EditorScene(val level: Level) : Scene() {
                 drawInfoGameObjectWindow(selectGameObject!!)
 
             if (EditorSceneUI.showSaveLevelExitWindow) {
-                functionalProgramming.window("Sauvegarder avant de quitter?", null, WindowFlags.AlwaysAutoResize.i) {
+                functionalProgramming.withWindow("Sauvegarder avant de quitter?", null, WindowFlags.AlwaysAutoResize.i) {
                     fun showMainMenu() {
                         EditorSceneUI.showSaveLevelExitWindow = false
                         PCGame.setScene(MainMenuScene())
@@ -967,16 +964,8 @@ class EditorScene(val level: Level) : Scene() {
                                 setListener(object : FileChooserAdapter() {
                                     override fun selected(files: com.badlogic.gdx.utils.Array<FileHandle>) {
                                         super.selected(files)
-
                                         files.forEach {
-                                            when {
-                                                Constants.levelTextureExtension.contains(it.extension()) -> it.copyTo(level.levelTexturesDir)
-                                                Constants.levelAtlasExtension.contains(it.extension()) -> {
-                                                    it.copyTo(level.levelAtlasDir)
-                                                    it.parent().child(it.nameWithoutExtension() + ".png").copyTo(level.levelAtlasDir)
-                                                }
-                                                Constants.levelSoundExtension.contains(it.extension()) -> it.copyTo(level.levelSoundDir)
-                                            }
+                                            level.addResources(it)
                                         }
                                     }
                                 })
@@ -1030,7 +1019,7 @@ class EditorScene(val level: Level) : Scene() {
 
     private fun drawGridSettingsWindow() {
         with(ImGui) {
-            functionalProgramming.window("Réglages de la grille", null, WindowFlags.AlwaysAutoResize.i) {
+            functionalProgramming.withWindow("Réglages de la grille", null, WindowFlags.AlwaysAutoResize.i) {
                 sliderInt("Largeur", gridMode::cellWidth, 1, Constants.maxGameObjectSize)
                 sliderInt("Hauteur", gridMode::cellHeight, 1, Constants.maxGameObjectSize)
                 dragInt("Décalage x", gridMode::offsetX, 1f, 0, level.activeRect.width)
@@ -1045,7 +1034,7 @@ class EditorScene(val level: Level) : Scene() {
         val addComponentTitle = "Ajouter un component"
 
         with(ImGui) {
-            functionalProgramming.window("Réglages du gameObject", null, WindowFlags.AlwaysAutoResize.i) {
+            functionalProgramming.withWindow("Réglages du gameObject", null, WindowFlags.AlwaysAutoResize.i) {
                 if (button("Supprimer ce gameObject", Vec2(-1, 20f))) {
                     gameObject.removeFromParent()
                     if (selectGameObject === gameObject) {
@@ -1068,7 +1057,7 @@ class EditorScene(val level: Level) : Scene() {
                     openPopup(newStateTitle)
                 }
                 sameLine()
-                if (button("Suppr. cet state")) {
+                if (button("Suppr. ce state")) {
                     if (gameObject.getStates().size > 1)
                         gameObject.removeState(EditorSceneUI.gameObjectAddStateComboIndex - 1)
                 }

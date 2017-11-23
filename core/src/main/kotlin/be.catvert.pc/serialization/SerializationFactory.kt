@@ -1,12 +1,19 @@
 package be.catvert.pc.serialization
 
+import com.badlogic.gdx.Files
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3FileHandle
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics
 import com.badlogic.gdx.files.FileHandle
 import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.*
 import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier
 import com.fasterxml.jackson.databind.deser.std.DelegatingDeserializer
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer
+import com.fasterxml.jackson.databind.jsontype.TypeSerializer
 import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
@@ -23,7 +30,6 @@ private class PostDeserializer(private val deserializer: JsonDeserializer<*>) : 
         return result
     }
 }
-
 
 /**
  * Objet permettant de dé/sérialiser n'importe quel classe dé/sérialisable en JSON/Smile

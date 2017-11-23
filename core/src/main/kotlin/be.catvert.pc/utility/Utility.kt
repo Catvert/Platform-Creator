@@ -29,7 +29,7 @@ import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaConstructor
 
 
-fun Batch.draw(texture: Texture, rect: Rect, flipX: Boolean = false, flipY: Boolean = false) = this.draw(texture, rect.position.x.toFloat(), rect.position.y.toFloat(), rect.size.width.toFloat(), rect.size.height.toFloat(), 0, 0, texture.width, texture.height, flipX, flipY)
+fun Batch.draw(texture: Texture, rect: Rect, flipX: Boolean = false, flipY: Boolean = false) = this.draw(texture, rect.position.x, rect.position.y, rect.size.width.toFloat(), rect.size.height.toFloat(), 0, 0, texture.width, texture.height, flipX, flipY)
 
 fun Batch.draw(textureRegion: TextureRegion, rect: Rect, flipX: Boolean = false, flipY: Boolean = false) {
     if (flipX && !textureRegion.isFlipX || !flipX && textureRegion.isFlipX) {
@@ -39,16 +39,16 @@ fun Batch.draw(textureRegion: TextureRegion, rect: Rect, flipX: Boolean = false,
         textureRegion.flip(false, true)
     }
 
-    this.draw(textureRegion, rect.position.x.toFloat(), rect.position.y.toFloat(), rect.size.width.toFloat(), rect.size.height.toFloat())
+    this.draw(textureRegion, rect.position.x, rect.position.y, rect.size.width.toFloat(), rect.size.height.toFloat())
 }
 
-fun ShapeRenderer.rect(rect: Rect) = this.rect(rect.x.toFloat(), rect.y.toFloat(), rect.width.toFloat(), rect.height.toFloat())
+fun ShapeRenderer.rect(rect: Rect) = this.rect(rect.x, rect.y, rect.width.toFloat(), rect.height.toFloat())
 
-fun Vector2.toPoint() = Point(this.x.toInt(), this.y.toInt())
+fun Vector2.toPoint() = Point(this.x, this.y)
 
-fun Vector3.toPoint() = Point(this.x.toInt(), this.y.toInt())
+fun Vector3.toPoint() = Point(this.x, this.y)
 
-fun Shape2D.contains(point: Point) = this.contains(point.x.toFloat(), point.y.toFloat())
+fun Shape2D.contains(point: Point) = this.contains(point.x, point.y)
 
 fun Graphics.toSize() = Size(width, height)
 

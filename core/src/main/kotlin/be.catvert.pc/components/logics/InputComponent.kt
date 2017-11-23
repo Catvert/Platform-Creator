@@ -3,7 +3,7 @@ package be.catvert.pc.components.logics
 import be.catvert.pc.GameObject
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
-import be.catvert.pc.components.UpdeatableComponent
+import be.catvert.pc.components.LogicsComponent
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.CustomEditorImpl
 import be.catvert.pc.utility.CustomType
@@ -17,7 +17,7 @@ import imgui.ImGui
 /**
  * Component permettant d'effectuer une action quand l'utilisateur appuie sur une touche
  */
-class InputComponent(var inputsData: Array<InputData>) : UpdeatableComponent(), CustomEditorImpl {
+class InputComponent(var inputsData: Array<InputData>) : LogicsComponent(), CustomEditorImpl {
     @JsonCreator private constructor(): this(arrayOf())
 
     data class InputData(var key: Int = Input.Keys.UNKNOWN, var justPressed: Boolean = false, var action: Action = EmptyAction()): CustomEditorImpl {

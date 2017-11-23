@@ -3,6 +3,7 @@ package be.catvert.pc.actions
 import be.catvert.pc.GameObject
 import be.catvert.pc.components.logics.LifeComponent
 import be.catvert.pc.utility.ExposeEditor
+import com.fasterxml.jackson.annotation.JsonCreator
 
 
 /**
@@ -10,6 +11,8 @@ import be.catvert.pc.utility.ExposeEditor
  * @see LifeComponent
  */
 class LifeAction(@ExposeEditor var action: LifeActions) : Action {
+    @JsonCreator private constructor(): this(LifeActions.REMOVE_LP)
+
     enum class LifeActions {
         ADD_LP, REMOVE_LP, ONE_SHOT
     }

@@ -43,7 +43,9 @@ class GameObject(@ExposeEditor var tag: Tag,
     var currentState: Int = 0
         set(value) {
             if (value in 0 until states.size) {
+                getCurrentState().inactive()
                 field = value
+                getCurrentState().active()
             }
         }
 
@@ -63,9 +65,9 @@ class GameObject(@ExposeEditor var tag: Tag,
     var container: GameObjectContainer? = container
         set(value) {
             field = value
-            if (field != null) {
-                states.forEach { it.onGOAddToContainer(this) }
-                getCurrentState().onStartStateAction(this)
+            if (value != null) {
+                states.forEach { it.onAddToContainer(this, value) }
+                getCurrentState().active()
             }
         }
 
@@ -79,13 +81,14 @@ class GameObject(@ExposeEditor var tag: Tag,
     fun size() = rectangle.size
 
     fun removeFromParent() {
+        getCurrentState().inactive()
         onRemoveFromParent(this)
         container?.removeGameObject(this)
     }
 
     fun addState(state: GameObjectState) {
         if(container != null)
-            state.onGOAddToContainer(this)
+            state.onAddToContainer(this, container!!)
         states.add(state)
     }
 

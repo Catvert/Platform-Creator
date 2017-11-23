@@ -28,7 +28,7 @@ class SoundAction(var soundIndex: Int) : Action, CustomEditorImpl {
                     list.addAll(soundsData)
                 list.toList()
             }
-            combo("son", this@SoundAction::soundIndex, sounds.map { it.soundPath.toLocalFile().nameWithoutExtension() })
+            combo("son", this@SoundAction::soundIndex, sounds.map { it.toString() })
         }
     }
 }

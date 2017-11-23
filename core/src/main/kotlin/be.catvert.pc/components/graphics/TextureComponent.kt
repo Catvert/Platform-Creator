@@ -1,9 +1,9 @@
 package be.catvert.pc.components.graphics
 
 import be.catvert.pc.GameObject
-import be.catvert.pc.GameObjectState
 import be.catvert.pc.PCGame
 import be.catvert.pc.components.RenderableComponent
+import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.CustomEditorImpl
@@ -25,7 +25,7 @@ import ktx.assets.toLocalFile
  * @param texturePath Le chemin vers la texture en question
  */
 class TextureComponent(texturePath: FileHandle) : RenderableComponent(), CustomEditorImpl {
-    @JsonCreator constructor() : this(Constants.noTextureFoundTexturePath.toLocalFile())
+    @JsonCreator constructor() : this(Constants.defaultTexturePath.toLocalFile())
 
     var texturePath: String = texturePath.path()
         private set
@@ -38,8 +38,8 @@ class TextureComponent(texturePath: FileHandle) : RenderableComponent(), CustomE
         texture = PCGame.assetManager.loadOnDemand<Texture>(this.texturePath).asset
     }
 
-    override fun onGOAddToContainer(state: GameObjectState, gameObject: GameObject) {
-        super.onGOAddToContainer(state, gameObject)
+    override fun onAddToContainer(gameObject: GameObject, container: GameObjectContainer) {
+        super.onAddToContainer(gameObject, container)
 
         updateTexture()
     }
@@ -75,11 +75,11 @@ class TextureComponent(texturePath: FileHandle) : RenderableComponent(), CustomE
 
                 var sumImgsWidth = 0f
 
-                val textures = if(showLevelTextures) editorScene.level.resourcesTextures() else PCGame.loadedTextures
+                val textures = if(showLevelTextures) editorScene.level.resourcesTextures() else PCGame.gameTextures
 
                 textures.forEach {
                     val texture = PCGame.assetManager.loadOnDemand<Texture>(it.path()).asset
-                    val imgBtnSize = Vec2(texture.width, texture.height)
+                    val imgBtnSize = Vec2(Math.min(texture.width, 200), Math.min(texture.height, 200))
                     if(imageButton(texture.textureObjectHandle, imgBtnSize, uv1 = Vec2(1))) {
                         updateTexture(it)
                         if(useTextureSize)

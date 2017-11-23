@@ -9,7 +9,6 @@ import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.Point
 import be.catvert.pc.utility.Utility
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.math.MathUtils
@@ -19,26 +18,56 @@ import ktx.assets.toLocalFile
 import java.util.*
 
 class Level(val levelPath: String, val gameVersion: Float, var playerUUID: UUID?, var backgroundPath: String? = null) : GameObjectMatrixContainer() {
-    @JsonIgnore val levelTexturesDir = levelPath.toLocalFile().parent().child("textures")
-    @JsonIgnore val levelAtlasDir = levelPath.toLocalFile().parent().child("atlas")
-    @JsonIgnore val levelSoundDir = levelPath.toLocalFile().parent().child("sounds")
+    @JsonIgnore private val levelTextures = levelPath.toLocalFile().parent().child("textures") to mutableListOf<FileHandle>()
+    @JsonIgnore private val levelAtlas = levelPath.toLocalFile().parent().child("atlas") to mutableListOf<FileHandle>()
+    @JsonIgnore private val levelSounds = levelPath.toLocalFile().parent().child("sounds") to mutableListOf<FileHandle>()
 
     @JsonIgnore var applyGravity = true
 
     @JsonIgnore var exit : (success: Boolean) -> Unit = { PCGame.setScene(EndLevelScene(levelPath, it)) }
 
+    val world = World<GameObject>()
+
     init {
-        if(!levelTexturesDir.exists())
-            levelTexturesDir.mkdirs()
-        if(!levelAtlasDir.exists())
-            levelAtlasDir.mkdirs()
-        if(!levelSoundDir.exists())
-            levelSoundDir.mkdirs()
+        if(!levelTextures.first.exists())
+            levelTextures.first.mkdirs()
+        else
+            levelTextures.second.addAll(Utility.getFilesRecursivly(levelTextures.first, *Constants.levelTextureExtension))
+
+        if(!levelAtlas.first.exists())
+            levelAtlas.first.mkdirs()
+        else
+            levelAtlas.second.addAll(Utility.getFilesRecursivly(levelAtlas.first, *Constants.levelAtlasExtension))
+
+        if(!levelSounds.first.exists())
+            levelSounds.first.mkdirs()
+        else
+            levelSounds.second.addAll(Utility.getFilesRecursivly(levelSounds.first, *Constants.levelSoundExtension))
     }
-    // TODO optimisation?
-    fun resourcesTextures() = Utility.getFilesRecursivly(levelTexturesDir, *Constants.levelTextureExtension)
-    fun resourcesAtlas() = Utility.getFilesRecursivly(levelAtlasDir, *Constants.levelAtlasExtension)
-    fun resourcesSounds() = Utility.getFilesRecursivly(levelSoundDir, *Constants.levelSoundExtension)
+
+    fun resourcesTextures() = levelTextures.second.toList()
+    fun resourcesAtlas() = levelAtlas.second.toList()
+    fun resourcesSounds() = levelSounds.second.toList()
+
+    fun addResources(vararg resources: FileHandle) {
+        resources.forEach {
+            when {
+                Constants.levelTextureExtension.contains(it.extension()) -> {
+                    it.copyTo(levelTextures.first)
+                    levelTextures.second.add(it)
+                }
+                Constants.levelAtlasExtension.contains(it.extension()) -> {
+                    it.copyTo(levelAtlas.first)
+                    it.parent().child(it.nameWithoutExtension() + ".png").copyTo(levelAtlas.first)
+                    levelAtlas.second.add(it)
+                }
+                Constants.levelSoundExtension.contains(it.extension()) -> {
+                    it.copyTo(levelSounds.first)
+                    levelSounds.second.add(it)
+                }
+            }
+        }
+    }
 
     fun setPlayer(gameObject: GameObject) {
         playerUUID = gameObject.id
@@ -66,8 +95,6 @@ class Level(val levelPath: String, val gameVersion: Float, var playerUUID: UUID?
     }
 
     companion object {
-        val world = World<GameObject>()
-
         fun newLevel(levelName: String): Level {
             val levelDir = (Constants.levelDirPath + levelName).toLocalFile()
             if(levelDir.exists()) {
@@ -77,7 +104,7 @@ class Level(val levelPath: String, val gameVersion: Float, var playerUUID: UUID?
                 levelDir.mkdirs()
             val level = Level(levelDir.path() + "/data" + Constants.levelExtension, Constants.gameVersion, null)
 
-            val player = PrefabFactory.Player.prefab.create(Point(100, 100), level)
+            val player = PrefabFactory.Player.prefab.create(Point(100f, 100f), level)
             level.setPlayer(player)
 
             return level

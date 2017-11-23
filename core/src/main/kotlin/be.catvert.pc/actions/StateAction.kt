@@ -14,9 +14,7 @@ class StateAction(var stateIndex: Int) : Action, CustomEditorImpl {
     @JsonCreator private constructor(): this(0)
 
     override fun invoke(gameObject: GameObject) {
-        gameObject.getCurrentState().onEndStateAction(gameObject)
         gameObject.currentState = stateIndex
-        gameObject.getCurrentState().onStartStateAction(gameObject)
     }
 
     @JsonIgnore private var currentStateComboIndex = 0

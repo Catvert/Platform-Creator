@@ -32,18 +32,16 @@ object Constants {
 
     val levelTextureExtension = arrayOf("jpg", "png")
     val levelAtlasExtension = arrayOf("atlas")
-    val levelSoundExtension = arrayOf("mp3", "wav")
+    val levelSoundExtension = arrayOf("mp3", "wav", "ogg")
 
     const val levelDataFile = "data" + levelExtension
 
-    const val noTextureAtlasFoundPath = assetsDirPath + "game/notexture_atlas.atlas"
-    const val noTextureFoundTexturePath = assetsDirPath + "game/notexture.png"
-    const val noSoundPath = assetsDirPath + "game/nosound.wav"
+    const val defaultAtlasPath = assetsDirPath + "game/notexture_atlas.atlas"
+    const val defaultTexturePath = assetsDirPath + "game/notexture.png"
+    const val defaultSoundPath = assetsDirPath + "game/nosound.wav"
 
     const val maxGameObjectSize = 500
 
     const val minLayerIndex = -100
     const val maxLayerIndex = 100
-
-    const val SCALE_MKS = 45f
 }

@@ -1,9 +1,9 @@
 package be.catvert.pc.components.graphics
 
 import be.catvert.pc.GameObject
-import be.catvert.pc.GameObjectState
 import be.catvert.pc.PCGame
 import be.catvert.pc.components.RenderableComponent
+import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.CustomEditorImpl
@@ -26,7 +26,7 @@ import ktx.assets.toLocalFile
  * @param region La région à utiliser
  */
 class AtlasComponent(atlasPath: FileHandle, region: String) : RenderableComponent(), CustomEditorImpl {
-    @JsonCreator constructor() : this(Constants.noTextureAtlasFoundPath.toLocalFile(), "notexture")
+    @JsonCreator constructor() : this(Constants.defaultAtlasPath.toLocalFile(), "notexture")
 
     var atlasPath: String = atlasPath.path()
         private set
@@ -45,8 +45,8 @@ class AtlasComponent(atlasPath: FileHandle, region: String) : RenderableComponen
         atlasRegion = atlas.findRegion(region)
     }
 
-    override fun onGOAddToContainer(state: GameObjectState, gameObject: GameObject) {
-        super.onGOAddToContainer(state, gameObject)
+    override fun onAddToContainer(gameObject: GameObject, container: GameObjectContainer) {
+        super.onAddToContainer(gameObject, container)
 
         updateAtlas()
     }
@@ -95,7 +95,7 @@ class AtlasComponent(atlasPath: FileHandle, region: String) : RenderableComponen
             setNextWindowPos(Vec2(Gdx.graphics.width / 2f - popupWidth / 2f, Gdx.graphics.height / 2f - popupHeight / 2f))
             if (beginPopup(selectAtlasTitle)) {
                 if (selectedAtlasIndex == -1) {
-                    selectedAtlasIndex = PCGame.loadedAtlas.indexOfFirst { it == atlasPath.toLocalFile() }
+                    selectedAtlasIndex = PCGame.gameAtlas.indexOfFirst { it == atlasPath.toLocalFile() }
                     if (selectedAtlasIndex == -1) {
                         selectedAtlasIndex = editorScene.level.resourcesAtlas().indexOfFirst { it == atlasPath.toLocalFile() }
                         if (selectedAtlasIndex == -1)
@@ -108,16 +108,16 @@ class AtlasComponent(atlasPath: FileHandle, region: String) : RenderableComponen
                 if (checkbox("Afficher les atlas importés", this@AtlasComponent::showLevelAtlas))
                     selectedAtlasIndex = 0
                 sameLine()
-                combo("atlas", this@AtlasComponent::selectedAtlasIndex, if (showLevelAtlas) editorScene.level.resourcesAtlas().map { it.nameWithoutExtension() } else PCGame.loadedAtlas.map { it.nameWithoutExtension() })
+                combo("atlas", this@AtlasComponent::selectedAtlasIndex, if (showLevelAtlas) editorScene.level.resourcesAtlas().map { it.nameWithoutExtension() } else PCGame.gameAtlas.map { it.nameWithoutExtension() })
                 checkbox("Mettre à jour la taille du gameObject", this@AtlasComponent::useAtlasSize)
 
                 var sumImgsWidth = 0f
 
-                val atlas = if (showLevelAtlas) editorScene.level.resourcesAtlas().getOrNull(selectedAtlasIndex)?.path() else PCGame.loadedAtlas.getOrNull(selectedAtlasIndex)?.path()
+                val atlas = if (showLevelAtlas) editorScene.level.resourcesAtlas().getOrNull(selectedAtlasIndex)?.path() else PCGame.gameAtlas.getOrNull(selectedAtlasIndex)?.path()
 
                 if(atlas != null) {
                     PCGame.assetManager.loadOnDemand<TextureAtlas>(atlas).asset.regions.forEach { it ->
-                        val imgBtnSize = Vec2(it.regionWidth, it.regionHeight)
+                        val imgBtnSize = Vec2(Math.min(it.regionWidth, 200), Math.min(it.regionHeight, 200))
 
                         if (imageButton(it.texture.textureObjectHandle, imgBtnSize, Vec2(it.u, it.v), Vec2(it.u2, it.v2))) {
                             updateAtlas(atlas.toLocalFile(), it.name)
@@ -133,7 +133,6 @@ class AtlasComponent(atlasPath: FileHandle, region: String) : RenderableComponen
                             sameLine()
                         else
                             sumImgsWidth = 0f
-
                     }
                 }
 

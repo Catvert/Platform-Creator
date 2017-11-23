@@ -18,12 +18,12 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     /**
      * La matrix permettant de stoquer les différentes entités selon leur position dans l'espace
      */
-    @JsonIgnore val matrixGrid = matrix2d(matrixWidth, matrixHeight, { row: Int, width: Int -> Array(width) { col -> mutableListOf<GameObject>() to Rect(row * matrixSizeCell, col * matrixSizeCell, matrixSizeCell, matrixSizeCell) } })
+    @JsonIgnore val matrixGrid = matrix2d(matrixWidth, matrixHeight, { row: Int, width: Int -> Array(width) { col -> mutableListOf<GameObject>() to Rect(row.toFloat() * matrixSizeCell, col.toFloat() * matrixSizeCell, matrixSizeCell, matrixSizeCell) } })
 
     /**
      * Le rectangle illustrant la matrix
      */
-    @JsonIgnore val matrixRect = Rect(0, 0, matrixSizeCell * matrixWidth, matrixSizeCell * matrixHeight)
+    @JsonIgnore val matrixRect = Rect(0f, 0f, matrixSizeCell * matrixWidth, matrixSizeCell * matrixHeight)
 
     /**
     * Le rectangle illustrant la zone où les cellules sont actives
@@ -50,7 +50,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
             drawDebugCells = !drawDebugCells
 
         if(followGameObject != null && allowUpdatingGO) {
-            activeRect.position =  Point(Math.max(0, followGameObject!!.position().x - activeRect.width / 2 + followGameObject!!.size().width / 2), Math.max(0, followGameObject!!.position().y - activeRect.height / 2 + followGameObject!!.size().height / 2))
+            activeRect.position =  Point(Math.max(0f, followGameObject!!.position().x - activeRect.width / 2 + followGameObject!!.size().width / 2), Math.max(0f, followGameObject!!.position().y - activeRect.height / 2 + followGameObject!!.size().height / 2))
         }
 
         super.update()
@@ -135,8 +135,8 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
         }
 
         if (matrixRect.overlaps(rect)) {
-            var x = Math.max(0, rect.x / matrixSizeCell)
-            var y = Math.max(0, rect.y / matrixSizeCell)
+            var x = Math.max(0f, rect.x / matrixSizeCell).toInt()
+            var y = Math.max(0f, rect.y / matrixSizeCell).toInt()
             if (rectContains(x, y)) {
                 cells += GridCell(x, y)
                 val firstXCell = x
