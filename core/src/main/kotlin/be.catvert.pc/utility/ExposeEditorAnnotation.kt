@@ -11,7 +11,8 @@ enum class CustomType {
 annotation class ExposeEditor(val customName: String = "", val minInt: Int = 0, val maxInt: Int = 0, val customType: CustomType = CustomType.DEFAULT)
 
 object ExposeEditorFactory {
-    fun createExposeEditor(customName: String = "", minInt: Int = 0, maxInt: Int = 0, customType: CustomType = CustomType.DEFAULT): ExposeEditor {
-        return TypeFactory.annotation(ExposeEditor::class.java, mapOf(ExposeEditor::customName.name to customName, ExposeEditor::minInt.name to minInt, ExposeEditor::maxInt.name to maxInt, ExposeEditor::customType.name to customType))
-    }
+    val empty: ExposeEditor = TypeFactory.annotation(ExposeEditor::class.java, mapOf())
+
+    fun createExposeEditor(customName: String = "", minInt: Int = 0, maxInt: Int = 0, customType: CustomType = CustomType.DEFAULT): ExposeEditor =
+            TypeFactory.annotation(ExposeEditor::class.java, mapOf(ExposeEditor::customName.name to customName, ExposeEditor::minInt.name to minInt, ExposeEditor::maxInt.name to maxInt, ExposeEditor::customType.name to customType))
 }

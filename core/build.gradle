@@ -36,6 +36,8 @@ dependencies {
     compile "io.leangen.geantyref:geantyref:$geantyrefVersion"
 
     compile 'com.github.implicit-invocation:jbump:master-SNAPSHOT'
+
+    compile fileTree(dir: '../libs', include: '*.jar')
 }
 
 kotlin {

@@ -20,6 +20,6 @@ class MultiplexerAction(var actions: Array<Action>) : Action, CustomEditorImpl {
     }
 
     override fun insertImgui(gameObject: GameObject, labelName: String, editorScene: EditorScene) {
-        editorScene.addImguiWidgetsArray(gameObject, "actions", { actions }, { actions = it }, { EmptyAction() }, { ReflectionUtility.simpleNameOf(actions[it]) }, { ExposeEditorFactory.createExposeEditor() })
+        editorScene.addImguiWidgetsArray(gameObject, "actions", { actions }, { actions = it }, { EmptyAction() }, { ReflectionUtility.simpleNameOf(actions[it]) }, { ExposeEditorFactory.empty })
     }
 }

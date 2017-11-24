@@ -20,9 +20,6 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
     @JsonIgnore
     var allowUpdatingGO = true
 
-    @JsonIgnore
-    var removeEntityBelowY0 = true
-
     @JsonIgnore private val removeGameObjects = mutableSetOf<GameObject>()
 
     @JsonIgnore
@@ -63,9 +60,8 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
             if(allowUpdatingGO)
                 it.update()
 
-            if (removeEntityBelowY0 && it.position().y < 0) {
-                LifeAction(LifeAction.LifeActions.ONE_SHOT).invoke(it)
-                removeGameObject(it)
+            if (it.position().y < 0) {
+                it.onOutOfMapAction(it)
             }
         }
 

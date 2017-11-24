@@ -21,13 +21,8 @@ class SoundAction(var soundIndex: Int) : Action, CustomEditorImpl {
 
     override fun insertImgui(gameObject: GameObject, labelName: String, editorScene: EditorScene) {
         with(ImGui) {
-            val sounds = let {
-                val list = mutableListOf<SoundComponent.SoundData>()
-                val soundsData = gameObject.getCurrentState().getComponent<SoundComponent>()?.sounds
-                if(soundsData != null)
-                    list.addAll(soundsData)
-                list.toList()
-            }
+            val sounds = gameObject.getCurrentState().getComponent<SoundComponent>()?.sounds ?: arrayOf()
+
             combo("son", this@SoundAction::soundIndex, sounds.map { it.toString() })
         }
     }

@@ -51,6 +51,6 @@ class SoundComponent(var sounds: Array<SoundData>) : BasicComponent(), CustomEdi
     }
 
     override fun insertImgui(gameObject: GameObject, labelName: String, editorScene: EditorScene) {
-        editorScene.addImguiWidgetsArray(gameObject, "sons", { sounds }, { sounds = it }, { SoundData(Constants.defaultSoundPath) }, { sounds[it].toString() }, { ExposeEditorFactory.createExposeEditor() })
+        editorScene.addImguiWidgetsArray(gameObject, "sons", { sounds }, { sounds = it }, { SoundData(Constants.defaultSoundPath) }, { sounds[it].toString() }, { ExposeEditorFactory.empty })
     }
 }

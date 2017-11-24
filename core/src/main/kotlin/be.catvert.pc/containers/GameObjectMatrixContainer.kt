@@ -18,7 +18,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     /**
      * La matrix permettant de stoquer les différentes entités selon leur position dans l'espace
      */
-    @JsonIgnore val matrixGrid = matrix2d(matrixWidth, matrixHeight, { row: Int, width: Int -> Array(width) { col -> mutableListOf<GameObject>() to Rect(row.toFloat() * matrixSizeCell, col.toFloat() * matrixSizeCell, matrixSizeCell, matrixSizeCell) } })
+    @JsonIgnore private val matrixGrid = matrix2d(matrixWidth, matrixHeight, { row: Int, width: Int -> Array(width) { col -> mutableListOf<GameObject>() to Rect(row.toFloat() * matrixSizeCell, col.toFloat() * matrixSizeCell, matrixSizeCell, matrixSizeCell) } })
 
     /**
      * Le rectangle illustrant la matrix
@@ -66,7 +66,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
                     shapeRenderer.rect(it.second)
                 }
             }
-            shapeRenderer.rect(activeRect.x.toFloat(), activeRect.y.toFloat(), activeRect.width.toFloat(), activeRect.height.toFloat())
+            shapeRenderer.rect(activeRect.x, activeRect.y, activeRect.width.toFloat(), activeRect.height.toFloat())
             shapeRenderer.end()
         }
     }
@@ -123,7 +123,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
      * Permet de retourner les cellules présentes dans le rectangle spécifié
      * @param rect Le rectangle
      */
-    fun getRectCells(rect: Rect): List<GridCell> {
+    private fun getRectCells(rect: Rect): List<GridCell> {
         val cells = mutableListOf<GridCell>()
 
         fun rectContains(x: Int, y: Int): Boolean {
@@ -233,6 +233,4 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
         }
         return list
     }
-
-
 }

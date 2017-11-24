@@ -1,5 +1,7 @@
 package be.catvert.pc
 
+import aurelienribon.tweenengine.Tween
+import aurelienribon.tweenengine.TweenManager
 import be.catvert.pc.actions.Action
 import be.catvert.pc.components.Component
 import be.catvert.pc.components.graphics.TextureComponent
@@ -50,6 +52,8 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
 
         imgui.IO.mouseDrawCursor = true
 
+        Tween.registerAccessor(GameObject::class.java, GameObjectTweenAccessor())
+
         Utility.getFilesRecursivly(Constants.backgroundsDirPath.toLocalFile(), *Constants.levelTextureExtension).forEach {
             backgroundsList.add(it)
         }
@@ -79,6 +83,8 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
         Gdx.graphics.setTitle(Constants.gameTitle + " - ${Gdx.graphics.framesPerSecond} FPS")
 
         currentScene.update()
+
+        tweenManager.update(Gdx.graphics.deltaTime)
 
         currentScene.render(mainBatch)
 
@@ -232,6 +238,8 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
 
         val assetManager = AssetManager()
 
+        val tweenManager = TweenManager()
+
         private lateinit var currentScene: Scene
 
         fun getBackgrounds() = backgroundsList.toList()
@@ -248,9 +256,7 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
         /**
          * Permet de retourner la taille du logo au cas où la taille de l'écran changerait.
          */
-        private fun getLogoSize(): Size {
-            return Size(Gdx.graphics.width / 3 * 2, Gdx.graphics.height / 4)
-        }
+        private fun getLogoSize() = Size(Gdx.graphics.width / 3 * 2, Gdx.graphics.height / 4)
 
         fun getLogoRect(): Rect {
             val size = getLogoSize()

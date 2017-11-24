@@ -94,6 +94,12 @@ class Level(val levelPath: String, val gameVersion: Float, var playerUUID: UUID?
         followGameObject = if(playerUUID != null) findGameObjectByID(playerUUID!!) else null
     }
 
+    fun deleteFiles() {
+        if(!levelPath.toLocalFile().exists()) {
+            levelPath.toLocalFile().parent().deleteDirectory()
+        }
+    }
+
     companion object {
         fun newLevel(levelName: String): Level {
             val levelDir = (Constants.levelDirPath + levelName).toLocalFile()

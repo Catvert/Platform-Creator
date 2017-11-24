@@ -55,6 +55,8 @@ class EditorScene(val level: Level) : Scene() {
         var gameObjectAddStateComboIndex = 0
         var gameObjectAddComponentComboIndex = 0
 
+        var gameObjectCurrentStateIndex = 0
+
         var addGameObjectPrefabComboIndex = 0
 
         val settingsLevelBackgroundIndex = intArrayOf(-1)
@@ -154,8 +156,6 @@ class EditorScene(val level: Level) : Scene() {
 
         if (level.backgroundPath != null)
             backgroundTexture = PCGame.assetManager.loadOnDemand<Texture>(level.backgroundPath.toLocalFile().path()).asset
-
-        level.removeEntityBelowY0 = false
 
         onSelectGameObjectChange(null)
     }
@@ -655,8 +655,11 @@ class EditorScene(val level: Level) : Scene() {
     override fun dispose() {
         super.dispose()
         editorFont.dispose()
-    }
 
+        if(!level.levelPath.toLocalFile().exists()) {
+            level.deleteFiles()
+        }
+    }
 
     private fun updateCamera() {
         var moveCameraX = 0f
@@ -794,6 +797,9 @@ class EditorScene(val level: Level) : Scene() {
 
     inline fun<reified T: Any> addImguiWidget(gameObject: GameObject, labelName: String, get: () -> T, crossinline set: (T) -> Unit, exposeEditor: ExposeEditor) {
         val value = get()
+
+        val dialogsImgui = mutableListOf<CustomEditorImpl>()
+
         with(ImGui) {
             when (value) {
                 is Action -> {
@@ -812,7 +818,10 @@ class EditorScene(val level: Level) : Scene() {
                         treePop()
                     }
                 }
-                is CustomEditorImpl -> value.insertImgui(gameObject, labelName,this@EditorScene)
+                is CustomEditorImpl -> {
+                    dialogsImgui.add(value)
+                    value.insertImgui(gameObject, labelName,this@EditorScene)
+                }
                 is Boolean -> {
                     if (checkbox(labelName, booleanArrayOf(value)))
                         set(!value as T)
@@ -884,26 +893,24 @@ class EditorScene(val level: Level) : Scene() {
                 }
             }
         }
+
+        dialogsImgui.forEach {
+            it.insertImguiPopup(gameObject, this@EditorScene)
+        }
     }
 
     fun insertImguiExposeEditorField(instance: Any, gameObject: GameObject) {
-        val dialogsImgui = mutableListOf<CustomEditorImpl>()
         ReflectionUtility.getAllFieldsOf(instance.javaClass).filter { it.isAnnotationPresent(ExposeEditor::class.java) }.forEach { field ->
             field.isAccessible = true
 
             val exposeField = field.getAnnotation(ExposeEditor::class.java)
 
-            val value = field.get(instance)
-            if (value is CustomEditorImpl)
-                dialogsImgui.add(value)
             addImguiWidget(gameObject, if (exposeField.customName.isBlank()) field.name else exposeField.customName, { field.get(instance) }, { field.set(instance, it) }, exposeField)
         }
 
         if (instance is CustomEditorImpl) {
             instance.insertImgui(gameObject, ReflectionUtility.simpleNameOf(instance), this@EditorScene)
             instance.insertImguiPopup(gameObject, this@EditorScene)
-
-            dialogsImgui.forEach { it.insertImguiPopup(gameObject, this@EditorScene) }
         }
     }
 
@@ -932,9 +939,8 @@ class EditorScene(val level: Level) : Scene() {
                     sameLine()
                     if (button("Abandonner les modifications")) {
                         if(!level.levelPath.toLocalFile().exists()) {
-                            level.levelPath.toLocalFile().parent().deleteDirectory()
+                            level.deleteFiles()
                         }
-
                         showMainMenu()
                     }
                     sameLine()
@@ -1051,7 +1057,8 @@ class EditorScene(val level: Level) : Scene() {
 
                 separator()
 
-                combo("state", gameObject::currentState, gameObject.getStates().map { it.name })
+
+                combo("state", EditorSceneUI::gameObjectCurrentStateIndex, gameObject.getStates().map { it.name })
 
                 if (button("Ajouter un state")) {
                     openPopup(newStateTitle)
@@ -1063,12 +1070,12 @@ class EditorScene(val level: Level) : Scene() {
                 }
 
                 if(collapsingHeader("components")) {
-                    gameObject.getCurrentState().getComponents().forEach {
+                    gameObject.getStates().elementAt(EditorSceneUI.gameObjectCurrentStateIndex).getComponents().forEach {
                         if(treeNode(it.name)) {
-                            insertImguiExposeEditorField(it, gameObject)
-                            if(button("Supprimer", Vec2(-1, 20f))) {
+                            if(button("Supprimer ce comp.", Vec2(-1, 20f))) {
                                 gameObject.getCurrentState().removeComponent(it)
                             }
+                            insertImguiExposeEditorField(it, gameObject)
                             treePop()
                         }
                     }
@@ -1119,7 +1126,7 @@ class EditorScene(val level: Level) : Scene() {
                     combo("component", EditorSceneUI::gameObjectAddComponentComboIndex, PCGame.componentsClasses.map { it.simpleName ?: "Nom inconnu" })
 
                     if (button("Ajouter")) {
-                        gameObject.getCurrentState().addComponent(ReflectionUtility.findNoArgConstructor(PCGame.componentsClasses[EditorSceneUI.gameObjectAddComponentComboIndex])!!.newInstance())
+                        gameObject.getStates().elementAt(EditorSceneUI.gameObjectCurrentStateIndex).addComponent(ReflectionUtility.findNoArgConstructor(PCGame.componentsClasses[EditorSceneUI.gameObjectAddComponentComboIndex])!!.newInstance())
                         closeCurrentPopup()
                     }
 

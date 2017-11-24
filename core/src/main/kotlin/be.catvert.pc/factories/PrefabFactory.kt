@@ -4,12 +4,10 @@ import be.catvert.pc.GameKeys
 import be.catvert.pc.GameObject
 import be.catvert.pc.Prefab
 import be.catvert.pc.actions.*
-import be.catvert.pc.components.SoundComponent
-import be.catvert.pc.components.graphics.AnimationComponent
-import be.catvert.pc.components.graphics.AtlasComponent
+import be.catvert.pc.components.*
+import be.catvert.pc.components.graphics.*
 import be.catvert.pc.components.logics.*
-import be.catvert.pc.components.logics.ai.AIComponent
-import be.catvert.pc.components.logics.ai.SimpleMoverComponent
+import be.catvert.pc.components.logics.ai.*
 import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.Point
 import be.catvert.pc.utility.Rect
@@ -52,7 +50,9 @@ enum class PrefabFactory(val prefab: Prefab) {
                     InputComponent.InputData(GameKeys.GAME_PLAYER_JUMP.key, true, PhysicsAction(PhysicsAction.PhysicsActions.JUMP))
             ))
 
-            this += LifeComponent(LevelAction(LevelAction.LevelActions.FAIL_EXIT), setOf())
+            this += TweenComponent(arrayOf(TweenFactory.RemoveGOTween().apply { endAction = LevelAction(LevelAction.LevelActions.FAIL_EXIT) }))
+
+            this += LifeComponent(TweenAction(0))
         }.apply {
             keepActive = true
         })
@@ -61,7 +61,7 @@ enum class PrefabFactory(val prefab: Prefab) {
         Prefab("spider", "Catvert", GameObject(GameObject.Tag.Enemy, UUID.randomUUID(), Rect(Point(), Size(48, 48)), null) {
             this += AnimationComponent((Constants.atlasDirPath + "More Enemies Animations/enemies.atlas").toLocalFile(), "spider_walk", 0.33f)
             this += PhysicsComponent(false, 5)
-            this += LifeComponent(RemoveGOAction(), setOf())
+            this += LifeComponent(RemoveGOAction())
             this += AIComponent(LifeAction(LifeAction.LifeActions.REMOVE_LP) to arrayOf(CollisionSide.OnDown, CollisionSide.OnRight, CollisionSide.OnLeft), LifeAction(LifeAction.LifeActions.REMOVE_LP) to arrayOf(CollisionSide.OnUp))
             this += SimpleMoverComponent(SimpleMoverComponent.SimpleMoverOrientation.HORIZONTAL, false).apply { onReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X) }
         })

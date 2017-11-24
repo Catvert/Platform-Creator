@@ -47,7 +47,7 @@ class InputComponent(var inputsData: Array<InputData>) : LogicsComponent(), Cust
     }
 
     override fun insertImgui(gameObject: GameObject, labelName: String, editorScene: EditorScene) {
-        editorScene.addImguiWidgetsArray(gameObject, "inputs", { inputsData }, { inputsData = it }, { InputData() }, { Input.Keys.toString(inputsData[it].key) }, { ExposeEditorFactory.createExposeEditor() })
+        editorScene.addImguiWidgetsArray(gameObject, "inputs", { inputsData }, { inputsData = it }, { InputData() }, { Input.Keys.toString(inputsData[it].key) }, { ExposeEditorFactory.empty })
     }
 
 }

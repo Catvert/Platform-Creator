@@ -21,9 +21,6 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
 
     @JsonIgnore lateinit var gameObject: GameObject
 
-    @ExposeEditor var onActiveAction: Action = EmptyAction()
-    @ExposeEditor var onInactiveAction: Action = EmptyAction()
-
     @JsonProperty("comps")
     private val components: MutableSet<Component> = components
 
@@ -67,12 +64,10 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
     inline fun <reified T : Component> hasComponent(klass: KClass<T> = T::class): Boolean = getComponent<T>() != null
 
     fun active() {
-        onActiveAction(gameObject)
         getComponents().forEach { it.onStateActive(gameObject) }
     }
 
     fun inactive() {
-        onInactiveAction(gameObject)
         getComponents().forEach { it.onStateInactive(gameObject) }
     }
 

@@ -14,13 +14,12 @@ class StateAction(var stateIndex: Int) : Action, CustomEditorImpl {
     @JsonCreator private constructor(): this(0)
 
     override fun invoke(gameObject: GameObject) {
-        gameObject.currentState = stateIndex
+        gameObject.setState(stateIndex, false)
     }
 
-    @JsonIgnore private var currentStateComboIndex = 0
     override fun insertImgui(gameObject: GameObject, labelName: String, editorScene: EditorScene) {
         with(ImGui) {
-            combo("state", this@StateAction::currentStateComboIndex, gameObject.getStates().map { it.name })
+            combo("state", this@StateAction::stateIndex, gameObject.getStates().map { it.name })
         }
     }
 

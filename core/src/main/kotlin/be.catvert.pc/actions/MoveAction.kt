@@ -1,6 +1,10 @@
 package be.catvert.pc.actions
 
+import aurelienribon.tweenengine.Tween
+import aurelienribon.tweenengine.equations.Elastic
 import be.catvert.pc.GameObject
+import be.catvert.pc.GameObjectTweenAccessor
+import be.catvert.pc.PCGame
 import be.catvert.pc.utility.ExposeEditor
 import com.fasterxml.jackson.annotation.JsonCreator
 
