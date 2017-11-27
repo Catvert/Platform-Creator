@@ -1,7 +1,6 @@
 package be.catvert.pc.components.logics.ai
 
 import be.catvert.pc.GameObject
-import be.catvert.pc.GameObjectState
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
 import be.catvert.pc.actions.PhysicsAction
@@ -11,11 +10,10 @@ import be.catvert.pc.components.logics.PhysicsComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.utility.ExposeEditor
 import com.fasterxml.jackson.annotation.JsonCreator
-import com.fasterxml.jackson.annotation.JsonIgnore
 
 
 class SimpleMoverComponent(orientation: SimpleMoverOrientation, reverse: Boolean) : LogicsComponent() {
-    @JsonCreator private constructor(): this(SimpleMoverOrientation.HORIZONTAL, false)
+    @JsonCreator private constructor() : this(SimpleMoverOrientation.HORIZONTAL, false)
 
     enum class SimpleMoverOrientation {
         HORIZONTAL, VERTICAL
@@ -24,28 +22,31 @@ class SimpleMoverComponent(orientation: SimpleMoverOrientation, reverse: Boolean
     private var firstAction = PhysicsAction(PhysicsAction.PhysicsActions.GO_LEFT)
     private var secondAction = PhysicsAction(PhysicsAction.PhysicsActions.GO_RIGHT)
 
-    @JsonIgnore private lateinit var gameObject: GameObject
+    private lateinit var gameObject: GameObject
 
     @ExposeEditor private var reverse = reverse
         set(value) {
             field = value
-            if(value)
+            if (value)
                 onReverseAction(gameObject)
             else
                 onUnReverseAction(gameObject)
         }
 
-    @ExposeEditor var onUnReverseAction: Action = EmptyAction()
-    @ExposeEditor var onReverseAction: Action = EmptyAction()
+    @ExposeEditor
+    var onUnReverseAction: Action = EmptyAction()
+    @ExposeEditor
+    var onReverseAction: Action = EmptyAction()
 
-    @ExposeEditor var orientation = orientation
+    @ExposeEditor
+    var orientation = orientation
         set(value) {
             field = value
             updateActions()
         }
 
     private fun updateActions() {
-        when(orientation) {
+        when (orientation) {
             SimpleMoverOrientation.HORIZONTAL -> {
                 firstAction.physicsAction = PhysicsAction.PhysicsActions.GO_LEFT
                 secondAction.physicsAction = PhysicsAction.PhysicsActions.GO_RIGHT
@@ -68,17 +69,17 @@ class SimpleMoverComponent(orientation: SimpleMoverOrientation, reverse: Boolean
 
         val physicsComp: PhysicsComponent = gameObject.getCurrentState().getComponent()!!
         physicsComp.onCollisionWith.register {
-            when(orientation) {
+            when (orientation) {
                 SimpleMoverOrientation.HORIZONTAL -> {
-                    if(it.side == CollisionSide.OnLeft)
+                    if (it.side == CollisionSide.OnLeft)
                         reverse = true
-                    else if(it.side == CollisionSide.OnRight)
+                    else if (it.side == CollisionSide.OnRight)
                         reverse = false
                 }
                 SimpleMoverOrientation.VERTICAL -> {
-                    if(it.side == CollisionSide.OnUp)
+                    if (it.side == CollisionSide.OnUp)
                         reverse = true
-                    else if(it.side == CollisionSide.OnDown)
+                    else if (it.side == CollisionSide.OnDown)
                         reverse = false
                 }
             }
@@ -86,9 +87,9 @@ class SimpleMoverComponent(orientation: SimpleMoverOrientation, reverse: Boolean
     }
 
     override fun update(gameObject: GameObject) {
-            if(!reverse)
-                firstAction(gameObject)
-            else
-                secondAction(gameObject)
+        if (!reverse)
+            firstAction(gameObject)
+        else
+            secondAction(gameObject)
     }
 }

@@ -19,7 +19,6 @@ dependencies {
     compile "io.github.libktx:ktx-i18n:$ktxVersion"
     compile "io.github.libktx:ktx-async:$ktxVersion"
     compile "io.github.libktx:ktx-app:$ktxVersion"
-    compile group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: coroutinesVersion
 
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
@@ -35,13 +34,5 @@ dependencies {
     compile "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
     compile "io.leangen.geantyref:geantyref:$geantyrefVersion"
 
-    compile 'com.github.implicit-invocation:jbump:master-SNAPSHOT'
-
     compile fileTree(dir: '../libs', include: '*.jar')
-}
-
-kotlin {
-    experimental {
-        coroutines 'enable'
-    }
 }

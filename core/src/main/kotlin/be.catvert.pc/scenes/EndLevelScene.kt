@@ -4,12 +4,12 @@ import be.catvert.pc.PCGame
 import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.Size
+import be.catvert.pc.utility.loadOnDemand
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.graphics.Texture
 import ktx.actors.onClick
 import ktx.actors.plus
-import ktx.assets.loadOnDemand
 import ktx.assets.toLocalFile
 import ktx.vis.window
 
@@ -43,13 +43,13 @@ class EndLevelScene(private val levelPath: String, levelSuccess: Boolean) : Scen
             setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
         }
 
-        PCGame.assetManager.loadOnDemand<Sound>((if(levelSuccess) "sounds/game-over-success.wav".toLocalFile() else "sounds/game-over-fail.wav".toLocalFile()).path()).asset.play(PCGame.soundVolume)
+        PCGame.assetManager.loadOnDemand<Sound>(if (levelSuccess) "sounds/game-over-success.wav".toLocalFile() else "sounds/game-over-fail.wav".toLocalFile()).asset.play(PCGame.soundVolume)
         backgroundTexture = PCGame.assetManager.loadOnDemand<Texture>(Constants.gameBackgroundMenuPath).asset
     }
 
 
     override fun resize(size: Size) {
         super.resize(size)
-        logo.rectangle.set(PCGame.getLogoRect())
+        logo.box.set(PCGame.getLogoRect())
     }
 }

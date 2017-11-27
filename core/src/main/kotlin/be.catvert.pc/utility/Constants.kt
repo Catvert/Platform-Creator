@@ -1,47 +1,51 @@
 package be.catvert.pc.utility
 
+import ktx.assets.toLocalFile
+
 /**
- * Objet permettant d'accéder aux constantes du jeu
+ * Objet permettant d'accéder aux antes du jeu
  */
 object Constants {
     const val gameTitle = "Platform Creator"
     const val gameVersion = 2.0f
 
-    const val assetsDirPath = "assets/"
+    const val maxGameObjectSize = 500
+    const val minLayerIndex = -100
+    const val maxLayerIndex = 100
 
-    const val UISkinPath = assetsDirPath + "ui/neutralizer-fix/neutralizer.json"
+    const val assetsDir = "assets/"
 
-    const val mainFontPath = assetsDirPath + "fonts/mainFont.fnt"
-    const val editorFontPath = assetsDirPath + "fonts/editorFont.fnt"
+    private val assetsDirPath = "assets/".toLocalFile()
 
-    const val configPath = assetsDirPath + "config.json"
-    const val keysConfigPath = assetsDirPath + "keysConfig.json"
+    val bundlesDirPath = assetsDirPath.child("i18n_bundles")
 
-    const val atlasDirPath = assetsDirPath + "atlas/"
-    const val texturesDirPath = assetsDirPath + "textures/"
-    const val soundsDirPath = assetsDirPath + "sounds/"
-    const val backgroundsDirPath = assetsDirPath + "game/background/"
-    const val prefabsDirPath = assetsDirPath + "prefabs/"
-    const val levelDirPath = assetsDirPath + "levels/"
+    val UISkinPath = assetsDirPath.child("ui/neutralizer-fix/neutralizer.json")
 
-    const val gameBackgroundMenuPath = assetsDirPath + "game/mainmenu.png"
-    const val gameLogoPath = assetsDirPath + "game/logo.png"
+    val mainFontPath = assetsDirPath.child("fonts/mainFont.fnt")
+    val editorFontPath = assetsDirPath.child("fonts/editorFont.fnt")
 
-    const val prefabExtension = ".prefab"
-    const val levelExtension = ".pclvl"
+    val keysConfigPath = assetsDirPath.child("keysConfig.json")
+
+    val atlasDirPath = assetsDirPath.child("atlas")
+    val texturesDirPath = assetsDirPath.child("textures")
+    val soundsDirPath = assetsDirPath.child("sounds")
+    val backgroundsDirPath = assetsDirPath.child("game/background")
+    val prefabsDirPath = assetsDirPath.child("prefabs")
+    val levelDirPath = assetsDirPath.child("levels")
+
+    val gameBackgroundMenuPath = assetsDirPath.child("game/mainmenu.png")
+    val gameLogoPath = assetsDirPath.child("game/logo.png")
+
+    val prefabExtension = "prefab"
+    val levelExtension = "pclvl"
 
     val levelTextureExtension = arrayOf("jpg", "png")
     val levelAtlasExtension = arrayOf("atlas")
     val levelSoundExtension = arrayOf("mp3", "wav", "ogg")
 
-    const val levelDataFile = "data" + levelExtension
+    val levelDataFile = "data.$levelExtension"
 
-    const val defaultAtlasPath = assetsDirPath + "game/notexture_atlas.atlas"
-    const val defaultTexturePath = assetsDirPath + "game/notexture.png"
-    const val defaultSoundPath = assetsDirPath + "game/nosound.wav"
-
-    const val maxGameObjectSize = 500
-
-    const val minLayerIndex = -100
-    const val maxLayerIndex = 100
+    val defaultAtlasPath = assetsDirPath.child("game/notexture_atlas.atlas")
+    val defaultTexturePath = assetsDirPath.child("game/notexture.png")
+    val defaultSoundPath = assetsDirPath.child("game/nosound.wav")
 }

@@ -1,9 +1,10 @@
 package be.catvert.pc.actions
 
 import be.catvert.pc.GameObject
-import be.catvert.pc.scenes.EditorScene
+import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.CustomEditorImpl
 import be.catvert.pc.utility.ExposeEditorFactory
+import be.catvert.pc.utility.ImguiHelper
 import be.catvert.pc.utility.ReflectionUtility
 import com.fasterxml.jackson.annotation.JsonCreator
 
@@ -19,7 +20,9 @@ class MultiplexerAction(var actions: Array<Action>) : Action, CustomEditorImpl {
         }
     }
 
-    override fun insertImgui(gameObject: GameObject, labelName: String, editorScene: EditorScene) {
-        editorScene.addImguiWidgetsArray(gameObject, "actions", { actions }, { actions = it }, { EmptyAction() }, { ReflectionUtility.simpleNameOf(actions[it]) }, { ExposeEditorFactory.empty })
+    override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
+        ImguiHelper.addImguiWidgetsArray("actions", this::actions, { EmptyAction() }, {
+            ImguiHelper.addImguiWidget(ReflectionUtility.simpleNameOf(it.obj), it, gameObject, level, ExposeEditorFactory.empty)
+        }) {}
     }
 }

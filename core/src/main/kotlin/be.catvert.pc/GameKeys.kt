@@ -4,7 +4,6 @@ import be.catvert.pc.utility.Constants
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.utils.JsonReader
 import com.badlogic.gdx.utils.JsonWriter
-import ktx.assets.toLocalFile
 import java.io.FileReader
 import java.io.FileWriter
 import java.io.IOException
@@ -38,6 +37,7 @@ enum class GameKeys(var key: Int, val description: String) {
     EDITOR_MOVE_ENTITY_RIGHT(Input.Keys.RIGHT, "Editor move entity 1 pixel right"),
     EDITOR_MOVE_ENTITY_UP(Input.Keys.UP, "Editor move entity 1 pixel up"),
     EDITOR_MOVE_ENTITY_DOWN(Input.Keys.DOWN, "Editor move entity 1 pixel down"),
+    EDITOR_TRY_LEVEL(Input.Keys.F2, "Editor try level"),
 
     DEBUG_MODE(Input.Keys.F12, "Debug Mode"),
 
@@ -61,9 +61,9 @@ enum class GameKeys(var key: Int, val description: String) {
          * Charge le fichier de configuration des touches du jeu
          */
         fun loadKeysConfig() {
-            if(Constants.keysConfigPath.toLocalFile().exists()) {
+            if (Constants.keysConfigPath.exists()) {
                 try {
-                    val root = JsonReader().parse(FileReader(Constants.keysConfigPath))
+                    val root = JsonReader().parse(FileReader(Constants.keysConfigPath.path()))
 
                     root["keys"].forEach {
                         val name = it.getString("name")
@@ -82,7 +82,7 @@ enum class GameKeys(var key: Int, val description: String) {
          */
         fun saveKeysConfig(): Boolean {
             try {
-                val writer = JsonWriter(FileWriter(Constants.keysConfigPath.toLocalFile().path(), false))
+                val writer = JsonWriter(FileWriter(Constants.keysConfigPath.path(), false))
                 writer.setOutputType(JsonWriter.OutputType.json)
 
                 writer.`object`()

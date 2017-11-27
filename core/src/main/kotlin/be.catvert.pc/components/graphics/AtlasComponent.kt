@@ -4,17 +4,14 @@ import be.catvert.pc.GameObject
 import be.catvert.pc.PCGame
 import be.catvert.pc.components.RenderableComponent
 import be.catvert.pc.containers.GameObjectContainer
-import be.catvert.pc.scenes.EditorScene
-import be.catvert.pc.utility.Constants
-import be.catvert.pc.utility.CustomEditorImpl
-import be.catvert.pc.utility.Size
-import be.catvert.pc.utility.draw
+import be.catvert.pc.containers.Level
+import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.fasterxml.jackson.annotation.JsonCreator
-import com.fasterxml.jackson.annotation.JsonIgnore
 import glm_.vec2.Vec2
 import imgui.ImGui
 import ktx.assets.loadOnDemand
@@ -26,7 +23,7 @@ import ktx.assets.toLocalFile
  * @param region La région à utiliser
  */
 class AtlasComponent(atlasPath: FileHandle, region: String) : RenderableComponent(), CustomEditorImpl {
-    @JsonCreator constructor() : this(Constants.defaultAtlasPath.toLocalFile(), "notexture")
+    @JsonCreator constructor() : this(Constants.defaultAtlasPath, "notexture")
 
     var atlasPath: String = atlasPath.path()
         private set
@@ -34,14 +31,14 @@ class AtlasComponent(atlasPath: FileHandle, region: String) : RenderableComponen
     var region: String = region
         private set
 
-    @JsonIgnore private var atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(this.atlasPath).asset
+    private var atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(this.atlasPath).asset
 
-    @JsonIgnore private var atlasRegion: TextureAtlas.AtlasRegion = atlas.findRegion(region)
+    private var atlasRegion: TextureAtlas.AtlasRegion = atlas.findRegion(region)
 
     fun updateAtlas(atlasPath: FileHandle = this.atlasPath.toLocalFile(), region: String = this.region) {
         this.atlasPath = atlasPath.path()
         this.region = region
-        atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(atlasPath.path()).asset
+        atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(atlasPath).asset
         atlasRegion = atlas.findRegion(region)
     }
 
@@ -52,18 +49,20 @@ class AtlasComponent(atlasPath: FileHandle, region: String) : RenderableComponen
     }
 
     override fun render(gameObject: GameObject, batch: Batch) {
-        batch.draw(atlasRegion, gameObject.rectangle, flipX, flipY)
+        batch.setColor(1f, 1f, 1f, alpha)
+        batch.draw(atlasRegion, gameObject.box, flipX, flipY)
+        batch.setColor(1f, 1f, 1f, 1f)
     }
 
-    @JsonIgnore private val selectAtlasTitle = "Sélection de l'atlas"
-    @JsonIgnore private var selectedAtlasIndex = -1
-    @JsonIgnore private var useAtlasSize = false
-    @JsonIgnore private var showLevelAtlas = false
+    private val selectAtlasTitle = "Sélection de l'atlas"
+    private var selectedAtlasIndex = -1
+    private var useAtlasSize = false
+    private var showLevelAtlas = false
 
-    override fun insertImgui(gameObject: GameObject, labelName: String, editorScene: EditorScene) {
+    override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
 
         with(ImGui) {
-            if (button("<-")) {
+            if (button("<-", Vec2(25, gameObject.box.height + 8f))) {
                 val index = atlas.regions.indexOfFirst { it.name == region }
                 if (index > 0) {
                     updateAtlas(region = atlas.regions[index - 1].name)
@@ -71,22 +70,26 @@ class AtlasComponent(atlasPath: FileHandle, region: String) : RenderableComponen
             }
 
             sameLine()
-            if (imageButton(atlasRegion.texture.textureObjectHandle, Vec2(gameObject.rectangle.width, gameObject.rectangle.height), Vec2(atlasRegion.u, atlasRegion.v), Vec2(atlasRegion.u2, atlasRegion.v2))) {
+            if (imageButton(atlasRegion.texture.textureObjectHandle, Vec2(gameObject.box.width, gameObject.box.height), Vec2(atlasRegion.u, atlasRegion.v), Vec2(atlasRegion.u2, atlasRegion.v2))) {
                 openPopup(selectAtlasTitle)
             }
 
             sameLine()
-            if (button("->")) {
+            if (button("->", Vec2(25f, gameObject.box.height + 8f))) {
                 val index = atlas.regions.indexOfFirst { it.name == region }
                 if (index in 0 until atlas.regions.size - 1) {
                     updateAtlas(region = atlas.regions[index + 1].name)
                 }
             }
+
+            if(button("Mettre à jour la taille", Vec2(-1, 20f))) {
+                gameObject.box.size = Size(atlasRegion.regionWidth, atlasRegion.regionHeight)
+            }
         }
     }
 
-    override fun insertImguiPopup(gameObject: GameObject, editorScene: EditorScene) {
-        super.insertImguiPopup(gameObject, editorScene)
+    override fun insertImguiPopup(gameObject: GameObject, level: Level) {
+        super.insertImguiPopup(gameObject, level)
 
         with(ImGui) {
             val popupWidth = Gdx.graphics.width / 3 * 2
@@ -97,7 +100,7 @@ class AtlasComponent(atlasPath: FileHandle, region: String) : RenderableComponen
                 if (selectedAtlasIndex == -1) {
                     selectedAtlasIndex = PCGame.gameAtlas.indexOfFirst { it == atlasPath.toLocalFile() }
                     if (selectedAtlasIndex == -1) {
-                        selectedAtlasIndex = editorScene.level.resourcesAtlas().indexOfFirst { it == atlasPath.toLocalFile() }
+                        selectedAtlasIndex = level.resourcesAtlas().indexOfFirst { it == atlasPath.toLocalFile() }
                         if (selectedAtlasIndex == -1)
                             selectedAtlasIndex = 0
                         else
@@ -108,14 +111,14 @@ class AtlasComponent(atlasPath: FileHandle, region: String) : RenderableComponen
                 if (checkbox("Afficher les atlas importés", this@AtlasComponent::showLevelAtlas))
                     selectedAtlasIndex = 0
                 sameLine()
-                combo("atlas", this@AtlasComponent::selectedAtlasIndex, if (showLevelAtlas) editorScene.level.resourcesAtlas().map { it.nameWithoutExtension() } else PCGame.gameAtlas.map { it.nameWithoutExtension() })
+                combo("atlas", this@AtlasComponent::selectedAtlasIndex, if (showLevelAtlas) level.resourcesAtlas().map { it.nameWithoutExtension() } else PCGame.gameAtlas.map { it.nameWithoutExtension() })
                 checkbox("Mettre à jour la taille du gameObject", this@AtlasComponent::useAtlasSize)
 
                 var sumImgsWidth = 0f
 
-                val atlas = if (showLevelAtlas) editorScene.level.resourcesAtlas().getOrNull(selectedAtlasIndex)?.path() else PCGame.gameAtlas.getOrNull(selectedAtlasIndex)?.path()
+                val atlas = if (showLevelAtlas) level.resourcesAtlas().getOrNull(selectedAtlasIndex)?.path() else PCGame.gameAtlas.getOrNull(selectedAtlasIndex)?.path()
 
-                if(atlas != null) {
+                if (atlas != null) {
                     PCGame.assetManager.loadOnDemand<TextureAtlas>(atlas).asset.regions.forEach { it ->
                         val imgBtnSize = Vec2(Math.min(it.regionWidth, 200), Math.min(it.regionHeight, 200))
 
@@ -123,7 +126,7 @@ class AtlasComponent(atlasPath: FileHandle, region: String) : RenderableComponen
                             updateAtlas(atlas.toLocalFile(), it.name)
 
                             if (useAtlasSize)
-                                gameObject.rectangle.size = Size(it.regionWidth, it.regionHeight)
+                                gameObject.box.size = Size(it.regionWidth, it.regionHeight)
                             closeCurrentPopup()
                         }
 

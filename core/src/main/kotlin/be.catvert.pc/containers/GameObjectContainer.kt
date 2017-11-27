@@ -2,7 +2,6 @@ package be.catvert.pc.containers
 
 import be.catvert.pc.GameObject
 import be.catvert.pc.GameObjectState
-import be.catvert.pc.actions.LifeAction
 import be.catvert.pc.serialization.PostDeserialization
 import be.catvert.pc.utility.Rect
 import be.catvert.pc.utility.Renderable
@@ -20,7 +19,7 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
     @JsonIgnore
     var allowUpdatingGO = true
 
-    @JsonIgnore private val removeGameObjects = mutableSetOf<GameObject>()
+    private val removeGameObjects = mutableSetOf<GameObject>()
 
     @JsonIgnore
     fun getGameObjectsData() = gameObjects.toSet()
@@ -41,7 +40,7 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
     }
 
     fun createGameObject(rectangle: Rect = Rect(), tag: GameObject.Tag, initDefaultState: GameObjectState.() -> Unit = {}, initGO: GameObject.() -> Unit = {}): GameObject {
-        val go = GameObject(tag, UUID.randomUUID(), rectangle, this, initDefaultState).apply(initGO)
+        val go = GameObject(tag, rectangle, this, initDefaultState).apply(initGO)
 
         addGameObject(go)
 
@@ -57,7 +56,7 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
 
     override fun update() {
         gameObjects.forEach {
-            if(allowUpdatingGO)
+            if (allowUpdatingGO)
                 it.update()
 
             if (it.position().y < 0) {
@@ -65,7 +64,7 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
             }
         }
 
-        if(removeGameObjects.isNotEmpty()) {
+        if (removeGameObjects.isNotEmpty()) {
             removeGameObjects.forEach {
                 onRemoveGameObject(it)
                 gameObjects.remove(it)

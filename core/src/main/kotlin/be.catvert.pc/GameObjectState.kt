@@ -1,32 +1,27 @@
 package be.catvert.pc
 
-import be.catvert.pc.actions.Action
-import be.catvert.pc.actions.EmptyAction
-import be.catvert.pc.actions.RemoveGOAction
 import be.catvert.pc.components.Component
-import be.catvert.pc.components.RenderableComponent
 import be.catvert.pc.components.LogicsComponent
+import be.catvert.pc.components.RenderableComponent
 import be.catvert.pc.containers.GameObjectContainer
-import be.catvert.pc.utility.ExposeEditor
 import be.catvert.pc.utility.Renderable
 import be.catvert.pc.utility.Updeatable
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
-import kotlin.reflect.KClass
 
 class GameObjectState(var name: String, components: MutableSet<Component> = mutableSetOf()) : Renderable, Updeatable {
-    @JsonCreator private constructor(): this("State")
+    @JsonCreator private constructor() : this("State")
 
-    @JsonIgnore lateinit var gameObject: GameObject
+    private lateinit var gameObject: GameObject
 
     @JsonProperty("comps")
     private val components: MutableSet<Component> = components
 
-    @JsonIgnore private val renderComponents = mutableSetOf<RenderableComponent>()
+    private val renderComponents = mutableSetOf<RenderableComponent>()
 
-    @JsonIgnore private val updateComponents = mutableSetOf<LogicsComponent>()
+    private val updateComponents = mutableSetOf<LogicsComponent>()
 
     @JsonIgnore
     fun getComponents() = components.toSet()
@@ -37,7 +32,7 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
     }
 
     fun addComponent(component: Component) {
-        if(components.none { it.javaClass.isInstance(component) }) {
+        if (components.none { it.javaClass.isInstance(component) }) {
             components.add(component)
             sortComponent(component)
         }
@@ -46,9 +41,9 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
     fun removeComponent(component: Component) {
         components.remove(component)
 
-        if(component is RenderableComponent)
+        if (component is RenderableComponent)
             renderComponents.remove(component)
-        else if(component is LogicsComponent)
+        else if (component is LogicsComponent)
             updateComponents.remove(component)
     }
 
@@ -61,7 +56,7 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
 
     inline fun <reified T : Component> getComponent(): T? = getComponents().firstOrNull { it is T } as? T
 
-    inline fun <reified T : Component> hasComponent(klass: KClass<T> = T::class): Boolean = getComponent<T>() != null
+    inline fun <reified T : Component> hasComponent(): Boolean = getComponent<T>() != null
 
     fun active() {
         getComponents().forEach { it.onStateActive(gameObject) }
@@ -72,20 +67,24 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
     }
 
     fun setFlipRenderable(x: Boolean, y: Boolean) {
-        getComponents().filter { it is RenderableComponent }.forEach {
-            val renderComp = it as RenderableComponent
-            renderComp.flipX = x
-            renderComp.flipY = y
+        renderComponents.forEach {
+            it.flipX = x
+            it.flipY = y
         }
     }
 
     fun inverseFlipRenderable(inverseX: Boolean, inverseY: Boolean) {
-        getComponents().filter { it is RenderableComponent }.forEach {
-            val renderComp = it as RenderableComponent
-            if(inverseX)
-                renderComp.flipX = !renderComp.flipX
-            if(inverseY)
-                renderComp.flipY = !renderComp.flipY
+        renderComponents.forEach {
+            if (inverseX)
+                it.flipX = !it.flipX
+            if (inverseY)
+                it.flipY = !it.flipY
+        }
+    }
+
+    fun setAlphaRenderable(alpha: Float) {
+        renderComponents.forEach {
+            it.alpha = alpha
         }
     }
 

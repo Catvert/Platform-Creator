@@ -6,7 +6,7 @@ class Signal<T> {
     private val listeners = mutableSetOf<SignalListener<T>>()
 
     fun register(listener: SignalListener<T>) {
-       listeners.add(listener)
+        listeners.add(listener)
     }
 
     fun register(removeAfterInvoke: Boolean = false, onSignal: (T) -> Unit) = register(SignalListener(removeAfterInvoke, onSignal))

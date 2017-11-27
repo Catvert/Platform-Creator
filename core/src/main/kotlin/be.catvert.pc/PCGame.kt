@@ -6,6 +6,7 @@ import be.catvert.pc.actions.Action
 import be.catvert.pc.components.Component
 import be.catvert.pc.components.graphics.TextureComponent
 import be.catvert.pc.containers.GameObjectContainer
+import be.catvert.pc.i18n.Locales
 import be.catvert.pc.scenes.MainMenuScene
 import be.catvert.pc.scenes.Scene
 import be.catvert.pc.utility.*
@@ -24,45 +25,43 @@ import imgui.ImGui
 import imgui.impl.LwjglGL3
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner
 import ktx.app.KtxApplicationAdapter
-import ktx.assets.toLocalFile
-import ktx.async.enableKtxCoroutines
 import uno.glfw.GlfwWindow
 import kotlin.reflect.KClass
 
 /** [com.badlogic.gdx.ApplicationListener, implementation shared by all platforms.  */
-class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: Float) : KtxApplicationAdapter {
+class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
     override fun create() {
         super.create()
-        enableKtxCoroutines(asynchronousExecutorConcurrencyLevel = 1)
 
         Log.info { "Initialisation en cours.. \n Taille : ${Gdx.graphics.width}x${Gdx.graphics.height}" }
 
-        VisUI.load(Gdx.files.internal(Constants.UISkinPath))
+        Locales.load()
+
+        VisUI.load(Constants.UISkinPath.path())
 
         GameKeys.loadKeysConfig()
 
         mainBatch = SpriteBatch()
         hudBatch = SpriteBatch()
 
-        PCGame.vsync = initialVSync
         PCGame.soundVolume = initialSoundVolume
         PCGame.defaultProjection = mainBatch.projectionMatrix.cpy()
 
-        PCGame.mainFont = BitmapFont(Constants.mainFontPath.toLocalFile())
+        PCGame.mainFont = BitmapFont(Constants.mainFontPath)
 
         imgui.IO.mouseDrawCursor = true
 
         Tween.registerAccessor(GameObject::class.java, GameObjectTweenAccessor())
 
-        Utility.getFilesRecursivly(Constants.backgroundsDirPath.toLocalFile(), *Constants.levelTextureExtension).forEach {
+        Utility.getFilesRecursivly(Constants.backgroundsDirPath, *Constants.levelTextureExtension).forEach {
             backgroundsList.add(it)
         }
 
-        gameAtlas = Utility.getFilesRecursivly(Constants.atlasDirPath.toLocalFile(), *Constants.levelAtlasExtension)
+        gameAtlas = Utility.getFilesRecursivly(Constants.atlasDirPath, *Constants.levelAtlasExtension)
 
-        gameTextures = Utility.getFilesRecursivly(Constants.texturesDirPath.toLocalFile(), *Constants.levelTextureExtension)
+        gameTextures = Utility.getFilesRecursivly(Constants.texturesDirPath, *Constants.levelTextureExtension)
 
-        gameSounds = Utility.getFilesRecursivly(Constants.soundsDirPath.toLocalFile(), *Constants.levelSoundExtension)
+        gameSounds = Utility.getFilesRecursivly(Constants.soundsDirPath, *Constants.levelSoundExtension)
 
         currentScene = MainMenuScene()
 
@@ -224,15 +223,9 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
             componentsList.toList()
         }
 
-        var vsync = false
-            set(value) {
-                field = value
-                Gdx.graphics.setVSync(vsync)
-            }
-
         var soundVolume = 1f
             set(value) {
-                if(value in 0.0..1.0)
+                if (value in 0.0..1.0)
                     field = value
             }
 
@@ -249,7 +242,7 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
          */
         fun generateLogo(container: GameObjectContainer): GameObject {
             return container.createGameObject(getLogoRect(), GameObject.Tag.Sprite, {
-                this += TextureComponent(Constants.gameLogoPath.toLocalFile())
+                this += TextureComponent(Constants.gameLogoPath)
             })
         }
 
@@ -260,7 +253,7 @@ class PCGame(private val initialVSync: Boolean, private val initialSoundVolume: 
 
         fun getLogoRect(): Rect {
             val size = getLogoSize()
-            return Rect(Point(Gdx.graphics.width / 2f - size.width / 2, Gdx.graphics.height - size.height.toFloat()), size)
+            return Rect(Point(Gdx.graphics.width / 2 - size.width / 2, Gdx.graphics.height - size.height), size)
         }
 
         fun setScene(newScene: Scene, disposeCurrentScene: Boolean = true) {

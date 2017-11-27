@@ -4,17 +4,13 @@ import be.catvert.pc.GameObject
 import be.catvert.pc.PCGame
 import be.catvert.pc.components.RenderableComponent
 import be.catvert.pc.containers.GameObjectContainer
-import be.catvert.pc.scenes.EditorScene
-import be.catvert.pc.utility.Constants
-import be.catvert.pc.utility.CustomEditorImpl
-import be.catvert.pc.utility.Size
-import be.catvert.pc.utility.draw
+import be.catvert.pc.containers.Level
+import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonCreator
-import com.fasterxml.jackson.annotation.JsonIgnore
 import glm_.vec2.Vec2
 import imgui.ImGui
 import ktx.assets.loadOnDemand
@@ -25,12 +21,12 @@ import ktx.assets.toLocalFile
  * @param texturePath Le chemin vers la texture en question
  */
 class TextureComponent(texturePath: FileHandle) : RenderableComponent(), CustomEditorImpl {
-    @JsonCreator constructor() : this(Constants.defaultTexturePath.toLocalFile())
+    @JsonCreator constructor() : this(Constants.defaultTexturePath)
 
     var texturePath: String = texturePath.path()
         private set
 
-    @JsonIgnore private var texture = PCGame.assetManager.loadOnDemand<Texture>(this.texturePath).asset
+    private var texture = PCGame.assetManager.loadOnDemand<Texture>(this.texturePath).asset
 
     fun updateTexture(texturePath: FileHandle = this.texturePath.toLocalFile()) {
         this.texturePath = texturePath.path()
@@ -45,51 +41,53 @@ class TextureComponent(texturePath: FileHandle) : RenderableComponent(), CustomE
     }
 
     override fun render(gameObject: GameObject, batch: Batch) {
-        batch.draw(texture, gameObject.rectangle, flipX, flipY)
+        batch.setColor(1f, 1f, 1f, alpha)
+        batch.draw(texture, gameObject.box, flipX, flipY)
+        batch.setColor(1f, 1f, 1f, 1f)
     }
 
-    @JsonIgnore private val selectTextureTitle = "Sélection de la texture"
-    @JsonIgnore private var useTextureSize = false
-    @JsonIgnore private var showLevelTextures = false
+    private val selectTextureTitle = "Sélection de la texture"
+    private var useTextureSize = false
+    private var showLevelTextures = false
 
-    override fun insertImgui(gameObject: GameObject, labelName: String, editorScene: EditorScene) {
+    override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
         with(ImGui) {
-            if(imageButton(texture.textureObjectHandle, Vec2(gameObject.rectangle.width, gameObject.rectangle.height), uv1 = Vec2(1))) {
+            if (imageButton(texture.textureObjectHandle, Vec2(gameObject.box.width, gameObject.box.height), uv1 = Vec2(1))) {
                 openPopup(selectTextureTitle)
             }
         }
     }
 
-    override fun insertImguiPopup(gameObject: GameObject, editorScene: EditorScene) {
-        super.insertImguiPopup(gameObject, editorScene)
+    override fun insertImguiPopup(gameObject: GameObject, level: Level) {
+        super.insertImguiPopup(gameObject, level)
 
         with(ImGui) {
             val popupWidth = Gdx.graphics.width / 3 * 2
             val popupHeight = Gdx.graphics.height / 3 * 2
             setNextWindowSize(Vec2(popupWidth, popupHeight))
             setNextWindowPos(Vec2(Gdx.graphics.width / 2f - popupWidth / 2f, Gdx.graphics.height / 2f - popupHeight / 2f))
-            if(beginPopup(selectTextureTitle)) {
+            if (beginPopup(selectTextureTitle)) {
                 checkbox("Afficher les textures importées", this@TextureComponent::showLevelTextures)
                 sameLine()
                 checkbox("Mettre à jour la taille du gameObject", this@TextureComponent::useTextureSize)
 
                 var sumImgsWidth = 0f
 
-                val textures = if(showLevelTextures) editorScene.level.resourcesTextures() else PCGame.gameTextures
+                val textures = if (showLevelTextures) level.resourcesTextures() else PCGame.gameTextures
 
                 textures.forEach {
-                    val texture = PCGame.assetManager.loadOnDemand<Texture>(it.path()).asset
+                    val texture = PCGame.assetManager.loadOnDemand<Texture>(it).asset
                     val imgBtnSize = Vec2(Math.min(texture.width, 200), Math.min(texture.height, 200))
-                    if(imageButton(texture.textureObjectHandle, imgBtnSize, uv1 = Vec2(1))) {
+                    if (imageButton(texture.textureObjectHandle, imgBtnSize, uv1 = Vec2(1))) {
                         updateTexture(it)
-                        if(useTextureSize)
-                            gameObject.rectangle.size = Size(texture.width, texture.height)
+                        if (useTextureSize)
+                            gameObject.box.size = Size(texture.width, texture.height)
                         closeCurrentPopup()
                     }
 
                     sumImgsWidth += imgBtnSize.x
 
-                    if(sumImgsWidth + 400f < popupWidth)
+                    if (sumImgsWidth + 400f < popupWidth)
                         sameLine()
                     else
                         sumImgsWidth = 0f

@@ -1,44 +1,40 @@
 package be.catvert.pc.utility
 
 import be.catvert.pc.GameObject
-import be.catvert.pc.scenes.EditorScene
-import com.badlogic.gdx.math.Polygon
+import be.catvert.pc.containers.Level
 import com.fasterxml.jackson.annotation.JsonIgnore
 import imgui.ImGui
+import imgui.functionalProgramming
 
 class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
-    override fun insertImgui(gameObject: GameObject, labelName: String, editorScene: EditorScene) {
-        with(ImGui) {
-            if (collapsingHeader(labelName)) {
-                editorScene.addImguiWidget(gameObject, "Position", { position }, { position = it }, ExposeEditorFactory.createExposeEditor(maxInt = editorScene.level.matrixRect.width))
-                editorScene.addImguiWidget(gameObject, "Taille", { size }, { size = it }, ExposeEditorFactory.createExposeEditor(maxInt = Constants.maxGameObjectSize))
-            }
-        }
-    }
-
-    constructor(x: Float, y: Float, width: Int, height: Int): this(Point(x, y), Size(width, height))
+    constructor(x: Int, y: Int, width: Int, height: Int) : this(Point(x, y), Size(width, height))
     constructor(rect: Rect): this(rect.x, rect.y, rect.width, rect.height)
 
-    @JsonIgnore var position = position
+    @JsonIgnore
+    var position = position
         set(value) {
             field = value
             onPositionChange(value)
         }
-    @JsonIgnore var size = size
+    @JsonIgnore
+    var size = size
         set(value) {
             field = value
             onSizeChange(value)
         }
 
-    @JsonIgnore val onPositionChange = Signal<Point>()
-    @JsonIgnore val onSizeChange = Signal<Size>()
 
-    var x: Float
+    @JsonIgnore
+    val onPositionChange = Signal<Point>()
+    @JsonIgnore
+    val onSizeChange = Signal<Size>()
+
+    var x: Int
         get() = position.x
         set(value) {
             position = Point(value, y)
         }
-    var y: Float
+    var y: Int
         get() = position.y
         set(value) {
             position = Point(x, value)
@@ -78,7 +74,18 @@ class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
 
     fun contains(point: Point) = this.x <= point.x && this.x + this.width >= point.x && this.y <= point.y && this.y + this.height >= point.y
 
-    fun overlaps(rect: Rect) =  this.x < rect.x + rect.width && this.x + this.width > rect.x && this.y < rect.y + rect.height && this.y + this.height > rect.y
+    fun overlaps(rect: Rect) = this.x < rect.x + rect.width && this.x + this.width > rect.x && this.y < rect.y + rect.height && this.y + this.height > rect.y
+
+    override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
+        with(ImGui) {
+            if (collapsingHeader(labelName)) {
+                functionalProgramming.withIndent {
+                    ImguiHelper.addImguiWidget("position", this@Rect::position, gameObject, level, ExposeEditorFactory.createExposeEditor(maxInt = level.matrixRect.width))
+                    ImguiHelper.addImguiWidget("taille", this@Rect::size, gameObject, level, ExposeEditorFactory.createExposeEditor(maxInt = Constants.maxGameObjectSize))
+                }
+            }
+        }
+    }
 
     override fun toString(): String = "{ x: $x y: $y width: $width height: $height }"
 }

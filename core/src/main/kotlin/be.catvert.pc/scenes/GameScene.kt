@@ -1,19 +1,13 @@
 package be.catvert.pc.scenes
 
 import be.catvert.pc.GameKeys
-import be.catvert.pc.GameObject
 import be.catvert.pc.PCGame
-import be.catvert.pc.components.graphics.TextureComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
-import be.catvert.pc.utility.Constants
-import be.catvert.pc.utility.Rect
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.dongbat.jbump.Item
-import com.dongbat.jbump.Response
+import ktx.app.use
 import ktx.assets.loadOnDemand
 import ktx.assets.toLocalFile
 
@@ -24,13 +18,7 @@ import ktx.assets.toLocalFile
 class GameScene(private val level: Level) : Scene() {
     override var gameObjectContainer: GameObjectContainer = level
 
-    //override val camera = OrthographicCamera().apply { setToOrtho(false, Gdx.graphics.width / Constants.PPM, Gdx.graphics.height / Constants.PPM) }
-
     private val cameraMoveSpeed = 10f
-
-    val shapeRenderer = ShapeRenderer()
-
-    val goes = mutableListOf<GameObject>()
 
     init {
         if (level.backgroundPath != null)
@@ -40,6 +28,11 @@ class GameScene(private val level: Level) : Scene() {
     override fun postBatchRender() {
         super.postBatchRender()
         level.drawDebug()
+
+        PCGame.hudBatch.use {
+            PCGame.mainFont.draw(it, "Score : ${level.scorePoints}", 10f, Gdx.graphics.height - 10f)
+            PCGame.mainFont.draw(it, "Temps écoulé : ${level.timer}", 10f, Gdx.graphics.height - 40f)
+        }
     }
 
     override fun update() {
@@ -52,7 +45,7 @@ class GameScene(private val level: Level) : Scene() {
         if (Gdx.input.isKeyJustPressed(GameKeys.GAME_SWITCH_GRAVITY.key))
             level.applyGravity = !level.applyGravity
         if (Gdx.input.isKeyJustPressed(GameKeys.GAME_EDIT_LEVEL.key))
-            PCGame.setScene(EditorScene(Level.loadFromFile(level.levelPath.toLocalFile())!!))
+            PCGame.setScene(EditorScene(Level.loadFromFile(level.levelPath.toLocalFile().parent())!!))
     }
 
     private fun updateCamera(lerp: Boolean) {
@@ -67,7 +60,7 @@ class GameScene(private val level: Level) : Scene() {
         }
 
 
-        if (!level.moveCameraToFollowGameObject(camera, true)) {
+        if (!level.moveCameraToFollowGameObject(camera, lerp)) {
             if (Gdx.input.isKeyPressed(GameKeys.GAME_CAMERA_LEFT.key)) {
                 camera.position.x -= cameraMoveSpeed
             }

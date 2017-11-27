@@ -1,7 +1,6 @@
 package be.catvert.pc
 
 import com.badlogic.gdx.utils.Disposable
-import ktx.async.ktxAsync
 import java.io.FileWriter
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -20,12 +19,10 @@ object Log : Disposable {
     fun warn(warn: () -> String) = write("Attention", warn())
 
     private fun write(type: String, content: String) {
-        ktxAsync {
-            val str = suffix() + " -> $type : " + content
+        val str = suffix() + " -> $type : " + content
 
-            writer.write(str)
-            println(str)
-        }
+        writer.write(str)
+        println(str)
     }
 
     override fun dispose() {

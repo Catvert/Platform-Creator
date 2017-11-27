@@ -1,7 +1,6 @@
 package be.catvert.pc.scenes
 
 import be.catvert.pc.*
-import be.catvert.pc.actions.Action
 import be.catvert.pc.components.RenderableComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
@@ -33,14 +32,13 @@ import ktx.actors.plus
 import ktx.app.use
 import ktx.assets.loadOnDemand
 import ktx.assets.toLocalFile
-import ktx.collections.toGdxArray
 
 /**
  * Scène de l'éditeur de niveau
  */
 class EditorScene(val level: Level) : Scene() {
     enum class EditorMode {
-        NO_MODE, SELECT_GO, COPY_GO, SELECT_POINT, TRY_LEVEL
+        NO_MODE, SELECT, COPY, SELECT_POINT, SELECT_GO, TRY_LEVEL
     }
 
     private enum class ResizeMode {
@@ -57,6 +55,8 @@ class EditorScene(val level: Level) : Scene() {
 
         var gameObjectCurrentStateIndex = 0
 
+        var gameObjectCurrentComponentIndex = 0
+
         var addGameObjectPrefabComboIndex = 0
 
         val settingsLevelBackgroundIndex = intArrayOf(-1)
@@ -67,23 +67,23 @@ class EditorScene(val level: Level) : Scene() {
     private data class GridMode(var active: Boolean = false, var offsetX: Int = 0, var offsetY: Int = 0, var cellWidth: Int = 50, var cellHeight: Int = 50) {
         fun putGameObject(walkRect: Rect, point: Point, gameObject: GameObject) {
             walkCells(walkRect) {
-                if(it.contains(point)) {
-                    gameObject.rectangle = it
+                if (it.contains(point)) {
+                    gameObject.box = it
                 }
             }
         }
 
         fun walkCells(walkRect: Rect, walk: (cellRect: Rect) -> Unit) {
-            for(x in (walkRect.x.toInt() + offsetX)..(walkRect.x.toInt() + walkRect.width + offsetX) step cellWidth) {
-                for(y in (walkRect.y.toInt() + offsetY)..(walkRect.y.toInt() + walkRect.height + offsetY) step cellHeight) {
-                    walk(Rect(x.toFloat(), y.toFloat(), cellWidth, cellHeight))
+            for (x in (walkRect.x + offsetX)..(walkRect.x + walkRect.width + offsetX) step cellWidth) {
+                for (y in (walkRect.y + offsetY)..(walkRect.y + walkRect.height + offsetY) step cellHeight) {
+                    walk(Rect(x, y, cellWidth, cellHeight))
                 }
             }
         }
     }
 
     /**
-     * Classe de donnée permettant de créer le rectangle de sélection
+     * Classe de donnée permettant de créer le box de sélection
      */
     private data class SelectRectangleData(var startPosition: Point, var endPosition: Point, var rectangleStarted: Boolean = false) {
         fun getRect(): Rect {
@@ -92,7 +92,7 @@ class EditorScene(val level: Level) : Scene() {
             val maxX = Math.max(startPosition.x, endPosition.x)
             val maxY = Math.max(startPosition.y, endPosition.y)
 
-            return Rect(minX, minY, (maxX - minX).toInt(), (maxY - minY).toInt())
+            return Rect(minX, minY, (maxX - minX), (maxY - minY).toInt())
         }
     }
 
@@ -100,7 +100,7 @@ class EditorScene(val level: Level) : Scene() {
 
     private val shapeRenderer = ShapeRenderer()
 
-    private val editorFont = BitmapFont(Constants.editorFontPath.toLocalFile())
+    private val editorFont = BitmapFont(Constants.editorFontPath)
 
     private val cameraMoveSpeed = 10f
 
@@ -113,13 +113,9 @@ class EditorScene(val level: Level) : Scene() {
 
     private val selectGameObjects = mutableSetOf<GameObject>()
     private var selectGameObject: GameObject? = null
-        set(value) {
-            field = value
-            onSelectGameObjectChange(value)
-        }
 
-    private val onSelectGameObjectChange = Signal<GameObject?>()
     val onSelectPoint = Signal<Point>()
+    val onSelectGO = Signal<GameObject>()
 
     private val prefabs = mutableSetOf(*PrefabFactory.values().map { it.prefab }.toTypedArray())
 
@@ -141,7 +137,7 @@ class EditorScene(val level: Level) : Scene() {
     private var latestMousePos = Point()
 
     /**
-     * La position du début et de la fin du rectangle
+     * La position du début et de la fin du box
      */
     private val selectRectangleData = SelectRectangleData(Point(), Point())
 
@@ -150,14 +146,12 @@ class EditorScene(val level: Level) : Scene() {
     init {
         gameObjectContainer.allowUpdatingGO = false
 
-        Utility.getFilesRecursivly(Constants.prefabsDirPath.toLocalFile(), Constants.prefabExtension).forEach {
+        Utility.getFilesRecursivly(Constants.prefabsDirPath, Constants.prefabExtension).forEach {
             prefabs.add(SerializationFactory.deserializeFromFile(it))
         }
 
         if (level.backgroundPath != null)
             backgroundTexture = PCGame.assetManager.loadOnDemand<Texture>(level.backgroundPath.toLocalFile().path()).asset
-
-        onSelectGameObjectChange(null)
     }
 
     override fun postBatchRender() {
@@ -175,54 +169,54 @@ class EditorScene(val level: Level) : Scene() {
             shapeRenderer.line(0f, 0f, 1f, 10000f, Color.GOLD, Color.WHITE)
         }
 
-        if(gridMode.active) {
+        if (gridMode.active) {
             shapeRenderer.color = Color.DARK_GRAY
             gridMode.walkCells(level.activeRect) {
-                shapeRenderer.rect(it.x.toFloat(), it.y.toFloat(), it.width.toFloat(), it.height.toFloat())
+                shapeRenderer.rect(it)
             }
         }
 
         /**
-         * Dessine les gameObjects qui n'ont pas de renderableComponent avec un rectangle noir
+         * Dessine les gameObjects qui n'ont pas de renderableComponent avec un box noir
          */
         gameObjectContainer.getGameObjectsData().filter { it.active }.forEach { gameObject ->
             if (!gameObject.getCurrentState().hasComponent<RenderableComponent>()) {
                 shapeRenderer.color = Color.GRAY
-                shapeRenderer.rect(gameObject.rectangle)
+                shapeRenderer.rect(gameObject.box)
             }
         }
 
         when (editorMode) {
             EditorMode.NO_MODE -> {
                 /**
-                 * Dessine le rectangle en cour de création
+                 * Dessine le box en cour de création
                  */
                 if (selectRectangleData.rectangleStarted) {
                     shapeRenderer.color = Color.BLUE
                     shapeRenderer.rect(selectRectangleData.getRect())
                 }
             }
-            EditorMode.SELECT_GO -> {
+            EditorMode.SELECT -> {
                 /**
-                 * Dessine un rectangle autour des gameObjects sélectionnés
+                 * Dessine un box autour des gameObjects sélectionnés
                  */
                 selectGameObjects.forEach {
                     shapeRenderer.color = Color.RED
                     if (it === selectGameObject) {
                         shapeRenderer.color = Color.CORAL
                     }
-                    shapeRenderer.rect(it.rectangle)
+                    shapeRenderer.rect(it.box)
                 }
 
                 if (selectGameObject != null) {
-                    val rect = selectGameObject!!.rectangle
+                    val rect = selectGameObject!!.box
 
                     when (selectGameObjectMode) {
                         SelectGOMode.NO_MODE -> {
-                            shapeRenderer.color = Color.RED; shapeRenderer.circle(rect.x.toFloat() + rect.width.toFloat(), rect.y.toFloat() + rect.height.toFloat(), 10f)
+                            shapeRenderer.color = Color.RED; shapeRenderer.circle(rect.x + rect.width.toFloat(), rect.y + rect.height.toFloat(), 10f)
                         }
                         SelectGOMode.RESIZE -> {
-                            shapeRenderer.color = Color.BLUE; shapeRenderer.circle(rect.x.toFloat() + rect.width.toFloat(), rect.y.toFloat() + rect.height.toFloat(), 15f)
+                            shapeRenderer.color = Color.BLUE; shapeRenderer.circle(rect.x + rect.width.toFloat(), rect.y + rect.height.toFloat(), 15f)
                         }
                         SelectGOMode.MOVE -> {
                         }
@@ -232,7 +226,7 @@ class EditorScene(val level: Level) : Scene() {
                 /**
                  * Affiche la position de l'entité sélectionné
                  */
-                val rectFirstGO = selectGameObject?.rectangle
+                val rectFirstGO = selectGameObject?.box
                 if (rectFirstGO != null) {
                     PCGame.mainBatch.projectionMatrix = camera.combined
                     PCGame.mainBatch.use {
@@ -240,13 +234,13 @@ class EditorScene(val level: Level) : Scene() {
                     }
                 }
             }
-            EditorMode.COPY_GO -> {
+            EditorMode.COPY -> {
                 selectGameObjects.forEach {
                     if (it === selectGameObject)
                         shapeRenderer.color = Color.GREEN
                     else
                         shapeRenderer.color = Color.OLIVE
-                    shapeRenderer.rect(it.rectangle)
+                    shapeRenderer.rect(it.box)
                 }
             }
             EditorMode.TRY_LEVEL -> {
@@ -255,6 +249,13 @@ class EditorScene(val level: Level) : Scene() {
                 PCGame.mainBatch.projectionMatrix = PCGame.defaultProjection
                 PCGame.mainBatch.use {
                     val layout = GlyphLayout(editorFont, "Sélectionner un point")
+                    editorFont.draw(it, layout, Gdx.graphics.width / 2f - layout.width / 2, Gdx.graphics.height - editorFont.lineHeight * 2)
+                }
+            }
+            EditorMode.SELECT_GO -> {
+                PCGame.mainBatch.projectionMatrix = PCGame.defaultProjection
+                PCGame.mainBatch.use {
+                    val layout = GlyphLayout(editorFont, "Sélectionner un gameObject")
                     editorFont.draw(it, layout, Gdx.graphics.width / 2f - layout.width / 2, Gdx.graphics.height - editorFont.lineHeight * 2)
                 }
             }
@@ -283,7 +284,7 @@ class EditorScene(val level: Level) : Scene() {
         updateCamera()
 
         if (!isUIHover && editorMode != EditorMode.TRY_LEVEL) {
-            level.activeRect.position = Point(Math.max(0f, camera.position.x - level.activeRect.width / 2), Math.max(0f, camera.position.y - level.activeRect.height / 2))
+            level.activeRect.position = Point(Math.max(0, Math.round(camera.position.x) - level.activeRect.width / 2), Math.max(0, Math.round(camera.position.y) - level.activeRect.height / 2))
 
             if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_UP_LAYER.key)) {
                 selectLayer += 1
@@ -310,8 +311,8 @@ class EditorScene(val level: Level) : Scene() {
                             val gameObject = findGameObjectUnderMouse()
                             if (gameObject != null) {
                                 addSelectGameObject(gameObject)
-                                editorMode = EditorMode.SELECT_GO
-                            } else { // Maybe rectangle
+                                editorMode = EditorMode.SELECT
+                            } else { // Maybe box
                                 selectRectangleData.rectangleStarted = true
                                 selectRectangleData.startPosition = mousePosInWorld
                                 selectRectangleData.endPosition = selectRectangleData.startPosition
@@ -322,7 +323,7 @@ class EditorScene(val level: Level) : Scene() {
 
                         level.getAllGameObjectsInRect(selectRectangleData.getRect(), false).forEach {
                             addSelectGameObject(it)
-                            editorMode = EditorMode.SELECT_GO
+                            editorMode = EditorMode.SELECT
                         }
                     }
 
@@ -330,7 +331,7 @@ class EditorScene(val level: Level) : Scene() {
                         val gameObject = findGameObjectUnderMouse()
                         if (gameObject != null) {
                             addSelectGameObject(gameObject)
-                            editorMode = EditorMode.COPY_GO
+                            editorMode = EditorMode.COPY
                         }
                     }
 
@@ -342,12 +343,8 @@ class EditorScene(val level: Level) : Scene() {
                         val gameObject = findGameObjectUnderMouse()
                         gameObject?.getCurrentState()?.inverseFlipRenderable(true, false)
                     }
-
-                    if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && !latestRightButtonClick) {
-
-                    }
                 }
-                EditorMode.SELECT_GO -> {
+                EditorMode.SELECT -> {
                     if (selectGameObjects.isEmpty()) {
                         editorMode = EditorMode.NO_MODE
                         return
@@ -360,14 +357,14 @@ class EditorScene(val level: Level) : Scene() {
                         if (selectGameObjects.let {
                             var canMove = true
                             it.forEach {
-                                if (!level.matrixRect.contains(Rect(it.rectangle.x + moveX, it.rectangle.y + moveY, it.rectangle.width, it.rectangle.height))) {
+                                if (!level.matrixRect.contains(Rect(it.box.x + moveX, it.box.y + moveY, it.box.width, it.box.height))) {
                                     canMove = false
                                 }
                             }
                             canMove
                         }) {
                             selectGameObjects.forEach {
-                                it.rectangle.move(moveX, moveY)
+                                it.box.move(moveX, moveY)
                             }
                         }
                     }
@@ -377,8 +374,8 @@ class EditorScene(val level: Level) : Scene() {
                      */
                     fun checkCircleResize(): Boolean {
                         if (selectGameObject != null) {
-                            val rect = selectGameObject!!.rectangle
-                            return Circle(rect.x.toFloat() + rect.width.toFloat(), rect.y.toFloat() + rect.height.toFloat(), 10f).contains(mousePosInWorld)
+                            val rect = selectGameObject!!.box
+                            return Circle(rect.x + rect.width.toFloat(), rect.y + rect.height.toFloat(), 10f).contains(mousePosInWorld)
                         }
                         return false
                     }
@@ -408,7 +405,9 @@ class EditorScene(val level: Level) : Scene() {
                             if (selectGameObjectMode == SelectGOMode.NO_MODE)
                                 selectGameObjectMode = SelectGOMode.MOVE
 
-                            val selectGORect = selectGameObject!!.rectangle
+                            selectGameObjects.forEach { it.getCurrentState().setAlphaRenderable(0.7f) }
+
+                            val selectGORect = selectGameObject!!.box
 
                             when (selectGameObjectMode) {
                                 SelectGOMode.NO_MODE -> {
@@ -427,7 +426,7 @@ class EditorScene(val level: Level) : Scene() {
                                     if (selectGameObjects.let {
                                         var canResize = true
                                         it.forEach {
-                                            if (!level.matrixRect.contains(Rect(it.rectangle.x, it.rectangle.y, it.rectangle.width - resizeX.toInt(), it.rectangle.height - resizeY.toInt()))) {
+                                            if (!level.matrixRect.contains(Rect(it.box.x, it.box.y, it.box.width - resizeX, it.box.height - resizeY))) {
                                                 canResize = false
                                             }
                                         }
@@ -436,13 +435,13 @@ class EditorScene(val level: Level) : Scene() {
                                         selectGameObjects.forEach {
                                             // On vérifie si le gameObject à redimensionner a le même tag que le gameObject sélectionné et qu'il peut être redimensionné
                                             if (it.tag == selectGameObject!!.tag) {
-                                                val newSizeX = it.rectangle.width - resizeX
-                                                val newSizeY = it.rectangle.height - resizeY
+                                                val newSizeX = it.box.width - resizeX
+                                                val newSizeY = it.box.height - resizeY
 
                                                 if (newSizeX in 1..Constants.maxGameObjectSize)
-                                                    it.rectangle.width = newSizeX.toInt()
+                                                    it.box.width = newSizeX
                                                 if (newSizeY in 1..Constants.maxGameObjectSize)
-                                                    it.rectangle.height = newSizeY.toInt()
+                                                    it.box.height = newSizeY
                                             }
                                         }
                                     }
@@ -451,13 +450,15 @@ class EditorScene(val level: Level) : Scene() {
                                     val moveX = selectGORect.x + selectGORect.width / 2 - mousePosInWorld.x
                                     val moveY = selectGORect.y + selectGORect.height / 2 - mousePosInWorld.y
 
-                                    moveGameObjects(-moveX.toInt(), -moveY.toInt())
+                                    moveGameObjects(-moveX, -moveY)
                                 }
                             }
                         }
                         // Le bouton gauche n'est pas appuyé pendant cette frame
                     } else {
                         selectGameObjectMode = SelectGOMode.NO_MODE
+
+                        selectGameObjects.forEach { it.getCurrentState().setAlphaRenderable(1f) }
 
                         if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && !latestRightButtonClick) {
                             clearSelectGameObjects()
@@ -477,10 +478,10 @@ class EditorScene(val level: Level) : Scene() {
                         }
 
                         if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_COPY_MODE.key))
-                            editorMode = EditorMode.COPY_GO
+                            editorMode = EditorMode.COPY
                     }
                 }
-                EditorMode.COPY_GO -> {
+                EditorMode.COPY -> {
                     if (selectGameObjects.isEmpty() && selectGameObject == null /* Permet de vérifier si on est pas entrain d'ajouter un nouveau gameObject */) {
                         editorMode = EditorMode.NO_MODE
                         return
@@ -505,11 +506,11 @@ class EditorScene(val level: Level) : Scene() {
                     if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && !latestRightButtonClick) {
                         val copySelectGO = SerializationFactory.copy(selectGameObject!!)
 
-                        var posX = copySelectGO.rectangle.x
-                        var posY = copySelectGO.rectangle.y
+                        var posX = copySelectGO.box.x
+                        var posY = copySelectGO.box.y
 
-                        val width = copySelectGO.rectangle.width
-                        val height = copySelectGO.rectangle.height
+                        val width = copySelectGO.box.width
+                        val height = copySelectGO.box.height
 
                         var moveToCopyGO = true
 
@@ -562,21 +563,20 @@ class EditorScene(val level: Level) : Scene() {
                             useMousePos = true
 
                         if (useMousePos) {
-                                posX = Math.min(level.matrixRect.width - width.toFloat(), // Les min et max permettent de rester dans le cadre de la matrix
-                                        Math.max(0f, mousePosInWorld.x - width / 2))
-                                posY = Math.min(level.matrixRect.height - height.toFloat(),
-                                        Math.max(0f, mousePosInWorld.y - height / 2))
+                            posX = Math.min(level.matrixRect.width - width, // Les min et max permettent de rester dans le cadre de la matrix
+                                    Math.max(0, mousePosInWorld.x - width / 2))
+                            posY = Math.min(level.matrixRect.height - height,
+                                    Math.max(0, mousePosInWorld.y - height / 2))
 
                             // Permet de vérifier si le gameObject copié est nouveau ou pas (si il est nouveau, ça veut dire qu'il n'a pas encore de container)è
                             if (selectGameObject!!.container != null)
                                 moveToCopyGO = false
                         }
 
-                        if(gridMode.active && useMousePos) {
+                        if (gridMode.active && useMousePos) {
                             gridMode.putGameObject(level.activeRect, Point(mousePosInWorld.x, mousePosInWorld.y), copySelectGO)
-                        }
-                        else
-                            copySelectGO.rectangle.position = Point(posX, posY)
+                        } else
+                            copySelectGO.box.position = Point(posX, posY)
 
                         level.addGameObject(copySelectGO)
 
@@ -587,7 +587,7 @@ class EditorScene(val level: Level) : Scene() {
                             val deltaY = it.position().y - selectGameObject!!.position().y
 
                             level.addGameObject(SerializationFactory.copy(it).apply {
-                                this.rectangle.position = Point(copySelectGO.position().x + deltaX, copySelectGO.position().y + deltaY)
+                                this.box.position = Point(copySelectGO.position().x + deltaX, copySelectGO.position().y + deltaY)
                                 copyGameObjects += this
                             })
                         }
@@ -602,6 +602,15 @@ class EditorScene(val level: Level) : Scene() {
                     if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !latestLeftButtonClick) {
                         onSelectPoint(mousePosInWorld)
                         editorMode = EditorMode.NO_MODE
+                    }
+                }
+                EditorMode.SELECT_GO -> {
+                    if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+                        val gameObject = findGameObjectUnderMouse()
+                        if (gameObject != null) {
+                            onSelectGO(gameObject)
+                            editorMode = EditorMode.NO_MODE
+                        }
                     }
                 }
                 EditorMode.TRY_LEVEL -> {
@@ -647,8 +656,15 @@ class EditorScene(val level: Level) : Scene() {
                 EditorSceneUI.showSaveLevelExitWindow = true
         }
 
-        if(Gdx.input.isKeyJustPressed(GameKeys.EDITOR_GRID_MODE.key)) {
+        if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_GRID_MODE.key)) {
             gridMode.active = !gridMode.active
+        }
+
+        if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_TRY_LEVEL.key)) {
+            if (editorMode != EditorMode.TRY_LEVEL)
+                launchTryLevel()
+            else
+                finishTryLevel()
         }
     }
 
@@ -656,7 +672,7 @@ class EditorScene(val level: Level) : Scene() {
         super.dispose()
         editorFont.dispose()
 
-        if(!level.levelPath.toLocalFile().exists()) {
+        if (!level.levelPath.toLocalFile().exists()) {
             level.deleteFiles()
         }
     }
@@ -717,7 +733,7 @@ class EditorScene(val level: Level) : Scene() {
 
         val mousePosInWorld = camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)).toPoint()
 
-        val gameObjectsUnderMouse = level.getGameObjectsData().filter { it.rectangle.contains(mousePosInWorld) }
+        val gameObjectsUnderMouse = level.getGameObjectsData().filter { it.box.contains(mousePosInWorld) }
 
         if (!gameObjectsUnderMouse.isEmpty()) {
             val goodLayerGameObject = gameObjectsUnderMouse.find { it.layer == selectLayer }
@@ -762,168 +778,32 @@ class EditorScene(val level: Level) : Scene() {
 
     private fun addPrefab(prefab: Prefab) {
         prefabs.add(prefab)
-        SerializationFactory.serializeToFile(prefab, (Constants.prefabsDirPath + prefab.name + Constants.prefabExtension).toLocalFile())
+        SerializationFactory.serializeToFile(prefab, (Constants.prefabsDirPath.child("${prefab.name}.${Constants.prefabExtension}")))
     }
 
     private fun saveLevelToFile() {
         try {
             SerializationFactory.serializeToFile(level, level.levelPath.toLocalFile())
         } catch (e: Exception) {
-            Log.error(e, message = { "Erreur lors de l'enregistrement du niveau !" })
+            Log.error(e) { "Erreur lors de l'enregistrement du niveau !" }
         }
     }
 
     //region UI
 
-    inline fun <reified T : Any> addImguiWidgetsArray(gameObject: GameObject, arrayName: String, crossinline getArray: () -> Array<T>, crossinline setArray: (newArray: Array<T>) -> Unit, crossinline createItem: () -> T, crossinline getItemName: (index: Int) -> String, crossinline getItemExposeEditor: (index: Int) -> ExposeEditor) {
-        with(ImGui) {
-            if (collapsingHeader(arrayName)) {
-                val array = getArray()
-                for (index in 0 until array.size) {
-                    if (button("Suppr. ${index + 1}")) {
-                        setArray(array.toGdxArray().apply { removeIndex(index) }.toArray())
-                        break
-                    } else {
-                        sameLine()
-                        addImguiWidget(gameObject, "${index + 1}. ${getItemName(index)}", { array[index] }, { setArray(getArray().apply { set(index, it) }) }, getItemExposeEditor(index))
-                    }
-                }
-                if (button("Ajouter", Vec2(-1, 20f))) {
-                    setArray(getArray() + createItem())
-                }
-            }
-        }
-    }
-
-    inline fun<reified T: Any> addImguiWidget(gameObject: GameObject, labelName: String, get: () -> T, crossinline set: (T) -> Unit, exposeEditor: ExposeEditor) {
-        val value = get()
-
-        val dialogsImgui = mutableListOf<CustomEditorImpl>()
-
-        with(ImGui) {
-            when (value) {
-                is Action -> {
-                    if (treeNode(labelName)) {
-                        val index = intArrayOf(PCGame.actionsClasses.indexOfFirst { it.isInstance(value) })
-
-                        if (combo("action", index, PCGame.actionsClasses.map { it.simpleName ?: "Nom inconnu" })) {
-                            set(ReflectionUtility.findNoArgConstructor(PCGame.actionsClasses[index[0]])!!.newInstance() as T)
-                        }
-
-                        if (treeNode("Propriétés")) {
-                            insertImguiExposeEditorField(value, gameObject)
-                            treePop()
-                        }
-
-                        treePop()
-                    }
-                }
-                is CustomEditorImpl -> {
-                    dialogsImgui.add(value)
-                    value.insertImgui(gameObject, labelName,this@EditorScene)
-                }
-                is Boolean -> {
-                    if (checkbox(labelName, booleanArrayOf(value)))
-                        set(!value as T)
-                }
-                is Int -> {
-                    when (exposeEditor.customType) {
-                        CustomType.DEFAULT -> {
-                            val value = intArrayOf(value) // TODO changer en inputInt
-                            if (sliderInt(labelName, value, exposeEditor.minInt, exposeEditor.maxInt))
-                                set(value[0] as T)
-                        }
-                        CustomType.KEY_INT -> {
-                            val value = Input.Keys.toString(value).toCharArray()
-                            pushItemWidth(150f)
-                            if (inputText(labelName, value))
-                                set(Input.Keys.valueOf(String(value)) as T)
-                            popItemWidth()
-                        }
-                    }
-                }
-                is Size -> {
-                    if (treeNode(labelName)) {
-                        val width = intArrayOf(value.width)
-                        if (sliderInt("Largeur", width, exposeEditor.minInt, exposeEditor.maxInt))
-                            set(value.copy(width = width[0], height = value.height) as T)
-
-                        val height = intArrayOf(value.height)
-                        if (sliderInt("Hauteur", height, exposeEditor.minInt, exposeEditor.maxInt))
-                            set(value.copy(width = value.width, height = height[0]) as T)
-
-                        treePop()
-                    }
-                }
-                is Point -> {
-                    if (treeNode(labelName)) {
-                        val x = intArrayOf(value.x.toInt())
-                        if (sliderInt("X", x, exposeEditor.minInt, exposeEditor.maxInt))
-                            set(value.copy(x = x[0].toFloat(), y = value.y) as T)
-
-                        val y = intArrayOf(value.y.toInt())
-                        if (sliderInt("Y", y, exposeEditor.minInt, exposeEditor.maxInt))
-                            set(value.copy(x = value.x, y = y[0].toFloat()) as T)
-
-                        if(button("Sélectionner", Vec2(-1, 20f))) {
-                            editorMode = EditorMode.SELECT_POINT
-                            onSelectPoint.register(true) {
-                                set(Point(it.x - gameObject.rectangle.width / 2, it.y - gameObject.rectangle.height / 2) as T)
-                            }
-                        }
-                        treePop()
-                    }
-                }
-                is String -> {
-                    val value = value.toCharArray()
-                    if (inputText(labelName, value))
-                        set(value.toString() as T)
-                }
-                is Enum<*> -> {
-                    val enumConstants = value.javaClass.enumConstants
-                    val selectedIndex = intArrayOf(enumConstants.indexOfFirst { it == value })
-
-                    functionalProgramming.withItemWidth(100f) {
-                        if (combo(labelName, selectedIndex, enumConstants.map { (it as Enum<*>).name }))
-                            set(enumConstants[selectedIndex[0]] as T)
-                    }
-                }
-                else -> {
-                    text(ReflectionUtility.simpleNameOf(value))
-                }
-            }
-        }
-
-        dialogsImgui.forEach {
-            it.insertImguiPopup(gameObject, this@EditorScene)
-        }
-    }
-
-    fun insertImguiExposeEditorField(instance: Any, gameObject: GameObject) {
-        ReflectionUtility.getAllFieldsOf(instance.javaClass).filter { it.isAnnotationPresent(ExposeEditor::class.java) }.forEach { field ->
-            field.isAccessible = true
-
-            val exposeField = field.getAnnotation(ExposeEditor::class.java)
-
-            addImguiWidget(gameObject, if (exposeField.customName.isBlank()) field.name else exposeField.customName, { field.get(instance) }, { field.set(instance, it) }, exposeField)
-        }
-
-        if (instance is CustomEditorImpl) {
-            instance.insertImgui(gameObject, ReflectionUtility.simpleNameOf(instance), this@EditorScene)
-            instance.insertImguiPopup(gameObject, this@EditorScene)
-        }
-    }
 
     private fun drawUI() {
         with(ImGui) {
 
             drawMainMenuBar()
 
-            if(gridMode.active)
+            if (gridMode.active)
                 drawGridSettingsWindow()
 
-            if (selectGameObject != null && editorMode != EditorMode.SELECT_POINT)
+            if (selectGameObject != null && selectGameObject?.container != null
+                    && editorMode != EditorMode.SELECT_POINT && editorMode != EditorMode.SELECT_GO && editorMode != EditorMode.TRY_LEVEL) {
                 drawInfoGameObjectWindow(selectGameObject!!)
+            }
 
             if (EditorSceneUI.showSaveLevelExitWindow) {
                 functionalProgramming.withWindow("Sauvegarder avant de quitter?", null, WindowFlags.AlwaysAutoResize.i) {
@@ -938,7 +818,7 @@ class EditorScene(val level: Level) : Scene() {
                     }
                     sameLine()
                     if (button("Abandonner les modifications")) {
-                        if(!level.levelPath.toLocalFile().exists()) {
+                        if (!level.levelPath.toLocalFile().exists()) {
                             level.deleteFiles()
                         }
                         showMainMenu()
@@ -958,7 +838,6 @@ class EditorScene(val level: Level) : Scene() {
                 if (editorMode != EditorMode.TRY_LEVEL) {
                     menu("Fichier") {
                         menuItem("Importer une ressource..") {
-                            //TODO FileChooserText
                             stage + FileChooser("Importer une ressource..", FileChooser.Mode.OPEN).apply {
                                 isMultiSelectionEnabled = true
 
@@ -990,18 +869,6 @@ class EditorScene(val level: Level) : Scene() {
                     }
 
                     menu("Éditer") {
-                        menu("Créer un gameObject") {
-                            combo("prefabs", EditorSceneUI::addGameObjectPrefabComboIndex, prefabs.map { it.name })
-                            if (button("Créer", Vec2(windowContentRegionWidth, 20f))) {
-                                val gameObject = prefabs.elementAt(EditorSceneUI.addGameObjectPrefabComboIndex).create(Point())
-
-                                clearSelectGameObjects()
-                                selectGameObject = gameObject
-                                editorMode = EditorMode.COPY_GO
-
-                                closeCurrentPopup()
-                            }
-                        }
                         menu("Options du niveau") {
                             if (EditorSceneUI.settingsLevelBackgroundIndex[0] == -1) {
                                 EditorSceneUI.settingsLevelBackgroundIndex[0] = PCGame.getBackgrounds().indexOfFirst { it == level.backgroundPath?.toLocalFile() }
@@ -1011,6 +878,29 @@ class EditorScene(val level: Level) : Scene() {
                                 val newBackgroundPath = PCGame.getBackgrounds()[EditorSceneUI.settingsLevelBackgroundIndex[0]].path()
                                 level.backgroundPath = newBackgroundPath
                                 backgroundTexture = PCGame.assetManager.loadOnDemand<Texture>(newBackgroundPath).asset
+                            }
+
+                            if (button("Sélectionner le gameObject suivi", Vec2(-1, 20f))) {
+                                editorMode = EditorMode.SELECT_GO
+                                onSelectGO.register(true) {
+                                    level.followGameObjectID = it.id
+                                }
+                            }
+
+                        }
+                    }
+                    menu("Créer un gameObject") {
+                        GameObject.Tag.values().forEach { tag ->
+                            menu(tag.name) {
+                                prefabs.filter { it.prefabGO.tag == tag }.forEach {
+                                    menuItem(it.name) {
+                                        val gameObject = it.create(Point())
+
+                                        clearSelectGameObjects()
+                                        selectGameObject = gameObject
+                                        editorMode = EditorMode.COPY
+                                    }
+                                }
                             }
                         }
                     }
@@ -1053,12 +943,13 @@ class EditorScene(val level: Level) : Scene() {
                 if (button("Créer un prefab", Vec2(-1, 20f)))
                     openPopup(createPrefabTitle)
 
-                insertImguiExposeEditorField(gameObject, gameObject)
+                ImguiHelper.insertImguiExposeEditorField(gameObject, gameObject, level)
 
                 separator()
 
-
-                combo("state", EditorSceneUI::gameObjectCurrentStateIndex, gameObject.getStates().map { it.name })
+                functionalProgramming.withItemWidth(100f) {
+                    combo("state", EditorSceneUI::gameObjectCurrentStateIndex, gameObject.getStates().map { it.name })
+                }
 
                 if (button("Ajouter un state")) {
                     openPopup(newStateTitle)
@@ -1069,22 +960,30 @@ class EditorScene(val level: Level) : Scene() {
                         gameObject.removeState(EditorSceneUI.gameObjectAddStateComboIndex - 1)
                 }
 
-                if(collapsingHeader("components")) {
-                    gameObject.getStates().elementAt(EditorSceneUI.gameObjectCurrentStateIndex).getComponents().forEach {
-                        if(treeNode(it.name)) {
-                            if(button("Supprimer ce comp.", Vec2(-1, 20f))) {
-                                gameObject.getCurrentState().removeComponent(it)
-                            }
-                            insertImguiExposeEditorField(it, gameObject)
-                            treePop()
-                        }
-                    }
+                functionalProgramming.withIndent {
+                    if (collapsingHeader("components")) {
+                        val components = gameObject.getStates().elementAt(EditorSceneUI.gameObjectCurrentStateIndex).getComponents()
 
-                    if (button("Ajouter un component", Vec2(-1, 20f))) {
-                        openPopup(addComponentTitle)
+                        functionalProgramming.withItemWidth(150f) {
+                            combo("component", EditorSceneUI::gameObjectCurrentComponentIndex, components.map { it.name })
+                        }
+
+                        val component = components.elementAtOrNull(EditorSceneUI.gameObjectCurrentComponentIndex)
+
+                        if (component != null) {
+                            functionalProgramming.withIndent {
+                                ImguiHelper.insertImguiExposeEditorField(component, gameObject, level)
+                                if (button("Supprimer ce comp.", Vec2(-1, 20f))) {
+                                    gameObject.getCurrentState().removeComponent(component)
+                                }
+                            }
+                        }
+                        separator()
+
+                        if (button("Ajouter un component", Vec2(-1, 20f)))
+                            openPopup(addComponentTitle)
                     }
                 }
-
                 if (beginPopup(createPrefabTitle)) {
                     val name = "test".toCharArray() // TODO inputtext
                     val author = "Catvert".toCharArray()
@@ -1102,7 +1001,10 @@ class EditorScene(val level: Level) : Scene() {
 
                 if (beginPopup(newStateTitle)) {
                     val comboItems = mutableListOf("State vide").apply { addAll(gameObject.getStates().map { "Copier de : ${it.name}" }) }
-                    combo("type", EditorSceneUI::gameObjectAddStateComboIndex, comboItems)
+
+                    functionalProgramming.withItemWidth(150f) {
+                        combo("type", EditorSceneUI::gameObjectAddStateComboIndex, comboItems)
+                    }
                     inputText("Nom", "test".toCharArray())
 
                     if (button("Ajouter")) {
@@ -1123,8 +1025,9 @@ class EditorScene(val level: Level) : Scene() {
                 }
 
                 if (beginPopup(addComponentTitle)) {
-                    combo("component", EditorSceneUI::gameObjectAddComponentComboIndex, PCGame.componentsClasses.map { it.simpleName ?: "Nom inconnu" })
-
+                    functionalProgramming.withItemWidth(150f) {
+                        combo("component", EditorSceneUI::gameObjectAddComponentComboIndex, PCGame.componentsClasses.map { it.simpleName ?: "Nom inconnu" })
+                    }
                     if (button("Ajouter")) {
                         gameObject.getStates().elementAt(EditorSceneUI.gameObjectCurrentStateIndex).addComponent(ReflectionUtility.findNoArgConstructor(PCGame.componentsClasses[EditorSceneUI.gameObjectAddComponentComboIndex])!!.newInstance())
                         closeCurrentPopup()

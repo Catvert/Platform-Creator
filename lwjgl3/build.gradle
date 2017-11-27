@@ -13,6 +13,10 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
 }
 
+run {
+    workingDir = new File("../")
+}
+
 jar {
     archiveName "${appName}-${version}.jar"
     from { configurations.compile.collect { zipTree(it) } }
@@ -22,10 +26,4 @@ jar {
 }
 repositories {
     mavenCentral()
-}
-
-kotlin {
-    experimental {
-        coroutines 'enable'
-    }
 }

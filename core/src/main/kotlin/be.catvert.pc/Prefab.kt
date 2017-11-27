@@ -7,7 +7,7 @@ import be.catvert.pc.utility.Point
 
 class Prefab(val name: String, val author: String, val prefabGO: GameObject) {
     fun create(position: Point, container: GameObjectContainer? = null) = SerializationFactory.copy(prefabGO).apply {
-        this.rectangle.position = position
+        this.box.position = position
         container?.addGameObject(this)
     }
 

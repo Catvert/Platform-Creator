@@ -1,34 +1,35 @@
 package be.catvert.pc
 
 import aurelienribon.tweenengine.TweenAccessor
-import be.catvert.pc.actions.EmptyAction
+import be.catvert.pc.actions.Action
+import be.catvert.pc.actions.RemoveGOAction
 import be.catvert.pc.containers.GameObjectContainer
-import be.catvert.pc.scenes.EditorScene
+import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import imgui.ImGui
+import imgui.functionalProgramming
 import java.util.*
 
 
 /**
  * Classe représentant un objet en jeu
  * @param id L'id du gameObject
- * @param rectangle Représente le rectangle de l'objet dans l'espace (position + taille)
- * @param container Container dans lequel l'objet va être implémenté
+ * @param box Représente le box de l'objet dans l'espace (position + taille)
+ * @param container Item dans lequel l'objet va être implémenté
  */
 class GameObject(@ExposeEditor var tag: Tag,
-                 id: UUID = UUID.randomUUID(),
-                 @ExposeEditor var rectangle: Rect = Rect(size = Size(1, 1)),
+                 @ExposeEditor var box: Rect = Rect(size = Size(1, 1)),
                  container: GameObjectContainer? = null,
                  initDefaultState: GameObjectState.() -> Unit = {}) : Updeatable, Renderable, CustomEditorImpl {
 
     enum class Tag {
-        Sprite, PhysicsSprite, Player, Enemy
+        Sprite, PhysicsSprite, Player, Enemy, Special
     }
 
-    var id: UUID = id
+    var id: UUID = UUID.randomUUID()
 
     @ExposeEditor
     var keepActive: Boolean = false
@@ -39,7 +40,8 @@ class GameObject(@ExposeEditor var tag: Tag,
             if (value in Constants.minLayerIndex until Constants.maxLayerIndex) field = value
         }
 
-    @ExposeEditor(customName = "action out of map") var onOutOfMapAction = EmptyAction()
+    @ExposeEditor(customName = "action out of map")
+    var onOutOfMapAction: Action = RemoveGOAction()
 
     @JsonProperty("states") private val states: MutableSet<GameObjectState> = mutableSetOf(GameObjectState("default").apply(initDefaultState))
 
@@ -47,12 +49,13 @@ class GameObject(@ExposeEditor var tag: Tag,
 
     var initialState: Int = 0
         set(value) {
-            if(value in 0 until states.size) {
+            if (value in 0 until states.size) {
                 field = value
             }
         }
 
-    @JsonIgnore val onRemoveFromParent = Signal<GameObject>()
+    @JsonIgnore
+    val onRemoveFromParent = Signal<GameObject>()
 
     @JsonIgnore
     var active: Boolean = true
@@ -60,6 +63,7 @@ class GameObject(@ExposeEditor var tag: Tag,
             if (!keepActive)
                 field = value
         }
+
 
     @JsonIgnore
     var gridCells: MutableList<GridCell> = mutableListOf()
@@ -83,8 +87,8 @@ class GameObject(@ExposeEditor var tag: Tag,
     @JsonIgnore
     fun getStates() = states.toSet()
 
-    fun position() = rectangle.position
-    fun size() = rectangle.size
+    fun position() = box.position
+    fun size() = box.size
 
     fun removeFromParent() {
         getCurrentState().inactive()
@@ -93,7 +97,7 @@ class GameObject(@ExposeEditor var tag: Tag,
     }
 
     fun addState(state: GameObjectState): Int {
-        if(container != null)
+        if (container != null)
             state.onAddToContainer(this, container!!)
         states.add(state)
         return states.size - 1
@@ -113,9 +117,9 @@ class GameObject(@ExposeEditor var tag: Tag,
         states.remove(states.elementAt(stateIndex))
     }
 
-    fun setState(stateIndex: Int, callActionsEvent: Boolean = true) {
+    fun setState(stateIndex: Int) {
         if (stateIndex in 0 until states.size) {
-            if(stateIndex != currentState) {
+            if (stateIndex != currentState) {
                 getCurrentState().inactive()
             }
             currentState = stateIndex
@@ -136,9 +140,11 @@ class GameObject(@ExposeEditor var tag: Tag,
         }
     }
 
-    override fun insertImgui(gameObject: GameObject, labelName: String, editorScene: EditorScene) {
+    override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
         with(ImGui) {
-            combo("State initial", this@GameObject::initialState, getStates().map { it.name })
+            functionalProgramming.withItemWidth(100f) {
+                combo("State initial", this@GameObject::initialState, getStates().map { it.name })
+            }
         }
     }
 }
@@ -159,27 +165,54 @@ class GameObjectTweenAccessor : TweenAccessor<GameObject> {
     }
 
     override fun setValues(gameObject: GameObject, tweenType: Int, newValues: FloatArray) {
-        when(GameObjectTween.fromType(tweenType)) {
-            GameObjectTween.NOTHING -> {}
-            GameObjectTween.POS_X -> { gameObject.rectangle.x = newValues[0] }
-            GameObjectTween.POS_Y -> { gameObject.rectangle.y = newValues[0] }
-            GameObjectTween.POS_XY -> { gameObject.rectangle.position = Point(newValues[0], newValues[1]) }
-            GameObjectTween.SIZE_X -> { gameObject.rectangle.width = newValues[0].toInt() }
-            GameObjectTween.SIZE_Y -> { gameObject.rectangle.height = newValues[0].toInt() }
-            GameObjectTween.SIZE_XY -> { gameObject.rectangle.size = Size(newValues[0].toInt(), newValues[1].toInt())}
+        when (GameObjectTween.fromType(tweenType)) {
+            GameObjectTween.NOTHING -> {
+            }
+            GameObjectTween.POS_X -> {
+                gameObject.box.x = Math.round(newValues[0])
+            }
+            GameObjectTween.POS_Y -> {
+                gameObject.box.y = Math.round(newValues[0])
+            }
+            GameObjectTween.POS_XY -> {
+                gameObject.box.position = Point(Math.round(newValues[0]), Math.round(newValues[1]))
+            }
+            GameObjectTween.SIZE_X -> {
+                gameObject.box.width = Math.round(newValues[0])
+            }
+            GameObjectTween.SIZE_Y -> {
+                gameObject.box.height = Math.round(newValues[0])
+            }
+            GameObjectTween.SIZE_XY -> {
+                gameObject.box.size = Size(Math.round(newValues[0]), Math.round(newValues[1]))
+            }
             else -> Log.error { "Tween inconnu : $tweenType" }
         }
     }
 
     override fun getValues(gameObject: GameObject, tweenType: Int, returnValues: FloatArray): Int {
-        when(GameObjectTween.fromType(tweenType)) {
-            GameObjectTween.NOTHING -> { return -1 }
-            GameObjectTween.POS_X -> { returnValues[0] = gameObject.rectangle.x; return 1 }
-            GameObjectTween.POS_Y -> { returnValues[0] = gameObject.rectangle.y; return 1 }
-            GameObjectTween.POS_XY -> { returnValues[0] = gameObject.rectangle.x; returnValues[1] = gameObject.rectangle.y; return 2 }
-            GameObjectTween.SIZE_X -> { returnValues[0] = gameObject.rectangle.width.toFloat(); return 1 }
-            GameObjectTween.SIZE_Y -> { returnValues[0] = gameObject.rectangle.height.toFloat(); return 1 }
-            GameObjectTween.SIZE_XY -> { returnValues[0] = gameObject.rectangle.width.toFloat(); returnValues[1] = gameObject.rectangle.height.toFloat(); return 2 }
+        when (GameObjectTween.fromType(tweenType)) {
+            GameObjectTween.NOTHING -> {
+                return -1
+            }
+            GameObjectTween.POS_X -> {
+                returnValues[0] = gameObject.box.x.toFloat(); return 1
+            }
+            GameObjectTween.POS_Y -> {
+                returnValues[0] = gameObject.box.y.toFloat(); return 1
+            }
+            GameObjectTween.POS_XY -> {
+                returnValues[0] = gameObject.box.x.toFloat(); returnValues[1] = gameObject.box.y.toFloat(); return 2
+            }
+            GameObjectTween.SIZE_X -> {
+                returnValues[0] = gameObject.box.width.toFloat(); return 1
+            }
+            GameObjectTween.SIZE_Y -> {
+                returnValues[0] = gameObject.box.height.toFloat(); return 1
+            }
+            GameObjectTween.SIZE_XY -> {
+                returnValues[0] = gameObject.box.width.toFloat(); returnValues[1] = gameObject.box.height.toFloat(); return 2
+            }
             else -> Log.error { "Tween inconnu : $tweenType" }
         }
 

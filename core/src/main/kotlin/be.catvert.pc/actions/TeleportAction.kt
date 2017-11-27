@@ -11,9 +11,9 @@ import com.fasterxml.jackson.annotation.JsonCreator
 
 //TODO maxInt
 class TeleportAction(@ExposeEditor var teleportPoint: Point) : Action {
-    @JsonCreator private constructor(): this(Point())
+    @JsonCreator private constructor() : this(Point())
 
     override fun invoke(gameObject: GameObject) {
-        gameObject.rectangle.position = teleportPoint
+        gameObject.box.position = teleportPoint
     }
 }

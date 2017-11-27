@@ -1,22 +1,20 @@
 package be.catvert.pc.components.logics
 
 import be.catvert.pc.GameObject
-import be.catvert.pc.GameObjectState
+import be.catvert.pc.Log
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
 import be.catvert.pc.actions.PhysicsAction
 import be.catvert.pc.actions.PhysicsAction.PhysicsActions
 import be.catvert.pc.components.LogicsComponent
 import be.catvert.pc.containers.GameObjectContainer
+import be.catvert.pc.containers.GameObjectMatrixContainer
 import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.ExposeEditor
 import be.catvert.pc.utility.Point
+import be.catvert.pc.utility.Rect
 import be.catvert.pc.utility.Signal
 import com.badlogic.gdx.math.MathUtils
-import com.dongbat.jbump.CollisionFilter
-import com.dongbat.jbump.Item
-import com.dongbat.jbump.Response
-import com.dongbat.jbump.World
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 
@@ -40,14 +38,13 @@ data class JumpData(var isJumping: Boolean = false, var targetHeight: Int = 0, v
  * Enum permettant de connaître le côté toucher lors d'une collision
  */
 enum class CollisionSide {
-    OnLeft, OnRight, OnUp, OnDown, Unknow;
+    OnLeft, OnRight, OnUp, OnDown;
 
     operator fun unaryMinus(): CollisionSide = when (this) {
         CollisionSide.OnLeft -> OnRight
         CollisionSide.OnRight -> OnLeft
         CollisionSide.OnUp -> OnDown
         CollisionSide.OnDown -> OnUp
-        CollisionSide.Unknow -> Unknow
     }
 }
 
@@ -87,17 +84,17 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
     @JsonIgnore
     val nextActions = mutableSetOf<PhysicsActions>()
 
-    @JsonIgnore private val jumpData: JumpData = JumpData()
+    private val jumpData: JumpData = JumpData()
 
     /**
      * La vitesse de déplacement x actuelle de l'entité (à titre d'information)
      */
-    @JsonIgnore private var actualMoveSpeedX = 0f
+    private var actualMoveSpeedX = 0f
 
     /**
      * La vitesse de déplacement y actuelle de l'entité (à titre d'information)
      */
-    @JsonIgnore private var actualMoveSpeedY = 0f
+    private var actualMoveSpeedY = 0f
 
     /**
      * Signal appelé lorsque une entité ayant ce component touche cette entité
@@ -108,36 +105,12 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
     /**
      * Permet à l'entité de savoir si elle est sur le sol ou non
      */
-    @JsonIgnore private var isOnGround = false
+    private var isOnGround = false
 
-    @JsonIgnore private val gravitySpeed = 15f
-
-    @JsonIgnore private lateinit var item: Item<GameObject>
-
-    @JsonIgnore private lateinit var world: World<GameObject>
-
-    override fun onAddToContainer(gameObject: GameObject, container: GameObjectContainer) {
-        world = (container as Level).world
-
-        super.onAddToContainer(gameObject, container)
-    }
-
-    override fun onStateActive(gameObject: GameObject) {
-        super.onStateActive(gameObject)
-
-        item = world.add(Item(gameObject), gameObject.position().x, gameObject.position().y, gameObject.size().width.toFloat(), gameObject.size().height.toFloat())
-    }
-
-    override fun onStateInactive(gameObject: GameObject) {
-        super.onStateInactive(gameObject)
-
-        world.remove(item)
-    }
+    private val gravitySpeed = 15
 
     override fun update(gameObject: GameObject) {
-        if (isStatic || !world.hasItem(item)) return
-
-        world.update(item, gameObject.position().x, gameObject.position().y)
+        if (isStatic) return
 
         if (gravity && (gameObject.container as? Level)?.applyGravity == true)
             nextActions += PhysicsAction.PhysicsActions.GRAVITY
@@ -160,28 +133,28 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                 PhysicsActions.JUMP -> {
                     if (!jumpData.isJumping) {
                         if (!jumpData.forceJumping) {
-                            if (checkYMove(gameObject.position(), -1f)) {
+                            if (!checkYMove(-1, gameObject)) {
                                 return@action
                             }
                         } else {
                             jumpData.forceJumping = false
                         }
                         jumpData.isJumping = true
-                        jumpData.targetHeight = gameObject.rectangle.y.toInt() + jumpHeight
+                        jumpData.targetHeight = gameObject.box.y + jumpHeight
                         jumpData.startJumping = true
 
                         gravity = false
 
-                        moveSpeedY = gravitySpeed
+                        moveSpeedY = gravitySpeed.toFloat()
                         addJumpAfterClear = true
                         jumpAction.invoke(gameObject)
                     } else {
                         // Vérifie si le go est arrivé à la bonne hauteur de saut ou s'il rencontre un obstacle au dessus de lui
-                        if (gameObject.rectangle.y >= jumpData.targetHeight || !checkYMove(gameObject.position(), gravitySpeed)) {
+                        if (gameObject.box.y >= jumpData.targetHeight || checkYMove(gravitySpeed, gameObject)) {
                             gravity = true
                             jumpData.isJumping = false
                         } else {
-                            moveSpeedY = gravitySpeed
+                            moveSpeedY = gravitySpeed.toFloat()
                             addJumpAfterClear = true
                         }
                         jumpData.startJumping = false
@@ -198,60 +171,93 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         actualMoveSpeedX = moveSpeedX
         actualMoveSpeedY = moveSpeedY
 
-        val collisions = world.move(item, gameObject.position().x + moveSpeedX, gameObject.position().y + moveSpeedY, collisionFilter)
-
-        for(i in 0 until collisions.projectedCollisions.size()) {
-            val collision = collisions.projectedCollisions.get(i)
-            val normal = collision.normal
-
-            val collisionSide = if(normal.x != 0f) {
-                when(normal.x) {
-                    -1f -> CollisionSide.OnRight
-                    1f -> CollisionSide.OnLeft
-                    else -> CollisionSide.Unknow
-                }
-            }
-            else {
-                when(normal.y) {
-                    -1f -> CollisionSide.OnDown
-                    1f -> CollisionSide.OnUp
-                    else -> CollisionSide.Unknow
-                }
-            }
-
-            (collision.item.userData as GameObject).getCurrentState().getComponent<PhysicsComponent>()?.onCollisionWith?.invoke(CollisionListener(collision.item.userData as GameObject, collision.other.userData as GameObject, collisionSide))
-            (collision.other.userData as GameObject).getCurrentState().getComponent<PhysicsComponent>()?.onCollisionWith?.invoke(CollisionListener(collision.other.userData as GameObject, collision.item.userData as GameObject, -collisionSide))
-        }
-
-        val newRect = world.getRect(item)
-        gameObject.rectangle.x = newRect.x
-        gameObject.rectangle.y = newRect.y
+        tryMove(Math.round(moveSpeedX), Math.round(moveSpeedY), gameObject) // move l'entité
 
         nextActions.clear()
 
         if (addJumpAfterClear)
             nextActions += PhysicsActions.JUMP
 
-        isOnGround = !checkYMove(gameObject.position(), -1f)
+        isOnGround = checkYMove(-1, gameObject)
     }
 
     /**
      * Permet de vérifier si l'entité est sur le sol ou pas
      */
-    private fun checkYMove(actualPos: Point, moveY: Float) = world.check(item, actualPos.x, actualPos.y + moveY, collisionFilter).goalY != actualPos.y
+    private fun checkYMove(moveY: Int, gameObject: GameObject) = collideOnMove(0, moveY, gameObject)
 
-    companion object {
-        private val collisionFilter = CollisionFilter { i1, i2 ->
-            val i1 = (i1.userData as GameObject)
-            val i2 = (i2.userData as GameObject)
+    /**
+     * Permet d'essayer de déplacer une entité ayant un physicsComponent
+     * @param moveX : Le déplacement x
+     * @param moveY : Le déplacement y
+     */
+    private fun tryMove(moveX: Int, moveY: Int, gameObject: GameObject) {
+        if (moveX != 0 || moveY != 0) {
+            var newMoveX = moveX
+            var newMoveY = moveY
 
-            val response = when (i2.getCurrentState().getComponent<PhysicsComponent>()!!.maskCollision) {
-                MaskCollision.ALL -> Response.slide
-                MaskCollision.ONLY_PLAYER -> if (i1.tag == GameObject.Tag.Player) Response.slide else Response.cross
-                MaskCollision.ONLY_ENEMY -> if (i1.tag == GameObject.Tag.Enemy) Response.slide else Response.cross
+            if (!collideOnMove(moveX, 0, gameObject)) {
+                gameObject.box.x = Math.max(0, gameObject.box.x + moveX)
+                newMoveX = 0
+            }
+            if (!collideOnMove(0, moveY, gameObject)) {
+                gameObject.box.y += moveY
+                newMoveY = 0
             }
 
-            response
+            if (newMoveX > 0)
+                newMoveX -= 1
+            else if (newMoveX < 0)
+                newMoveX += 1
+
+            if (newMoveY > 0)
+                newMoveY -= 1
+            else if (newMoveY < 0)
+                newMoveY += 1
+            tryMove(newMoveX, newMoveY, gameObject)
         }
+    }
+
+    /**
+     * Permet de tester si un déplacement est possible ou non
+     * @param moveX : Le déplacement x
+     * @param moveY : Le déplacement y
+     * @param gameObject : Le gameObject a testé
+     */
+    private fun collideOnMove(moveX: Int, moveY: Int, gameObject: GameObject): Boolean {
+        val newRect = Rect(gameObject.box)
+        newRect.position = Point(newRect.x + moveX, newRect.y + moveY)
+
+        (gameObject.container as? GameObjectMatrixContainer)?.apply {
+            getRectCells(newRect).forEach {
+                matrixGrid[it.x][it.y].first.filter { it.id != gameObject.id
+                            && when (it.getCurrentState().getComponent<PhysicsComponent>()?.maskCollision) {
+                        MaskCollision.ALL -> true
+                        MaskCollision.ONLY_PLAYER -> gameObject.tag == GameObject.Tag.Player
+                        MaskCollision.ONLY_ENEMY -> gameObject.tag == GameObject.Tag.Enemy
+                        null -> false
+                    }
+                }.forEach {
+                    if (newRect.overlaps(it.box)) {
+                        val side = when {
+                            moveX > 0 -> CollisionSide.OnRight
+                            moveX < 0 -> CollisionSide.OnLeft
+                            moveY > 0 -> CollisionSide.OnUp
+                            moveY < 0 -> CollisionSide.OnDown
+                            else -> {
+                                Log.warn { "Collision invalide !" }
+                                CollisionSide.OnLeft
+                            }
+                        }
+
+                        gameObject.getCurrentState().getComponent<PhysicsComponent>()?.onCollisionWith?.invoke(CollisionListener(gameObject, it, side))
+                        it.getCurrentState().getComponent<PhysicsComponent>()?.onCollisionWith?.invoke(CollisionListener(it, gameObject, -side))
+
+                        return true
+                    }
+                }
+            }
+        }
+        return false
     }
 }

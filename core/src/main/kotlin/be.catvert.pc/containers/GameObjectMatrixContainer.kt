@@ -18,26 +18,30 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     /**
      * La matrix permettant de stoquer les différentes entités selon leur position dans l'espace
      */
-    @JsonIgnore private val matrixGrid = matrix2d(matrixWidth, matrixHeight, { row: Int, width: Int -> Array(width) { col -> mutableListOf<GameObject>() to Rect(row.toFloat() * matrixSizeCell, col.toFloat() * matrixSizeCell, matrixSizeCell, matrixSizeCell) } })
+    @JsonIgnore val matrixGrid = matrix2d(matrixWidth, matrixHeight, { row: Int, width: Int -> Array(width) { col -> mutableListOf<GameObject>() to Rect(row * matrixSizeCell, col * matrixSizeCell, matrixSizeCell, matrixSizeCell) } })
 
     /**
-     * Le rectangle illustrant la matrix
+     * Le box illustrant la matrix
      */
-    @JsonIgnore val matrixRect = Rect(0f, 0f, matrixSizeCell * matrixWidth, matrixSizeCell * matrixHeight)
+    @JsonIgnore
+    val matrixRect = Rect(0, 0, matrixSizeCell * matrixWidth, matrixSizeCell * matrixHeight)
 
     /**
-    * Le rectangle illustrant la zone où les cellules sont actives
-    */
-    @JsonIgnore val activeRect = Rect()
+     * Le box illustrant la zone où les cellules sont actives
+     */
+    @JsonIgnore
+    val activeRect = Rect()
 
     /**
      * Les cellules actives
      */
     private val activeGridCells = mutableListOf<GridCell>()
 
-    @JsonIgnore var drawDebugCells = false
+    @JsonIgnore
+    var drawDebugCells = false
 
-    @JsonIgnore var followGameObject: GameObject? = null
+    @JsonIgnore
+    var followGameObject: GameObject? = null
 
     init {
         activeRect.size = Size(Gdx.graphics.width * 2, Gdx.graphics.height * 2)
@@ -46,11 +50,11 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     override fun update() {
         updateActiveCells()
 
-        if(Gdx.input.isKeyJustPressed(GameKeys.DEBUG_MODE.key))
+        if (Gdx.input.isKeyJustPressed(GameKeys.DEBUG_MODE.key))
             drawDebugCells = !drawDebugCells
 
-        if(followGameObject != null && allowUpdatingGO) {
-            activeRect.position =  Point(Math.max(0f, followGameObject!!.position().x - activeRect.width / 2 + followGameObject!!.size().width / 2), Math.max(0f, followGameObject!!.position().y - activeRect.height / 2 + followGameObject!!.size().height / 2))
+        if (followGameObject != null && allowUpdatingGO) {
+            activeRect.position = Point(Math.max(0, followGameObject!!.position().x - activeRect.width / 2 + followGameObject!!.size().width / 2), Math.max(0, followGameObject!!.position().y - activeRect.height / 2 + followGameObject!!.size().height / 2))
         }
 
         super.update()
@@ -66,7 +70,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
                     shapeRenderer.rect(it.second)
                 }
             }
-            shapeRenderer.rect(activeRect.x, activeRect.y, activeRect.width.toFloat(), activeRect.height.toFloat())
+            shapeRenderer.rect(activeRect)
             shapeRenderer.end()
         }
     }
@@ -93,8 +97,8 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     }
 
     private fun addRectListener(gameObject: GameObject) {
-        gameObject.rectangle.onPositionChange.register{ setGameObjectToGrid(gameObject) }
-        gameObject.rectangle.onSizeChange.register { setGameObjectToGrid(gameObject) }
+        gameObject.box.onPositionChange.register { setGameObjectToGrid(gameObject) }
+        gameObject.box.onSizeChange.register { setGameObjectToGrid(gameObject) }
     }
 
     /**
@@ -120,10 +124,10 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     }
 
     /**
-     * Permet de retourner les cellules présentes dans le rectangle spécifié
-     * @param rect Le rectangle
+     * Permet de retourner les cellules présentes dans le box spécifié
+     * @param rect Le box
      */
-    private fun getRectCells(rect: Rect): List<GridCell> {
+    fun getRectCells(rect: Rect): List<GridCell> {
         val cells = mutableListOf<GridCell>()
 
         fun rectContains(x: Int, y: Int): Boolean {
@@ -135,8 +139,8 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
         }
 
         if (matrixRect.overlaps(rect)) {
-            var x = Math.max(0f, rect.x / matrixSizeCell).toInt()
-            var y = Math.max(0f, rect.y / matrixSizeCell).toInt()
+            var x = Math.max(0, rect.x / matrixSizeCell)
+            var y = Math.max(0, rect.y / matrixSizeCell)
             if (rectContains(x, y)) {
                 cells += GridCell(x, y)
                 val firstXCell = x
@@ -166,7 +170,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
      * @param entity L'entité à mettre à jour
      */
     private fun setGameObjectToGrid(gameObject: GameObject) {
-        if(gameObject.gridCells.isEmpty())
+        if (gameObject.gridCells.isEmpty())
             gameObject.active = false
 
         gameObject.gridCells.forEach {
@@ -175,7 +179,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
 
         gameObject.gridCells.clear()
 
-        getRectCells(gameObject.rectangle).forEach {
+        getRectCells(gameObject.box).forEach {
             matrixGrid[it.x][it.y].first.add(gameObject)
             gameObject.gridCells.add(it)
         }
@@ -212,8 +216,8 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     }
 
     /**
-     * Permet de retourné les entités présentent dans le rectangle spécifiés
-     * @param rect le rectangle dans lequel les entités seront retournées
+     * Permet de retourné les entités présentent dans le box spécifiés
+     * @param rect le box dans lequel les entités seront retournées
      * @param overlaps permet de spécifier si le mode de détection est en overlaps ou contains
      */
     fun getAllGameObjectsInRect(rect: Rect, overlaps: Boolean = true): Set<GameObject> {
@@ -222,10 +226,10 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
         gridCells.forEach {
             matrixGrid[it.x][it.y].first.forEach {
                 if (overlaps) {
-                    if (rect.overlaps(it.rectangle))
+                    if (rect.overlaps(it.box))
                         list += it
                 } else {
-                    if (rect.contains(it.rectangle))
+                    if (rect.contains(it.box))
                         list += it
                 }
 

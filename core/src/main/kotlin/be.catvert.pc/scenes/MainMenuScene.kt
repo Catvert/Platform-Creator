@@ -4,39 +4,27 @@ import be.catvert.pc.GameKeys
 import be.catvert.pc.Log
 import be.catvert.pc.PCGame
 import be.catvert.pc.containers.Level
-import be.catvert.pc.utility.Constants
-import be.catvert.pc.utility.Size
-import be.catvert.pc.utility.UIUtility
-import be.catvert.pc.utility.Utility
+import be.catvert.pc.i18n.MenusText
+import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.kotcrab.vis.ui.widget.VisCheckBox
 import com.kotcrab.vis.ui.widget.VisLabel
 import com.kotcrab.vis.ui.widget.VisList
 import com.kotcrab.vis.ui.widget.VisTextArea
-import glm_.vec2.Vec2
-import imgui.ImGui
-import imgui.WindowFlags
-import imgui.functionalProgramming
 import ktx.actors.onChange
 import ktx.actors.onClick
 import ktx.actors.onKeyUp
 import ktx.actors.plus
 import ktx.app.use
-import ktx.assets.loadOnDemand
-import ktx.assets.toLocalFile
 import ktx.collections.GdxArray
 import ktx.collections.toGdxArray
 import ktx.vis.window
 import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.nio.file.StandardCopyOption
 
 
 /**
@@ -49,20 +37,20 @@ class MainMenuScene : Scene() {
     private val logo = PCGame.generateLogo(gameObjectContainer)
 
     init {
-        stage + window("Menu principal") {
+        stage + window(MenusText.MM_WINDOW_TITLE()) {
             verticalGroup {
                 space(10f)
-                textButton("Jouer !") {
+                textButton(MenusText.MM_PLAY_BUTTON()) {
                     onClick {
                         showSelectLevelsWindow()
                     }
                 }
-                textButton("Options") {
+                textButton(MenusText.MM_SETTINGS_BUTTON()) {
                     onClick {
                         showSettingsWindows()
                     }
                 }
-                textButton("Quitter") {
+                textButton(MenusText.MM_EXIT_BUTTON()) {
                     onClick {
                         Gdx.app.exit()
                     }
@@ -83,7 +71,7 @@ class MainMenuScene : Scene() {
 
     override fun resize(size: Size) {
         super.resize(size)
-        logo.rectangle.set(PCGame.getLogoRect())
+        logo.box.set(PCGame.getLogoRect())
     }
 
     //region UI
@@ -93,18 +81,18 @@ class MainMenuScene : Scene() {
      * @param onNameSelected Méthode appelée quand l'utilisateur a correctement entré le nom du niveau
      */
     private fun showSetNameLevelWindow(onNameSelected: (name: String) -> Unit) {
-        stage + window("Choisissez un nom pour le niveau") {
+        stage + window(MenusText.MM_SELECT_LEVEL_NAME_WINDOW_TITLE()) {
             isModal = true
-            setSize(300f, 150f)
+            setSize(300f, 100f)
             setPosition(Gdx.graphics.width / 2f - width / 2, Gdx.graphics.height / 2f - height / 2)
             addCloseButton()
 
             table(defaultSpacing = true) {
-                label("Nom : ")
+                label(MenusText.MM_SELECT_LEVEL_NAME_NAME())
 
                 val nameField = textField { }
-                textButton("Confirmer") {
-                    onClick { ->
+                textButton(MenusText.MM_SELECT_LEVEL_NAME_CONFIRM()) {
+                    onClick {
                         if (!nameField.text.isBlank()) {
                             onNameSelected(nameField.text)
                             this@window.remove()
@@ -123,12 +111,12 @@ class MainMenuScene : Scene() {
             override fun toString(): String = dir.name()
         }
 
-        fun getLevels(): GdxArray<LevelItem> = Constants.levelDirPath.toLocalFile().list { dir -> dir.isDirectory && dir.list { _, s -> s == Constants.levelDataFile }.isNotEmpty() }.map { LevelItem(it) }.toGdxArray()
+        fun getLevels(): GdxArray<LevelItem> = Constants.levelDirPath.list { dir -> dir.isDirectory && dir.list { _, s -> s == Constants.levelDataFile }.isNotEmpty() }.map { LevelItem(it) }.toGdxArray()
 
         val list = VisList<LevelItem>()
         list.setItems(getLevels())
 
-        stage + window("Sélection d'un niveau") window@ {
+        stage + window(MenusText.MM_SELECT_LEVEL_WINDOW_TITLE()) window@ {
             addCloseButton()
             isModal = true
             setSize(300f, 250f)
@@ -139,7 +127,7 @@ class MainMenuScene : Scene() {
                 addActor(list)
                 verticalGroup {
                     space(10f)
-                    textButton("Jouer") {
+                    textButton(MenusText.MM_SELECT_LEVEL_PLAY_BUTTON()) {
                         onClick {
                             if (list.selected != null) {
                                 val level = Level.loadFromFile(list.selected.dir)
@@ -149,7 +137,7 @@ class MainMenuScene : Scene() {
                             }
                         }
                     }
-                    textButton("Éditer") {
+                    textButton(MenusText.MM_SELECT_LEVEL_EDIT_BUTTON()) {
                         onClick {
                             if (list.selected != null) {
                                 val level = Level.loadFromFile(list.selected.dir)
@@ -159,7 +147,7 @@ class MainMenuScene : Scene() {
                             }
                         }
                     }
-                    textButton("Nouveau") {
+                    textButton(MenusText.MM_SELECT_LEVEL_NEW_BUTTON()) {
                         onClick {
                             showSetNameLevelWindow { name ->
                                 val level = Level.newLevel(name)
@@ -167,14 +155,15 @@ class MainMenuScene : Scene() {
                             }
                         }
                     }
-                    textButton("Copier") {
+                    textButton(MenusText.MM_SELECT_LEVEL_COPY_BUTTON()) {
                         onClick {
                             if (list.selected != null) {
                                 showSetNameLevelWindow { name ->
                                     try {
-                                        Files.copy(Paths.get(list.selected.dir.path()), Paths.get(list.selected.dir.parent().path() + "/$name.mtrlvl"), StandardCopyOption.REPLACE_EXISTING)
+                                        list.selected.dir.list().forEach {
+                                            it.copyTo(list.selected.dir.parent().child(name))
+                                        }
                                         list.setItems(getLevels())
-                                        UIUtility.showDialog(stage, "Opération réussie !", "La copie s'est correctement effectuée !")
                                     } catch (e: IOException) {
                                         UIUtility.showDialog(stage, "Opération échouée !", "Un problème s'est produit lors de la copie !")
                                         Log.error(e) { "Erreur survenue lors de la copie du niveau ! Erreur : $e" }
@@ -183,15 +172,14 @@ class MainMenuScene : Scene() {
                             }
                         }
                     }
-                    textButton("Supprimer") {
+                    textButton(MenusText.MM_SELECT_LEVEL_DELETE_BUTTON()) {
                         onClick {
                             if (list.selected != null) {
-                                UIUtility.showDialog(stage, "Supprimer le niveau ?", "Etes-vous sur de vouloir supprimer ${list.selected} ?", listOf("Oui", "Non")) {
+                                UIUtility.showDialog(stage, MenusText.MM_SELECT_LEVEL_DELETE_DIALOG_TITLE(), MenusText.MM_SELECT_LEVEL_DELETE_DIALOG_CONTENT(list.selected.dir.name()), listOf(MenusText.MM_SELECT_LEVEL_DELETE_DIALOG_YES(), MenusText.MM_SELECT_LEVEL_DELETE_DIALOG_NO())) {
                                     if (it == 0) {
                                         try {
                                             list.selected.dir.deleteDirectory()
                                             list.setItems(getLevels())
-                                            UIUtility.showDialog(stage, "Opération réussie !", "La suppression s'est correctement effectuée !")
                                         } catch (e: IOException) {
                                             UIUtility.showDialog(stage, "Opération échouée !", "Un problème s'est produit lors de la suppression !")
                                             Log.error(e) { "Erreur survenue lors de la suppression du niveau !" }
@@ -210,7 +198,7 @@ class MainMenuScene : Scene() {
      * Affiche la fenêtre de configuration du jeu et des touches
      */
     private fun showSettingsWindows() {
-        stage + window("Options du jeu") {
+        stage + window(MenusText.MM_SETTINGS_WINDOW_TITLE()) {
             addCloseButton()
             setSize(700f, 300f)
             setPosition(Gdx.graphics.width / 2f - width / 2f, Gdx.graphics.height / 2f - height / 2f)
@@ -219,32 +207,26 @@ class MainMenuScene : Scene() {
             val heightArea = VisTextArea(Gdx.graphics.height.toString())
 
             val fullScreenCkbox = VisCheckBox("", Gdx.graphics.isFullscreen)
-            val vSyncCkbox = VisCheckBox("", PCGame.vsync)
 
             val keyAreaList = mutableListOf<VisTextArea>()
             table(defaultSpacing = true) {
                 table(defaultSpacing = true) {
-                    label("Largeur de l'écran : ")
+                    label(MenusText.MM_SETTINGS_SCREEN_WIDTH())
                     add(widthArea).width(50f)
 
                     row()
 
-                    label("Hauteur de l'écran : ")
+                    label(MenusText.MM_SETTINGS_SCREEN_HEIGHT())
                     add(heightArea).width(50f)
 
                     row()
 
-                    label("Plein écran : ")
+                    label(MenusText.MM_SETTINGS_FULLSCREEN())
                     add(fullScreenCkbox)
 
                     row()
 
-                    label("VSync : ")
-                    add(vSyncCkbox)
-
-                    row()
-
-                    label("Audio : ")
+                    label(MenusText.MM_SETTINGS_SOUND())
 
                     fun formatLabel() = "${(PCGame.soundVolume * 100).toInt()}%"
 
@@ -281,7 +263,7 @@ class MainMenuScene : Scene() {
                 })
             }
             row()
-            textButton("Appliquer") {
+            textButton(MenusText.MM_SETTINGS_APPLY()) {
                 onClick {
                     var successConfig = true
                     if (widthArea.text.toIntOrNull() == null) {
@@ -295,8 +277,6 @@ class MainMenuScene : Scene() {
                     if (successConfig) {
                         widthArea.color = Color.WHITE
                         heightArea.color = Color.WHITE
-
-                        PCGame.vsync = vSyncCkbox.isChecked
 
                         if (fullScreenCkbox.isChecked)
                             Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
@@ -334,6 +314,6 @@ class MainMenuScene : Scene() {
         }
     }
 
-    private fun showWrongVersionLevelDialog() = UIUtility.showDialog(stage, "Mauvaise version !", "Le niveau n'a pas la meme version que celle du jeu ! :(")
+    private fun showWrongVersionLevelDialog() = UIUtility.showDialog(stage, MenusText.MM_WRONG_LEVEL_VERSION_DIALOG_TITLE(), MenusText.MM_WRONG_LEVEL_VERSION_DIALOG_CONTENT())
     //endregion
 }

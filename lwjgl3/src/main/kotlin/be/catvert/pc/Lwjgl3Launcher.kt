@@ -2,20 +2,15 @@ package be.catvert.pc
 
 import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.Utility
-import com.badlogic.gdx.Graphics
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics
-import imgui.impl.LwjglGL3
-import org.lwjgl.glfw.GLFW
-import uno.glfw.GlfwWindow
 
 /** Launches the desktop (LWJGL3) application.  */
 object Lwjgl3Launcher {
-    private val configuration: Triple<Lwjgl3ApplicationConfiguration, Boolean, Float>
+    private val configuration: Pair<Lwjgl3ApplicationConfiguration, Float>
         get() {
             val configuration = Lwjgl3ApplicationConfiguration()
-            val (width, height, vsync, fullscreen, soundVolume) = Utility.loadGameConfig()
+            val (width, height, fullscreen, soundVolume) = Utility.loadGameConfig()
 
             configuration.setTitle(Constants.gameTitle)
             if(fullscreen) {
@@ -26,13 +21,13 @@ object Lwjgl3Launcher {
                 configuration.setWindowedMode(width, height)
 
             configuration.setResizable(false)
-            configuration.useVsync(vsync)
+            configuration.useVsync(true)
 
-            return Triple(configuration, vsync, soundVolume)
+            return configuration to soundVolume
         }
 
     @JvmStatic
     fun main(args: Array<String>) {
-        Lwjgl3Application(PCGame(configuration.second, configuration.third), configuration.first)
+        Lwjgl3Application(PCGame(configuration.second), configuration.first)
     }
 }

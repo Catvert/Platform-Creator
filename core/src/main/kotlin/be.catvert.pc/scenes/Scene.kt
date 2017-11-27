@@ -84,7 +84,7 @@ abstract class Scene : Renderable, Updeatable, Resizable, Disposable {
     }
 
     override fun resize(size: Size) {
-       // camera.setToOrtho(false, size.width.toFloat(), size.height.toFloat())
+        camera.setToOrtho(false, size.width.toFloat(), size.height.toFloat())
         stage.viewport.update(size.width, size.height)
         backgroundSize = Gdx.graphics.toSize()
     }

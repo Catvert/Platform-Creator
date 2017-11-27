@@ -1,10 +1,10 @@
 package be.catvert.pc.utility
 
 import be.catvert.pc.GameObject
-import be.catvert.pc.scenes.EditorScene
+import be.catvert.pc.containers.Level
 
 interface CustomEditorImpl {
-    fun insertImgui(gameObject: GameObject, labelName: String, editorScene: EditorScene)
+    fun insertImgui(labelName: String, gameObject: GameObject, level: Level)
 
-    fun insertImguiPopup(gameObject: GameObject, editorScene: EditorScene) = Unit
+    fun insertImguiPopup(gameObject: GameObject, level: Level) = Unit
 }

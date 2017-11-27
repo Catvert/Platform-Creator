@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
  * @see LifeComponent
  */
 class LifeAction(@ExposeEditor var action: LifeActions) : Action {
-    @JsonCreator private constructor(): this(LifeActions.REMOVE_LP)
+    @JsonCreator private constructor() : this(LifeActions.REMOVE_LP)
 
     enum class LifeActions {
         ADD_LP, REMOVE_LP, ONE_SHOT
@@ -19,7 +19,7 @@ class LifeAction(@ExposeEditor var action: LifeActions) : Action {
 
     override fun invoke(gameObject: GameObject) {
         val lifeComponent = gameObject.getCurrentState().getComponent<LifeComponent>()
-        when(action) {
+        when (action) {
             LifeActions.ADD_LP -> lifeComponent?.addLifePoint()
             LifeActions.REMOVE_LP -> lifeComponent?.removeLifePoint()
             LifeActions.ONE_SHOT -> lifeComponent?.kill()

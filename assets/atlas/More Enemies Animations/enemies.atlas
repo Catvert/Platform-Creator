@@ -506,14 +506,14 @@ snake
   orig: 63, 23
   offset: 0, 0
   index: -1
-snakeLava
+snakeLava_0
   rotate: false
   xy: 372, 40
   size: 53, 147
   orig: 53, 147
   offset: 0, 0
   index: -1
-snakeLava_ani
+snakeLava_1
   rotate: false
   xy: 477, 0
   size: 52, 147
@@ -534,14 +534,14 @@ snakeLava_hit
   orig: 53, 147
   offset: 0, 0
   index: -1
-snakeSlime
+snakeSlime_0
   rotate: false
   xy: 424, 187
   size: 53, 147
   orig: 53, 147
   offset: 0, 0
   index: -1
-snakeSlime_ani
+snakeSlime_1
   rotate: false
   xy: 425, 0
   size: 52, 147

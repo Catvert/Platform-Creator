@@ -3,6 +3,7 @@ package be.catvert.pc.utility
 import be.catvert.pc.PCGame
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Graphics
+import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -16,7 +17,8 @@ import com.badlogic.gdx.utils.JsonReader
 import com.badlogic.gdx.utils.JsonWriter
 import ktx.actors.onClick
 import ktx.actors.plus
-import ktx.assets.toLocalFile
+import ktx.assets.Asset
+import ktx.assets.loadOnDemand
 import ktx.vis.window
 import java.io.File
 import java.io.FileReader
@@ -29,7 +31,7 @@ import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaConstructor
 
 
-fun Batch.draw(texture: Texture, rect: Rect, flipX: Boolean = false, flipY: Boolean = false) = this.draw(texture, rect.position.x, rect.position.y, rect.size.width.toFloat(), rect.size.height.toFloat(), 0, 0, texture.width, texture.height, flipX, flipY)
+fun Batch.draw(texture: Texture, rect: Rect, flipX: Boolean = false, flipY: Boolean = false) = this.draw(texture, rect.position.x.toFloat(), rect.position.y.toFloat(), rect.size.width.toFloat(), rect.size.height.toFloat(), 0, 0, texture.width, texture.height, flipX, flipY)
 
 fun Batch.draw(textureRegion: TextureRegion, rect: Rect, flipX: Boolean = false, flipY: Boolean = false) {
     if (flipX && !textureRegion.isFlipX || !flipX && textureRegion.isFlipX) {
@@ -39,18 +41,20 @@ fun Batch.draw(textureRegion: TextureRegion, rect: Rect, flipX: Boolean = false,
         textureRegion.flip(false, true)
     }
 
-    this.draw(textureRegion, rect.position.x, rect.position.y, rect.size.width.toFloat(), rect.size.height.toFloat())
+    this.draw(textureRegion, rect.position.x.toFloat(), rect.position.y.toFloat(), rect.size.width.toFloat(), rect.size.height.toFloat())
 }
 
-fun ShapeRenderer.rect(rect: Rect) = this.rect(rect.x, rect.y, rect.width.toFloat(), rect.height.toFloat())
+fun ShapeRenderer.rect(rect: Rect) = this.rect(rect.x.toFloat(), rect.y.toFloat(), rect.width.toFloat(), rect.height.toFloat())
 
-fun Vector2.toPoint() = Point(this.x, this.y)
+fun Vector2.toPoint() = Point(Math.round(this.x), Math.round(this.y))
 
-fun Vector3.toPoint() = Point(this.x, this.y)
+fun Vector3.toPoint() = Point(Math.round(this.x), Math.round(this.y))
 
-fun Shape2D.contains(point: Point) = this.contains(point.x, point.y)
+fun Shape2D.contains(point: Point) = this.contains(point.x.toFloat(), point.y.toFloat())
 
 fun Graphics.toSize() = Size(width, height)
+
+inline fun <reified T : Any> AssetManager.loadOnDemand(file: FileHandle): Asset<T> = this.loadOnDemand(file.path())
 
 object Utility {
     fun getFilesRecursivly(dir: FileHandle, vararg fileExt: String = arrayOf()): List<FileHandle> {
@@ -67,28 +71,30 @@ object Utility {
         return files
     }
 
-    data class GameConfig(val width: Int, val height: Int, val vsync: Boolean, val fullscreen: Boolean, val soundVolume: Float)
+    private val configPath = Constants.assetsDir + "config.json"
+
+    data class GameConfig(val width: Int, val height: Int, val fullscreen: Boolean, val soundVolume: Float)
+
     /**
      * Charge le fichier de configuration du jeu
      */
     fun loadGameConfig(): GameConfig {
-        if(File(Constants.configPath).exists()) {
+        if (File(configPath).exists()) {
             try {
-                val root = JsonReader().parse(FileReader(Constants.configPath))
+                val root = JsonReader().parse(FileReader(configPath))
 
                 val screenWidth = root.getInt("width")
                 val screenHeight = root.getInt("height")
-                val vsync = root.getBoolean("vsync")
                 val fullscreen = root.getBoolean("fullscreen")
                 val soundVolume = root.getFloat("soundvolume")
 
-                return GameConfig(screenWidth, screenHeight, vsync, fullscreen, soundVolume)
+                return GameConfig(screenWidth, screenHeight, fullscreen, soundVolume)
             } catch (e: Exception) {
                 System.err.println("Erreur lors du chargement de la configuration du jeu ! Erreur : ${e.message}")
             }
         }
 
-        return GameConfig(1280, 720, true, false, 1f)
+        return GameConfig(1280, 720, true, 1f)
     }
 
     /**
@@ -96,14 +102,13 @@ object Utility {
      */
     fun saveGameConfig(width: Int, height: Int): Boolean {
         try {
-            val writer = JsonWriter(FileWriter(Constants.configPath.toLocalFile().path(), false))
+            val writer = JsonWriter(FileWriter(configPath, false))
             writer.setOutputType(JsonWriter.OutputType.json)
 
             writer.`object`()
 
             writer.name("width").value(width)
             writer.name("height").value(height)
-            writer.name("vsync").value(PCGame.vsync)
             writer.name("fullscreen").value(Gdx.graphics.isFullscreen)
             writer.name("soundvolume").value(PCGame.soundVolume)
 
@@ -120,11 +125,11 @@ object Utility {
 }
 
 object ReflectionUtility {
-    inline fun <reified T: Any> hasNoArgConstructor(klass: KClass<out T>) = findNoArgConstructor(klass) != null
+    inline fun <reified T : Any> hasNoArgConstructor(klass: KClass<out T>) = findNoArgConstructor(klass) != null
 
-    inline fun <reified T: Any> findNoArgConstructor(klass: KClass<out T>): Constructor<T>? {
+    inline fun <reified T : Any> findNoArgConstructor(klass: KClass<out T>): Constructor<T>? {
         klass.constructors.forEach {
-            if(it.parameters.isEmpty())
+            if (it.parameters.isEmpty())
                 return it.javaConstructor.apply { it.isAccessible = true }
         }
         return null
@@ -143,7 +148,7 @@ object ReflectionUtility {
         return fields
     }
 
-    fun simpleNameOf(instance: Any) = instance.javaClass.kotlin.simpleName?: "Nom introuvable"
+    fun simpleNameOf(instance: Any) = instance.javaClass.kotlin.simpleName ?: "Nom introuvable"
 }
 
 object UIUtility {

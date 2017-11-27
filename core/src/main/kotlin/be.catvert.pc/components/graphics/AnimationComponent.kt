@@ -4,20 +4,17 @@ import be.catvert.pc.GameObject
 import be.catvert.pc.PCGame
 import be.catvert.pc.components.RenderableComponent
 import be.catvert.pc.containers.GameObjectContainer
-import be.catvert.pc.scenes.EditorScene
-import be.catvert.pc.utility.Constants
-import be.catvert.pc.utility.CustomEditorImpl
-import be.catvert.pc.utility.Size
-import be.catvert.pc.utility.draw
+import be.catvert.pc.containers.Level
+import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.fasterxml.jackson.annotation.JsonCreator
-import com.fasterxml.jackson.annotation.JsonIgnore
 import glm_.vec2.Vec2
 import imgui.ImGui
+import imgui.functionalProgramming
 import ktx.assets.loadOnDemand
 import ktx.assets.toLocalFile
 import ktx.collections.toGdxArray
@@ -26,7 +23,7 @@ import ktx.collections.toGdxArray
  * Component permettant d'ajouter une animation à un gameObject
  */
 class AnimationComponent(atlasPath: FileHandle, animationRegionName: String, frameDuration: Float) : RenderableComponent(), CustomEditorImpl {
-    @JsonCreator private constructor() : this(Constants.defaultAtlasPath.toLocalFile(), "", 0f)
+    @JsonCreator private constructor() : this(Constants.defaultAtlasPath, "", 0f)
 
     var atlasPath: String = atlasPath.path()
         private set
@@ -39,18 +36,18 @@ class AnimationComponent(atlasPath: FileHandle, animationRegionName: String, fra
             animation.frameDuration = value
         }
 
-    @JsonIgnore private var atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(this.atlasPath).asset
+    private var atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(this.atlasPath).asset
 
-    @JsonIgnore private var animation: Animation<TextureAtlas.AtlasRegion> = loadAnimation(atlas, animationRegionName, frameDuration)
+    private var animation: Animation<TextureAtlas.AtlasRegion> = loadAnimation(atlas, animationRegionName, frameDuration)
 
-    @JsonIgnore private var stateTime = 0f
+    private var stateTime = 0f
 
     fun updateAnimation(atlasPath: FileHandle = this.atlasPath.toLocalFile(), animationRegionName: String = this.animationRegionName, frameDuration: Float = this.frameDuration) {
         this.atlasPath = atlasPath.path()
         this.animationRegionName = animationRegionName
         this.frameDuration = frameDuration
 
-        atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(atlasPath.path()).asset
+        atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(atlasPath).asset
         animation = loadAnimation(atlas, animationRegionName, frameDuration)
     }
 
@@ -62,7 +59,9 @@ class AnimationComponent(atlasPath: FileHandle, animationRegionName: String, fra
 
     override fun render(gameObject: GameObject, batch: Batch) {
         stateTime += Gdx.graphics.deltaTime
-        batch.draw(animation.getKeyFrame(stateTime), gameObject.rectangle, flipX, flipY)
+        batch.setColor(1f, 1f, 1f, alpha)
+        batch.draw(animation.getKeyFrame(stateTime), gameObject.box, flipX, flipY)
+        batch.setColor(1f, 1f, 1f, 1f)
     }
 
     companion object {
@@ -94,13 +93,9 @@ class AnimationComponent(atlasPath: FileHandle, animationRegionName: String, fra
 
                         val frameList = mutableListOf<TextureAtlas.AtlasRegion>()
 
-                        val initialRegion = atlas.findRegion(name + "_0")
-
                         for (i in 0 until count) {
                             val nameNextFrame = name + "_" + i
                             val region = atlas.findRegion(nameNextFrame)
-                            region.regionWidth = initialRegion.regionWidth
-                            region.regionHeight = initialRegion.regionHeight
                             frameList.add(region)
                         }
 
@@ -113,25 +108,27 @@ class AnimationComponent(atlasPath: FileHandle, animationRegionName: String, fra
         }
     }
 
-    @JsonIgnore private val selectAnimationTitle = "Sélection de l'animation"
-    @JsonIgnore private var selectedAtlasIndex = -1
-    @JsonIgnore private var useAtlasSize = false
-    @JsonIgnore private var showLevelAnimations = false
+    private val selectAnimationTitle = "Sélection de l'animation"
+    private var selectedAtlasIndex = -1
+    private var useAtlasSize = false
+    private var showLevelAnimations = false
 
-    override fun insertImgui(gameObject: GameObject, labelName: String, editorScene: EditorScene) {
+    override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
 
         with(ImGui) {
             val region = animation.getKeyFrame(0f)
-            if (imageButton(region.texture.textureObjectHandle, Vec2(gameObject.rectangle.width, gameObject.rectangle.height), Vec2(region.u, region.v), Vec2(region.u2, region.v2))) {
+            if (imageButton(region.texture.textureObjectHandle, Vec2(gameObject.box.width, gameObject.box.height), Vec2(region.u, region.v), Vec2(region.u2, region.v2))) {
                 openPopup(selectAnimationTitle)
             }
 
-            sliderFloat("Vitesse de l'animation", this@AnimationComponent::frameDuration, 0f, 1f)
+            functionalProgramming.withItemWidth(100f) {
+                sliderFloat("Vitesse", this@AnimationComponent::frameDuration, 0f, 1f)
+            }
         }
     }
 
-    override fun insertImguiPopup(gameObject: GameObject, editorScene: EditorScene) {
-        super.insertImguiPopup(gameObject, editorScene)
+    override fun insertImguiPopup(gameObject: GameObject, level: Level) {
+        super.insertImguiPopup(gameObject, level)
 
         with(ImGui) {
             val popupWidth = Gdx.graphics.width / 3 * 2
@@ -142,7 +139,7 @@ class AnimationComponent(atlasPath: FileHandle, animationRegionName: String, fra
                 if (selectedAtlasIndex == -1) {
                     selectedAtlasIndex = PCGame.gameAtlas.indexOfFirst { it == atlasPath.toLocalFile() }
                     if (selectedAtlasIndex == -1) {
-                        selectedAtlasIndex = editorScene.level.resourcesAtlas().indexOfFirst { it == atlasPath.toLocalFile() }
+                        selectedAtlasIndex = level.resourcesAtlas().indexOfFirst { it == atlasPath.toLocalFile() }
                         if (selectedAtlasIndex == -1)
                             selectedAtlasIndex = 0
                         else
@@ -151,13 +148,13 @@ class AnimationComponent(atlasPath: FileHandle, animationRegionName: String, fra
                 }
                 checkbox("Utiliser les animations importées (atlas)", this@AnimationComponent::showLevelAnimations)
                 sameLine()
-                combo("atlas", this@AnimationComponent::selectedAtlasIndex, if(showLevelAnimations) editorScene.level.resourcesAtlas().map { it.nameWithoutExtension() } else PCGame.gameAtlas.map { it.nameWithoutExtension() })
+                combo("atlas", this@AnimationComponent::selectedAtlasIndex, if (showLevelAnimations) level.resourcesAtlas().map { it.nameWithoutExtension() } else PCGame.gameAtlas.map { it.nameWithoutExtension() })
                 checkbox("Mettre à jour la taille du gameObject", this@AnimationComponent::useAtlasSize)
 
                 var sumImgsWidth = 0f
 
-                val atlasPath = if(showLevelAnimations) editorScene.level.resourcesAtlas().getOrNull(selectedAtlasIndex)?.path() else PCGame.gameAtlas.getOrNull(selectedAtlasIndex)?.path()
-                if(atlasPath != null) {
+                val atlasPath = if (showLevelAnimations) level.resourcesAtlas().getOrNull(selectedAtlasIndex)?.path() else PCGame.gameAtlas.getOrNull(selectedAtlasIndex)?.path()
+                if (atlasPath != null) {
                     val atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(atlasPath).asset
 
                     findAnimationRegionsNameInAtlas(atlas).forEach { it ->
@@ -166,13 +163,13 @@ class AnimationComponent(atlasPath: FileHandle, animationRegionName: String, fra
                         if (imageButton(region.texture.textureObjectHandle, imgBtnSize, Vec2(region.u, region.v), Vec2(region.u2, region.v2))) {
                             updateAnimation(atlasPath.toLocalFile(), it)
                             if (useAtlasSize)
-                                gameObject.rectangle.size = Size(region.regionWidth, region.regionHeight)
+                                gameObject.box.size = Size(region.regionWidth, region.regionHeight)
                             closeCurrentPopup()
                         }
 
                         sumImgsWidth += imgBtnSize.x
 
-                        if(sumImgsWidth + 400f < popupWidth)
+                        if (sumImgsWidth + 400f < popupWidth)
                             sameLine()
                         else
                             sumImgsWidth = 0f

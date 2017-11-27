@@ -11,18 +11,17 @@ import com.fasterxml.jackson.annotation.JsonCreator
  * @see Level
  */
 class LevelAction(@ExposeEditor var action: LevelActions = LevelActions.FAIL_EXIT) : Action {
-    @JsonCreator private constructor(): this(LevelActions.FAIL_EXIT)
+    @JsonCreator private constructor() : this(LevelActions.FAIL_EXIT)
 
     enum class LevelActions {
         SUCCESS_EXIT, FAIL_EXIT
     }
 
     override fun invoke(gameObject: GameObject) {
-        if(gameObject.container != null && gameObject.container is Level) {
-            val level = gameObject.container as Level
-            when(action) {
-                LevelAction.LevelActions.SUCCESS_EXIT -> level.exit(true)
-                LevelAction.LevelActions.FAIL_EXIT -> level.exit(false)
+        (gameObject.container as? Level)?.apply {
+            when (action) {
+                LevelAction.LevelActions.SUCCESS_EXIT -> exit(true)
+                LevelAction.LevelActions.FAIL_EXIT -> exit(false)
             }
         }
     }
