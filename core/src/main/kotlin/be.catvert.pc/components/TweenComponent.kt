@@ -20,7 +20,7 @@ import kotlin.reflect.KClass
 class TweenComponent(var tweenData: Array<TweenData>) : BasicComponent(), CustomEditorImpl {
     @JsonCreator private constructor() : this(arrayOf())
 
-    data class TweenData(var name: String, var type: GameObjectTweenAccessor.GameObjectTween, var target: FloatArray, var duration: Float, var newComponents: Array<Component>, var keepComponents: Array<Class<out Component>>, var endAction: Action) : CustomEditorImpl {
+    data class TweenData(var name: String, var type: GameObjectTweenAccessor.GameObjectTween, var target: FloatArray, var duration: Float, var keepComponents: Array<Class<out Component>>, var endAction: Action) : CustomEditorImpl {
         private var started = false
         fun start(gameObject: GameObject) {
             if (started)
@@ -30,10 +30,6 @@ class TweenComponent(var tweenData: Array<TweenData>) : BasicComponent(), Custom
                 gameObject.getCurrentState().getComponents().forEach {
                     if(keepComponents.contains(it.javaClass))
                         addComponent(it)
-                }
-
-                newComponents.forEach {
-                    addComponent(it)
                 }
             }
 
@@ -74,11 +70,6 @@ class TweenComponent(var tweenData: Array<TweenData>) : BasicComponent(), Custom
                                 PCGame.componentsClasses[index].java
                         }.toTypedArray()
                     }
-
-                    ImguiHelper.addImguiWidgetsArray("new components", this@TweenData::newComponents, { AtlasComponent() }, {
-                        //val index = intArrayOf()
-                      //  combo("component", index, )
-                    }, {})
 
                     treePop()
                 }

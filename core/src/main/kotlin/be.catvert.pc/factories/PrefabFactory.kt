@@ -60,7 +60,7 @@ enum class PrefabFactory(val prefab: Prefab) {
     ),
     Spider(
             Prefab("spider", "Catvert", GameObject(GameObject.Tag.Enemy, Rect(size = Size(48, 48)), null) {
-                this += AnimationComponent(Constants.atlasDirPath.child("More Enemies Animations/enemies.atlas"), "spider_walk", 0.33f)
+                this += AnimationComponent(0, arrayOf(AnimationComponent.AnimationData(Constants.atlasDirPath.child("More Enemies Animations/enemies.atlas"), "spider_walk", 0.33f)))
                 this += PhysicsComponent(false, 5)
                 this += LifeComponent(RemoveGOAction())
                 this += AIComponent(LifeAction(LifeAction.LifeActions.REMOVE_LP), arrayOf(CollisionSide.OnDown, CollisionSide.OnRight, CollisionSide.OnLeft), LifeAction(LifeAction.LifeActions.REMOVE_LP), arrayOf(CollisionSide.OnUp))
@@ -69,7 +69,7 @@ enum class PrefabFactory(val prefab: Prefab) {
     ),
     SnakeSlime(
             Prefab("snake slime", "Catvert", GameObject(GameObject.Tag.Enemy, Rect(size = Size(35, 120)), null) {
-                this += AnimationComponent(Constants.atlasDirPath.child("More Enemies Animations/enemies.atlas"), "snakeSlime", 0.33f)
+                this += AnimationComponent(0, arrayOf(AnimationComponent.AnimationData(Constants.atlasDirPath.child("More Enemies Animations/enemies.atlas"), "snakeSlime", 0.33f)))
                 this += PhysicsComponent(true)
                 this += LifeComponent(RemoveGOAction())
                 this += AIComponent(LifeAction(LifeAction.LifeActions.REMOVE_LP), arrayOf(CollisionSide.OnDown, CollisionSide.OnRight, CollisionSide.OnLeft, CollisionSide.OnDown), LifeAction(LifeAction.LifeActions.REMOVE_LP), arrayOf())

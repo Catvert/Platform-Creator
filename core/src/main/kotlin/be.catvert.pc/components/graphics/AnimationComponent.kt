@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonIgnore
 import glm_.vec2.Vec2
 import imgui.ImGui
 import imgui.functionalProgramming
@@ -22,46 +23,144 @@ import ktx.collections.toGdxArray
 /**
  * Component permettant d'ajouter une animation à un gameObject
  */
-class AnimationComponent(atlasPath: FileHandle, animationRegionName: String, frameDuration: Float) : RenderableComponent(), CustomEditorImpl {
-    @JsonCreator private constructor() : this(Constants.defaultAtlasPath, "", 0f)
+class AnimationComponent(var currentAnimation: Int, var animations: Array<AnimationData>) : RenderableComponent(), CustomEditorImpl {
+    @JsonCreator private constructor() : this(0, arrayOf())
 
-    var atlasPath: String = atlasPath.path()
-        private set
-    var animationRegionName: String = animationRegionName
-        private set
+    class AnimationData(atlasFile: FileHandle, var animationRegionName: String, frameDuration: Float): CustomEditorImpl {
+        @JsonCreator private constructor() : this(Constants.defaultAtlasPath, "", 0.33f)
 
-    var frameDuration: Float = frameDuration
-        set(value) {
-            field = value
-            animation.frameDuration = value
+        var atlasPath = atlasFile.path()
+
+        var frameDuration: Float = frameDuration
+            set(value) {
+                field = value
+                animation.frameDuration = value
+            }
+
+        private var atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(this.atlasPath).asset
+
+        private var animation: Animation<TextureAtlas.AtlasRegion> = loadAnimation(atlas, animationRegionName, frameDuration)
+
+        private var stateTime = 0f
+
+        @JsonIgnore
+        fun getAnimationFrame(): TextureAtlas.AtlasRegion {
+            stateTime += Gdx.graphics.deltaTime
+            return animation.getKeyFrame(stateTime, true)
         }
 
-    private var atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(this.atlasPath).asset
+        fun updateAnimation(atlasPath: FileHandle = this.atlasPath.toLocalFile(), animationRegionName: String = this.animationRegionName, frameDuration: Float = this.frameDuration) {
+            this.atlasPath = atlasPath.path()
+            this.animationRegionName = animationRegionName
+            this.frameDuration = frameDuration
 
-    private var animation: Animation<TextureAtlas.AtlasRegion> = loadAnimation(atlas, animationRegionName, frameDuration)
+            atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(atlasPath).asset
+            animation = loadAnimation(atlas, animationRegionName, frameDuration)
+        }
 
-    private var stateTime = 0f
+        private val selectAnimationTitle = "Sélection de l'animation"
+        private var selectedAtlasIndex = -1
+        private var useAtlasSize = false
+        private var showLevelAnimations = false
+        override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
 
-    fun updateAnimation(atlasPath: FileHandle = this.atlasPath.toLocalFile(), animationRegionName: String = this.animationRegionName, frameDuration: Float = this.frameDuration) {
-        this.atlasPath = atlasPath.path()
-        this.animationRegionName = animationRegionName
-        this.frameDuration = frameDuration
+            with(ImGui) {
+                val region = animation.getKeyFrame(0f)
+                if (imageButton(region.texture.textureObjectHandle, Vec2(gameObject.box.width, gameObject.box.height), Vec2(region.u, region.v), Vec2(region.u2, region.v2))) {
+                    openPopup(selectAnimationTitle)
+                }
 
-        atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(atlasPath).asset
-        animation = loadAnimation(atlas, animationRegionName, frameDuration)
+                functionalProgramming.withItemWidth(100f) {
+                    sliderFloat("Vitesse", this@AnimationData::frameDuration, 0f, 1f)
+                }
+            }
+        }
+
+        override fun insertImguiPopup(gameObject: GameObject, level: Level) {
+            super.insertImguiPopup(gameObject, level)
+
+            with(ImGui) {
+                val popupWidth = Gdx.graphics.width / 3 * 2
+                val popupHeight = Gdx.graphics.height / 3 * 2
+                setNextWindowSize(Vec2(popupWidth, popupHeight))
+                setNextWindowPos(Vec2(Gdx.graphics.width / 2f - popupWidth / 2f, Gdx.graphics.height / 2f - popupHeight / 2f))
+                if (beginPopup(selectAnimationTitle)) {
+                    if (selectedAtlasIndex == -1) {
+                        selectedAtlasIndex = PCGame.gameAtlas.indexOfFirst { it == atlasPath.toLocalFile() }
+                        if (selectedAtlasIndex == -1) {
+                            selectedAtlasIndex = level.resourcesAtlas().indexOfFirst { it == atlasPath.toLocalFile() }
+                            if (selectedAtlasIndex == -1)
+                                selectedAtlasIndex = 0
+                            else
+                                showLevelAnimations = true
+                        }
+                    }
+                    checkbox("Utiliser les animations importées (atlas)", this@AnimationData::showLevelAnimations)
+                    sameLine()
+                    combo("atlas", this@AnimationData::selectedAtlasIndex, if (showLevelAnimations) level.resourcesAtlas().map { it.nameWithoutExtension() } else PCGame.gameAtlas.map { it.nameWithoutExtension() })
+                    checkbox("Mettre à jour la taille du gameObject", this@AnimationData::useAtlasSize)
+
+                    var sumImgsWidth = 0f
+
+                    val atlasPath = if (showLevelAnimations) level.resourcesAtlas().getOrNull(selectedAtlasIndex)?.path() else PCGame.gameAtlas.getOrNull(selectedAtlasIndex)?.path()
+                    if (atlasPath != null) {
+                        val atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(atlasPath).asset
+
+                        findAnimationRegionsNameInAtlas(atlas).forEach { it ->
+                            val region = atlas.findRegion(it + "_0")
+                            val imgBtnSize = Vec2(Math.min(region.regionWidth, 200), Math.min(region.regionHeight, 200))
+                            if (imageButton(region.texture.textureObjectHandle, imgBtnSize, Vec2(region.u, region.v), Vec2(region.u2, region.v2))) {
+                                updateAnimation(atlasPath.toLocalFile(), it)
+                                if (useAtlasSize)
+                                    gameObject.box.size = Size(region.regionWidth, region.regionHeight)
+                                closeCurrentPopup()
+                            }
+                            sumImgsWidth += imgBtnSize.x
+
+                            if (sumImgsWidth + 400f < popupWidth)
+                                sameLine()
+                            else
+                                sumImgsWidth = 0f
+                        }
+                    }
+
+                    endPopup()
+                }
+            }
+        }
     }
+
 
     override fun onAddToContainer(gameObject: GameObject, container: GameObjectContainer) {
         super.onAddToContainer(gameObject, container)
 
-        updateAnimation()
+        animations.forEach {
+            it.updateAnimation()
+        }
     }
 
     override fun render(gameObject: GameObject, batch: Batch) {
-        stateTime += Gdx.graphics.deltaTime
-        batch.setColor(1f, 1f, 1f, alpha)
-        batch.draw(animation.getKeyFrame(stateTime), gameObject.box, flipX, flipY)
-        batch.setColor(1f, 1f, 1f, 1f)
+        if(currentAnimation in animations.indices) {
+            val animation = animations[currentAnimation]
+            batch.setColor(1f, 1f, 1f, alpha)
+            batch.draw(animation.getAnimationFrame(), gameObject.box, flipX, flipY)
+            batch.setColor(1f, 1f, 1f, 1f)
+        }
+    }
+
+    override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
+        with(ImGui) {
+            functionalProgramming.withItemWidth(100f) {
+                sliderInt("animation", this@AnimationComponent::currentAnimation, 0, animations.size - 1)
+            }
+            ImguiHelper.addImguiWidgetsArray("animations", this@AnimationComponent::animations, { AnimationData(Constants.defaultAtlasPath, "", 0.33f) }, {
+                if(treeNode(it.obj.animationRegionName)) {
+                    it.obj.insertImgui(it.obj.animationRegionName, gameObject, level)
+                    it.obj.insertImguiPopup(gameObject, level)
+                    treePop()
+                }
+            }, {})
+        }
     }
 
     companion object {
@@ -108,76 +207,4 @@ class AnimationComponent(atlasPath: FileHandle, animationRegionName: String, fra
         }
     }
 
-    private val selectAnimationTitle = "Sélection de l'animation"
-    private var selectedAtlasIndex = -1
-    private var useAtlasSize = false
-    private var showLevelAnimations = false
-
-    override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
-
-        with(ImGui) {
-            val region = animation.getKeyFrame(0f)
-            if (imageButton(region.texture.textureObjectHandle, Vec2(gameObject.box.width, gameObject.box.height), Vec2(region.u, region.v), Vec2(region.u2, region.v2))) {
-                openPopup(selectAnimationTitle)
-            }
-
-            functionalProgramming.withItemWidth(100f) {
-                sliderFloat("Vitesse", this@AnimationComponent::frameDuration, 0f, 1f)
-            }
-        }
-    }
-
-    override fun insertImguiPopup(gameObject: GameObject, level: Level) {
-        super.insertImguiPopup(gameObject, level)
-
-        with(ImGui) {
-            val popupWidth = Gdx.graphics.width / 3 * 2
-            val popupHeight = Gdx.graphics.height / 3 * 2
-            setNextWindowSize(Vec2(popupWidth, popupHeight))
-            setNextWindowPos(Vec2(Gdx.graphics.width / 2f - popupWidth / 2f, Gdx.graphics.height / 2f - popupHeight / 2f))
-            if (beginPopup(selectAnimationTitle)) {
-                if (selectedAtlasIndex == -1) {
-                    selectedAtlasIndex = PCGame.gameAtlas.indexOfFirst { it == atlasPath.toLocalFile() }
-                    if (selectedAtlasIndex == -1) {
-                        selectedAtlasIndex = level.resourcesAtlas().indexOfFirst { it == atlasPath.toLocalFile() }
-                        if (selectedAtlasIndex == -1)
-                            selectedAtlasIndex = 0
-                        else
-                            showLevelAnimations = true
-                    }
-                }
-                checkbox("Utiliser les animations importées (atlas)", this@AnimationComponent::showLevelAnimations)
-                sameLine()
-                combo("atlas", this@AnimationComponent::selectedAtlasIndex, if (showLevelAnimations) level.resourcesAtlas().map { it.nameWithoutExtension() } else PCGame.gameAtlas.map { it.nameWithoutExtension() })
-                checkbox("Mettre à jour la taille du gameObject", this@AnimationComponent::useAtlasSize)
-
-                var sumImgsWidth = 0f
-
-                val atlasPath = if (showLevelAnimations) level.resourcesAtlas().getOrNull(selectedAtlasIndex)?.path() else PCGame.gameAtlas.getOrNull(selectedAtlasIndex)?.path()
-                if (atlasPath != null) {
-                    val atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(atlasPath).asset
-
-                    findAnimationRegionsNameInAtlas(atlas).forEach { it ->
-                        val region = atlas.findRegion(it + "_0")
-                        val imgBtnSize = Vec2(Math.min(region.regionWidth, 200), Math.min(region.regionHeight, 200))
-                        if (imageButton(region.texture.textureObjectHandle, imgBtnSize, Vec2(region.u, region.v), Vec2(region.u2, region.v2))) {
-                            updateAnimation(atlasPath.toLocalFile(), it)
-                            if (useAtlasSize)
-                                gameObject.box.size = Size(region.regionWidth, region.regionHeight)
-                            closeCurrentPopup()
-                        }
-
-                        sumImgsWidth += imgBtnSize.x
-
-                        if (sumImgsWidth + 400f < popupWidth)
-                            sameLine()
-                        else
-                            sumImgsWidth = 0f
-                    }
-                }
-
-                endPopup()
-            }
-        }
-    }
 }
