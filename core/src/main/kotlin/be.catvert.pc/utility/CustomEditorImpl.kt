@@ -5,6 +5,4 @@ import be.catvert.pc.containers.Level
 
 interface CustomEditorImpl {
     fun insertImgui(labelName: String, gameObject: GameObject, level: Level)
-
-    fun insertImguiPopup(gameObject: GameObject, level: Level) = Unit
 }

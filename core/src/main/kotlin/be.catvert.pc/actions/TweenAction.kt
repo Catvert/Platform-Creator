@@ -19,7 +19,7 @@ class TweenAction(var tweenIndex: Int) : Action, CustomEditorImpl {
         with(ImGui) {
             val tweens = gameObject.getCurrentState().getComponent<TweenComponent>()?.tweenData ?: arrayOf()
             functionalProgramming.withItemWidth(100f) {
-                combo("tween", this@TweenAction::tweenIndex, tweens.map { it.name })
+                combo("tween", ::tweenIndex, tweens.map { it.name })
             }
         }
     }

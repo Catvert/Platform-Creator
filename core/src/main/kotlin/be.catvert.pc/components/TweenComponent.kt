@@ -20,7 +20,7 @@ import kotlin.reflect.KClass
 class TweenComponent(var tweenData: Array<TweenData>) : BasicComponent(), CustomEditorImpl {
     @JsonCreator private constructor() : this(arrayOf())
 
-    data class TweenData(var name: String, var type: GameObjectTweenAccessor.GameObjectTween, var target: FloatArray, var duration: Float, var keepComponents: Array<Class<out Component>>, var endAction: Action) : CustomEditorImpl {
+    class TweenData(var name: String, var type: GameObjectTweenAccessor.GameObjectTween, var target: FloatArray, var duration: Float, var keepComponents: Array<Class<out Component>>, var endAction: Action) : CustomEditorImpl {
         private var started = false
         fun start(gameObject: GameObject) {
             if (started)
@@ -54,16 +54,18 @@ class TweenComponent(var tweenData: Array<TweenData>) : BasicComponent(), Custom
                     if (combo("type", index, GameObjectTweenAccessor.GameObjectTween.values().map { it.name }))
                         type = GameObjectTweenAccessor.GameObjectTween.values()[index[0]]
                     inputFloatN("target", target, target.size, 1, 0)
-                    sliderFloat("duration", this@TweenData::duration, 0f, 10f, "%.1f")
+                    sliderFloat("duration", ::duration, 0f, 10f, "%.1f")
 
                     val item = ImguiHelper.Item(keepComponents.mapIndexed { i, _ -> i }.toTypedArray())
                     if(ImguiHelper.addImguiWidgetsArray("keep components", item, { 0 }, {
                         val index = intArrayOf(PCGame.componentsClasses.indexOf(keepComponents[it.obj].kotlin))
                         if(combo("", index, PCGame.componentsClasses.map { it.simpleName?: "Nom inconnu" })) {
                             keepComponents[it.obj] = PCGame.componentsClasses[index[0]].java
+                            true
                         }
-                    }) {}) {
-                        keepComponents = item.obj.mapIndexed { index, i ->
+                        false
+                    })) {
+                        keepComponents = item.obj.mapIndexed { index, _ ->
                             if(index in keepComponents.indices)
                                 keepComponents[index]
                             else
@@ -86,30 +88,24 @@ class TweenComponent(var tweenData: Array<TweenData>) : BasicComponent(), Custom
     private var currentTweenIndex = 0
     override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
         with(ImGui) {
-            ImguiHelper.addImguiWidgetsArray("tweens", this@TweenComponent::tweenData, { TweenFactory.EmptyTween() }, {
+            ImguiHelper.addImguiWidgetsArray("tweens", ::tweenData, { TweenFactory.EmptyTween() }, {
                 it.obj.insertImgui(it.obj.name, gameObject, level)
+                false
             }) {
                 if (button("Ajouter depuis..", Vec2(-1, 20f)))
                     openPopup(addTweenTitle)
-            }
 
-        }
-    }
+                if (beginPopup(addTweenTitle)) {
+                    functionalProgramming.withItemWidth(100f) {
+                        combo("tweens", ::currentTweenIndex, TweenFactory.values().map { it.name })
+                    }
+                    if (button("Ajouter", Vec2(-1, 20f))) {
+                        tweenData += TweenFactory.values()[currentTweenIndex]()
+                        closeCurrentPopup()
+                    }
 
-    override fun insertImguiPopup(gameObject: GameObject, level: Level) {
-        super.insertImguiPopup(gameObject, level)
-
-        with(ImGui) {
-            if (beginPopup(addTweenTitle)) {
-                functionalProgramming.withItemWidth(100f) {
-                    combo("tweens", this@TweenComponent::currentTweenIndex, TweenFactory.values().map { it.name })
+                    endPopup()
                 }
-                if (button("Ajouter", Vec2(-1, 20f))) {
-                    tweenData += TweenFactory.values()[currentTweenIndex]()
-                    closeCurrentPopup()
-                }
-
-                endPopup()
             }
         }
     }

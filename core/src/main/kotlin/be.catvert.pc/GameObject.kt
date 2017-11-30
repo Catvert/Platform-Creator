@@ -109,10 +109,6 @@ class GameObject(@ExposeEditor var tag: Tag,
         return addState(state)
     }
 
-    fun removeState(state: GameObjectState) {
-        states.remove(state)
-    }
-
     fun removeState(stateIndex: Int) {
         states.remove(states.elementAt(stateIndex))
     }
@@ -143,7 +139,7 @@ class GameObject(@ExposeEditor var tag: Tag,
     override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
         with(ImGui) {
             functionalProgramming.withItemWidth(100f) {
-                combo("State initial", this@GameObject::initialState, getStates().map { it.name })
+                combo("State initial", ::initialState, getStates().map { it.name })
             }
         }
     }

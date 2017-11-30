@@ -6,6 +6,7 @@
 - Traduire tout le texte visible en français
 - Javadoc + commentaires
 - Refactoriser findGameObjectUnderMouse() -> ajouter méthode pour récupérer cell à un point précis
+- [Optimisation] Texture, Atlas et Animation qui charge les assets depuis l'assetManager toutes les frames dans imgui
 ## BUGS
 
 - Logo du jeu problème lors du redimensionnement fenêtre (+fullscreen?)

@@ -28,7 +28,7 @@ class SoundAction(var soundIndex: Int) : Action, CustomEditorImpl {
             val sounds = gameObject.getCurrentState().getComponent<SoundComponent>()?.sounds ?: arrayOf()
 
             functionalProgramming.withItemWidth(100f) {
-                combo("son", this@SoundAction::soundIndex, sounds.map { it.toString() })
+                combo("son", ::soundIndex, sounds.map { it.toString() })
 
                 sameLine()
                 if(button("jouer")) {

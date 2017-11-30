@@ -19,6 +19,7 @@ import ktx.actors.onClick
 import ktx.actors.plus
 import ktx.assets.Asset
 import ktx.assets.loadOnDemand
+import ktx.assets.toLocalFile
 import ktx.vis.window
 import java.io.File
 import java.io.FileReader
@@ -54,7 +55,12 @@ fun Shape2D.contains(point: Point) = this.contains(point.x.toFloat(), point.y.to
 
 fun Graphics.toSize() = Size(width, height)
 
+inline fun <reified T : Any> AssetManager.loadOnDemand(file: FileWrapper): Asset<T> = this.loadOnDemand(file.get())
 inline fun <reified T : Any> AssetManager.loadOnDemand(file: FileHandle): Asset<T> = this.loadOnDemand(file.path())
+
+fun String?.toFileWrapper() = FileWrapper(this.toLocalFile())
+
+fun FileHandle.toFileWrapper() = FileWrapper(this)
 
 object Utility {
     fun getFilesRecursivly(dir: FileHandle, vararg fileExt: String = arrayOf()): List<FileHandle> {

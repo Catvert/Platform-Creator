@@ -25,9 +25,9 @@ class InputComponent(var inputsData: Array<InputData>) : LogicsComponent(), Cust
         override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
             with(ImGui) {
                 if (treeNode(labelName)) {
-                    ImguiHelper.addImguiWidget("", this@InputData::key, gameObject, level, ExposeEditorFactory.createExposeEditor(customType = CustomType.KEY_INT))
-                    checkbox("Pressé", this@InputData::justPressed)
-                    ImguiHelper.addImguiWidget("action", this@InputData::action, gameObject, level, ExposeEditorFactory.empty)
+                    ImguiHelper.addImguiWidget("", ::key, gameObject, level, ExposeEditorFactory.createExposeEditor(customType = CustomType.KEY_INT))
+                    checkbox("Pressé", ::justPressed)
+                    ImguiHelper.addImguiWidget("action", ::action, gameObject, level, ExposeEditorFactory.empty)
 
                     treePop()
                 }
@@ -50,7 +50,8 @@ class InputComponent(var inputsData: Array<InputData>) : LogicsComponent(), Cust
     override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
         ImguiHelper.addImguiWidgetsArray("inputs", this::inputsData, { InputData() }, {
             it.obj.insertImgui(Input.Keys.toString(it.obj.key), gameObject, level)
-        }) {}
+            false
+        })
     }
 
 }

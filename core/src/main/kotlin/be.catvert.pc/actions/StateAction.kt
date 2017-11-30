@@ -20,7 +20,7 @@ class StateAction(var stateIndex: Int) : Action, CustomEditorImpl {
     override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
         with(ImGui) {
             functionalProgramming.withItemWidth(100f) {
-                combo("state", this@StateAction::stateIndex, gameObject.getStates().map { it.name })
+                combo("state", ::stateIndex, gameObject.getStates().map { it.name })
             }
         }
     }

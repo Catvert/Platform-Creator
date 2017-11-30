@@ -8,6 +8,7 @@ import com.badlogic.gdx.Input
 import glm_.vec2.Vec2
 import imgui.ImGui
 import imgui.functionalProgramming
+import ktx.collections.GdxArray
 import ktx.collections.toGdxArray
 import kotlin.reflect.KMutableProperty0
 
@@ -16,14 +17,16 @@ object ImguiHelper {
         inline fun <reified T : Any> cast() = this as Item<T>
     }
 
-    inline fun <reified T : Any> addImguiWidgetsArray(label: String, array: KMutableProperty0<Array<T>>, crossinline createItem: () -> T, block: (item: Item<T>) -> Unit, endBlock: () -> Unit) {
+    inline fun <reified T : Any> addImguiWidgetsArray(label: String, array: KMutableProperty0<Array<T>>, crossinline createItem: () -> T, itemBlock: (item: Item<T>) -> Boolean, endBlock: () -> Unit = {}): Boolean {
         val item = Item(array.get())
-        if (addImguiWidgetsArray(label, item, createItem, block, endBlock)) {
+        if (addImguiWidgetsArray(label, item, createItem, itemBlock, endBlock)) {
             array.set(item.obj)
+            return true
         }
+        return false
     }
 
-    inline fun <reified T : Any> addImguiWidgetsArray(label: String, array: Item<Array<T>>, crossinline createItem: () -> T, block: (item: Item<T>) -> Unit, endBlock: () -> Unit): Boolean {
+    inline fun <reified T : Any> addImguiWidgetsArray(label: String, array: Item<Array<T>>, crossinline createItem: () -> T, itemBlock: (item: Item<T>) -> Boolean, endBlock: () -> Unit = {}): Boolean {
         var valueChanged = false
 
         with(ImGui) {
@@ -32,7 +35,7 @@ object ImguiHelper {
                     for (index in 0 until array.obj.size) {
                         pushId("suppr $index")
                         if (button("Suppr.")) {
-                            array.obj = array.obj.toGdxArray().apply { removeIndex(index) }.toArray()
+                            array.obj = array.obj.toMutableList().apply { removeAt(index) }.toTypedArray()
                             valueChanged = true
                             break
                         }
@@ -41,7 +44,8 @@ object ImguiHelper {
                         sameLine()
                         functionalProgramming.withId(index) {
                             val item = Item(array.obj[index])
-                            block(item)
+                            if(itemBlock(item))
+                                valueChanged = true
                             array.obj[index] = item.obj
                         }
                     }
@@ -67,8 +71,6 @@ object ImguiHelper {
     }
 
     inline fun <reified T : Any> addImguiWidget(label: String, item: Item<T>, gameObject: GameObject, level: Level, exposeEditor: ExposeEditor): Boolean {
-        val dialogsImgui = mutableListOf<CustomEditorImpl>()
-
         var valueChanged = false
 
         val value = item.obj
@@ -80,8 +82,7 @@ object ImguiHelper {
                         valueChanged = action(label, item.cast(), gameObject, level)
                     }
                     is CustomEditorImpl -> {
-                        dialogsImgui.add(value as CustomEditorImpl)
-                        value.insertImgui(label, gameObject, level)
+                        custom(label, item.cast<CustomEditorImpl>().obj, gameObject, level)
                     }
                     is Boolean -> {
                         valueChanged = checkbox(label, item.cast<Boolean>()::obj)
@@ -121,14 +122,15 @@ object ImguiHelper {
                 }
             }
         }
-        dialogsImgui.forEach {
-            it.insertImguiPopup(gameObject, level)
-        }
 
         return valueChanged
     }
 
-    fun ImGui.action(label: String, action: Item<Action>, gameObject: GameObject, level: Level): Boolean {
+    fun custom(label: String, value: CustomEditorImpl, gameObject: GameObject, level: Level) {
+        value.insertImgui(label, gameObject, level)
+    }
+
+    fun action(label: String, action: Item<Action>, gameObject: GameObject, level: Level): Boolean {
         var valueChanged = false
         with(ImGui) {
             if (treeNode(label)) {
@@ -152,7 +154,7 @@ object ImguiHelper {
         return valueChanged
     }
 
-    fun ImGui.point(point: Item<Point>, minPoint: Point, maxPoint: Point): Boolean {
+    fun point(point: Item<Point>, minPoint: Point, maxPoint: Point): Boolean {
         var valueChanged = false
         val pos = intArrayOf(point.obj.x, point.obj.y)
         functionalProgramming.withItemWidth(150f) {
@@ -168,7 +170,7 @@ object ImguiHelper {
         return valueChanged
     }
 
-    fun ImGui.size(size: Item<Size>, minSize: Size, maxSize: Size): Boolean {
+    fun size(size: Item<Size>, minSize: Size, maxSize: Size): Boolean {
         var valueChanged = false
         val sizeArr = intArrayOf(size.obj.width, size.obj.height)
         functionalProgramming.withItemWidth(150f) {
@@ -184,12 +186,12 @@ object ImguiHelper {
         return valueChanged
     }
 
-    fun ImGui.gdxKey(key: Item<Int>): Boolean {
+    fun gdxKey(key: Item<Int>): Boolean {
         var valueChanged = false
 
         val value = Input.Keys.toString(key.obj).toCharArray()
         functionalProgramming.withItemWidth(100f) {
-            if (inputText("touche", value)) {
+            if (ImGui.inputText("touche", value)) {
                 key.obj = Input.Keys.valueOf(String(value))
                 valueChanged = true
             }
@@ -198,14 +200,14 @@ object ImguiHelper {
         return valueChanged
     }
 
-    fun ImGui.enum(label: String, enum: Item<Enum<*>>): Boolean {
+    fun enum(label: String, enum: Item<Enum<*>>): Boolean {
         var valueChanged = false
 
         val enumConstants = enum.obj.javaClass.enumConstants
         val selectedIndex = intArrayOf(enumConstants.indexOfFirst { it == enum.obj })
 
         functionalProgramming.withItemWidth(100f) {
-            if (combo(label, selectedIndex, enumConstants.map { (it as Enum<*>).name })) {
+            if (ImGui.combo(label, selectedIndex, enumConstants.map { (it as Enum<*>).name })) {
                 enum.obj = enumConstants[selectedIndex[0]] as Enum<*>
                 valueChanged = true
             }
@@ -227,7 +229,7 @@ object ImguiHelper {
 
         if (instance is CustomEditorImpl) {
             instance.insertImgui(ReflectionUtility.simpleNameOf(instance), gameObject, level)
-            instance.insertImguiPopup(gameObject, level)
+           // instance.in
         }
     }
 }

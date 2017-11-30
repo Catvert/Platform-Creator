@@ -14,8 +14,8 @@ import ktx.assets.loadOnDemand
 import ktx.assets.toLocalFile
 
 
-class SoundComponent(var sounds: Array<SoundData>) : BasicComponent(), CustomEditorImpl {
-    @JsonCreator private constructor() : this(arrayOf())
+class SoundComponent(vararg sounds: SoundData) : BasicComponent(), CustomEditorImpl {
+    var sounds = arrayOf(*sounds)
 
     class SoundData(soundFile: FileHandle, var levelResources: Boolean = false) : CustomEditorImpl {
         @JsonCreator private constructor() : this(Constants.defaultSoundPath)
@@ -49,7 +49,7 @@ class SoundComponent(var sounds: Array<SoundData>) : BasicComponent(), CustomEdi
                     }
 
                     sameLine()
-                    checkbox("Sons importés", this@SoundData::levelResources)
+                    checkbox("Sons importés", ::levelResources)
                 }
             }
         }
@@ -69,6 +69,7 @@ class SoundComponent(var sounds: Array<SoundData>) : BasicComponent(), CustomEdi
     override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
         ImguiHelper.addImguiWidgetsArray("sons", this::sounds, { SoundData(Constants.defaultSoundPath) }, {
             it.obj.insertImgui(it.obj.toString(), gameObject, level)
-        }) {}
+            false
+        })
     }
 }

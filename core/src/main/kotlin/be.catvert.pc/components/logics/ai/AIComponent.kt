@@ -48,15 +48,15 @@ class AIComponent(var actionApplyOnPlayer: Action, var collisionsCondPlayer: Arr
 
     override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
         with(ImGui) {
-            ImguiHelper.addImguiWidgetsArray("joueur", this@AIComponent::collisionsCondPlayer, { CollisionSide.OnLeft }, {
+            ImguiHelper.addImguiWidgetsArray("joueur", ::collisionsCondPlayer, { CollisionSide.OnLeft }, {
                 enum("side", it.cast())
             }) {
-                ImguiHelper.addImguiWidget("action sur le joueur", this@AIComponent::actionApplyOnPlayer, gameObject, level, ExposeEditorFactory.empty)
+                ImguiHelper.addImguiWidget("action sur le joueur", ::actionApplyOnPlayer, gameObject, level, ExposeEditorFactory.empty)
             }
-            ImguiHelper.addImguiWidgetsArray("gameObject", this@AIComponent::collisionsCondGameObject, { CollisionSide.OnLeft }, {
+            ImguiHelper.addImguiWidgetsArray("gameObject", ::collisionsCondGameObject, { CollisionSide.OnLeft }, {
                 enum("side", it.cast())
             }) {
-                ImguiHelper.addImguiWidget("action sur le go", this@AIComponent::actionApplyOnGO, gameObject, level, ExposeEditorFactory.empty)
+                ImguiHelper.addImguiWidget("action sur le go", ::actionApplyOnGO, gameObject, level, ExposeEditorFactory.empty)
             }
         }
 

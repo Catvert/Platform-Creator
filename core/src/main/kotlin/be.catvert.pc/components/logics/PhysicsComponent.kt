@@ -7,7 +7,6 @@ import be.catvert.pc.actions.EmptyAction
 import be.catvert.pc.actions.PhysicsAction
 import be.catvert.pc.actions.PhysicsAction.PhysicsActions
 import be.catvert.pc.components.LogicsComponent
-import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.GameObjectMatrixContainer
 import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.ExposeEditor
@@ -75,14 +74,19 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                        @ExposeEditor var gravity: Boolean = !isStatic,
                        @ExposeEditor var maskCollision: MaskCollision = MaskCollision.ALL,
                        @ExposeEditor(maxInt = 1000) var jumpHeight: Int = 0,
-                       @ExposeEditor var jumpAction: Action = EmptyAction()) : LogicsComponent() {
+                       @ExposeEditor var onLeftAction: Action = EmptyAction(),
+                       @ExposeEditor var onRightAction: Action = EmptyAction(),
+                       @ExposeEditor var onJumpAction: Action = EmptyAction(),
+                       @ExposeEditor var onFallAction: Action = EmptyAction(),
+                       @ExposeEditor var onNothingAction: Action = EmptyAction()) : LogicsComponent() {
     @JsonCreator private constructor() : this(true)
 
+
     /**
-     * Les nextActions représentes les actions que doit faire l'entité pendant le prochain frame
+     * Les physicsActions représentes les actions que doit faire l'entité pendant le prochain frame
      */
     @JsonIgnore
-    val nextActions = mutableSetOf<PhysicsActions>()
+    val physicsActions = mutableSetOf<PhysicsActions>()
 
     private val jumpData: JumpData = JumpData()
 
@@ -112,18 +116,21 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
     override fun update(gameObject: GameObject) {
         if (isStatic) return
 
+        if(physicsActions.isEmpty())
+            onNothingAction(gameObject)
+
         if (gravity && (gameObject.container as? Level)?.applyGravity == true)
-            nextActions += PhysicsAction.PhysicsActions.GRAVITY
+            physicsActions += PhysicsAction.PhysicsActions.GRAVITY
 
         if (jumpData.forceJumping) {
-            nextActions += PhysicsAction.PhysicsActions.JUMP
+            physicsActions += PhysicsAction.PhysicsActions.JUMP
         }
 
         var moveSpeedX = 0f
         var moveSpeedY = 0f
         var addJumpAfterClear = false
 
-        nextActions.forEach action@ {
+        physicsActions.forEach action@ {
             when (it) {
                 PhysicsActions.GO_LEFT -> moveSpeedX -= moveSpeed
                 PhysicsActions.GO_RIGHT -> moveSpeedX += moveSpeed
@@ -147,7 +154,8 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
 
                         moveSpeedY = gravitySpeed.toFloat()
                         addJumpAfterClear = true
-                        jumpAction.invoke(gameObject)
+
+                        onJumpAction(gameObject)
                     } else {
                         // Vérifie si le go est arrivé à la bonne hauteur de saut ou s'il rencontre un obstacle au dessus de lui
                         if (gameObject.box.y >= jumpData.targetHeight || checkYMove(gravitySpeed, gameObject)) {
@@ -173,10 +181,10 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
 
         tryMove(Math.round(moveSpeedX), Math.round(moveSpeedY), gameObject) // move l'entité
 
-        nextActions.clear()
+        physicsActions.clear()
 
         if (addJumpAfterClear)
-            nextActions += PhysicsActions.JUMP
+            physicsActions += PhysicsActions.JUMP
 
         isOnGround = checkYMove(-1, gameObject)
     }
@@ -198,10 +206,20 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
 
             if (!collideOnMove(moveX, 0, gameObject)) {
                 gameObject.box.x = Math.max(0, gameObject.box.x + moveX)
+
+                if (gameObject.box.x != 0 && moveX < 0)
+                    onLeftAction(gameObject)
+                else if (moveX > 0)
+                    onRightAction(gameObject)
+
                 newMoveX = 0
             }
             if (!collideOnMove(0, moveY, gameObject)) {
                 gameObject.box.y += moveY
+
+                if (moveY < 0)
+                    onFallAction(gameObject)
+
                 newMoveY = 0
             }
 
@@ -230,7 +248,8 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
 
         (gameObject.container as? GameObjectMatrixContainer)?.apply {
             getRectCells(newRect).forEach {
-                matrixGrid[it.x][it.y].first.filter { it.id != gameObject.id
+                matrixGrid[it.x][it.y].first.filter {
+                    it.id != gameObject.id
                             && when (it.getCurrentState().getComponent<PhysicsComponent>()?.maskCollision) {
                         MaskCollision.ALL -> true
                         MaskCollision.ONLY_PLAYER -> gameObject.tag == GameObject.Tag.Player

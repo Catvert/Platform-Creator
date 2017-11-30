@@ -55,45 +55,41 @@ class TextureComponent(texturePath: FileHandle) : RenderableComponent(), CustomE
             if (imageButton(texture.textureObjectHandle, Vec2(gameObject.box.width, gameObject.box.height), uv1 = Vec2(1))) {
                 openPopup(selectTextureTitle)
             }
-        }
-    }
 
-    override fun insertImguiPopup(gameObject: GameObject, level: Level) {
-        super.insertImguiPopup(gameObject, level)
+            with(ImGui) {
+                val popupWidth = Gdx.graphics.width / 3 * 2
+                val popupHeight = Gdx.graphics.height / 3 * 2
+                setNextWindowSize(Vec2(popupWidth, popupHeight))
+                setNextWindowPos(Vec2(Gdx.graphics.width / 2f - popupWidth / 2f, Gdx.graphics.height / 2f - popupHeight / 2f))
+                if (beginPopup(selectTextureTitle)) {
+                    checkbox("Afficher les textures importées", ::showLevelTextures)
+                    sameLine()
+                    checkbox("Mettre à jour la taille du gameObject", ::useTextureSize)
 
-        with(ImGui) {
-            val popupWidth = Gdx.graphics.width / 3 * 2
-            val popupHeight = Gdx.graphics.height / 3 * 2
-            setNextWindowSize(Vec2(popupWidth, popupHeight))
-            setNextWindowPos(Vec2(Gdx.graphics.width / 2f - popupWidth / 2f, Gdx.graphics.height / 2f - popupHeight / 2f))
-            if (beginPopup(selectTextureTitle)) {
-                checkbox("Afficher les textures importées", this@TextureComponent::showLevelTextures)
-                sameLine()
-                checkbox("Mettre à jour la taille du gameObject", this@TextureComponent::useTextureSize)
+                    var sumImgsWidth = 0f
 
-                var sumImgsWidth = 0f
+                    val textures = if (showLevelTextures) level.resourcesTextures() else PCGame.gameTextures
 
-                val textures = if (showLevelTextures) level.resourcesTextures() else PCGame.gameTextures
+                    textures.forEach {
+                        val texture = PCGame.assetManager.loadOnDemand<Texture>(it.toFileWrapper()).asset
+                        val imgBtnSize = Vec2(Math.min(texture.width, 200), Math.min(texture.height, 200))
+                        if (imageButton(texture.textureObjectHandle, imgBtnSize, uv1 = Vec2(1))) {
+                            updateTexture(it)
+                            if (useTextureSize)
+                                gameObject.box.size = Size(texture.width, texture.height)
+                            closeCurrentPopup()
+                        }
 
-                textures.forEach {
-                    val texture = PCGame.assetManager.loadOnDemand<Texture>(it).asset
-                    val imgBtnSize = Vec2(Math.min(texture.width, 200), Math.min(texture.height, 200))
-                    if (imageButton(texture.textureObjectHandle, imgBtnSize, uv1 = Vec2(1))) {
-                        updateTexture(it)
-                        if (useTextureSize)
-                            gameObject.box.size = Size(texture.width, texture.height)
-                        closeCurrentPopup()
+                        sumImgsWidth += imgBtnSize.x
+
+                        if (sumImgsWidth + 400f < popupWidth)
+                            sameLine()
+                        else
+                            sumImgsWidth = 0f
                     }
 
-                    sumImgsWidth += imgBtnSize.x
-
-                    if (sumImgsWidth + 400f < popupWidth)
-                        sameLine()
-                    else
-                        sumImgsWidth = 0f
+                    endPopup()
                 }
-
-                endPopup()
             }
         }
     }

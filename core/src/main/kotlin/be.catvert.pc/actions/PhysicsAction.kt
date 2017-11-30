@@ -26,6 +26,6 @@ class PhysicsAction(@ExposeEditor var physicsAction: PhysicsActions = PhysicsAct
     }
 
     override fun invoke(gameObject: GameObject) {
-        gameObject.getCurrentState().getComponent<PhysicsComponent>()?.nextActions?.add(physicsAction)
+        gameObject.getCurrentState().getComponent<PhysicsComponent>()?.physicsActions?.add(physicsAction)
     }
 }
