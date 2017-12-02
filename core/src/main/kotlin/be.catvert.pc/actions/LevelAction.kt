@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
  * Permet par exemple de terminer le niveau selon si le joueur est mort ou a réussi
  * @see Level
  */
-class LevelAction(@ExposeEditor var action: LevelActions = LevelActions.FAIL_EXIT) : Action {
+class LevelAction(@ExposeEditor var action: LevelActions) : Action {
     @JsonCreator private constructor() : this(LevelActions.FAIL_EXIT)
 
     enum class LevelActions {

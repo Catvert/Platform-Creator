@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
  * Action permettant d'appliquer une action physique sur un gameObject ayant le component PhysicsComponent
  * @see PhysicsComponent
  */
-class PhysicsAction(@ExposeEditor var physicsAction: PhysicsActions = PhysicsActions.GO_LEFT) : Action {
+class PhysicsAction(@ExposeEditor var physicsAction: PhysicsActions) : Action {
     @JsonCreator private constructor() : this(PhysicsActions.GO_LEFT)
 
     enum class PhysicsActions {

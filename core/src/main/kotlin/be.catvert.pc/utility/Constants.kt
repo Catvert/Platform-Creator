@@ -45,7 +45,7 @@ object Constants {
 
     val levelDataFile = "data.$levelExtension"
 
-    val defaultAtlasPath = assetsDirPath.child("game/notexture_atlas.atlas") to "notexture"
+    val defaultAtlasPath = assetsDirPath.child("game/notexture_atlas.atlas").toFileWrapper() to "notexture"
     val defaultTexturePath = assetsDirPath.child("game/notexture.png")
     val defaultSoundPath = assetsDirPath.child("game/nosound.wav")
 }

@@ -5,6 +5,7 @@ import be.catvert.pc.Log
 import be.catvert.pc.PCGame
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.scenes.EndLevelScene
+import be.catvert.pc.scenes.SceneManager
 import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.Point
@@ -26,7 +27,7 @@ class Level(val levelPath: String, val gameVersion: Float, var backgroundPath: S
     var applyGravity = true
 
     @JsonIgnore
-    var exit: (success: Boolean) -> Unit = { PCGame.setScene(EndLevelScene(levelPath, it)) }
+    var exit: (success: Boolean) -> Unit = { SceneManager.loadScene(EndLevelScene(levelPath, it)) }
 
     @JsonIgnore
     var scorePoints = 0

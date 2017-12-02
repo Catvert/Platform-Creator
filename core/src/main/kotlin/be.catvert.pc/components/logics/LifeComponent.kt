@@ -39,14 +39,20 @@ class LifeComponent(onDeathAction: Action, vararg lifePointActions: LifePointAct
     private var lifePoint: Int = this.lpActions.size
 
     fun removeLifePoint() {
-        if (lifePoint > 1)
+        if (lifePoint > 1) {
+            lpActions.elementAt(lifePoint - 1).onEndAction(gameObject)
             --lifePoint
-        lpActions.elementAt(lifePoint - 1).onEndAction(gameObject)
+            lpActions.elementAt(lifePoint - 1).onStartAction(gameObject)
+        }
+        else if(lifePoint != -1) {
+            lpActions.elementAt(0).onEndAction(gameObject)
+            lifePoint = -1
+        }
     }
 
     fun kill() {
-        lifePoint = 1
         lpActions.elementAt(0).onEndAction(gameObject)
+        lifePoint = -1
     }
 
     fun addLifePoint() {

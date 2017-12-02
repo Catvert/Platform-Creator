@@ -17,8 +17,8 @@ import imgui.ImGui
 import imgui.functionalProgramming
 import kotlin.reflect.KClass
 
-class TweenComponent(var tweenData: Array<TweenData>) : BasicComponent(), CustomEditorImpl {
-    @JsonCreator private constructor() : this(arrayOf())
+class TweenComponent(vararg tweens: TweenData) : BasicComponent(), CustomEditorImpl {
+    var tweens = arrayOf(*tweens)
 
     class TweenData(var name: String, var type: GameObjectTweenAccessor.GameObjectTween, var target: FloatArray, var duration: Float, var keepComponents: Array<Class<out Component>>, var endAction: Action) : CustomEditorImpl {
         private var started = false
@@ -80,15 +80,15 @@ class TweenComponent(var tweenData: Array<TweenData>) : BasicComponent(), Custom
     }
 
     fun startTween(gameObject: GameObject, tweenIndex: Int) {
-        if (tweenIndex in tweenData.indices)
-            tweenData[tweenIndex].start(gameObject)
+        if (tweenIndex in tweens.indices)
+            tweens[tweenIndex].start(gameObject)
     }
 
     private val addTweenTitle = "Ajouter un tween"
     private var currentTweenIndex = 0
     override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
         with(ImGui) {
-            ImguiHelper.addImguiWidgetsArray("tweens", ::tweenData, { TweenFactory.EmptyTween() }, {
+            ImguiHelper.addImguiWidgetsArray("tweens", ::tweens, { TweenFactory.EmptyTween() }, {
                 it.obj.insertImgui(it.obj.name, gameObject, level)
                 false
             }) {
@@ -100,7 +100,7 @@ class TweenComponent(var tweenData: Array<TweenData>) : BasicComponent(), Custom
                         combo("tweens", ::currentTweenIndex, TweenFactory.values().map { it.name })
                     }
                     if (button("Ajouter", Vec2(-1, 20f))) {
-                        tweenData += TweenFactory.values()[currentTweenIndex]()
+                        tweens += TweenFactory.values()[currentTweenIndex]()
                         closeCurrentPopup()
                     }
 

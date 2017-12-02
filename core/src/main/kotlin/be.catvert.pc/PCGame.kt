@@ -1,14 +1,17 @@
 package be.catvert.pc
 
+import aurelienribon.tweenengine.Timeline
 import aurelienribon.tweenengine.Tween
 import aurelienribon.tweenengine.TweenManager
 import be.catvert.pc.actions.Action
 import be.catvert.pc.components.Component
-import be.catvert.pc.components.graphics.TextureComponent
+import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.i18n.Locales
 import be.catvert.pc.scenes.MainMenuScene
 import be.catvert.pc.scenes.Scene
+import be.catvert.pc.scenes.SceneManager
+import be.catvert.pc.scenes.SceneTweenAccessor
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
@@ -52,6 +55,7 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
         imgui.IO.mouseDrawCursor = true
 
         Tween.registerAccessor(GameObject::class.java, GameObjectTweenAccessor())
+        Tween.registerAccessor(Scene::class.java, SceneTweenAccessor())
 
         Utility.getFilesRecursivly(Constants.backgroundsDirPath, *Constants.levelTextureExtension).forEach {
             backgroundsList.add(it)
@@ -62,8 +66,6 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
         gameTextures = Utility.getFilesRecursivly(Constants.texturesDirPath, *Constants.levelTextureExtension)
 
         gameSounds = Utility.getFilesRecursivly(Constants.soundsDirPath, *Constants.levelSoundExtension)
-
-        currentScene = MainMenuScene()
 
         val handle = (Gdx.graphics as Lwjgl3Graphics).window.let {
             it::class.java.getDeclaredField("windowHandle").apply { isAccessible = true }.getLong(it)
@@ -81,21 +83,21 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
 
         Gdx.graphics.setTitle(Constants.gameTitle + " - ${Gdx.graphics.framesPerSecond} FPS")
 
-        currentScene.update()
+        SceneManager.update()
 
         tweenManager.update(Gdx.graphics.deltaTime)
 
-        currentScene.render(mainBatch)
+        SceneManager.render(mainBatch)
 
         ImGui.render()
 
-        currentScene.calcIsUIHover()
+        SceneManager.currentScene().calcIsUIHover()
     }
 
     override fun resize(width: Int, height: Int) {
         super.resize(width, height)
 
-        currentScene.resize(Size(width, height))
+        SceneManager.resize(Size(width, height))
         defaultProjection.setToOrtho2D(0f, 0f, width.toFloat(), height.toFloat())
     }
 
@@ -105,7 +107,7 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
         mainBatch.dispose()
         hudBatch.dispose()
 
-        currentScene.dispose()
+        SceneManager.dispose()
 
         mainFont.dispose()
 
@@ -233,8 +235,6 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
 
         val tweenManager = TweenManager()
 
-        private lateinit var currentScene: Scene
-
         fun getBackgrounds() = backgroundsList.toList()
 
         /**
@@ -242,7 +242,7 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
          */
         fun generateLogo(container: GameObjectContainer): GameObject {
             return container.createGameObject(getLogoRect(), GameObject.Tag.Sprite, {
-                this += TextureComponent(Constants.gameLogoPath)
+                this += AtlasComponent(0, AtlasComponent.AtlasData("logo", Constants.gameLogoPath.toFileWrapper()))
             })
         }
 
@@ -254,13 +254,6 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
         fun getLogoRect(): Rect {
             val size = getLogoSize()
             return Rect(Point(Gdx.graphics.width / 2 - size.width / 2, Gdx.graphics.height - size.height), size)
-        }
-
-        fun setScene(newScene: Scene, disposeCurrentScene: Boolean = true) {
-            Log.info { "Chargement de la scène : ${ReflectionUtility.simpleNameOf(newScene)}" }
-            if (disposeCurrentScene)
-                currentScene.dispose()
-            currentScene = newScene
         }
     }
 }

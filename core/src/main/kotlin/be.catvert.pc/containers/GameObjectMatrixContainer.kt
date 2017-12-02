@@ -60,7 +60,6 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
         super.update()
     }
 
-
     fun drawDebug() {
         if (drawDebugCells) {
             shapeRenderer.projectionMatrix = PCGame.mainBatch.projectionMatrix

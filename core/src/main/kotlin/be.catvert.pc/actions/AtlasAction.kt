@@ -4,7 +4,6 @@ import be.catvert.pc.GameObject
 import be.catvert.pc.components.SoundComponent
 import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.containers.Level
-import be.catvert.pc.utility.ComponentData
 import be.catvert.pc.utility.CustomEditorImpl
 import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
@@ -15,13 +14,13 @@ class AtlasAction(var atlasIndex: Int) : Action, CustomEditorImpl {
 
     override fun invoke(gameObject: GameObject) {
         gameObject.getCurrentState().getComponent<AtlasComponent>()?.also {
-            it.data.index = atlasIndex
+            it.currentIndex = atlasIndex
         }
     }
 
     override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
         with(ImGui) {
-            val atlasData = gameObject.getCurrentState().getComponent<AtlasComponent>()?.data?.items ?: arrayOf()
+            val atlasData = gameObject.getCurrentState().getComponent<AtlasComponent>()?.data ?: arrayOf()
 
             functionalProgramming.withItemWidth(100f) {
                 combo("atlas", ::atlasIndex, atlasData.map { it.name })

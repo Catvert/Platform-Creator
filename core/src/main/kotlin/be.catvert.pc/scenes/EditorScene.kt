@@ -2,6 +2,7 @@ package be.catvert.pc.scenes
 
 import be.catvert.pc.*
 import be.catvert.pc.components.RenderableComponent
+import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
 import be.catvert.pc.factories.PrefabFactory
@@ -180,7 +181,7 @@ class EditorScene(val level: Level) : Scene() {
          * Dessine les gameObjects qui n'ont pas de renderableComponent avec un box noir
          */
         gameObjectContainer.getGameObjectsData().filter { it.active }.forEach { gameObject ->
-            if (!gameObject.getCurrentState().hasComponent<RenderableComponent>()) {
+            if (gameObject.getCurrentState().getComponent<AtlasComponent>()?.data?.isEmpty() != false) {
                 shapeRenderer.color = Color.GRAY
                 shapeRenderer.rect(gameObject.box)
             }
@@ -809,7 +810,7 @@ class EditorScene(val level: Level) : Scene() {
                 functionalProgramming.withWindow("Sauvegarder avant de quitter?", null, WindowFlags.AlwaysAutoResize.i) {
                     fun showMainMenu() {
                         EditorSceneUI.showSaveLevelExitWindow = false
-                        PCGame.setScene(MainMenuScene())
+                        SceneManager.loadScene(MainMenuScene())
                     }
 
                     if (button("Sauvegarder")) {

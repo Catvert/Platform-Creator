@@ -18,8 +18,8 @@ import imgui.ImGui
 /**
  * Component permettant d'effectuer une action quand l'utilisateur appuie sur une touche
  */
-class InputComponent(var inputsData: Array<InputData>) : LogicsComponent(), CustomEditorImpl {
-    @JsonCreator private constructor() : this(arrayOf())
+class InputComponent(vararg inputs: InputData) : LogicsComponent(), CustomEditorImpl {
+    var inputs = arrayOf(*inputs)
 
     data class InputData(var key: Int = Input.Keys.UNKNOWN, var justPressed: Boolean = false, var action: Action = EmptyAction()) : CustomEditorImpl {
         override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
@@ -36,7 +36,7 @@ class InputComponent(var inputsData: Array<InputData>) : LogicsComponent(), Cust
     }
 
     override fun update(gameObject: GameObject) {
-        inputsData.forEach {
+        inputs.forEach {
             if (it.justPressed) {
                 if (Gdx.input.isKeyJustPressed(it.key))
                     it.action(gameObject)
@@ -48,7 +48,7 @@ class InputComponent(var inputsData: Array<InputData>) : LogicsComponent(), Cust
     }
 
     override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
-        ImguiHelper.addImguiWidgetsArray("inputs", this::inputsData, { InputData() }, {
+        ImguiHelper.addImguiWidgetsArray("inputs", this::inputs, { InputData() }, {
             it.obj.insertImgui(Input.Keys.toString(it.obj.key), gameObject, level)
             false
         })

@@ -1,6 +1,13 @@
 package be.catvert.pc.scenes
 
+import aurelienribon.tweenengine.BaseTween
+import aurelienribon.tweenengine.TweenAccessor
+import aurelienribon.tweenengine.TweenCallback
+import aurelienribon.tweenengine.TweenUtils
+import be.catvert.pc.GameObject
+import be.catvert.pc.Log
 import be.catvert.pc.PCGame
+import be.catvert.pc.components.RenderableComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
@@ -11,6 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import imgui.ImGui
+import ktx.actors.alpha
 import ktx.app.clearScreen
 import ktx.app.use
 
@@ -19,9 +27,9 @@ import ktx.app.use
  */
 abstract class Scene : Renderable, Updeatable, Resizable, Disposable {
     protected open val camera = OrthographicCamera().apply { setToOrtho(false) }
-    protected val stage = Stage(ScreenViewport(), PCGame.hudBatch)
+    val stage = Stage(ScreenViewport(), PCGame.hudBatch)
 
-    protected val backgroundColors = Triple(0f, 0f, 0f)
+    val backgroundColors = Triple(0f, 0f, 0f)
 
     protected var backgroundTexture: Texture? = null
     private var backgroundSize = Gdx.graphics.toSize()
@@ -30,6 +38,17 @@ abstract class Scene : Renderable, Updeatable, Resizable, Disposable {
 
     protected var isUIHover = false
         private set
+
+    var alpha = 1f
+        set(value) {
+            field = value
+            gameObjectContainer.getGameObjectsData().forEach {
+                it.getStates().forEach {
+                    it.getComponent<RenderableComponent>()?.alpha = value
+                }
+            }
+            stage.alpha = value
+        }
 
     init {
         Gdx.input.inputProcessor = stage
@@ -50,7 +69,7 @@ abstract class Scene : Renderable, Updeatable, Resizable, Disposable {
             }
         }
 
-        isUIHover = imgui.findHoveredWindow(ImGui.mousePos) != null
+        isUIHover = imgui.findHoveredWindow(ImGui.mousePos) != null || ImGui.isAnyItemHovered
     }
 
     protected fun hideUI() {
@@ -62,8 +81,6 @@ abstract class Scene : Renderable, Updeatable, Resizable, Disposable {
     }
 
     override fun render(batch: Batch) {
-        clearScreen(backgroundColors.first, backgroundColors.second, backgroundColors.third)
-
         batch.projectionMatrix = PCGame.defaultProjection
         batch.use {
             if (backgroundTexture != null) {
@@ -91,5 +108,34 @@ abstract class Scene : Renderable, Updeatable, Resizable, Disposable {
 
     override fun dispose() {
         stage.dispose()
+    }
+}
+
+class SceneTweenAccessor : TweenAccessor<Scene> {
+    enum class SceneTween(val tweenType: Int) {
+        ALPHA(0);
+        companion object {
+            fun fromType(tweenType: Int) = values().firstOrNull { it.tweenType == tweenType }
+        }
+    }
+
+    override fun setValues(scene: Scene, tweenType: Int, newValues: FloatArray) {
+        when (SceneTween.fromType(tweenType)) {
+            SceneTween.ALPHA -> {
+                scene.alpha = newValues[0]
+            }
+            else -> Log.error { "Tween inconnu : $tweenType" }
+        }
+    }
+
+    override fun getValues(scene: Scene, tweenType: Int, returnValues: FloatArray): Int {
+        when (SceneTween.fromType(tweenType)) {
+            SceneTween.ALPHA -> {
+                returnValues[0] = scene.alpha; return 1
+            }
+            else -> Log.error { "Tween inconnu : $tweenType" }
+        }
+
+        return -1
     }
 }

@@ -114,7 +114,7 @@ object ImguiHelper {
                         }
                     }
                     is Enum<*> -> {
-
+                        valueChanged = enum(label, item.cast())
                     }
                     else -> {
                         text(ReflectionUtility.simpleNameOf(value))
@@ -229,7 +229,6 @@ object ImguiHelper {
 
         if (instance is CustomEditorImpl) {
             instance.insertImgui(ReflectionUtility.simpleNameOf(instance), gameObject, level)
-           // instance.in
         }
     }
 }

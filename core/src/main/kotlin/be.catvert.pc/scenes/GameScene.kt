@@ -41,11 +41,11 @@ class GameScene(private val level: Level) : Scene() {
         updateCamera(true)
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
-            PCGame.setScene(PauseScene(this), false)
+            SceneManager.loadScene(PauseScene(this), disposeCurrentScene = false)
         if (Gdx.input.isKeyJustPressed(GameKeys.GAME_SWITCH_GRAVITY.key))
             level.applyGravity = !level.applyGravity
         if (Gdx.input.isKeyJustPressed(GameKeys.GAME_EDIT_LEVEL.key))
-            PCGame.setScene(EditorScene(Level.loadFromFile(level.levelPath.toLocalFile().parent())!!))
+            SceneManager.loadScene(EditorScene(Level.loadFromFile(level.levelPath.toLocalFile().parent())!!))
     }
 
     private fun updateCamera(lerp: Boolean) {

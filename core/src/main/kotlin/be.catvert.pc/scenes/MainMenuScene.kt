@@ -64,7 +64,7 @@ class MainMenuScene : Scene() {
 
     override fun postBatchRender() {
         super.postBatchRender()
-        PCGame.mainBatch.use {
+        PCGame.hudBatch.use {
             PCGame.mainFont.draw(it, glyphCreatedBy, Gdx.graphics.width - glyphCreatedBy.width, glyphCreatedBy.height)
         }
     }
@@ -132,7 +132,7 @@ class MainMenuScene : Scene() {
                             if (list.selected != null) {
                                 val level = Level.loadFromFile(list.selected.dir)
                                 if (level != null)
-                                    PCGame.setScene(GameScene(level))
+                                    SceneManager.loadScene(GameScene(level))
                                 else showWrongVersionLevelDialog()
                             }
                         }
@@ -142,7 +142,7 @@ class MainMenuScene : Scene() {
                             if (list.selected != null) {
                                 val level = Level.loadFromFile(list.selected.dir)
                                 if (level != null)
-                                    PCGame.setScene(EditorScene(level))
+                                    SceneManager.loadScene(EditorScene(level))
                                 else showWrongVersionLevelDialog()
                             }
                         }
@@ -151,7 +151,7 @@ class MainMenuScene : Scene() {
                         onClick {
                             showSetNameLevelWindow { name ->
                                 val level = Level.newLevel(name)
-                                PCGame.setScene(EditorScene(level))
+                                SceneManager.loadScene(EditorScene(level))
                             }
                         }
                     }

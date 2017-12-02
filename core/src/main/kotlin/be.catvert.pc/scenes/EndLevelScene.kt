@@ -31,12 +31,12 @@ class EndLevelScene(private val levelPath: String, levelSuccess: Boolean) : Scen
                     addListener(onClick {
                         val level = Level.loadFromFile(levelPath.toLocalFile().parent())
                         if (level != null)
-                            PCGame.setScene(GameScene(level))
+                            SceneManager.loadScene(GameScene(level))
                     })
                 }
                 textButton("Quitter") {
                     addListener(onClick {
-                        PCGame.setScene(MainMenuScene())
+                        SceneManager.loadScene(MainMenuScene(), false)
                     })
                 }
             }

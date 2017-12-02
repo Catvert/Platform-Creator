@@ -11,8 +11,8 @@ import com.fasterxml.jackson.annotation.JsonCreator
 /**
  * Action permettant d'utiliser d'appliquer plusieurs actions sur un gameObject à la place d'une seule.
  */
-class MultiplexerAction(var actions: Array<Action>) : Action, CustomEditorImpl {
-    @JsonCreator private constructor() : this(arrayOf())
+class MultiplexerAction(vararg actions: Action) : Action, CustomEditorImpl {
+    var actions = arrayOf(*actions)
 
     override fun invoke(gameObject: GameObject) {
         actions.forEach {

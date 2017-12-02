@@ -18,18 +18,19 @@ class PauseScene(private val gameScene: GameScene) : Scene() {
     private val logo = PCGame.generateLogo(gameObjectContainer)
 
     init {
-        stage + window("Menu principal") {
+        stage + window("Pause") {
             verticalGroup {
                 space(10f)
 
                 textButton("Reprendre") {
                     onClick {
-                        PCGame.setScene(gameScene)
+                        SceneManager.loadScene(gameScene)
                     }
                 }
                 textButton("Quitter le niveau") {
                     onClick {
-                        PCGame.setScene(MainMenuScene())
+                        gameScene.dispose()
+                        SceneManager.loadScene(MainMenuScene(), false)
                     }
                 }
             }
@@ -44,7 +45,7 @@ class PauseScene(private val gameScene: GameScene) : Scene() {
         super.update()
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
-            PCGame.setScene(gameScene)
+            SceneManager.loadScene(gameScene)
     }
 
     override fun resize(size: Size) {
