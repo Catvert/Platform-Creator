@@ -4,8 +4,10 @@ import be.catvert.pc.GameObject
 import be.catvert.pc.PCGame
 import be.catvert.pc.actions.Action
 import be.catvert.pc.containers.Level
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import glm_.vec2.Vec2
+import imgui.Cond
 import imgui.ImGui
 import imgui.functionalProgramming
 import kotlin.reflect.KMutableProperty0
@@ -15,25 +17,26 @@ object ImguiHelper {
         inline fun <reified T : Any> cast() = this as Item<T>
     }
 
-    inline fun <reified T : Any> addImguiWidgetsArray(label: String, array: KMutableProperty0<Array<T>>, crossinline createItem: () -> T, itemBlock: (item: Item<T>) -> Boolean, endBlock: () -> Unit = {}): Boolean {
+    /*inline fun <reified T : Any> addImguiWidgetsArray(label: String, array: KMutableProperty0<Array<T>>, crossinline createItem: () -> T, itemBlock: (item: Item<T>) -> Boolean, endBlock: () -> Unit = {}): Boolean {
         val item = Item(array.get())
         if (addImguiWidgetsArray(label, item, createItem, itemBlock, endBlock)) {
             array.set(item.obj)
             return true
         }
         return false
-    }
+    }*/
 
-    inline fun <reified T : Any> addImguiWidgetsArray(label: String, array: Item<Array<T>>, crossinline createItem: () -> T, itemBlock: (item: Item<T>) -> Boolean, endBlock: () -> Unit = {}): Boolean {
+    inline fun <reified T : Any> addImguiWidgetsArray(label: String, array: ArrayList<T>, crossinline createItem: () -> T, itemBlock: (item: Item<T>) -> Boolean, endBlock: () -> Unit = {}): Boolean {
         var valueChanged = false
 
         with(ImGui) {
             if (collapsingHeader(label)) {
                 functionalProgramming.withIndent {
-                    for (index in 0 until array.obj.size) {
+                    for (index in 0 until array.size) {
                         pushId("suppr $index")
                         if (button("Suppr.")) {
-                            array.obj = array.obj.toMutableList().apply { removeAt(index) }.toTypedArray()
+                            array.removeAt(index)
+                            //  array.obj = array.obj.toMutableList().apply { removeAt(index) }.toTypedArray()
                             valueChanged = true
                             break
                         }
@@ -41,15 +44,15 @@ object ImguiHelper {
 
                         sameLine()
                         functionalProgramming.withId(index) {
-                            val item = Item(array.obj[index])
+                            val item = Item(array[index])
                             if (itemBlock(item))
                                 valueChanged = true
-                            array.obj[index] = item.obj
+                            array[index] = item.obj
                         }
                     }
                 }
                 if (button("Ajouter", Vec2(-1, 20f))) {
-                    array.obj += createItem()
+                    array.add(createItem())
                     valueChanged = true
                 }
 
@@ -126,6 +129,11 @@ object ImguiHelper {
 
     fun custom(label: String, value: CustomEditorImpl, gameObject: GameObject, level: Level) {
         value.insertImgui(label, gameObject, level)
+    }
+
+    fun action(label: String, action: KMutableProperty0<Action>, gameObject: GameObject, level: Level): Boolean {
+        val item = Item(action())
+        return action(label, item, gameObject, level).apply { action.set(item.obj) }
     }
 
     fun action(label: String, action: Item<Action>, gameObject: GameObject, level: Level): Boolean {
@@ -212,6 +220,20 @@ object ImguiHelper {
         }
 
         return valueChanged
+    }
+
+    fun withCenteredWindow(name: String, open: KMutableProperty0<Boolean>? = null, size: Vec2, flags: Int = 0, centerCond: Cond = Cond.Once, block: () -> Unit) {
+        ImGui.setNextWindowSize(size, centerCond)
+        ImGui.setNextWindowPos(Vec2(Gdx.graphics.width / 2f - size.x / 2f, Gdx.graphics.height / 2f - size.y / 2f), centerCond)
+        functionalProgramming.withWindow(name, open, flags) {
+            block()
+        }
+    }
+
+    fun popupModal(name: String, open: KMutableProperty0<Boolean>? = null, extraFlags: Int = 0, block: () -> Unit) {
+        val bool = if (open != null) booleanArrayOf(open()) else null
+        functionalProgramming.popupModal(name, bool, extraFlags, block)
+        open?.set(bool!![0])
     }
 
     fun insertImguiExposeEditorField(instance: Any, gameObject: GameObject, level: Level) {

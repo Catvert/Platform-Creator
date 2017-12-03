@@ -19,7 +19,7 @@ class AtlasAction(var atlasIndex: Int) : Action, CustomEditorImpl {
 
     override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
         with(ImGui) {
-            val atlasData = gameObject.getCurrentState().getComponent<AtlasComponent>()?.data ?: arrayOf()
+            val atlasData = gameObject.getCurrentState().getComponent<AtlasComponent>()?.data ?: arrayListOf()
 
             functionalProgramming.withItemWidth(100f) {
                 combo("atlas", ::atlasIndex, atlasData.map { it.name })

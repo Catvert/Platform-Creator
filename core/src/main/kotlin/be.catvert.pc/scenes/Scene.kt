@@ -6,22 +6,17 @@ import be.catvert.pc.PCGame
 import be.catvert.pc.components.RenderableComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.utility.*
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.Batch
-import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.Disposable
-import com.badlogic.gdx.utils.viewport.ScreenViewport
 import imgui.ImGui
-import ktx.actors.alpha
 import ktx.app.use
 
 /**
  * Classe abstraite permettant l'implémentation d'une scène
  */
 abstract class Scene(protected var background: Background) : Renderable, Updeatable, Resizable, Disposable {
-    protected open val camera = OrthographicCamera().apply { setToOrtho(false) }
-    val stage = Stage(ScreenViewport(), PCGame.hudBatch)
+    protected open val camera = OrthographicCamera().apply { setToOrtho(false); }
 
     val backgroundColors = Triple(0f, 0f, 0f)
 
@@ -38,37 +33,14 @@ abstract class Scene(protected var background: Background) : Renderable, Updeata
                     it.getComponent<RenderableComponent>()?.alpha = value
                 }
             }
-            stage.alpha = value
         }
-
-    init {
-        Gdx.input.inputProcessor = stage
-    }
 
     protected open fun postBatchRender() {}
 
     fun calcIsUIHover() {
         isUIHover = false
 
-        val mouseX = Gdx.input.x.toFloat()
-        val mouseY = Gdx.input.y.toFloat()
-
-        stage.actors.filter { it.isVisible }.forEach {
-            if ((mouseX >= it.x && mouseX <= it.x + it.width) && (Gdx.graphics.height - mouseY <= it.y + it.height && Gdx.graphics.height - mouseY >= it.y)) {
-                isUIHover = true
-                return
-            }
-        }
-
         isUIHover = imgui.findHoveredWindow(ImGui.mousePos) != null || ImGui.isAnyItemHovered
-    }
-
-    protected fun hideUI() {
-        stage.actors.forEach { it.isVisible = false }
-    }
-
-    protected fun showUI() {
-        stage.actors.forEach { it.isVisible = true }
     }
 
     override fun render(batch: Batch) {
@@ -76,27 +48,21 @@ abstract class Scene(protected var background: Background) : Renderable, Updeata
         batch.use {
             background.render(it)
             it.projectionMatrix = camera.combined
-            gameObjectContainer.render(batch)
+            gameObjectContainer.render(it)
         }
 
         postBatchRender()
-
-        stage.draw()
     }
 
     override fun update() {
         gameObjectContainer.update()
-        stage.act(Gdx.graphics.deltaTime)
     }
 
     override fun resize(size: Size) {
         camera.setToOrtho(false, size.width.toFloat(), size.height.toFloat())
-        stage.viewport.update(size.width, size.height)
     }
 
-    override fun dispose() {
-        stage.dispose()
-    }
+    override fun dispose() {}
 }
 
 class SceneTweenAccessor : TweenAccessor<Scene> {

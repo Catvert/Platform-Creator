@@ -15,6 +15,7 @@ import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonIgnore
 import ktx.assets.toLocalFile
 import java.util.*
+import kotlin.math.roundToInt
 
 class Level(val levelPath: String, val gameVersion: Float, var background: Background) : GameObjectMatrixContainer() {
     private val levelTextures = levelPath.toLocalFile().parent().child("textures") to mutableListOf<FileHandle>()
@@ -55,6 +56,9 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
             levelSounds.first.mkdirs()
         else
             levelSounds.second.addAll(Utility.getFilesRecursivly(levelSounds.first, *Constants.levelSoundExtension))
+
+        if (background is ParallaxBackground)
+            (background as ParallaxBackground).updateWidth(matrixRect.width)
     }
 
     fun resourcesTextures() = levelTextures.second.toList()
@@ -66,16 +70,16 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
             when {
                 Constants.levelTextureExtension.contains(it.extension()) -> {
                     it.copyTo(levelTextures.first)
-                    levelTextures.second.add(it)
+                    levelTextures.second.add(levelTextures.first.child(it.name()))
                 }
                 Constants.levelAtlasExtension.contains(it.extension()) -> {
                     it.copyTo(levelAtlas.first)
                     it.parent().child(it.nameWithoutExtension() + ".png").copyTo(levelAtlas.first)
-                    levelAtlas.second.add(it)
+                    levelAtlas.second.add(levelAtlas.first.child(it.name()))
                 }
                 Constants.levelSoundExtension.contains(it.extension()) -> {
                     it.copyTo(levelSounds.first)
-                    levelSounds.second.add(it)
+                    levelSounds.second.add(levelSounds.first.child(it.name()))
                 }
             }
         }
@@ -92,9 +96,12 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
             val lerpY = MathUtils.lerp(camera.position.y, posY, 0.1f)
 
             camera.position.set(
-                    if (lerp) Math.round(lerpX).toFloat() else Math.round(posX).toFloat(),
-                    if (lerp) Math.round(lerpY).toFloat() else Math.round(posY).toFloat(), 0f)
+                    if (lerp) lerpX.roundToInt().toFloat() else posX.roundToInt().toFloat(),
+                    if (lerp) lerpY.roundToInt().toFloat() else posY.roundToInt().toFloat(), 0f)
         }
+
+        if (background is ParallaxBackground)
+            (background as ParallaxBackground).updateCamera(camera)
 
         return followGameObject != null
     }
@@ -129,7 +136,7 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
                 Log.warn { "Un niveau portant le même nom existe déjà !" }
             } else
                 levelDir.mkdirs()
-            val level = Level(levelDir.child(Constants.levelDataFile).path(), Constants.gameVersion, PCGame.getBackgrounds().elementAtOrNull(1) ?: StandardBackground(FileWrapper("")))
+            val level = Level(levelDir.child(Constants.levelDataFile).path(), Constants.gameVersion, PCGame.standardBackgrounds().elementAtOrNull(1) ?: StandardBackground(FileWrapper("")))
 
             val player = PrefabFactory.Player.prefab.create(Point(100, 100), level)
             level.followGameObjectID = player.id
@@ -140,6 +147,7 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
         fun loadFromFile(levelDir: FileHandle): Level? {
             try {
                 val level = SerializationFactory.deserializeFromFile<Level>(levelDir.child(Constants.levelDataFile))
+
                 return if (level.gameVersion == Constants.gameVersion) level else null
             } catch (e: Exception) {
                 Log.error(e) { "Erreur lors du chargement du niveau ! : ${e.message}" }

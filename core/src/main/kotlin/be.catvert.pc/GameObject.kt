@@ -6,13 +6,13 @@ import be.catvert.pc.actions.RemoveGOAction
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.*
-import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import imgui.ImGui
 import imgui.functionalProgramming
 import java.util.*
+import kotlin.math.roundToInt
 
 
 /**
@@ -126,7 +126,8 @@ class GameObject(@ExposeEditor var tag: Tag,
     override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
         with(ImGui) {
             functionalProgramming.withItemWidth(100f) {
-                combo("State initial", ::initialState, getStates().map { it.name })
+                if (combo("State initial", ::initialState, getStates().map { it.name }))
+                    currentState = initialState
             }
         }
     }
@@ -152,22 +153,22 @@ class GameObjectTweenAccessor : TweenAccessor<GameObject> {
             GameObjectTween.NOTHING -> {
             }
             GameObjectTween.POS_X -> {
-                gameObject.box.x = Math.round(newValues[0])
+                gameObject.box.x = newValues[0].roundToInt()
             }
             GameObjectTween.POS_Y -> {
-                gameObject.box.y = Math.round(newValues[0])
+                gameObject.box.y = newValues[0].roundToInt()
             }
             GameObjectTween.POS_XY -> {
-                gameObject.box.position = Point(Math.round(newValues[0]), Math.round(newValues[1]))
+                gameObject.box.position = Point(newValues[0].roundToInt(), newValues[1].roundToInt())
             }
             GameObjectTween.SIZE_X -> {
-                gameObject.box.width = Math.round(newValues[0])
+                gameObject.box.width = newValues[0].roundToInt()
             }
             GameObjectTween.SIZE_Y -> {
-                gameObject.box.height = Math.round(newValues[0])
+                gameObject.box.height = newValues[0].roundToInt()
             }
             GameObjectTween.SIZE_XY -> {
-                gameObject.box.size = Size(Math.round(newValues[0]), Math.round(newValues[1]))
+                gameObject.box.size = Size(newValues[0].roundToInt(), newValues[1].roundToInt())
             }
             else -> Log.error { "Tween inconnu : $tweenType" }
         }

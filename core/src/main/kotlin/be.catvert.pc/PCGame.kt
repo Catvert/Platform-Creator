@@ -18,7 +18,6 @@ import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Matrix4
-import com.kotcrab.vis.ui.VisUI
 import glm_.vec2.Vec2
 import glm_.vec4.Vec4
 import imgui.Col
@@ -36,9 +35,9 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
 
         Log.info { "Initialisation en cours.. \n Taille : ${Gdx.graphics.width}x${Gdx.graphics.height}" }
 
-        Locales.load()
 
-        VisUI.load(Constants.UISkinPath.path())
+
+        Locales.load()
 
         GameKeys.loadKeysConfig()
 
@@ -56,7 +55,11 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
         Tween.registerAccessor(Scene::class.java, SceneTweenAccessor())
 
         Utility.getFilesRecursivly(Constants.backgroundsDirPath.child("standard"), *Constants.levelTextureExtension).forEach {
-            backgroundsList.add(StandardBackground(it.toFileWrapper()))
+            standardBackgrounds.add(StandardBackground(it.toFileWrapper()))
+        }
+
+        Utility.getFilesRecursivly(Constants.backgroundsDirPath.child("parallax"), "data").forEach {
+            parallaxBackgrounds.add(ParallaxBackground(it.toFileWrapper()))
         }
 
         mainBackground = StandardBackground(Constants.gameBackgroundMenuPath.toFileWrapper())
@@ -106,8 +109,6 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
         SceneManager.dispose()
 
         mainFont.dispose()
-
-        VisUI.dispose()
 
         assetManager.dispose()
 
@@ -179,7 +180,8 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
     }
 
     companion object {
-        private val backgroundsList = mutableListOf<Background>()
+        private val standardBackgrounds = mutableListOf<StandardBackground>()
+        private val parallaxBackgrounds = mutableListOf<ParallaxBackground>()
 
         lateinit var mainBatch: SpriteBatch
             private set
@@ -233,8 +235,8 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
 
         val tweenManager = TweenManager()
 
-        fun getBackgrounds() = backgroundsList.toList()
-
+        fun standardBackgrounds() = standardBackgrounds.toList()
+        fun parallaxBackgrounds() = parallaxBackgrounds.toList()
         /**
          * Permet de retourner le logo du jeu
          */

@@ -11,14 +11,16 @@ import be.catvert.pc.utility.ExposeEditorFactory
 import be.catvert.pc.utility.ImguiHelper
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
+import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
 
 
 /**
  * Component permettant d'effectuer une action quand l'utilisateur appuie sur une touche
  */
-class InputComponent(vararg inputs: InputData) : LogicsComponent(), CustomEditorImpl {
-    var inputs = arrayOf(*inputs)
+class InputComponent(var inputs: ArrayList<InputData>) : LogicsComponent(), CustomEditorImpl {
+    constructor(vararg inputs: InputData) : this(arrayListOf(*inputs))
+    @JsonCreator private constructor() : this(arrayListOf())
 
     data class InputData(var key: Int = Input.Keys.UNKNOWN, var justPressed: Boolean = false, var action: Action = EmptyAction()) : CustomEditorImpl {
         override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
@@ -47,7 +49,7 @@ class InputComponent(vararg inputs: InputData) : LogicsComponent(), CustomEditor
     }
 
     override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
-        ImguiHelper.addImguiWidgetsArray("inputs", this::inputs, { InputData() }, {
+        ImguiHelper.addImguiWidgetsArray("inputs", inputs, { InputData() }, {
             it.obj.insertImgui(Input.Keys.toString(it.obj.key), gameObject, level)
             false
         })

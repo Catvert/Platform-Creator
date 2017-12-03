@@ -5,20 +5,25 @@ dependencies {
     compile "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
     compile "com.badlogicgames.gdx:gdx:$gdxVersion"
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-    compile "com.kotcrab.vis:vis-ui:$visUiVersion"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
-    compile "io.github.libktx:ktx-vis-style:$ktxVersion"
     compile "net.dermetfan.libgdx-utils:libgdx-utils:$utilsVersion"
     compile "io.github.libktx:ktx-assets:$ktxVersion"
     compile "io.github.libktx:ktx-collections:$ktxVersion"
     compile "io.github.libktx:ktx-style:$ktxVersion"
-    compile "io.github.libktx:ktx-vis:$ktxVersion"
     compile "io.github.libktx:ktx-actors:$ktxVersion"
     compile "io.github.libktx:ktx-math:$ktxVersion"
-    compile "io.github.libktx:ktx-scene2d:$ktxVersion"
     compile "io.github.libktx:ktx-i18n:$ktxVersion"
     compile "io.github.libktx:ktx-async:$ktxVersion"
     compile "io.github.libktx:ktx-app:$ktxVersion"
+
+    compile group: 'org.lwjgl', name: 'lwjgl-tinyfd', version: lwjglVersion
+    compile "org.lwjgl:lwjgl-tinyfd:$lwjglVersion:natives-windows"
+    compile "org.lwjgl:lwjgl-tinyfd:$lwjglVersion:natives-linux"
+    compile "org.lwjgl:lwjgl-tinyfd:$lwjglVersion:natives-macos"
+
+    compile "org.lwjgl:lwjgl-stb:$lwjglVersion:natives-windows"
+    compile "org.lwjgl:lwjgl-stb:$lwjglVersion:natives-linux"
+    compile "org.lwjgl:lwjgl-stb:$lwjglVersion:natives-macos"
 
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion

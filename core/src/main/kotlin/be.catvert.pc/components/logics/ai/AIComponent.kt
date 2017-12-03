@@ -10,14 +10,13 @@ import be.catvert.pc.components.logics.PhysicsComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.CustomEditorImpl
-import be.catvert.pc.utility.ExposeEditorFactory
 import be.catvert.pc.utility.ImguiHelper
 import be.catvert.pc.utility.ImguiHelper.enum
 import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
 
-class AIComponent(var actionApplyOnPlayer: Action, var collisionsCondPlayer: Array<CollisionSide>, var actionApplyOnGO: Action, var collisionsCondGameObject: Array<CollisionSide>) : BasicComponent(), CustomEditorImpl {
-    @JsonCreator private constructor() : this(EmptyAction(), arrayOf(), EmptyAction(), arrayOf())
+class AIComponent(var target: GameObject.Tag, var actionTarget: Action, var actionCondTarget: ArrayList<CollisionSide>, var actionOnThis: Action, var actionCondThis: ArrayList<CollisionSide>) : BasicComponent(), CustomEditorImpl {
+    @JsonCreator private constructor() : this(GameObject.Tag.Player, EmptyAction(), arrayListOf(), EmptyAction(), arrayListOf())
 
     private var physicsComponent: PhysicsComponent? = null
 
@@ -27,16 +26,16 @@ class AIComponent(var actionApplyOnPlayer: Action, var collisionsCondPlayer: Arr
         physicsComponent = gameObject.getCurrentState().getComponent()
         if (physicsComponent != null) {
             physicsComponent!!.onCollisionWith.register {
-                if (it.collideGameObject.tag == GameObject.Tag.Player) {
-                    collisionsCondPlayer.forEach { side ->
+                if (it.collideGameObject.tag == target) {
+                    actionCondTarget.forEach { side ->
                         if (side == it.side) {
-                            actionApplyOnPlayer(it.collideGameObject)
+                            actionTarget(it.collideGameObject)
                         }
                     }
 
-                    collisionsCondGameObject.forEach { side ->
+                    actionCondThis.forEach { side ->
                         if (side == it.side) {
-                            actionApplyOnGO(gameObject)
+                            actionOnThis(gameObject)
                         }
                     }
                 }
@@ -48,17 +47,19 @@ class AIComponent(var actionApplyOnPlayer: Action, var collisionsCondPlayer: Arr
 
     override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
         with(ImGui) {
-            ImguiHelper.addImguiWidgetsArray("joueur", ::collisionsCondPlayer, { CollisionSide.OnLeft }, {
+            val targetItem: ImguiHelper.Item<Enum<*>> = ImguiHelper.Item(target)
+            if (ImguiHelper.enum("cible", targetItem))
+                target = targetItem.obj as GameObject.Tag
+            ImguiHelper.addImguiWidgetsArray("conditions cible", actionCondTarget, { CollisionSide.OnLeft }, {
                 enum("side", it.cast())
             }) {
-                ImguiHelper.addImguiWidget("action sur le joueur", ::actionApplyOnPlayer, gameObject, level, ExposeEditorFactory.empty)
+                ImguiHelper.action("action cible ", ::actionTarget, gameObject, level)
             }
-            ImguiHelper.addImguiWidgetsArray("gameObject", ::collisionsCondGameObject, { CollisionSide.OnLeft }, {
+            ImguiHelper.addImguiWidgetsArray("conditions gameObject", actionCondThis, { CollisionSide.OnLeft }, {
                 enum("side", it.cast())
             }) {
-                ImguiHelper.addImguiWidget("action sur le go", ::actionApplyOnGO, gameObject, level, ExposeEditorFactory.empty)
+                ImguiHelper.action("action go", ::actionOnThis, gameObject, level)
             }
         }
-
     }
 }

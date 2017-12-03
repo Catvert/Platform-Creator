@@ -1,0 +1,24 @@
+{
+    "layers": [
+        {
+            "file": "1.png",
+            "applyYOffset": false,
+            "speed": 0
+        },
+        {
+            "file": "2.png",
+            "applyYOffset": true,
+            "speed": 0.3
+        },
+        {
+            "file": "3.png",
+            "applyYOffset": true,
+            "speed": 0.5
+        },
+        {
+            "file": "4.png",
+            "applyYOffset": true,
+            "speed": 0.6
+        }
+    ]
+}

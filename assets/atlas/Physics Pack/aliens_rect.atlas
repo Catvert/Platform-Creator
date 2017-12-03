@@ -1,0 +1,109 @@
+aliens_rect.png
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+alienBeige_round
+  rotate: false
+  xy: 0, 70
+  size: 70, 70
+  orig: 70, 70
+  offset: 0, 0
+  index: -1
+alienBeige_square
+  rotate: false
+  xy: 0, 0
+  size: 70, 70
+  orig: 70, 70
+  offset: 0, 0
+  index: -1
+alienBeige_suit
+  rotate: false
+  xy: 140, 70
+  size: 70, 70
+  orig: 70, 70
+  offset: 0, 0
+  index: -1
+alienBlue_round
+  rotate: false
+  xy: 280, 70
+  size: 70, 70
+  orig: 70, 70
+  offset: 0, 0
+  index: -1
+alienBlue_square
+  rotate: false
+  xy: 280, 0
+  size: 70, 70
+  orig: 70, 70
+  offset: 0, 0
+  index: -1
+alienBlue_suit
+  rotate: false
+  xy: 210, 140
+  size: 70, 70
+  orig: 70, 70
+  offset: 0, 0
+  index: -1
+alienGreen_round
+  rotate: false
+  xy: 210, 70
+  size: 70, 70
+  orig: 70, 70
+  offset: 0, 0
+  index: -1
+alienGreen_square
+  rotate: false
+  xy: 210, 0
+  size: 70, 70
+  orig: 70, 70
+  offset: 0, 0
+  index: -1
+alienGreen_suit
+  rotate: false
+  xy: 140, 140
+  size: 70, 70
+  orig: 70, 70
+  offset: 0, 0
+  index: -1
+alienPink_round
+  rotate: false
+  xy: 280, 140
+  size: 70, 70
+  orig: 70, 70
+  offset: 0, 0
+  index: -1
+alienPink_square
+  rotate: false
+  xy: 140, 0
+  size: 70, 70
+  orig: 70, 70
+  offset: 0, 0
+  index: -1
+alienPink_suit
+  rotate: false
+  xy: 70, 140
+  size: 70, 70
+  orig: 70, 70
+  offset: 0, 0
+  index: -1
+alienYellow_round
+  rotate: false
+  xy: 70, 70
+  size: 70, 70
+  orig: 70, 70
+  offset: 0, 0
+  index: -1
+alienYellow_square
+  rotate: false
+  xy: 70, 0
+  size: 70, 70
+  orig: 70, 70
+  offset: 0, 0
+  index: -1
+alienYellow_suit
+  rotate: false
+  xy: 0, 140
+  size: 70, 70
+  orig: 70, 70
+  offset: 0, 0
+  index: -1

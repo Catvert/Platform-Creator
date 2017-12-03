@@ -15,8 +15,8 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 import imgui.ImGui
 
-class LifeComponent(onDeathAction: Action, vararg lifePointActions: LifePointActions) : BasicComponent(), CustomEditorImpl {
-    @JsonCreator private constructor() : this(RemoveGOAction())
+class LifeComponent(onDeathAction: Action, lifePointActions: ArrayList<LifePointActions> = arrayListOf()) : BasicComponent(), CustomEditorImpl {
+    @JsonCreator private constructor() : this(RemoveGOAction(), arrayListOf())
 
     data class LifePointActions(@ExposeEditor var onStartAction: Action, @ExposeEditor var onEndAction: Action) : CustomEditorImpl {
         override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
@@ -33,7 +33,7 @@ class LifeComponent(onDeathAction: Action, vararg lifePointActions: LifePointAct
     private lateinit var gameObject: GameObject
 
     @JsonProperty("lpActions")
-    private var lpActions = arrayOf(LifePointActions(EmptyAction(), onDeathAction)) + lifePointActions
+    private var lpActions = arrayListOf(LifePointActions(EmptyAction(), onDeathAction), *lifePointActions.toTypedArray())
 
     @JsonProperty("lifePoint")
     private var lifePoint: Int = this.lpActions.size
@@ -71,7 +71,7 @@ class LifeComponent(onDeathAction: Action, vararg lifePointActions: LifePointAct
 
     override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
         var index = 0
-        ImguiHelper.addImguiWidgetsArray("life actions", this::lpActions, { LifePointActions(EmptyAction(), EmptyAction()) }, {
+        ImguiHelper.addImguiWidgetsArray("life actions", lpActions, { LifePointActions(EmptyAction(), EmptyAction()) }, {
             it.obj.insertImgui("vie ${++index}", gameObject, level)
             false
         })

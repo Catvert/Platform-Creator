@@ -6,12 +6,14 @@ import be.catvert.pc.utility.CustomEditorImpl
 import be.catvert.pc.utility.ExposeEditorFactory
 import be.catvert.pc.utility.ImguiHelper
 import be.catvert.pc.utility.ReflectionUtility
+import com.fasterxml.jackson.annotation.JsonCreator
 
 /**
  * Action permettant d'utiliser d'appliquer plusieurs actions sur un gameObject à la place d'une seule.
  */
-class MultiplexerAction(vararg actions: Action) : Action, CustomEditorImpl {
-    var actions = arrayOf(*actions)
+class MultiplexerAction(var actions: ArrayList<Action>) : Action, CustomEditorImpl {
+    constructor(vararg actions: Action) : this(arrayListOf(*actions))
+    @JsonCreator private constructor() : this(arrayListOf())
 
     override fun invoke(gameObject: GameObject) {
         actions.forEach {
@@ -20,7 +22,7 @@ class MultiplexerAction(vararg actions: Action) : Action, CustomEditorImpl {
     }
 
     override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
-        ImguiHelper.addImguiWidgetsArray("actions", this::actions, { EmptyAction() }, {
+        ImguiHelper.addImguiWidgetsArray("actions", actions, { EmptyAction() }, {
             ImguiHelper.addImguiWidget(ReflectionUtility.simpleNameOf(it.obj), it, gameObject, level, ExposeEditorFactory.empty)
         })
     }

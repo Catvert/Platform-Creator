@@ -3,6 +3,7 @@ package be.catvert.pc.containers
 import be.catvert.pc.GameKeys
 import be.catvert.pc.GameObject
 import be.catvert.pc.PCGame
+import be.catvert.pc.components.logics.PhysicsComponent
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
@@ -75,7 +76,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     fun getActiveGridCells() = activeGridCells.toList()
 
     @JsonIgnore
-    var drawDebugCells = false
+    private var drawDebugCells = false
 
     @JsonIgnore
     var followGameObject: GameObject? = null
@@ -96,11 +97,14 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
         }
 
         getAllGameObjectsInCells(activeGridCells).forEach {
-            if (allowUpdatingGO)
+            if (allowUpdatingGO) {
                 it.update()
 
-            if (it.position().y < 0) {
-                it.onOutOfMapAction(it)
+                if (it.getCurrentState().hasComponent<PhysicsComponent>()) {
+                    if (it.position().y <= 1) {
+                        it.onOutOfMapAction(it)
+                    }
+                }
             }
         }
 

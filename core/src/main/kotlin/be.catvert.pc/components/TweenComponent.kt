@@ -9,14 +9,16 @@ import be.catvert.pc.containers.Level
 import be.catvert.pc.factories.TweenFactory
 import be.catvert.pc.utility.CustomEditorImpl
 import be.catvert.pc.utility.ImguiHelper
+import com.fasterxml.jackson.annotation.JsonCreator
 import glm_.vec2.Vec2
 import imgui.ImGui
 import imgui.functionalProgramming
 
-class TweenComponent(vararg tweens: TweenData) : BasicComponent(), CustomEditorImpl {
-    var tweens = arrayOf(*tweens)
+class TweenComponent(var tweens: ArrayList<TweenData>) : BasicComponent(), CustomEditorImpl {
+    constructor(vararg tweens: TweenData) : this(arrayListOf(*tweens))
+    @JsonCreator private constructor() : this(arrayListOf())
 
-    class TweenData(var name: String, var type: GameObjectTweenAccessor.GameObjectTween, var target: FloatArray, var duration: Float, var keepComponents: Array<Class<out Component>>, var endAction: Action) : CustomEditorImpl {
+    class TweenData(var name: String, var type: GameObjectTweenAccessor.GameObjectTween, var target: FloatArray, var duration: Float, var keepComponents: ArrayList<Class<out Component>>, var endAction: Action) : CustomEditorImpl {
         private var started = false
         fun start(gameObject: GameObject) {
             if (started)
@@ -52,22 +54,14 @@ class TweenComponent(vararg tweens: TweenData) : BasicComponent(), CustomEditorI
                     inputFloatN("target", target, target.size, 1, 0)
                     sliderFloat("duration", ::duration, 0f, 10f, "%.1f")
 
-                    val item = ImguiHelper.Item(keepComponents.mapIndexed { i, _ -> i }.toTypedArray())
-                    if (ImguiHelper.addImguiWidgetsArray("keep components", item, { 0 }, {
-                        val index = intArrayOf(PCGame.componentsClasses.indexOf(keepComponents[it.obj].kotlin))
+                    ImguiHelper.addImguiWidgetsArray("keep components", keepComponents, { PCGame.componentsClasses[0].java }, {
+                        val index = intArrayOf(PCGame.componentsClasses.indexOf(it.obj.kotlin))
                         if (combo("", index, PCGame.componentsClasses.map { it.simpleName ?: "Nom inconnu" })) {
-                            keepComponents[it.obj] = PCGame.componentsClasses[index[0]].java
-                            true
+                            keepComponents.set(keepComponents.indexOf(it.obj), PCGame.componentsClasses[index[0]].java)
+                            return@addImguiWidgetsArray true
                         }
                         false
-                    })) {
-                        keepComponents = item.obj.mapIndexed { index, _ ->
-                            if (index in keepComponents.indices)
-                                keepComponents[index]
-                            else
-                                PCGame.componentsClasses[index].java
-                        }.toTypedArray()
-                    }
+                    })
 
                     treePop()
                 }
@@ -84,7 +78,7 @@ class TweenComponent(vararg tweens: TweenData) : BasicComponent(), CustomEditorI
     private var currentTweenIndex = 0
     override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
         with(ImGui) {
-            ImguiHelper.addImguiWidgetsArray("tweens", ::tweens, { TweenFactory.EmptyTween() }, {
+            ImguiHelper.addImguiWidgetsArray("tweens", tweens, { TweenFactory.EmptyTween() }, {
                 it.obj.insertImgui(it.obj.name, gameObject, level)
                 false
             }) {
@@ -96,7 +90,7 @@ class TweenComponent(vararg tweens: TweenData) : BasicComponent(), CustomEditorI
                         combo("tweens", ::currentTweenIndex, TweenFactory.values().map { it.name })
                     }
                     if (button("Ajouter", Vec2(-1, 20f))) {
-                        tweens += TweenFactory.values()[currentTweenIndex]()
+                        tweens.add(TweenFactory.values()[currentTweenIndex]())
                         closeCurrentPopup()
                     }
 

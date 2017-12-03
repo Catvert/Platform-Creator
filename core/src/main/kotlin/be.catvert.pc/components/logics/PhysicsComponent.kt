@@ -7,6 +7,7 @@ import be.catvert.pc.actions.EmptyAction
 import be.catvert.pc.actions.PhysicsAction
 import be.catvert.pc.actions.PhysicsAction.PhysicsActions
 import be.catvert.pc.components.LogicsComponent
+import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.GameObjectMatrixContainer
 import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.ExposeEditor
@@ -16,6 +17,7 @@ import be.catvert.pc.utility.Signal
 import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
+import kotlin.math.roundToInt
 
 /**
  * Enmu permettant de définir le type de mouvement de l'entité (fluide ou linéaire)
@@ -81,7 +83,6 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                        @ExposeEditor var onNothingAction: Action = EmptyAction()) : LogicsComponent() {
     @JsonCreator private constructor() : this(true)
 
-
     /**
      * Les physicsActions représentes les actions que doit faire l'entité pendant le prochain frame
      */
@@ -112,6 +113,13 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
     private var isOnGround = false
 
     private val gravitySpeed = 15
+
+    private var level: Level? = null
+
+    override fun onAddToContainer(gameObject: GameObject, container: GameObjectContainer) {
+        super.onAddToContainer(gameObject, container)
+        level = container as? Level
+    }
 
     override fun update(gameObject: GameObject) {
         if (isStatic) return
@@ -179,7 +187,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         actualMoveSpeedX = moveSpeedX
         actualMoveSpeedY = moveSpeedY
 
-        tryMove(Math.round(moveSpeedX), Math.round(moveSpeedY), gameObject) // move l'entité
+        tryMove(moveSpeedX.roundToInt(), moveSpeedY.roundToInt(), gameObject) // move l'entité
 
         physicsActions.clear()
 
@@ -205,11 +213,11 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
             var newMoveY = moveY
 
             if (!collideOnMove(moveX, 0, gameObject)) {
-                gameObject.box.x = Math.max(0, gameObject.box.x + moveX)
+                gameObject.box.x += moveX
 
                 if (gameObject.box.x != 0 && moveX < 0)
                     onLeftAction(gameObject)
-                else if (moveX > 0)
+                else if (gameObject.box.x != level?.matrixRect?.width?.minus(gameObject.box.width) && moveX > 0)
                     onRightAction(gameObject)
 
                 newMoveX = 0
@@ -245,6 +253,9 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
     private fun collideOnMove(moveX: Int, moveY: Int, gameObject: GameObject): Boolean {
         val newRect = Rect(gameObject.box)
         newRect.position = Point(newRect.x + moveX, newRect.y + moveY)
+
+        if (level?.matrixRect?.contains(newRect) == false)
+            return true
 
         (gameObject.container as? GameObjectMatrixContainer)?.apply {
             this.getAllGameObjectsInCells(getRectCells(newRect)).filter {

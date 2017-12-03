@@ -7,20 +7,18 @@ import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.CustomEditorImpl
 import be.catvert.pc.utility.ImguiHelper
-import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.files.FileHandle
 import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
 import imgui.functionalProgramming
-import ktx.assets.getAsset
 import ktx.assets.load
-import ktx.assets.loadOnDemand
 import ktx.assets.toLocalFile
 
 
-class SoundComponent(vararg sounds: SoundData) : BasicComponent(), CustomEditorImpl {
-    var sounds = arrayOf(*sounds)
+class SoundComponent(var sounds: ArrayList<SoundData>) : BasicComponent(), CustomEditorImpl {
+    constructor(vararg sounds: SoundData) : this(arrayListOf(*sounds))
+    @JsonCreator private constructor() : this(arrayListOf())
 
     class SoundData(soundFile: FileHandle, var levelResources: Boolean = false) : CustomEditorImpl {
         @JsonCreator private constructor() : this(Constants.defaultSoundPath)
@@ -73,7 +71,7 @@ class SoundComponent(vararg sounds: SoundData) : BasicComponent(), CustomEditorI
     }
 
     override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
-        ImguiHelper.addImguiWidgetsArray("sons", this::sounds, { SoundData(Constants.defaultSoundPath) }, {
+        ImguiHelper.addImguiWidgetsArray("sons", sounds, { SoundData(Constants.defaultSoundPath) }, {
             it.obj.insertImgui(it.obj.toString(), gameObject, level)
             false
         })

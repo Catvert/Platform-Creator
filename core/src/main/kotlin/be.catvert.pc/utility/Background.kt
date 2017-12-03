@@ -1,15 +1,26 @@
 package be.catvert.pc.utility
 
+import be.catvert.pc.Log
 import be.catvert.pc.PCGame
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.math.Vector3
+import com.badlogic.gdx.utils.JsonReader
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import java.io.FileReader
+import kotlin.math.roundToInt
+
+enum class BackgroundType {
+    Standard, Parallax
+}
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
-sealed class Background : Renderable
+sealed class Background(val type: BackgroundType) : Renderable
 
-class StandardBackground(var backgroundFile: FileWrapper) : Background() {
+class StandardBackground(val backgroundFile: FileWrapper) : Background(BackgroundType.Standard) {
     private val background = if (backgroundFile.get().exists()) PCGame.assetManager.loadOnDemand<Texture>(backgroundFile) else null
     override fun render(batch: Batch) {
         background?.apply {
@@ -18,15 +29,59 @@ class StandardBackground(var backgroundFile: FileWrapper) : Background() {
     }
 }
 
-class ParallaxBackground(var parallaxDir: FileWrapper) : Background() {
-    init {
-        Utility.getFilesRecursivly(parallaxDir.get()).sortedBy { it.nameWithoutExtension() }.forEach {
+class ParallaxBackground(val parallaxDataFile: FileWrapper) : Background(BackgroundType.Parallax) {
+    private data class Layer(val layer: TextureRegion, val applyYOffset: Boolean, val speed: Float, var x: Float = 0f)
 
+    private val layers = mutableListOf<Layer>()
+
+    private var lastCameraPos: Vector3? = null
+
+    private var width = Gdx.graphics.width
+
+    private var yOffset = 0f
+
+    init {
+        try {
+            val root = JsonReader().parse(FileReader(parallaxDataFile.get().path()))
+
+            root["layers"].forEach {
+                val layerFile = it.getString("file")
+                val applyYOffset = it.getBoolean("applyYOffset")
+                val speed = it.getFloat("speed")
+                layers += Layer(TextureRegion(PCGame.assetManager.loadOnDemand<Texture>(parallaxDataFile.get().parent().child(layerFile)).asset.apply { setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat) }), applyYOffset, speed)
+            }
+        } catch (e: Exception) {
+            Log.error(e) { "Une erreur s'est produite lors du chargement d'un fond d'écran parallax !" }
         }
     }
 
-    override fun render(batch: Batch) {
+    fun updateWidth(width: Int) {
+        this.width = width
 
+        layers.forEach {
+            it.layer.regionWidth = width
+        }
+    }
+
+    fun updateCamera(camera: OrthographicCamera) {
+        if (lastCameraPos != null && lastCameraPos != camera.position) {
+            val deltaX = camera.position.x - lastCameraPos!!.x
+            val deltaY = (camera.position.y - lastCameraPos!!.y) / 2f
+            yOffset = Math.min(0f, yOffset - deltaY)
+
+            layers.forEach {
+                val move = (deltaX * it.speed)
+                it.x -= move
+                updateWidth(width + move.roundToInt())
+            }
+        }
+        lastCameraPos = camera.position.cpy()
+    }
+
+    override fun render(batch: Batch) {
+        layers.forEach {
+            batch.draw(it.layer, it.x, if (it.applyYOffset) yOffset.toFloat() else 0f, width.toFloat(), Gdx.graphics.height.toFloat())
+        }
     }
 }
 

@@ -12,21 +12,17 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Shape2D
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
-import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.JsonReader
 import com.badlogic.gdx.utils.JsonWriter
-import ktx.actors.onClick
-import ktx.actors.plus
 import ktx.assets.Asset
 import ktx.assets.loadOnDemand
-import ktx.assets.toLocalFile
-import ktx.vis.window
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 import java.io.IOException
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
+import kotlin.math.roundToInt
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaConstructor
@@ -47,9 +43,9 @@ fun Batch.draw(textureRegion: TextureRegion, rect: Rect, flipX: Boolean = false,
 
 fun ShapeRenderer.rect(rect: Rect) = this.rect(rect.x.toFloat(), rect.y.toFloat(), rect.width.toFloat(), rect.height.toFloat())
 
-fun Vector2.toPoint() = Point(Math.round(this.x), Math.round(this.y))
+fun Vector2.toPoint() = Point(this.x.roundToInt(), this.y.roundToInt())
 
-fun Vector3.toPoint() = Point(Math.round(this.x), Math.round(this.y))
+fun Vector3.toPoint() = Point(this.x.roundToInt(), this.y.roundToInt())
 
 fun Shape2D.contains(point: Point) = this.contains(point.x.toFloat(), point.y.toFloat())
 
@@ -57,8 +53,6 @@ fun Graphics.toSize() = Size(width, height)
 
 inline fun <reified T : Any> AssetManager.loadOnDemand(file: FileWrapper): Asset<T> = this.loadOnDemand(file.get())
 inline fun <reified T : Any> AssetManager.loadOnDemand(file: FileHandle): Asset<T> = this.loadOnDemand(file.path())
-
-fun String?.toFileWrapper() = FileWrapper(this.toLocalFile())
 
 fun FileHandle.toFileWrapper() = FileWrapper(this)
 
@@ -141,6 +135,7 @@ object ReflectionUtility {
         return null
     }
 
+
     fun getAllFieldsOf(type: Class<*>): List<Field> {
         val fields = mutableListOf<Field>()
 
@@ -155,41 +150,4 @@ object ReflectionUtility {
     }
 
     fun simpleNameOf(instance: Any) = instance.javaClass.kotlin.simpleName ?: "Nom introuvable"
-}
-
-object UIUtility {
-
-    /**
-     * Affiche un dialogue complexe
-     * @param title : Le titre
-     * @param content : Le contenu du dialogue
-     * @param buttons : Les boutons disponibles dans le dialogue
-     * @param onClose : Fonction appelée quand l'utilisateur a appuié sur un bouton
-     */
-    fun showDialog(stage: Stage, title: String, content: String, buttons: List<String> = listOf(), onClose: (button: Int) -> Unit = {}) {
-        stage + window(title) {
-            isModal = true
-            setSize(400f, 150f)
-            setPosition(Gdx.graphics.width / 2f - width / 2, Gdx.graphics.height / 2f - height / 2)
-            addCloseButton()
-
-            verticalGroup {
-                space(10f)
-
-                label(content)
-
-                horizontalGroup {
-                    space(10f)
-                    buttons.forEachIndexed { i, buttonStr ->
-                        textButton(buttonStr) {
-                            onClick {
-                                this@window.remove()
-                                onClose(i)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
 }

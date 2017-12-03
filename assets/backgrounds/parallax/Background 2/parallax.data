@@ -1,0 +1,59 @@
+{
+    "layers": [
+        {
+            "file": "1.png",
+            "applyYOffset": false,
+            "speed": 0
+        },
+        {
+            "file": "2.png",
+            "applyYOffset": false,
+            "speed": 0
+        },
+        {
+            "file": "3.png",
+            "applyYOffset": false,
+            "speed": 0
+        },
+        {
+            "file": "4.png",
+            "applyYOffset": false,
+            "speed": 0
+        },
+        {
+            "file": "5.png",
+            "applyYOffset": true,
+            "speed": 0.05
+        },
+        {
+            "file": "6.png",
+            "applyYOffset": true,
+            "speed": 0.1
+        },
+        {
+            "file": "7.png",
+            "applyYOffset": true,
+            "speed": 0.2
+        },
+        {
+            "file": "8.png",
+            "applyYOffset": true,
+            "speed": 0.3
+        },
+        {
+            "file": "9.png",
+            "applyYOffset": true,
+            "speed": 0.4
+        },
+        {
+            "file": "10.png",
+            "applyYOffset": true,
+            "speed": 0.5
+        },
+        {
+            "file": "11.png",
+            "applyYOffset": true,
+            "speed": 0.6
+        }
+    ]
+}

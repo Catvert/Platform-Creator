@@ -4,8 +4,15 @@ import be.catvert.pc.GameKeys
 import be.catvert.pc.PCGame
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
+import be.catvert.pc.utility.Constants
+import be.catvert.pc.utility.ImguiHelper
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
+import com.badlogic.gdx.graphics.OrthographicCamera
+import com.badlogic.gdx.graphics.g2d.Batch
+import glm_.vec2.Vec2
+import imgui.ImGui
+import imgui.WindowFlags
 import ktx.app.use
 import ktx.assets.toLocalFile
 
@@ -15,8 +22,34 @@ import ktx.assets.toLocalFile
  */
 class GameScene(private val level: Level) : Scene(level.background) {
     override var gameObjectContainer: GameObjectContainer = level
+    override val camera: OrthographicCamera = OrthographicCamera(Constants.levelCameraRatio, Constants.levelCameraRatio * (Gdx.graphics.height.toFloat() / Gdx.graphics.width))
 
     private val cameraMoveSpeed = 10f
+
+    private var pause = false
+
+    override fun render(batch: Batch) {
+        super.render(batch)
+
+        with(ImGui) {
+            if (pause) {
+                ImguiHelper.withCenteredWindow("Pause", null, Vec2(200, 110), WindowFlags.NoResize.i or WindowFlags.NoCollapse.i) {
+                    if (button("Reprendre", Vec2(-1, 20))) {
+                        pause = false
+                        gameObjectContainer.allowUpdatingGO = true
+                    }
+                    if (button("Recommencer", Vec2(-1, 20))) {
+                        val level = Level.loadFromFile(this@GameScene.level.levelPath.toLocalFile().parent())
+                        if (level != null)
+                            SceneManager.loadScene(GameScene(level))
+                    }
+                    if (button("Quitter le niveau", Vec2(-1, 20))) {
+                        SceneManager.loadScene(MainMenuScene())
+                    }
+                }
+            }
+        }
+    }
 
     override fun postBatchRender() {
         super.postBatchRender()
@@ -33,8 +66,10 @@ class GameScene(private val level: Level) : Scene(level.background) {
 
         updateCamera(true)
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
-            SceneManager.loadScene(PauseScene(this), disposeCurrentScene = false)
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            pause = true
+            gameObjectContainer.allowUpdatingGO = false
+        }
         if (Gdx.input.isKeyJustPressed(GameKeys.GAME_SWITCH_GRAVITY.key))
             level.applyGravity = !level.applyGravity
         if (Gdx.input.isKeyJustPressed(GameKeys.GAME_EDIT_LEVEL.key))

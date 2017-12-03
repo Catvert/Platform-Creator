@@ -10,7 +10,10 @@ import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.components.logics.*
 import be.catvert.pc.components.logics.ai.AIComponent
 import be.catvert.pc.components.logics.ai.SimpleMoverComponent
-import be.catvert.pc.utility.*
+import be.catvert.pc.utility.Constants
+import be.catvert.pc.utility.Rect
+import be.catvert.pc.utility.Size
+import be.catvert.pc.utility.toFileWrapper
 
 /**
  * Objet permettant la création de prefab préfait
@@ -20,12 +23,12 @@ enum class PrefabFactory(val prefab: Prefab) {
     Empty(Prefab("empty", GameObject(GameObject.Tag.Sprite, box = Rect(size = Size(50, 50))))),
     Sprite(
             Prefab("sprite", GameObject(GameObject.Tag.Sprite, box = Rect(size = Size(50, 50))) {
-                this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.defaultAtlasPath))
+                this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.atlasDirPath.child("Extended Tiles/grassSheet.atlas").toFileWrapper() to "slice01_01"))
             })
     ),
     PhysicsSprite(
             Prefab("physicsSprite", GameObject(GameObject.Tag.PhysicsSprite, box = Rect(size = Size(50, 50))) {
-                this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.defaultAtlasPath))
+                this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.atlasDirPath.child("Extended Tiles/grassSheet.atlas").toFileWrapper() to "slice01_01"))
                 this += PhysicsComponent(true)
             })
     ),
@@ -37,7 +40,7 @@ enum class PrefabFactory(val prefab: Prefab) {
 
                 this += AtlasComponent(0,
                         AtlasComponent.AtlasData("stand", atlas to "alienGreen_stand"),
-                        AtlasComponent.AtlasData("walk", atlas,"alienGreen_walk", 0.33f),
+                        AtlasComponent.AtlasData("walk", atlas, "alienGreen_walk", 0.33f),
                         AtlasComponent.AtlasData("jump", atlas to "alienGreen_jump"),
                         AtlasComponent.AtlasData("fall", atlas to "alienGreen_swim_1"))
 
@@ -66,21 +69,21 @@ enum class PrefabFactory(val prefab: Prefab) {
             })
     ),
     Spider(
-            Prefab("spider",  GameObject(GameObject.Tag.Enemy, box = Rect(size = Size(48, 48))) {
+            Prefab("spider", GameObject(GameObject.Tag.Enemy, box = Rect(size = Size(48, 48))) {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("walk", Constants.atlasDirPath.child("More Enemies Animations/enemies.atlas").toFileWrapper(), "spider_walk", 0.33f))
                 this += PhysicsComponent(false, 5)
                 this += TweenComponent(TweenFactory.RemoveGOTween())
                 this += LifeComponent(TweenAction(0))
-                this += AIComponent(LifeAction(LifeAction.LifeActions.REMOVE_LP), arrayOf(CollisionSide.OnDown, CollisionSide.OnRight, CollisionSide.OnLeft), LifeAction(LifeAction.LifeActions.REMOVE_LP), arrayOf(CollisionSide.OnUp))
+                this += AIComponent(GameObject.Tag.Player, LifeAction(LifeAction.LifeActions.REMOVE_LP), arrayListOf(CollisionSide.OnDown, CollisionSide.OnRight, CollisionSide.OnLeft), LifeAction(LifeAction.LifeActions.REMOVE_LP), arrayListOf(CollisionSide.OnUp))
                 this += SimpleMoverComponent(SimpleMoverComponent.SimpleMoverOrientation.HORIZONTAL, false).apply { onReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X) }
             })
     ),
     SnakeSlime(
-            Prefab("snake slime",  GameObject(GameObject.Tag.Enemy, box = Rect(size = Size(35, 120))) {
+            Prefab("snake slime", GameObject(GameObject.Tag.Enemy, box = Rect(size = Size(35, 120))) {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("base", Constants.atlasDirPath.child("More Enemies Animations/enemies.atlas").toFileWrapper(), "snakeSlime", 0.33f))
                 this += PhysicsComponent(true)
                 this += LifeComponent(RemoveGOAction())
-                this += AIComponent(LifeAction(LifeAction.LifeActions.REMOVE_LP), arrayOf(CollisionSide.OnDown, CollisionSide.OnRight, CollisionSide.OnLeft, CollisionSide.OnDown), LifeAction(LifeAction.LifeActions.REMOVE_LP), arrayOf())
+                this += AIComponent(GameObject.Tag.Player, LifeAction(LifeAction.LifeActions.REMOVE_LP), arrayListOf(CollisionSide.OnDown, CollisionSide.OnRight, CollisionSide.OnLeft, CollisionSide.OnDown), LifeAction(LifeAction.LifeActions.REMOVE_LP), arrayListOf())
             })
     ),
     Bee(
@@ -88,16 +91,16 @@ enum class PrefabFactory(val prefab: Prefab) {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.atlasDirPath.child("More Enemies Animations/enemies.atlas").toFileWrapper() to "bee"))
                 this += PhysicsComponent(false, 5, gravity = false)
                 this += LifeComponent(RemoveGOAction())
-                this += AIComponent(LifeAction(LifeAction.LifeActions.REMOVE_LP), arrayOf(CollisionSide.OnDown, CollisionSide.OnRight, CollisionSide.OnLeft), LifeAction(LifeAction.LifeActions.REMOVE_LP), arrayOf(CollisionSide.OnUp))
+                this += AIComponent(GameObject.Tag.Player, LifeAction(LifeAction.LifeActions.REMOVE_LP), arrayListOf(CollisionSide.OnDown, CollisionSide.OnRight, CollisionSide.OnLeft), LifeAction(LifeAction.LifeActions.REMOVE_LP), arrayListOf(CollisionSide.OnUp))
                 this += SimpleMoverComponent(SimpleMoverComponent.SimpleMoverOrientation.HORIZONTAL, false).apply { onReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X) }
             })
     ),
     GoldCoin(
-            Prefab("gold coin",  GameObject(GameObject.Tag.Special, box = Rect(size = Size(35, 35))) {
+            Prefab("gold coin", GameObject(GameObject.Tag.Special, box = Rect(size = Size(35, 35))) {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.atlasDirPath.child("Jumper Pack/spritesheet_jumper.atlas").toFileWrapper() to "coin_gold"))
                 this += PhysicsComponent(true)
                 this += SoundComponent(SoundComponent.SoundData(Constants.soundsDirPath.child("coin.wav")))
-                this += AIComponent(EmptyAction(), arrayOf(), MultiplexerAction(ScoreAction(1), RemoveGOAction(), SoundAction(0)), arrayOf(CollisionSide.OnLeft, CollisionSide.OnRight, CollisionSide.OnUp, CollisionSide.OnDown))
+                this += AIComponent(GameObject.Tag.Player, EmptyAction(), arrayListOf(), MultiplexerAction(ScoreAction(1), RemoveGOAction(), SoundAction(0)), arrayListOf(CollisionSide.OnLeft, CollisionSide.OnRight, CollisionSide.OnUp, CollisionSide.OnDown))
             })
     ),
     BlockEnemy(

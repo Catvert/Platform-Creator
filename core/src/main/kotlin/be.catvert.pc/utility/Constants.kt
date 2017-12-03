@@ -13,13 +13,13 @@ object Constants {
     const val minLayerIndex = -100
     const val maxLayerIndex = 100
 
+    const val levelCameraRatio = 2000f
+
     const val assetsDir = "assets/"
 
     private val assetsDirPath = "assets/".toLocalFile()
 
     val bundlesDirPath = assetsDirPath.child("i18n_bundles")
-
-    val UISkinPath = assetsDirPath.child("ui/neutralizer-fix/neutralizer.json")
 
     val mainFontPath = assetsDirPath.child("fonts/mainFont.fnt")
     val editorFontPath = assetsDirPath.child("fonts/editorFont.fnt")
