@@ -4,6 +4,7 @@ import be.catvert.pc.GameObject
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.utility.ExposeEditor
 import be.catvert.pc.utility.ReflectionUtility
+import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonTypeInfo

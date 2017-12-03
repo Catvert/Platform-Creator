@@ -8,8 +8,6 @@ import com.badlogic.gdx.Input
 import glm_.vec2.Vec2
 import imgui.ImGui
 import imgui.functionalProgramming
-import ktx.collections.GdxArray
-import ktx.collections.toGdxArray
 import kotlin.reflect.KMutableProperty0
 
 object ImguiHelper {
@@ -44,7 +42,7 @@ object ImguiHelper {
                         sameLine()
                         functionalProgramming.withId(index) {
                             val item = Item(array.obj[index])
-                            if(itemBlock(item))
+                            if (itemBlock(item))
                                 valueChanged = true
                             array.obj[index] = item.obj
                         }

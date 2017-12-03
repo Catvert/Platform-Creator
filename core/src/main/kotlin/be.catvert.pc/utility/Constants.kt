@@ -29,7 +29,7 @@ object Constants {
     val atlasDirPath = assetsDirPath.child("atlas")
     val texturesDirPath = assetsDirPath.child("textures")
     val soundsDirPath = assetsDirPath.child("sounds")
-    val backgroundsDirPath = assetsDirPath.child("game/background")
+    val backgroundsDirPath = assetsDirPath.child("backgrounds")
     val prefabsDirPath = assetsDirPath.child("prefabs")
     val levelDirPath = assetsDirPath.child("levels")
 

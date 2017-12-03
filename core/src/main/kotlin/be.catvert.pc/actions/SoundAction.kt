@@ -31,7 +31,7 @@ class SoundAction(var soundIndex: Int) : Action, CustomEditorImpl {
                 combo("son", ::soundIndex, sounds.map { it.toString() })
 
                 sameLine()
-                if(button("jouer")) {
+                if (button("jouer")) {
                     playSound(gameObject)
                 }
             }

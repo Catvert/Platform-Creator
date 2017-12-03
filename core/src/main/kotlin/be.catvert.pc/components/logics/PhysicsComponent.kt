@@ -116,7 +116,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
     override fun update(gameObject: GameObject) {
         if (isStatic) return
 
-        if(physicsActions.isEmpty())
+        if (physicsActions.isEmpty())
             onNothingAction(gameObject)
 
         if (gravity && (gameObject.container as? Level)?.applyGravity == true)
@@ -247,33 +247,31 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         newRect.position = Point(newRect.x + moveX, newRect.y + moveY)
 
         (gameObject.container as? GameObjectMatrixContainer)?.apply {
-            getRectCells(newRect).forEach {
-                matrixGrid[it.x][it.y].first.filter {
-                    it.id != gameObject.id
-                            && when (it.getCurrentState().getComponent<PhysicsComponent>()?.maskCollision) {
-                        MaskCollision.ALL -> true
-                        MaskCollision.ONLY_PLAYER -> gameObject.tag == GameObject.Tag.Player
-                        MaskCollision.ONLY_ENEMY -> gameObject.tag == GameObject.Tag.Enemy
-                        null -> false
-                    }
-                }.forEach {
-                    if (newRect.overlaps(it.box)) {
-                        val side = when {
-                            moveX > 0 -> CollisionSide.OnRight
-                            moveX < 0 -> CollisionSide.OnLeft
-                            moveY > 0 -> CollisionSide.OnUp
-                            moveY < 0 -> CollisionSide.OnDown
-                            else -> {
-                                Log.warn { "Collision invalide !" }
-                                CollisionSide.OnLeft
-                            }
+            this.getAllGameObjectsInCells(getRectCells(newRect)).filter {
+                it.id != gameObject.id
+                        && when (it.getCurrentState().getComponent<PhysicsComponent>()?.maskCollision) {
+                    MaskCollision.ALL -> true
+                    MaskCollision.ONLY_PLAYER -> gameObject.tag == GameObject.Tag.Player
+                    MaskCollision.ONLY_ENEMY -> gameObject.tag == GameObject.Tag.Enemy
+                    null -> false
+                }
+            }.forEach {
+                if (newRect.overlaps(it.box)) {
+                    val side = when {
+                        moveX > 0 -> CollisionSide.OnRight
+                        moveX < 0 -> CollisionSide.OnLeft
+                        moveY > 0 -> CollisionSide.OnUp
+                        moveY < 0 -> CollisionSide.OnDown
+                        else -> {
+                            Log.warn { "Collision invalide !" }
+                            CollisionSide.OnLeft
                         }
-
-                        gameObject.getCurrentState().getComponent<PhysicsComponent>()?.onCollisionWith?.invoke(CollisionListener(gameObject, it, side))
-                        it.getCurrentState().getComponent<PhysicsComponent>()?.onCollisionWith?.invoke(CollisionListener(it, gameObject, -side))
-
-                        return true
                     }
+
+                    gameObject.getCurrentState().getComponent<PhysicsComponent>()?.onCollisionWith?.invoke(CollisionListener(gameObject, it, side))
+                    it.getCurrentState().getComponent<PhysicsComponent>()?.onCollisionWith?.invoke(CollisionListener(it, gameObject, -side))
+
+                    return true
                 }
             }
         }

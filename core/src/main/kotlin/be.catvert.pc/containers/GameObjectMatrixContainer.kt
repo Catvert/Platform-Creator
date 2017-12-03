@@ -11,20 +11,54 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 abstract class GameObjectMatrixContainer : GameObjectContainer() {
     private val shapeRenderer = ShapeRenderer()
 
-    private val matrixWidth = 300
-    private val matrixHeight = 300
-    private val matrixSizeCell = 200
+    @JsonIgnore
+    val minMatrixSize = 10
 
+    var matrixWidth = minMatrixSize
+        set(value) {
+            if (value >= minMatrixSize) {
+                if (value > field) {
+                    for (i in 0 until value - field) {
+                        addLineWidth()
+                        ++field
+                    }
+                } else {
+                    for (i in 0 until Math.abs(field - value)) {
+                        removeLineWidth()
+                        --field
+                    }
+                }
+            }
+        }
+    var matrixHeight = minMatrixSize
+        set(value) {
+            if (value >= minMatrixSize) {
+                if (value > field) {
+                    for (i in 0 until value - field) {
+                        addLineHeight()
+                        ++field
+                    }
+                } else {
+                    for (i in 0 until Math.abs(field - value)) {
+                        removeLineHeight()
+                        --field
+                    }
+                }
+            }
+        }
+
+    private val matrixSizeCell = 200
     /**
      * La matrix permettant de stoquer les différentes entités selon leur position dans l'espace
      */
-    @JsonIgnore val matrixGrid = matrix2d(matrixWidth, matrixHeight, { row: Int, width: Int -> Array(width) { col -> mutableListOf<GameObject>() to Rect(row * matrixSizeCell, col * matrixSizeCell, matrixSizeCell, matrixSizeCell) } })
-
+    private val matrixGrid = matrix2d(matrixWidth, matrixHeight, { row: Int, width: Int -> MutableList(width) { col -> mutableListOf<GameObject>() to Rect(row * matrixSizeCell, col * matrixSizeCell, matrixSizeCell, matrixSizeCell) } })
     /**
      * Le box illustrant la matrix
      */
+
     @JsonIgnore
-    val matrixRect = Rect(0, 0, matrixSizeCell * matrixWidth, matrixSizeCell * matrixHeight)
+    var matrixRect = Rect(0, 0, matrixSizeCell * matrixWidth, matrixSizeCell * matrixHeight)
+        private set
 
     /**
      * Le box illustrant la zone où les cellules sont actives
@@ -38,6 +72,9 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     private val activeGridCells = mutableListOf<GridCell>()
 
     @JsonIgnore
+    fun getActiveGridCells() = activeGridCells.toList()
+
+    @JsonIgnore
     var drawDebugCells = false
 
     @JsonIgnore
@@ -48,7 +85,8 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     }
 
     override fun update() {
-        updateActiveCells()
+        activeGridCells.clear()
+        activeGridCells.addAll(getRectCells(activeRect))
 
         if (Gdx.input.isKeyJustPressed(GameKeys.DEBUG_MODE.key))
             drawDebugCells = !drawDebugCells
@@ -57,7 +95,16 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
             activeRect.position = Point(Math.max(0, followGameObject!!.position().x - activeRect.width / 2 + followGameObject!!.size().width / 2), Math.max(0, followGameObject!!.position().y - activeRect.height / 2 + followGameObject!!.size().height / 2))
         }
 
-        super.update()
+        getAllGameObjectsInCells(activeGridCells).forEach {
+            if (allowUpdatingGO)
+                it.update()
+
+            if (it.position().y < 0) {
+                it.onOutOfMapAction(it)
+            }
+        }
+
+        removeGameObjects()
     }
 
     fun drawDebug() {
@@ -74,6 +121,52 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
         }
     }
 
+    private fun addLineWidth() {
+        val width = mutableListOf<Pair<MutableList<GameObject>, Rect>>()
+        matrixGrid.last().map { it.second }.forEach {
+            width.add(mutableListOf<GameObject>() to Rect(it.x + matrixSizeCell, it.y, matrixSizeCell, matrixSizeCell))
+        }
+
+        matrixGrid.add(width)
+
+        matrixRect.width += matrixSizeCell
+    }
+
+    private fun removeLineWidth() {
+        val last = matrixGrid.last().apply {
+            forEach {
+                it.first.forEach {
+                    removeGameObject(it)
+                }
+            }
+        }
+        matrixGrid.remove(last)
+
+        matrixRect.width -= matrixSizeCell
+    }
+
+    private fun addLineHeight() {
+        matrixGrid.forEach {
+            val lastRect = it.last().second
+            it.add(mutableListOf<GameObject>() to Rect(lastRect.x, lastRect.y + matrixSizeCell, matrixSizeCell, matrixSizeCell))
+        }
+
+        matrixRect.height += matrixSizeCell
+    }
+
+    private fun removeLineHeight() {
+        matrixGrid.forEach {
+            val last = it.last().apply {
+                it.last().first.forEach {
+                    removeGameObject(it)
+                }
+            }
+            it.remove(last)
+        }
+
+        matrixRect.height -= matrixSizeCell
+    }
+
     override fun addGameObject(gameObject: GameObject): GameObject {
         setGameObjectToGrid(gameObject)
 
@@ -85,7 +178,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     override fun onRemoveGameObject(gameObject: GameObject) {
         super.onRemoveGameObject(gameObject)
         gameObject.gridCells.forEach {
-            matrixGrid[it.x][it.y].first.remove(gameObject)
+            matrixGrid.elementAtOrNull(it.x)?.elementAtOrNull(it.y)?.first?.remove(gameObject)
         }
         gameObject.gridCells.clear()
     }
@@ -98,28 +191,6 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     private fun addRectListener(gameObject: GameObject) {
         gameObject.box.onPositionChange.register { setGameObjectToGrid(gameObject) }
         gameObject.box.onSizeChange.register { setGameObjectToGrid(gameObject) }
-    }
-
-    /**
-     * Permet de mettre à jour les cellules actives
-     */
-    private fun updateActiveCells() {
-        activeGridCells.forEach {
-            matrixGrid[it.x][it.y].first.forEach matrix@ {
-                it.active = false
-            }
-        }
-
-        activeGridCells.clear()
-
-        activeGridCells.addAll(getRectCells(activeRect))
-
-        activeGridCells.forEach {
-            for (i in 0 until matrixGrid[it.x][it.y].first.size) {
-                val go = matrixGrid[it.x][it.y].first[i]
-                go.active = true
-            }
-        }
     }
 
     /**
@@ -169,8 +240,8 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
      * @param entity L'entité à mettre à jour
      */
     private fun setGameObjectToGrid(gameObject: GameObject) {
-        if (gameObject.gridCells.isEmpty())
-            gameObject.active = false
+        // if (gameObject.gridCells.isEmpty())
+        //   gameObject.active = false
 
         gameObject.gridCells.forEach {
             matrixGrid[it.x][it.y].first.remove(gameObject)

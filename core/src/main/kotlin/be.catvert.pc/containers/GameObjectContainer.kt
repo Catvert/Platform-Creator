@@ -39,8 +39,8 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
         return gameObject
     }
 
-    fun createGameObject(rectangle: Rect = Rect(), tag: GameObject.Tag, initDefaultState: GameObjectState.() -> Unit = {}, initGO: GameObject.() -> Unit = {}): GameObject {
-        val go = GameObject(tag, rectangle, this, initDefaultState).apply(initGO)
+    fun createGameObject(name: String, tag: GameObject.Tag, rectangle: Rect = Rect(), initDefaultState: GameObjectState.() -> Unit = {}, initGO: GameObject.() -> Unit = {}): GameObject {
+        val go = GameObject(tag, name, rectangle, this, initDefaultState).apply(initGO)
 
         addGameObject(go)
 
@@ -64,6 +64,10 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
             }
         }
 
+        removeGameObjects()
+    }
+
+    protected fun removeGameObjects() {
         if (removeGameObjects.isNotEmpty()) {
             removeGameObjects.forEach {
                 onRemoveGameObject(it)

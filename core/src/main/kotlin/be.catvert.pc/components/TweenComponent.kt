@@ -5,17 +5,13 @@ import be.catvert.pc.GameObject
 import be.catvert.pc.GameObjectTweenAccessor
 import be.catvert.pc.PCGame
 import be.catvert.pc.actions.Action
-import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.containers.Level
 import be.catvert.pc.factories.TweenFactory
 import be.catvert.pc.utility.CustomEditorImpl
-import be.catvert.pc.utility.ExposeEditorFactory
 import be.catvert.pc.utility.ImguiHelper
-import com.fasterxml.jackson.annotation.JsonCreator
 import glm_.vec2.Vec2
 import imgui.ImGui
 import imgui.functionalProgramming
-import kotlin.reflect.KClass
 
 class TweenComponent(vararg tweens: TweenData) : BasicComponent(), CustomEditorImpl {
     var tweens = arrayOf(*tweens)
@@ -28,7 +24,7 @@ class TweenComponent(vararg tweens: TweenData) : BasicComponent(), CustomEditorI
 
             val tweenState = gameObject.addState("tween-state") {
                 gameObject.getCurrentState().getComponents().forEach {
-                    if(keepComponents.contains(it.javaClass))
+                    if (keepComponents.contains(it.javaClass))
                         addComponent(it)
                 }
             }
@@ -57,16 +53,16 @@ class TweenComponent(vararg tweens: TweenData) : BasicComponent(), CustomEditorI
                     sliderFloat("duration", ::duration, 0f, 10f, "%.1f")
 
                     val item = ImguiHelper.Item(keepComponents.mapIndexed { i, _ -> i }.toTypedArray())
-                    if(ImguiHelper.addImguiWidgetsArray("keep components", item, { 0 }, {
+                    if (ImguiHelper.addImguiWidgetsArray("keep components", item, { 0 }, {
                         val index = intArrayOf(PCGame.componentsClasses.indexOf(keepComponents[it.obj].kotlin))
-                        if(combo("", index, PCGame.componentsClasses.map { it.simpleName?: "Nom inconnu" })) {
+                        if (combo("", index, PCGame.componentsClasses.map { it.simpleName ?: "Nom inconnu" })) {
                             keepComponents[it.obj] = PCGame.componentsClasses[index[0]].java
                             true
                         }
                         false
                     })) {
                         keepComponents = item.obj.mapIndexed { index, _ ->
-                            if(index in keepComponents.indices)
+                            if (index in keepComponents.indices)
                                 keepComponents[index]
                             else
                                 PCGame.componentsClasses[index].java

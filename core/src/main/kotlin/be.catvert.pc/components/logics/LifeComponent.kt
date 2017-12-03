@@ -18,8 +18,8 @@ import imgui.ImGui
 class LifeComponent(onDeathAction: Action, vararg lifePointActions: LifePointActions) : BasicComponent(), CustomEditorImpl {
     @JsonCreator private constructor() : this(RemoveGOAction())
 
-    data class LifePointActions(@ExposeEditor var onStartAction: Action, @ExposeEditor var onEndAction: Action): CustomEditorImpl  {
-       override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
+    data class LifePointActions(@ExposeEditor var onStartAction: Action, @ExposeEditor var onEndAction: Action) : CustomEditorImpl {
+        override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
             with(ImGui) {
                 if (treeNode(labelName)) {
                     ImguiHelper.addImguiWidget("start", ::onStartAction, gameObject, level, ExposeEditorFactory.empty)
@@ -43,8 +43,7 @@ class LifeComponent(onDeathAction: Action, vararg lifePointActions: LifePointAct
             lpActions.elementAt(lifePoint - 1).onEndAction(gameObject)
             --lifePoint
             lpActions.elementAt(lifePoint - 1).onStartAction(gameObject)
-        }
-        else if(lifePoint != -1) {
+        } else if (lifePoint != -1) {
             lpActions.elementAt(0).onEndAction(gameObject)
             lifePoint = -1
         }
@@ -72,7 +71,7 @@ class LifeComponent(onDeathAction: Action, vararg lifePointActions: LifePointAct
 
     override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
         var index = 0
-        ImguiHelper.addImguiWidgetsArray("life actions", this::lpActions,  { LifePointActions(EmptyAction(), EmptyAction()) }, {
+        ImguiHelper.addImguiWidgetsArray("life actions", this::lpActions, { LifePointActions(EmptyAction(), EmptyAction()) }, {
             it.obj.insertImgui("vie ${++index}", gameObject, level)
             false
         })

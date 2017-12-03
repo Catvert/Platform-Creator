@@ -4,12 +4,17 @@ import be.catvert.pc.GameObject
 import be.catvert.pc.PCGame
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
-import be.catvert.pc.utility.*
+import be.catvert.pc.utility.Constants
+import be.catvert.pc.utility.CustomEditorImpl
+import be.catvert.pc.utility.ImguiHelper
+import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.files.FileHandle
 import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
 import imgui.functionalProgramming
+import ktx.assets.getAsset
+import ktx.assets.load
 import ktx.assets.loadOnDemand
 import ktx.assets.toLocalFile
 
@@ -22,13 +27,15 @@ class SoundComponent(vararg sounds: SoundData) : BasicComponent(), CustomEditorI
 
         var soundPath = soundFile.path()
 
-        private var sound: Sound = PCGame.assetManager.loadOnDemand<Sound>(soundPath).asset
+        private lateinit var sound: Sound
 
-        fun play() { sound.play(PCGame.soundVolume) }
+        fun play() {
+            sound.play(PCGame.soundVolume)
+        }
 
         fun updateSound(soundFile: FileHandle = soundPath.toLocalFile()) {
             this.soundPath = soundFile.path()
-            sound = PCGame.assetManager.loadOnDemand<Sound>(soundPath).asset
+            sound = PCGame.assetManager.load<Sound>(soundPath).apply { finishLoading() }.asset
         }
 
         override fun toString(): String = soundPath.toLocalFile().nameWithoutExtension()
@@ -44,7 +51,7 @@ class SoundComponent(vararg sounds: SoundData) : BasicComponent(), CustomEditorI
                     }
 
                     sameLine()
-                    if(button("jouer")) {
+                    if (button("jouer")) {
                         play()
                     }
 
@@ -62,7 +69,6 @@ class SoundComponent(vararg sounds: SoundData) : BasicComponent(), CustomEditorI
 
     override fun onAddToContainer(gameObject: GameObject, container: GameObjectContainer) {
         super.onAddToContainer(gameObject, container)
-
         sounds.forEach { it.updateSound() }
     }
 

@@ -1,6 +1,5 @@
 package be.catvert.pc
 
-import aurelienribon.tweenengine.Timeline
 import aurelienribon.tweenengine.Tween
 import aurelienribon.tweenengine.TweenManager
 import be.catvert.pc.actions.Action
@@ -8,7 +7,6 @@ import be.catvert.pc.components.Component
 import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.i18n.Locales
-import be.catvert.pc.scenes.MainMenuScene
 import be.catvert.pc.scenes.Scene
 import be.catvert.pc.scenes.SceneManager
 import be.catvert.pc.scenes.SceneTweenAccessor
@@ -57,9 +55,11 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
         Tween.registerAccessor(GameObject::class.java, GameObjectTweenAccessor())
         Tween.registerAccessor(Scene::class.java, SceneTweenAccessor())
 
-        Utility.getFilesRecursivly(Constants.backgroundsDirPath, *Constants.levelTextureExtension).forEach {
-            backgroundsList.add(it)
+        Utility.getFilesRecursivly(Constants.backgroundsDirPath.child("standard"), *Constants.levelTextureExtension).forEach {
+            backgroundsList.add(StandardBackground(it.toFileWrapper()))
         }
+
+        mainBackground = StandardBackground(Constants.gameBackgroundMenuPath.toFileWrapper())
 
         gameAtlas = Utility.getFilesRecursivly(Constants.atlasDirPath, *Constants.levelAtlasExtension)
 
@@ -79,8 +79,6 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
     override fun render() {
         super.render()
 
-        LwjglGL3.newFrame()
-
         Gdx.graphics.setTitle(Constants.gameTitle + " - ${Gdx.graphics.framesPerSecond} FPS")
 
         SceneManager.update()
@@ -88,8 +86,6 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
         tweenManager.update(Gdx.graphics.deltaTime)
 
         SceneManager.render(mainBatch)
-
-        ImGui.render()
 
         SceneManager.currentScene().calcIsUIHover()
     }
@@ -183,7 +179,7 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
     }
 
     companion object {
-        private val backgroundsList = mutableListOf<FileHandle>()
+        private val backgroundsList = mutableListOf<Background>()
 
         lateinit var mainBatch: SpriteBatch
             private set
@@ -205,6 +201,8 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
         lateinit var gameTextures: List<FileHandle>
             private set
         lateinit var gameSounds: List<FileHandle>
+            private set
+        lateinit var mainBackground: Background
             private set
 
         val actionsClasses = let {
@@ -241,7 +239,7 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
          * Permet de retourner le logo du jeu
          */
         fun generateLogo(container: GameObjectContainer): GameObject {
-            return container.createGameObject(getLogoRect(), GameObject.Tag.Sprite, {
+            return container.createGameObject("logo", GameObject.Tag.Sprite, getLogoRect(), {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("logo", Constants.gameLogoPath.toFileWrapper()))
             })
         }

@@ -17,20 +17,20 @@ import be.catvert.pc.utility.*
  */
 
 enum class PrefabFactory(val prefab: Prefab) {
-    Empty(Prefab("empty", "Catvert", GameObject(GameObject.Tag.Sprite, Rect(size = Size(50, 50))))),
+    Empty(Prefab("empty", GameObject(GameObject.Tag.Sprite, box = Rect(size = Size(50, 50))))),
     Sprite(
-            Prefab("sprite", "Catvert", GameObject(GameObject.Tag.Sprite, Rect(size = Size(50, 50)), null) {
+            Prefab("sprite", GameObject(GameObject.Tag.Sprite, box = Rect(size = Size(50, 50))) {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.defaultAtlasPath))
             })
     ),
     PhysicsSprite(
-            Prefab("physicsSprite", "Catvert", GameObject(GameObject.Tag.PhysicsSprite, Rect(size = Size(50, 50)), null) {
+            Prefab("physicsSprite", GameObject(GameObject.Tag.PhysicsSprite, box = Rect(size = Size(50, 50))) {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.defaultAtlasPath))
                 this += PhysicsComponent(true)
             })
     ),
     Player(
-            Prefab("player", "Catvert", GameObject(GameObject.Tag.Player, Rect(size = Size(48, 98)), null) {
+            Prefab("player", GameObject(GameObject.Tag.Player, box = Rect(size = Size(48, 98))) {
                 val jumpSoundIndex = 0
 
                 val atlas = Constants.atlasDirPath.child("More Enemies Animations/aliens.atlas").toFileWrapper()
@@ -63,11 +63,10 @@ enum class PrefabFactory(val prefab: Prefab) {
                 this += LifeComponent(LevelAction(LevelAction.LevelActions.FAIL_EXIT))
             }.apply {
                 onOutOfMapAction = LevelAction(LevelAction.LevelActions.FAIL_EXIT)
-                keepActive = true
             })
     ),
     Spider(
-            Prefab("spider", "Catvert", GameObject(GameObject.Tag.Enemy, Rect(size = Size(48, 48)), null) {
+            Prefab("spider",  GameObject(GameObject.Tag.Enemy, box = Rect(size = Size(48, 48))) {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("walk", Constants.atlasDirPath.child("More Enemies Animations/enemies.atlas").toFileWrapper(), "spider_walk", 0.33f))
                 this += PhysicsComponent(false, 5)
                 this += TweenComponent(TweenFactory.RemoveGOTween())
@@ -77,7 +76,7 @@ enum class PrefabFactory(val prefab: Prefab) {
             })
     ),
     SnakeSlime(
-            Prefab("snake slime", "Catvert", GameObject(GameObject.Tag.Enemy, Rect(size = Size(35, 120)), null) {
+            Prefab("snake slime",  GameObject(GameObject.Tag.Enemy, box = Rect(size = Size(35, 120))) {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("base", Constants.atlasDirPath.child("More Enemies Animations/enemies.atlas").toFileWrapper(), "snakeSlime", 0.33f))
                 this += PhysicsComponent(true)
                 this += LifeComponent(RemoveGOAction())
@@ -85,7 +84,7 @@ enum class PrefabFactory(val prefab: Prefab) {
             })
     ),
     Bee(
-            Prefab("bee", "Catvert", GameObject(GameObject.Tag.Enemy, Rect(size = Size(35, 35)), null) {
+            Prefab("bee", GameObject(GameObject.Tag.Enemy, box = Rect(size = Size(35, 35))) {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.atlasDirPath.child("More Enemies Animations/enemies.atlas").toFileWrapper() to "bee"))
                 this += PhysicsComponent(false, 5, gravity = false)
                 this += LifeComponent(RemoveGOAction())
@@ -94,7 +93,7 @@ enum class PrefabFactory(val prefab: Prefab) {
             })
     ),
     GoldCoin(
-            Prefab("gold coin", "Catvert", GameObject(GameObject.Tag.Special, Rect(size = Size(35, 35)), null) {
+            Prefab("gold coin",  GameObject(GameObject.Tag.Special, box = Rect(size = Size(35, 35))) {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.atlasDirPath.child("Jumper Pack/spritesheet_jumper.atlas").toFileWrapper() to "coin_gold"))
                 this += PhysicsComponent(true)
                 this += SoundComponent(SoundComponent.SoundData(Constants.soundsDirPath.child("coin.wav")))
@@ -102,7 +101,7 @@ enum class PrefabFactory(val prefab: Prefab) {
             })
     ),
     BlockEnemy(
-            Prefab("block enemy", "Catvert", GameObject(GameObject.Tag.Special, Rect(size = Size(20, 20)), null) {
+            Prefab("block enemy", GameObject(GameObject.Tag.Special, box = Rect(size = Size(20, 20))) {
                 this += PhysicsComponent(true, maskCollision = MaskCollision.ONLY_ENEMY)
             })
     ),

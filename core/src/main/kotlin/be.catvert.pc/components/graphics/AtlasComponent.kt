@@ -3,19 +3,19 @@ package be.catvert.pc.components.graphics
 import be.catvert.pc.GameObject
 import be.catvert.pc.PCGame
 import be.catvert.pc.components.RenderableComponent
-import be.catvert.pc.components.graphics.AtlasComponent.AtlasData.Companion.findAnimationRegions
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonIgnore
 import glm_.vec2.Vec2
 import glm_.vec4.Vec4
-import imgui.Cond
 import imgui.ImGui
 import imgui.WindowFlags
 import imgui.functionalProgramming
@@ -40,10 +40,11 @@ class AtlasComponent(var currentIndex: Int = 0, vararg data: AtlasData) : Render
         var frameDuration: Float = frameDuration
             set(value) {
                 field = value
-                animation.frameDuration = value
+                if(::animation.isInitialized)
+                    animation.frameDuration = value
             }
 
-        private var animation: Animation<TextureAtlas.AtlasRegion> = loadAnimation()
+        private lateinit var animation: Animation<TextureAtlas.AtlasRegion>
 
         private var stateTime = 0f
 
@@ -53,14 +54,36 @@ class AtlasComponent(var currentIndex: Int = 0, vararg data: AtlasData) : Render
             batch.draw(animation.getKeyFrame(stateTime), gameObject.box, flipX, flipY)
         }
 
-        fun onAddToContainer() {
-            updateAtlas()
-        }
-
         fun updateAtlas(regions: Array<Pair<FileWrapper, String>> = this.regions, frameDuration: Float = this.frameDuration) {
             this.regions = regions
-            this.frameDuration = frameDuration
             this.animation = loadAnimation()
+            this.frameDuration = frameDuration
+        }
+
+        fun previousFrameRegion(regionIndex: Int) {
+            this.regions.elementAtOrNull(regionIndex)?.apply {
+                val atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(this.first).asset
+                val region = loadRegion(this)
+                val index = atlas.regions.indexOf(region)
+
+                if (index > 0) {
+                    this@AtlasData.regions[regionIndex] = this.first to atlas.regions[index - 1].name
+                    updateAtlas()
+                }
+            }
+        }
+
+        fun nextFrameRegion(regionIndex: Int) {
+            this.regions.elementAtOrNull(regionIndex)?.apply {
+                val atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(this.first).asset
+                val region = loadRegion(this)
+                val index = atlas.regions.indexOf(region)
+
+                if (index < atlas.regions.size - 1) {
+                    this@AtlasData.regions[regionIndex] = this.first to atlas.regions[index + 1].name
+                    updateAtlas()
+                }
+            }
         }
 
         private fun loadAnimation(): Animation<TextureAtlas.AtlasRegion> {
@@ -77,33 +100,8 @@ class AtlasComponent(var currentIndex: Int = 0, vararg data: AtlasData) : Render
         }
 
         companion object {
-            fun findAnimationRegions(atlasFile: FileWrapper, animation: String): Array<Pair<FileWrapper, String>> {
-                val atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(atlasFile).asset
-                val regions = mutableListOf<String>()
-
-                var i = 0
-                while (atlas.findRegion(animation + "_$i") != null) {
-                    regions.add(animation + "_$i")
-                    ++i
-                }
-
-                return regions.map { atlasFile to it }.toTypedArray()
-            }
-
-            fun findAnimationInAtlas(atlas: TextureAtlas): List<String> {
-                val animationRegionNames = mutableListOf<String>()
-
-                atlas.regions.forEach {
-                    if (it.name.endsWith("_0")) {
-                        animationRegionNames += it.name.removeSuffix("_0")
-                    }
-                }
-
-                return animationRegionNames
-            }
-
             fun loadRegion(region: Pair<FileWrapper, String>): TextureAtlas.AtlasRegion {
-                return if (region.second != textureIdentifier)
+                return if (region.second != AtlasComponent.textureIdentifier)
                     PCGame.assetManager.loadOnDemand<TextureAtlas>(region.first).asset.findRegion(region.second)
                 else {
                     val texture = PCGame.assetManager.loadOnDemand<Texture>(region.first).asset
@@ -111,14 +109,12 @@ class AtlasComponent(var currentIndex: Int = 0, vararg data: AtlasData) : Render
                 }
             }
         }
-
     }
 
     override fun onAddToContainer(gameObject: GameObject, container: GameObjectContainer) {
         super.onAddToContainer(gameObject, container)
-
         data.forEach {
-            it.onAddToContainer()
+            it.updateAtlas()
         }
     }
 
@@ -128,7 +124,6 @@ class AtlasComponent(var currentIndex: Int = 0, vararg data: AtlasData) : Render
         batch.setColor(1f, 1f, 1f, 1f)
     }
 
-    private var showEditAtlasWindow = false
     private var selectedAtlasIndex = -1
     private var showLevelAtlas = false
 
@@ -140,6 +135,7 @@ class AtlasComponent(var currentIndex: Int = 0, vararg data: AtlasData) : Render
     private var atlasIndex = 0
     private var regionIndex = 0
     private var addAtlasName = "test"
+    private var ressourcesCollapsing = false
 
     override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
         with(ImGui) {
@@ -151,17 +147,15 @@ class AtlasComponent(var currentIndex: Int = 0, vararg data: AtlasData) : Render
                 showEditAtlasWindow = true
             }
 
-            if(showEditAtlasWindow)
+            if (showEditAtlasWindow)
                 drawEditWindow(gameObject, level)
         }
     }
 
     private fun drawEditWindow(gameObject: GameObject, level: Level) {
         with(ImGui) {
-            val editWindowSize = if (data.isEmpty()) Vec2(200f, 100f) else Vec2(500f, 500f)
-            setNextWindowSize(editWindowSize, Cond.Always)
-            setNextWindowPos(Vec2(Gdx.graphics.width / 2f - editWindowSize.x / 2f, Gdx.graphics.height / 2f - editWindowSize.y / 2f), Cond.Once)
-            functionalProgramming.withWindow("Éditer l'atlas", ::showEditAtlasWindow, flags = WindowFlags.NoResize.i or WindowFlags.AlwaysHorizontalScrollbar.i) {
+            setNextWindowSizeConstraints(Vec2(500f, 200f), Vec2(500f, 500f))
+            functionalProgramming.withWindow("Éditer l'atlas", ::showEditAtlasWindow, flags = WindowFlags.AlwaysAutoResize.i) {
                 val addAtlasTitle = "Ajouter un atlas"
 
                 functionalProgramming.popupModal(addAtlasTitle, extraFlags = WindowFlags.AlwaysAutoResize.i) {
@@ -196,7 +190,7 @@ class AtlasComponent(var currentIndex: Int = 0, vararg data: AtlasData) : Render
                         sameLine()
                     }
 
-                    functionalProgramming.withItemWidth(-1) {
+                    functionalProgramming.withItemWidth(300f) {
                         if (combo("atlas", ::atlasIndex, data.map { it.name } + "Ajouter un atlas")) {
                             selectedAtlasIndex = -1
 
@@ -209,34 +203,58 @@ class AtlasComponent(var currentIndex: Int = 0, vararg data: AtlasData) : Render
                     separator()
 
                     data.elementAtOrNull(atlasIndex)?.apply {
+
+                        fun addPlusBtn() {
+                            if (button("+", Vec2(20f, gameObject.box.height + 8f))) {
+                                this.regions += Constants.defaultAtlasPath
+                                updateAtlas()
+                            }
+                        }
+
                         this.regions.forEachIndexed { index, it ->
                             val region = AtlasComponent.AtlasData.loadRegion(it)
                             val tintCol = if (regionIndex != index) Vec4(1f, 1f, 1f, 0.3f) else Vec4(1f)
 
                             functionalProgramming.withGroup {
+                                functionalProgramming.withGroup {
+                                    if (button("<-", Vec2((gameObject.box.width + 5f) / 2f, 20f))) {
+                                        this.previousFrameRegion(index)
+                                    }
+                                    sameLine()
+                                    if (button("->", Vec2((gameObject.box.width + 5f) / 2f, 20f))) {
+                                        this.nextFrameRegion(index)
+                                    }
+                                }
                                 if (imageButton(region.texture.textureObjectHandle, Vec2(gameObject.box.width, gameObject.box.height), Vec2(region.u, region.v), Vec2(region.u2, region.v2), tintCol = tintCol)) {
                                     regionIndex = index
                                 }
+
+                                if (index == this.regions.size - 1) {
+                                    sameLine()
+                                    addPlusBtn()
+                                }
+
                                 functionalProgramming.withId("suppr region $index") {
                                     if (button("Suppr.", Vec2(gameObject.box.width + 10f, 20f))) {
                                         data.elementAtOrNull(atlasIndex)?.apply {
                                             this.regions = this.regions.toMutableList().apply { removeAt(index) }.toTypedArray()
+                                            updateAtlas()
                                         }
                                         return@withWindow
                                     }
                                 }
                             }
 
-                            if (index < this.regions.size)
+                            if (index < this.regions.size - 1)
                                 sameLine()
                         }
 
-                        if (button("+", Vec2(20f, gameObject.box.height + 8f))) {
-                            this.regions += Constants.defaultAtlasPath
+                        if (this.regions.isEmpty()) {
+                            addPlusBtn()
                         }
 
                         if (this.regions.size > 1) {
-                            functionalProgramming.withItemWidth(-1) {
+                            functionalProgramming.withItemWidth(calcItemWidth()) {
                                 sliderFloat("Vitesse", ::frameDuration, 0f, 1f)
                             }
                         }
@@ -256,84 +274,88 @@ class AtlasComponent(var currentIndex: Int = 0, vararg data: AtlasData) : Render
                         }
                     }
 
-                    ImguiHelper.enum("type", editAtlasType)
+                    ressourcesCollapsing = false
+                    functionalProgramming.collapsingHeader("ressources") {
+                        ressourcesCollapsing = true
+                        ImguiHelper.enum("type", editAtlasType)
 
-                    var sumImgsWidth = 0f
+                        var sumImgsWidth = 0f
 
-                    val editAtlasType = editAtlasType.obj as EditAtlasType
-                    if (editAtlasType != EditAtlasType.Textures) {
-                        if (checkbox("pack importés", ::showLevelAtlas))
-                            selectedAtlasIndex = 0
-                        functionalProgramming.withItemWidth(150f) {
-                            combo("pack", ::selectedAtlasIndex, if (showLevelAtlas) level.resourcesAtlas().map { it.nameWithoutExtension() } else PCGame.gameAtlas.map { it.nameWithoutExtension() })
-                        }
-                        (if (showLevelAtlas) level.resourcesAtlas().getOrNull(selectedAtlasIndex) else PCGame.gameAtlas.getOrNull(selectedAtlasIndex))?.also { atlasPath ->
-                            if (atlasPath.exists()) {
-                                val atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(atlasPath.toFileWrapper()).asset
-                                when (editAtlasType) {
-                                    AtlasComponent.EditAtlasType.Pack -> {
-                                        if (atlasPath.exists()) {
-                                            atlas.regions.forEach { region ->
+                        val editAtlasType = editAtlasType.obj as EditAtlasType
+                        if (editAtlasType != EditAtlasType.Textures) {
+                            if (checkbox("pack importés", ::showLevelAtlas))
+                                selectedAtlasIndex = 0
+                            functionalProgramming.withItemWidth(150f) {
+                                combo("pack", ::selectedAtlasIndex, if (showLevelAtlas) level.resourcesAtlas().map { it.nameWithoutExtension() } else PCGame.gameAtlas.map { it.nameWithoutExtension() })
+                            }
+                            (if (showLevelAtlas) level.resourcesAtlas().getOrNull(selectedAtlasIndex) else PCGame.gameAtlas.getOrNull(selectedAtlasIndex))?.also { atlasPath ->
+                                if (atlasPath.exists()) {
+                                    val atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(atlasPath.toFileWrapper()).asset
+                                    when (editAtlasType) {
+                                        AtlasComponent.EditAtlasType.Pack -> {
+                                            if (atlasPath.exists()) {
+                                                atlas.regions.forEach { region ->
+                                                    val imgBtnSize = Vec2(Math.min(region.regionWidth, 200), Math.min(region.regionHeight, 200))
+
+                                                    if (imageButton(region.texture.textureObjectHandle, imgBtnSize, Vec2(region.u, region.v), Vec2(region.u2, region.v2))) {
+                                                        data.elementAtOrNull(atlasIndex)?.apply {
+                                                            this.regions[regionIndex] = atlasPath.toFileWrapper() to region.name
+                                                            updateAtlas()
+                                                        }
+                                                    }
+
+                                                    sumImgsWidth += imgBtnSize.x + 15f
+
+                                                    if (sumImgsWidth + imgBtnSize.x + 15f < 450f)
+                                                        sameLine()
+                                                    else
+                                                        sumImgsWidth = 0f
+                                                }
+                                            }
+                                        }
+                                        AtlasComponent.EditAtlasType.Animations -> {
+                                            findAnimationInAtlas(atlas).forEach {
+                                                val region = atlas.findRegion(it + "_0")
                                                 val imgBtnSize = Vec2(Math.min(region.regionWidth, 200), Math.min(region.regionHeight, 200))
 
                                                 if (imageButton(region.texture.textureObjectHandle, imgBtnSize, Vec2(region.u, region.v), Vec2(region.u2, region.v2))) {
                                                     data.elementAtOrNull(atlasIndex)?.apply {
-                                                        this.regions[regionIndex] = atlasPath.toFileWrapper() to region.name
-                                                        updateAtlas()
+                                                        this.regions = findAnimationRegions(atlasPath.toFileWrapper(), it)
+                                                        this.updateAtlas()
                                                     }
                                                 }
 
                                                 sumImgsWidth += imgBtnSize.x + 15f
 
-                                                if (sumImgsWidth + imgBtnSize.x + 15f < editWindowSize.x)
+                                                if (sumImgsWidth + imgBtnSize.x + 15f < 450f)
                                                     sameLine()
                                                 else
                                                     sumImgsWidth = 0f
                                             }
                                         }
-                                    }
-                                    AtlasComponent.EditAtlasType.Animations -> {
-                                        AtlasData.findAnimationInAtlas(atlas).forEach {
-                                            val region = atlas.findRegion(it + "_0")
-                                            val imgBtnSize = Vec2(Math.min(region.regionWidth, 200), Math.min(region.regionHeight, 200))
-
-                                            if (imageButton(region.texture.textureObjectHandle, imgBtnSize, Vec2(region.u, region.v), Vec2(region.u2, region.v2))) {
-                                                data.elementAtOrNull(atlasIndex)?.apply {
-                                                    this.regions = findAnimationRegions(atlasPath.toFileWrapper(), it)
-                                                    this.updateAtlas()
-                                                }
-                                            }
-
-                                            sumImgsWidth += imgBtnSize.x + 15f
-
-                                            if (sumImgsWidth < editWindowSize.x)
-                                                sameLine()
-                                            else
-                                                sumImgsWidth = 0f
+                                        else -> {
                                         }
                                     }
-                                    else -> {
+                                }
+                            }
+                        } else {
+                            (PCGame.gameTextures + level.resourcesTextures()).filter { it.exists() }.forEach {
+                                val texture = PCGame.assetManager.loadOnDemand<Texture>(it).asset
+                                val imgBtnSize = Vec2(Math.min(texture.width, 200), Math.min(texture.height, 200))
+
+                                if (imageButton(texture.textureObjectHandle, imgBtnSize, uv1 = Vec2(1))) {
+                                    data.elementAtOrNull(atlasIndex)?.regions?.apply {
+                                        set(regionIndex, it.toFileWrapper() to textureIdentifier)
                                     }
                                 }
+
+                                sumImgsWidth += imgBtnSize.x + 15f
+
+                                if (sumImgsWidth + imgBtnSize.x + 15f < 500f)
+                                    sameLine()
+                                else
+                                    sumImgsWidth = 0f
                             }
-                        }
-                    } else {
-                        (PCGame.gameTextures + level.resourcesTextures()).filter { it.exists() }.forEach {
-                            val texture = PCGame.assetManager.loadOnDemand<Texture>(it).asset
-                            val imgBtnSize = Vec2(Math.min(texture.width, 200), Math.min(texture.height, 200))
-
-                            if (imageButton(texture.textureObjectHandle, imgBtnSize, uv1 = Vec2(1))) {
-                                data.elementAtOrNull(atlasIndex)?.regions?.apply {
-                                    set(regionIndex, it.toFileWrapper() to textureIdentifier)
-                                }
-                            }
-
-                            sumImgsWidth += imgBtnSize.x + 15f
-
-                            if (sumImgsWidth + imgBtnSize.x + 15f < editWindowSize.x)
-                                sameLine()
-                            else
-                                sumImgsWidth = 0f
                         }
                     }
                 }
@@ -342,6 +364,32 @@ class AtlasComponent(var currentIndex: Int = 0, vararg data: AtlasData) : Render
     }
 
     companion object {
+        private var showEditAtlasWindow = false
         private val textureIdentifier = "texture_atlas"
+
+        private fun findAnimationRegions(atlasFile: FileWrapper, animation: String): Array<Pair<FileWrapper, String>> {
+            val atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(atlasFile).asset
+            val regions = mutableListOf<String>()
+
+            var i = 0
+            while (atlas.findRegion(animation + "_$i") != null) {
+                regions.add(animation + "_$i")
+                ++i
+            }
+
+            return regions.map { atlasFile to it }.toTypedArray()
+        }
+
+        private fun findAnimationInAtlas(atlas: TextureAtlas): List<String> {
+            val animationRegionNames = mutableListOf<String>()
+
+            atlas.regions.forEach {
+                if (it.name.endsWith("_0")) {
+                    animationRegionNames += it.name.removeSuffix("_0")
+                }
+            }
+
+            return animationRegionNames
+        }
     }
 }

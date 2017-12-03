@@ -6,7 +6,6 @@ import be.catvert.pc.utility.CustomEditorImpl
 import be.catvert.pc.utility.ExposeEditorFactory
 import be.catvert.pc.utility.ImguiHelper
 import be.catvert.pc.utility.ReflectionUtility
-import com.fasterxml.jackson.annotation.JsonCreator
 
 /**
  * Action permettant d'utiliser d'appliquer plusieurs actions sur un gameObject à la place d'une seule.

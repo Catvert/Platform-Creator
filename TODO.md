@@ -2,8 +2,6 @@
 
 ## A FAIRE
 
-- Ajouter la possibilité à stateAction d'afficher la liste des actions à la place de l'index sous forme de slider
-- Traduire tout le texte visible en français
 - Javadoc + commentaires
 - Refactoriser findGameObjectUnderMouse() -> ajouter méthode pour récupérer cell à un point précis
 - [Optimisation] Texture, Atlas et Animation qui charge les assets depuis l'assetManager toutes les frames dans imgui

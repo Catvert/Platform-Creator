@@ -6,7 +6,7 @@ package be.catvert.pc.utility
  * @param width La larguer de la matrix
  * @param init Méthode pour initialiser la matrix
  */
-inline fun <reified T> matrix2d(height: Int, width: Int, init: (Int, Int) -> Array<T>) = Array(height, { row -> init(row, width) })
+inline fun <reified T> matrix2d(height: Int, width: Int, init: (Int, Int) -> MutableList<T>) = MutableList(height, { row -> init(row, width) })
 
 /**
  * Cette classe permet de représenter une cellule contenant des entités avec une position x et y

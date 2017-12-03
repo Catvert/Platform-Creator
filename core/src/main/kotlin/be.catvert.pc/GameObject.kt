@@ -6,6 +6,7 @@ import be.catvert.pc.actions.RemoveGOAction
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.*
+import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -21,6 +22,7 @@ import java.util.*
  * @param container Item dans lequel l'objet va être implémenté
  */
 class GameObject(@ExposeEditor var tag: Tag,
+                 @ExposeEditor var name: String = tag.name.toLowerCase(),
                  @ExposeEditor var box: Rect = Rect(size = Size(1, 1)),
                  container: GameObjectContainer? = null,
                  initDefaultState: GameObjectState.() -> Unit = {}) : Updeatable, Renderable, CustomEditorImpl {
@@ -30,9 +32,6 @@ class GameObject(@ExposeEditor var tag: Tag,
     }
 
     var id: UUID = UUID.randomUUID()
-
-    @ExposeEditor
-    var keepActive: Boolean = false
 
     @ExposeEditor(minInt = -100, maxInt = 100)
     var layer: Int = 0
@@ -56,14 +55,6 @@ class GameObject(@ExposeEditor var tag: Tag,
 
     @JsonIgnore
     val onRemoveFromParent = Signal<GameObject>()
-
-    @JsonIgnore
-    var active: Boolean = true
-        set(value) {
-            if (!keepActive)
-                field = value
-        }
-
 
     @JsonIgnore
     var gridCells: MutableList<GridCell> = mutableListOf()
@@ -125,15 +116,11 @@ class GameObject(@ExposeEditor var tag: Tag,
     }
 
     override fun update() {
-        if (active) {
-            getCurrentState().update()
-        }
+        getCurrentState().update()
     }
 
     override fun render(batch: Batch) {
-        if (active) {
-            getCurrentState().render(batch)
-        }
+        getCurrentState().render(batch)
     }
 
     override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {

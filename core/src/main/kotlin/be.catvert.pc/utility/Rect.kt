@@ -8,7 +8,7 @@ import imgui.functionalProgramming
 
 class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
     constructor(x: Int, y: Int, width: Int, height: Int) : this(Point(x, y), Size(width, height))
-    constructor(rect: Rect): this(rect.x, rect.y, rect.width, rect.height)
+    constructor(rect: Rect) : this(rect.x, rect.y, rect.width, rect.height)
 
     @JsonIgnore
     var position = position
@@ -22,7 +22,6 @@ class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
             field = value
             onSizeChange(value)
         }
-
 
     @JsonIgnore
     val onPositionChange = Signal<Point>()
@@ -49,6 +48,8 @@ class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
         set(value) {
             size = Size(width, value)
         }
+
+    fun center() = Point(x + width / 2, y + height / 2)
 
     fun set(size: Size, position: Point) {
         this.size = size

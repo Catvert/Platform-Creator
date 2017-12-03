@@ -1,16 +1,14 @@
 package be.catvert.pc.containers
 
-import be.catvert.pc.GameObject
 import be.catvert.pc.Log
 import be.catvert.pc.PCGame
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.scenes.EndLevelScene
 import be.catvert.pc.scenes.SceneManager
 import be.catvert.pc.serialization.SerializationFactory
-import be.catvert.pc.utility.Constants
-import be.catvert.pc.utility.Point
-import be.catvert.pc.utility.Utility
+import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.math.MathUtils
@@ -18,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import ktx.assets.toLocalFile
 import java.util.*
 
-class Level(val levelPath: String, val gameVersion: Float, var backgroundPath: String? = null) : GameObjectMatrixContainer() {
+class Level(val levelPath: String, val gameVersion: Float, var background: Background) : GameObjectMatrixContainer() {
     private val levelTextures = levelPath.toLocalFile().parent().child("textures") to mutableListOf<FileHandle>()
     private val levelAtlas = levelPath.toLocalFile().parent().child("atlas") to mutableListOf<FileHandle>()
     private val levelSounds = levelPath.toLocalFile().parent().child("sounds") to mutableListOf<FileHandle>()
@@ -27,7 +25,10 @@ class Level(val levelPath: String, val gameVersion: Float, var backgroundPath: S
     var applyGravity = true
 
     @JsonIgnore
-    var exit: (success: Boolean) -> Unit = { SceneManager.loadScene(EndLevelScene(levelPath, it)) }
+    var exit: (success: Boolean) -> Unit = {
+        PCGame.assetManager.loadOnDemand<Sound>(if (it) "sounds/game-over-success.wav".toLocalFile() else "sounds/game-over-fail.wav".toLocalFile()).asset.play(PCGame.soundVolume)
+        SceneManager.loadScene(EndLevelScene(levelPath))
+    }
 
     @JsonIgnore
     var scorePoints = 0
@@ -84,8 +85,8 @@ class Level(val levelPath: String, val gameVersion: Float, var backgroundPath: S
         if (followGameObject != null) {
             val go = followGameObject!!
 
-            val posX = Math.max(0f + camera.viewportWidth / 2f, go.position().x + go.size().width / 2f)
-            val posY = Math.max(0f + camera.viewportHeight / 2f, go.position().y + go.size().height / 2f)
+            val posX = Math.min(matrixRect.width.toFloat() - camera.viewportWidth / 2f, Math.max(0f + camera.viewportWidth / 2f, go.position().x + go.size().width / 2f))
+            val posY = Math.min(matrixRect.height.toFloat() - camera.viewportHeight / 2f, Math.max(0f + camera.viewportHeight / 2f, go.position().y + go.size().height / 2f))
 
             val lerpX = MathUtils.lerp(camera.position.x, posX, 0.1f)
             val lerpY = MathUtils.lerp(camera.position.y, posY, 0.1f)
@@ -128,7 +129,7 @@ class Level(val levelPath: String, val gameVersion: Float, var backgroundPath: S
                 Log.warn { "Un niveau portant le même nom existe déjà !" }
             } else
                 levelDir.mkdirs()
-            val level = Level(levelDir.child(Constants.levelDataFile).path(), Constants.gameVersion, null)
+            val level = Level(levelDir.child(Constants.levelDataFile).path(), Constants.gameVersion, PCGame.getBackgrounds().elementAtOrNull(1) ?: StandardBackground(FileWrapper("")))
 
             val player = PrefabFactory.Player.prefab.create(Point(100, 100), level)
             level.followGameObjectID = player.id
