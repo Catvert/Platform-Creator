@@ -1,6 +1,6 @@
 dirtSheet.png
 format: RGBA8888
-filter: Linear,Linear
+filter: Nearest,Nearest
 repeat: none
 dirtHalf
   rotate: false

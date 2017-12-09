@@ -1,6 +1,6 @@
 castleSheet.png
 format: RGBA8888
-filter: Linear,Linear
+filter: Nearest,Nearest
 repeat: none
 castleHalf
   rotate: false

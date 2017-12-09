@@ -86,6 +86,8 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
     private val copyLevelTitle = "Copier un niveau"
     private val deleteLevelTitle = "Supprimer un niveau"
     private val errorLevelTitle = "Erreur lors du chargement du niveau"
+    private var newLevelName = "test"
+    private var copyLevelName = "test"
     private fun drawSelectLevelWindow() {
         with(ImGui) {
             ImguiHelper.popupModal(MenusText.MM_SELECT_LEVEL_WINDOW_TITLE(), ::showSelectLevelWindow, extraFlags = WindowFlags.NoResize.i) {
@@ -131,10 +133,10 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
 
                 functionalProgramming.popup(newLevelTitle) {
                     functionalProgramming.withItemWidth(100f) {
-                        inputText("nom", "test".toCharArray()) // todo inputtext
+                        ImguiHelper.inputText("nom", ::newLevelName)
                     }
                     if (button("Créer", Vec2(-1, 20))) {
-                        val level = Level.newLevel("test")
+                        val level = Level.newLevel(newLevelName)
                         SceneManager.loadScene(EditorScene(level))
                         closeCurrentPopup()
                     }
@@ -142,12 +144,12 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
 
                 functionalProgramming.popup(copyLevelTitle) {
                     functionalProgramming.withItemWidth(100f) {
-                        inputText("nom", "test 2".toCharArray())
+                        ImguiHelper.inputText("nom", ::copyLevelName)
                     }
 
                     if (button("Copier", Vec2(-1, 20))) {
                         val levelDir = levels[currentLevel].dir
-                        val copyLevelDir = levelDir.parent().child("test 2")
+                        val copyLevelDir = levelDir.parent().child(copyLevelName)
                         levelDir.list().forEach {
                             it.copyTo(copyLevelDir)
                         }
@@ -157,7 +159,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
                 }
 
                 functionalProgramming.popup(deleteLevelTitle) {
-                    if (button("Confirmer", Vec2(-1, 20))) {
+                    if (button("Confirmer", Vec2(100f, 20))) {
                         try {
                             if (currentLevel in levels.indices) {
                                 levels[currentLevel].dir.deleteDirectory()

@@ -1,6 +1,6 @@
 medieval_spritesheet.png
 format: RGBA8888
-filter: Linear,Linear
+filter: Nearest,Nearest
 repeat: none
 medievalTile_001
   rotate: false

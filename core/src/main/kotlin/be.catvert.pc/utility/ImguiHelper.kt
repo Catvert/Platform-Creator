@@ -1,7 +1,9 @@
 package be.catvert.pc.utility
 
 import be.catvert.pc.GameObject
+import be.catvert.pc.GameObjectTag
 import be.catvert.pc.PCGame
+import be.catvert.pc.Prefab
 import be.catvert.pc.actions.Action
 import be.catvert.pc.containers.Level
 import com.badlogic.gdx.Gdx
@@ -10,21 +12,15 @@ import glm_.vec2.Vec2
 import imgui.Cond
 import imgui.ImGui
 import imgui.functionalProgramming
+import io.leangen.geantyref.GenericTypeReflector
+import java.lang.reflect.GenericArrayType
+import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty0
 
 object ImguiHelper {
     class Item<T>(var obj: T) {
         inline fun <reified T : Any> cast() = this as Item<T>
     }
-
-    /*inline fun <reified T : Any> addImguiWidgetsArray(label: String, array: KMutableProperty0<Array<T>>, crossinline createItem: () -> T, itemBlock: (item: Item<T>) -> Boolean, endBlock: () -> Unit = {}): Boolean {
-        val item = Item(array.get())
-        if (addImguiWidgetsArray(label, item, createItem, itemBlock, endBlock)) {
-            array.set(item.obj)
-            return true
-        }
-        return false
-    }*/
 
     inline fun <reified T : Any> addImguiWidgetsArray(label: String, array: ArrayList<T>, crossinline createItem: () -> T, itemBlock: (item: Item<T>) -> Boolean, endBlock: () -> Unit = {}): Boolean {
         var valueChanged = false
@@ -36,7 +32,6 @@ object ImguiHelper {
                         pushId("suppr $index")
                         if (button("Suppr.")) {
                             array.removeAt(index)
-                            //  array.obj = array.obj.toMutableList().apply { removeAt(index) }.toTypedArray()
                             valueChanged = true
                             break
                         }
@@ -92,26 +87,38 @@ object ImguiHelper {
                         when (exposeEditor.customType) {
                             CustomType.DEFAULT -> {
                                 functionalProgramming.withItemWidth(100f) {
-                                    valueChanged = sliderInt(label, item.cast<Int>()::obj, exposeEditor.minInt, exposeEditor.maxInt)
+                                    valueChanged = sliderInt(label, item.cast<Int>()::obj, exposeEditor.min, exposeEditor.max)
                                 }
                             }
                             CustomType.KEY_INT -> {
                                 valueChanged = gdxKey(item.cast())
                             }
+                            else -> {}
                         }
                     }
+                    is Prefab -> {
+                        valueChanged = prefab(item.cast(), level, label)
+                    }
                     is Size -> {
-                        valueChanged = size(item.cast(), Size(exposeEditor.minInt, exposeEditor.minInt), Size(exposeEditor.minInt, exposeEditor.minInt))
+                        valueChanged = size(item.cast(), Size(exposeEditor.min, exposeEditor.min), Size(exposeEditor.min, exposeEditor.min))
                     }
                     is Point -> {
-                        valueChanged = point(item.cast(), Point(exposeEditor.minInt, exposeEditor.minInt), Point(exposeEditor.minInt, exposeEditor.minInt))
+                        valueChanged = point(item.cast(), Point(exposeEditor.min, exposeEditor.min), Point(exposeEditor.min, exposeEditor.min))
                     }
                     is String -> {
-                        functionalProgramming.withItemWidth(100f) {
-                            if (inputText(label, value.toCharArray())) {
-                                item.obj = value.toString() as T
-                                valueChanged = true
+                        when(exposeEditor.customType) {
+                            CustomType.DEFAULT -> {
+                                functionalProgramming.withItemWidth(100f) {
+                                    if (inputText(label, value.toCharArray())) {
+                                        item.obj = value.toString() as T
+                                        valueChanged = true
+                                    }
+                                }
                             }
+                            CustomType.TAG_STRING -> {
+                                valueChanged = gameObjectTag(item.cast(), level)
+                            }
+                            else -> {}
                         }
                     }
                     is Enum<*> -> {
@@ -125,6 +132,13 @@ object ImguiHelper {
         }
 
         return valueChanged
+    }
+
+    fun inputText(label: String, value: KMutableProperty0<String>) {
+        val buf = value.get().toCharArray()
+
+        if(ImGui.inputText(label, buf))
+            value.set(String(buf))
     }
 
     fun custom(label: String, value: CustomEditorImpl, gameObject: GameObject, level: Level) {
@@ -155,6 +169,35 @@ object ImguiHelper {
                 }
 
                 treePop()
+            }
+        }
+        return valueChanged
+    }
+
+    fun gameObjectTag(tag: Item<GameObjectTag>, level: Level, label: String = "tag"): Boolean {
+        var valueChanged = false
+        val selectedIndex = intArrayOf(level.tags.indexOfFirst { it == tag.obj })
+        functionalProgramming.withItemWidth(100f) {
+            if(ImGui.combo(label, selectedIndex, level.tags)) {
+                tag.obj = level.tags[selectedIndex[0]]
+                valueChanged = true
+            }
+        }
+        return valueChanged
+    }
+
+    fun gameObjectTag(tag: KMutableProperty0<GameObjectTag>, level: Level, label: String = "tag"): Boolean {
+        val item = Item(tag.get())
+        return gameObjectTag(item, level, label).apply { tag.set(item.obj) }
+    }
+
+    fun prefab(prefab: Item<Prefab>, level: Level, label: String = "prefab"): Boolean {
+        var valueChanged = false
+        val selectedIndex = intArrayOf(level.resourcesPrefabs().indexOfFirst { it.name == prefab.obj.name })
+        functionalProgramming.withItemWidth(100f) {
+            if(ImGui.combo(label, selectedIndex, level.resourcesPrefabs().map { it.name })) {
+                prefab.obj = level.resourcesPrefabs()[selectedIndex[0]]
+                valueChanged = true
             }
         }
         return valueChanged

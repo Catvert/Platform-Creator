@@ -28,6 +28,10 @@ class GameScene(private val level: Level) : Scene(level.background) {
 
     private var pause = false
 
+    init {
+        level.moveCameraToFollowGameObject(camera, false)
+    }
+
     override fun render(batch: Batch) {
         super.render(batch)
 
@@ -57,7 +61,7 @@ class GameScene(private val level: Level) : Scene(level.background) {
 
         PCGame.hudBatch.use {
             PCGame.mainFont.draw(it, "Score : ${level.scorePoints}", 10f, Gdx.graphics.height - 10f)
-            PCGame.mainFont.draw(it, "Temps écoulé : ${level.timer}", 10f, Gdx.graphics.height - 40f)
+            PCGame.mainFont.draw(it, "Temps écoulé : ${level.getTimer()}", 10f, Gdx.graphics.height - 40f)
         }
     }
 

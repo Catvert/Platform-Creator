@@ -1,18 +1,23 @@
 package be.catvert.pc.components.logics.ai
 
 import be.catvert.pc.GameObject
+import be.catvert.pc.GameObjectState
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
 import be.catvert.pc.actions.PhysicsAction
 import be.catvert.pc.components.LogicsComponent
-import be.catvert.pc.components.logics.CollisionSide
 import be.catvert.pc.components.logics.PhysicsComponent
 import be.catvert.pc.containers.GameObjectContainer
+import be.catvert.pc.utility.BoxSide
 import be.catvert.pc.utility.ExposeEditor
 import com.fasterxml.jackson.annotation.JsonCreator
 
-
-class SimpleMoverComponent(orientation: SimpleMoverOrientation, reverse: Boolean) : LogicsComponent() {
+/**
+ * Component permettant d'ajouter la possibilité à un gameObject de se déplacer automatiquement dans une direction.
+ * Si le gameObject rencontre un obstacle, il ira dans la direction opposé
+ * @param orientation L'orientation dans laquelle le gameObject se déplacer (verticalement/horizontalement)
+ */
+class SimpleMoverAIComponent(orientation: SimpleMoverOrientation, reverse: Boolean) : LogicsComponent() {
     @JsonCreator private constructor() : this(SimpleMoverOrientation.HORIZONTAL, false)
 
     enum class SimpleMoverOrientation {
@@ -42,10 +47,13 @@ class SimpleMoverComponent(orientation: SimpleMoverOrientation, reverse: Boolean
     var orientation = orientation
         set(value) {
             field = value
-            updateActions()
+            updateOrientation()
         }
 
-    private fun updateActions() {
+    /**
+     * Permet de mettre à jour les actions physiques selon l'orientation voulue
+     */
+    private fun updateOrientation() {
         when (orientation) {
             SimpleMoverOrientation.HORIZONTAL -> {
                 firstAction.physicsAction = PhysicsAction.PhysicsActions.GO_LEFT
@@ -59,28 +67,28 @@ class SimpleMoverComponent(orientation: SimpleMoverOrientation, reverse: Boolean
     }
 
     init {
-        updateActions()
+        updateOrientation()
     }
 
-    override fun onAddToContainer(gameObject: GameObject, container: GameObjectContainer) {
-        super.onAddToContainer(gameObject, container)
-
+    override fun onStateActive(gameObject: GameObject, state: GameObjectState, container: GameObjectContainer) {
+        super.onStateActive(gameObject, state, container)
         this.gameObject = gameObject
 
-        val physicsComp: PhysicsComponent = gameObject.getCurrentState().getComponent()!!
-        physicsComp.onCollisionWith.register {
-            when (orientation) {
-                SimpleMoverOrientation.HORIZONTAL -> {
-                    if (it.side == CollisionSide.OnLeft)
-                        reverse = true
-                    else if (it.side == CollisionSide.OnRight)
-                        reverse = false
-                }
-                SimpleMoverOrientation.VERTICAL -> {
-                    if (it.side == CollisionSide.OnUp)
-                        reverse = true
-                    else if (it.side == CollisionSide.OnDown)
-                        reverse = false
+        state.getComponent<PhysicsComponent>()?.apply {
+            onCollisionWith.register {
+                when (orientation) {
+                    SimpleMoverOrientation.HORIZONTAL -> {
+                        if (it.side == BoxSide.Left)
+                            reverse = true
+                        else if (it.side == BoxSide.Right)
+                            reverse = false
+                    }
+                    SimpleMoverOrientation.VERTICAL -> {
+                        if (it.side == BoxSide.Up)
+                            reverse = true
+                        else if (it.side == BoxSide.Down)
+                            reverse = false
+                    }
                 }
             }
         }

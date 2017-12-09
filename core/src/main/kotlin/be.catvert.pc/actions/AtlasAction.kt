@@ -8,6 +8,9 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
 import imgui.functionalProgramming
 
+/**
+ * Action permettant de changer l'atlas en cour d'un gameObject
+ */
 class AtlasAction(var atlasIndex: Int) : Action, CustomEditorImpl {
     @JsonCreator private constructor() : this(-1)
 

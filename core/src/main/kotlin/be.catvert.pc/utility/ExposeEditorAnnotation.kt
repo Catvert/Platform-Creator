@@ -3,16 +3,16 @@ package be.catvert.pc.utility
 import io.leangen.geantyref.TypeFactory
 
 enum class CustomType {
-    DEFAULT, KEY_INT
+    DEFAULT, KEY_INT, TAG_STRING
 }
 
 @Target(AnnotationTarget.FIELD)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class ExposeEditor(val customName: String = "", val minInt: Int = 0, val maxInt: Int = 0, val customType: CustomType = CustomType.DEFAULT)
+annotation class ExposeEditor(val customName: String = "", val min: Int = 0, val max: Int = 0, val customType: CustomType = CustomType.DEFAULT)
 
 object ExposeEditorFactory {
     val empty: ExposeEditor = TypeFactory.annotation(ExposeEditor::class.java, mapOf())
 
-    fun createExposeEditor(customName: String = "", minInt: Int = 0, maxInt: Int = 0, customType: CustomType = CustomType.DEFAULT): ExposeEditor =
-            TypeFactory.annotation(ExposeEditor::class.java, mapOf(ExposeEditor::customName.name to customName, ExposeEditor::minInt.name to minInt, ExposeEditor::maxInt.name to maxInt, ExposeEditor::customType.name to customType))
+    fun createExposeEditor(customName: String = "", min: Int = 0, max: Int = 0, customType: CustomType = CustomType.DEFAULT): ExposeEditor =
+            TypeFactory.annotation(ExposeEditor::class.java, mapOf(ExposeEditor::customName.name to customName, ExposeEditor::min.name to min, ExposeEditor::max.name to max, ExposeEditor::customType.name to customType))
 }

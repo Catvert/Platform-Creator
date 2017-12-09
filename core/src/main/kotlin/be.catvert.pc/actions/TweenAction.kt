@@ -8,6 +8,10 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
 import imgui.functionalProgramming
 
+/**
+ * Action permettant d'appliquer un tween sur un gameObject
+ * @see TweenComponent
+ */
 class TweenAction(var tweenIndex: Int) : Action, CustomEditorImpl {
     @JsonCreator private constructor() : this(-1)
 

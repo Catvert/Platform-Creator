@@ -2,16 +2,21 @@ package be.catvert.pc.containers
 
 import be.catvert.pc.GameObject
 import be.catvert.pc.GameObjectState
+import be.catvert.pc.GameObjectTag
+import be.catvert.pc.PCGame
 import be.catvert.pc.serialization.PostDeserialization
 import be.catvert.pc.utility.Rect
 import be.catvert.pc.utility.Renderable
+import be.catvert.pc.utility.ResourceLoader
 import be.catvert.pc.utility.Updeatable
+import com.badlogic.gdx.Game
+import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
-import java.util.*
 
-abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization {
+
+abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization, ResourceLoader {
     @JsonProperty("objects") protected val gameObjects: MutableSet<GameObject> = mutableSetOf()
 
     @JsonIgnore
@@ -24,22 +29,22 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
     @JsonIgnore
     fun getGameObjectsData() = gameObjects.toSet()
 
-    fun findGameObjectByID(id: UUID): GameObject? = gameObjects.firstOrNull { it.id == id }
-
-    fun findGameObjectsByTag(tag: GameObject.Tag): Set<GameObject> = gameObjects.filter { it.tag == tag }.toSet()
+    fun findGameObjectsByTag(tag: GameObjectTag): Set<GameObject> = gameObjects.filter { it.tag == tag }.toSet()
 
     open fun removeGameObject(gameObject: GameObject) {
         removeGameObjects.add(gameObject)
     }
 
     open fun addGameObject(gameObject: GameObject): GameObject {
+        gameObject.loadResources(PCGame.assetManager)
+
         gameObjects.add(gameObject)
         gameObject.container = this
 
         return gameObject
     }
 
-    fun createGameObject(name: String, tag: GameObject.Tag, rectangle: Rect = Rect(), initDefaultState: GameObjectState.() -> Unit = {}, initGO: GameObject.() -> Unit = {}): GameObject {
+    fun createGameObject(name: String, tag: GameObjectTag, rectangle: Rect = Rect(), initDefaultState: GameObjectState.() -> Unit = {}, initGO: GameObject.() -> Unit = {}): GameObject {
         val go = GameObject(tag, name, rectangle, this, initDefaultState).apply(initGO)
 
         addGameObject(go)
@@ -48,6 +53,12 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
     }
 
     protected open fun onRemoveGameObject(gameObject: GameObject) {}
+
+    override fun loadResources(assetManager: AssetManager) {
+        gameObjects.forEach {
+            it.loadResources(assetManager)
+        }
+    }
 
     override fun render(batch: Batch) {
         if (allowRenderingGO)
@@ -85,6 +96,8 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
                 removeGameObjects.add(it)
             }
         }
+
+        loadResources()
     }
 
     operator fun plusAssign(gameObject: GameObject) {

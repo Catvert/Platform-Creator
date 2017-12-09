@@ -8,18 +8,37 @@ import be.catvert.pc.actions.Action
 import be.catvert.pc.containers.Level
 import be.catvert.pc.factories.TweenFactory
 import be.catvert.pc.utility.CustomEditorImpl
+import be.catvert.pc.utility.ExposeEditor
 import be.catvert.pc.utility.ImguiHelper
 import com.fasterxml.jackson.annotation.JsonCreator
 import glm_.vec2.Vec2
 import imgui.ImGui
 import imgui.functionalProgramming
 
+/**
+ * Component permettant d'appliquer un tween précis sur un gameObject
+ * Un tween représente l'application d'une interpolation sur une caractéristiques d'un gameObject
+ * @see GameObjectTweenAccessor
+ */
 class TweenComponent(var tweens: ArrayList<TweenData>) : BasicComponent(), CustomEditorImpl {
     constructor(vararg tweens: TweenData) : this(arrayListOf(*tweens))
     @JsonCreator private constructor() : this(arrayListOf())
 
-    class TweenData(var name: String, var type: GameObjectTweenAccessor.GameObjectTween, var target: FloatArray, var duration: Float, var keepComponents: ArrayList<Class<out Component>>, var endAction: Action) : CustomEditorImpl {
+    /**
+     * Représente un tween à appliquer sur une caractéristiques d'un gameObject (par exemple la taille du gameObject)
+     * @param name Nom du tween
+     * @param type Type de tween à appliquer sur le gameObject
+     * @param target Valeur à atteindre d'une caractéristique du gameObject
+     * @param duration Temps requis pour atteindre la valeur du target
+     * @param keepComponents Components gardés lors de l'application du tween
+     * @param endAction Action appelée à la fin du tween
+     */
+    class TweenData(var name: String, var type: GameObjectTweenAccessor.GameObjectTween, var target: FloatArray, var duration: Float, var keepComponents: ArrayList<Class<out Component>>, var endAction: Action, var setLastStateOnFinish: Boolean = true) : CustomEditorImpl {
         private var started = false
+
+        /**
+         * Permet d'appliquer le tween sur un gameObject
+         */
         fun start(gameObject: GameObject) {
             if (started)
                 return
@@ -38,7 +57,9 @@ class TweenComponent(var tweens: ArrayList<TweenData>) : BasicComponent(), Custo
                     .target(*target)
                     .setCallback { _, _ ->
                         started = false
-                        gameObject.setState(lastState)
+                        if (setLastStateOnFinish) {
+                            gameObject.setState(lastState)
+                        }
                         endAction(gameObject)
                     }.start(PCGame.tweenManager)
             started = true
@@ -49,19 +70,26 @@ class TweenComponent(var tweens: ArrayList<TweenData>) : BasicComponent(), Custo
             with(ImGui) {
                 if (treeNode(labelName)) {
                     val index = intArrayOf(GameObjectTweenAccessor.GameObjectTween.values().indexOf(type))
-                    if (combo("type", index, GameObjectTweenAccessor.GameObjectTween.values().map { it.name }))
-                        type = GameObjectTweenAccessor.GameObjectTween.values()[index[0]]
-                    inputFloatN("target", target, target.size, 1, 0)
-                    sliderFloat("duration", ::duration, 0f, 10f, "%.1f")
 
+                    functionalProgramming.withItemWidth(100f) {
+                        if (combo("type", index, GameObjectTweenAccessor.GameObjectTween.values().map { it.name }))
+                            type = GameObjectTweenAccessor.GameObjectTween.values()[index[0]]
+                        inputFloatN("target", target, target.size, 1, 0)
+                        sliderFloat("interval", ::duration, 0f, 10f, "%.1f")
+                    }
                     ImguiHelper.addImguiWidgetsArray("keep components", keepComponents, { PCGame.componentsClasses[0].java }, {
                         val index = intArrayOf(PCGame.componentsClasses.indexOf(it.obj.kotlin))
-                        if (combo("", index, PCGame.componentsClasses.map { it.simpleName ?: "Nom inconnu" })) {
-                            keepComponents.set(keepComponents.indexOf(it.obj), PCGame.componentsClasses[index[0]].java)
-                            return@addImguiWidgetsArray true
+                        functionalProgramming.withItemWidth(150f) {
+                            if (combo("", index, PCGame.componentsClasses.map { it.simpleName ?: "Nom inconnu" })) {
+                                keepComponents.set(keepComponents.indexOf(it.obj), PCGame.componentsClasses[index[0]].java)
+                                return@addImguiWidgetsArray true
+                            }
                         }
                         false
                     })
+
+                    ImguiHelper.action("end action", ::endAction, gameObject, level)
+                    ImGui.checkbox("last state on finish", ::setLastStateOnFinish)
 
                     treePop()
                 }
@@ -69,6 +97,9 @@ class TweenComponent(var tweens: ArrayList<TweenData>) : BasicComponent(), Custo
         }
     }
 
+    /**
+     * Permet d'appliquer un tween précis sur un gameObject
+     */
     fun startTween(gameObject: GameObject, tweenIndex: Int) {
         if (tweenIndex in tweens.indices)
             tweens[tweenIndex].start(gameObject)

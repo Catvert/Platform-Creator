@@ -1,5 +1,6 @@
 package be.catvert.pc.serialization
 
+import be.catvert.pc.utility.cast
 import com.badlogic.gdx.files.FileHandle
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.JsonCreator
@@ -21,7 +22,7 @@ private class PostDeserializer(private val deserializer: JsonDeserializer<*>) : 
     @Throws(IOException::class)
     override fun deserialize(jp: JsonParser, ctxt: DeserializationContext): Any {
         val result = _delegatee.deserialize(jp, ctxt)
-        (result as? PostDeserialization)?.onPostDeserialization()
+        result.cast<PostDeserialization>()?.onPostDeserialization()
         return result
     }
 }

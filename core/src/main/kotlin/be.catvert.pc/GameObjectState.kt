@@ -5,13 +5,16 @@ import be.catvert.pc.components.LogicsComponent
 import be.catvert.pc.components.RenderableComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.utility.Renderable
+import be.catvert.pc.utility.ResourceLoader
 import be.catvert.pc.utility.Updeatable
+import be.catvert.pc.utility.cast
+import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 
-class GameObjectState(var name: String, components: MutableSet<Component> = mutableSetOf()) : Renderable, Updeatable {
+class GameObjectState(var name: String, components: MutableSet<Component> = mutableSetOf()) : Renderable, Updeatable, ResourceLoader {
     @JsonCreator private constructor() : this("State")
 
     private lateinit var gameObject: GameObject
@@ -28,7 +31,10 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
 
     fun onAddToContainer(gameObject: GameObject, container: GameObjectContainer) {
         this.gameObject = gameObject
-        components.forEach { sortComponent(it); it.onAddToContainer(gameObject, container) }
+    }
+
+    fun toggleActive(container: GameObjectContainer) {
+        components.forEach { sortComponent(it); it.onStateActive(gameObject, this, container) }
     }
 
     fun addComponent(component: Component) {
@@ -54,17 +60,9 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
             updateComponents.add(component)
     }
 
-    inline fun <reified T : Component> getComponent(): T? = getComponents().firstOrNull { it is T } as? T
+    inline fun <reified T : Component> getComponent(): T? = getComponents().firstOrNull { it is T }.cast()
 
     inline fun <reified T : Component> hasComponent(): Boolean = getComponent<T>() != null
-
-    fun active() {
-        getComponents().forEach { it.onStateActive(gameObject) }
-    }
-
-    fun inactive() {
-        getComponents().forEach { it.onStateInactive(gameObject) }
-    }
 
     fun setFlipRenderable(x: Boolean, y: Boolean) {
         renderComponents.forEach {
@@ -96,6 +94,10 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
         updateComponents.forEach {
             it.update(gameObject)
         }
+    }
+
+    override fun loadResources(assetManager: AssetManager) {
+        components.forEach { it.loadResources(assetManager) }
     }
 
     override fun toString(): String = name

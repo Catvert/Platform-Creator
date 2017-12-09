@@ -1,6 +1,6 @@
 foliagePack_default.png
 format: RGBA8888
-filter: Linear,Linear
+filter: Nearest,Nearest
 repeat: none
 foliagePack_001
   rotate: false

@@ -1,6 +1,6 @@
 snowSheet.png
 format: RGBA8888
-filter: Linear,Linear
+filter: Nearest,Nearest
 repeat: none
 slice01_01
   rotate: false

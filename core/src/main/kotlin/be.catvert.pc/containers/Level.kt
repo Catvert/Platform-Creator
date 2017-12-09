@@ -2,6 +2,8 @@ package be.catvert.pc.containers
 
 import be.catvert.pc.Log
 import be.catvert.pc.PCGame
+import be.catvert.pc.Prefab
+import be.catvert.pc.Tags
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.scenes.EndLevelScene
 import be.catvert.pc.scenes.SceneManager
@@ -14,13 +16,15 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonIgnore
 import ktx.assets.toLocalFile
-import java.util.*
 import kotlin.math.roundToInt
 
 class Level(val levelPath: String, val gameVersion: Float, var background: Background) : GameObjectMatrixContainer() {
     private val levelTextures = levelPath.toLocalFile().parent().child("textures") to mutableListOf<FileHandle>()
     private val levelAtlas = levelPath.toLocalFile().parent().child("atlas") to mutableListOf<FileHandle>()
     private val levelSounds = levelPath.toLocalFile().parent().child("sounds") to mutableListOf<FileHandle>()
+    private val levelPrefabs = levelPath.toLocalFile().parent().child("prefabs") to mutableListOf(*PrefabFactory.values().map { it.prefab }.toTypedArray())
+
+    val tags = arrayListOf(*Tags.values().map { it.tag }.toTypedArray())
 
     @JsonIgnore
     var applyGravity = true
@@ -34,12 +38,9 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
     @JsonIgnore
     var scorePoints = 0
 
-    @JsonIgnore
-    var timer = 0
-        private set
-    private var timerDelta = 0f
+    private val timer = Timer(1f)
 
-    var followGameObjectID: UUID? = null
+    var followGameObjectTag = Tags.Player.tag
 
     init {
         if (!levelTextures.first.exists())
@@ -57,13 +58,22 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
         else
             levelSounds.second.addAll(Utility.getFilesRecursivly(levelSounds.first, *Constants.levelSoundExtension))
 
+        if(!levelPrefabs.first.exists())
+            levelPrefabs.first.mkdirs()
+        else {
+            Utility.getFilesRecursivly(levelPrefabs.first, Constants.prefabExtension).forEach {
+                levelPrefabs.second.add(SerializationFactory.deserializeFromFile(it))
+            }
+        }
+
         if (background is ParallaxBackground)
-            (background as ParallaxBackground).updateWidth(matrixRect.width)
+            background.cast<ParallaxBackground>()?.updateWidth(matrixRect.width)
     }
 
     fun resourcesTextures() = levelTextures.second.toList()
     fun resourcesAtlas() = levelAtlas.second.toList()
     fun resourcesSounds() = levelSounds.second.toList()
+    fun resourcesPrefabs() = levelPrefabs.second.toList()
 
     fun addResources(vararg resources: FileHandle) {
         resources.forEach {
@@ -85,6 +95,11 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
         }
     }
 
+    fun addPrefab(prefab: Prefab) {
+        levelPrefabs.second.add(prefab)
+        SerializationFactory.serializeToFile(prefab, levelPrefabs.first.child("${prefab.name}.${Constants.prefabExtension}"))
+    }
+
     fun moveCameraToFollowGameObject(camera: OrthographicCamera, lerp: Boolean): Boolean {
         if (followGameObject != null) {
             val go = followGameObject!!
@@ -101,32 +116,29 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
         }
 
         if (background is ParallaxBackground)
-            (background as ParallaxBackground).updateCamera(camera)
+            background.cast<ParallaxBackground>()?.updateCamera(camera)
 
         return followGameObject != null
     }
 
-    override fun onPostDeserialization() {
-        super.onPostDeserialization()
-        followGameObject = if (followGameObjectID != null) findGameObjectByID(followGameObjectID!!) else null
-    }
-
-    override fun update() {
-        super.update()
-
-        if (allowUpdatingGO) {
-            timerDelta += Gdx.graphics.deltaTime
-            if (timerDelta >= 1f) {
-                ++timer
-                timerDelta = 0f
-            }
-        }
-    }
+    @JsonIgnore fun getTimer() = timer.timer
 
     fun deleteFiles() {
         if (!levelPath.toLocalFile().exists()) {
             levelPath.toLocalFile().parent().deleteDirectory()
         }
+    }
+
+    override fun onPostDeserialization() {
+        super.onPostDeserialization()
+        followGameObject = findGameObjectsByTag(followGameObjectTag).firstOrNull()
+    }
+
+    override fun update() {
+        super.update()
+
+        if (allowUpdatingGO)
+            timer.update()
     }
 
     companion object {
@@ -138,8 +150,9 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
                 levelDir.mkdirs()
             val level = Level(levelDir.child(Constants.levelDataFile).path(), Constants.gameVersion, PCGame.standardBackgrounds().elementAtOrNull(1) ?: StandardBackground(FileWrapper("")))
 
-            val player = PrefabFactory.Player.prefab.create(Point(100, 100), level)
-            level.followGameObjectID = player.id
+            PrefabFactory.Player.prefab.create(Point(100, 100), level)
+
+            level.loadResources()
 
             return level
         }

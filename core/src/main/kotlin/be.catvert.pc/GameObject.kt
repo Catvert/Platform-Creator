@@ -3,15 +3,16 @@ package be.catvert.pc
 import aurelienribon.tweenengine.TweenAccessor
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.RemoveGOAction
+import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.*
+import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import imgui.ImGui
 import imgui.functionalProgramming
-import java.util.*
 import kotlin.math.roundToInt
 
 
@@ -21,19 +22,13 @@ import kotlin.math.roundToInt
  * @param box Représente le box de l'objet dans l'espace (position + taille)
  * @param container Item dans lequel l'objet va être implémenté
  */
-class GameObject(@ExposeEditor var tag: Tag,
-                 @ExposeEditor var name: String = tag.name.toLowerCase(),
+class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: GameObjectTag,
+                 @ExposeEditor var name: String = tag,
                  @ExposeEditor var box: Rect = Rect(size = Size(1, 1)),
                  container: GameObjectContainer? = null,
-                 initDefaultState: GameObjectState.() -> Unit = {}) : Updeatable, Renderable, CustomEditorImpl {
+                 initDefaultState: GameObjectState.() -> Unit = {}) : Updeatable, Renderable, ResourceLoader, CustomEditorImpl {
 
-    enum class Tag {
-        Sprite, PhysicsSprite, Player, Enemy, Special
-    }
-
-    var id: UUID = UUID.randomUUID()
-
-    @ExposeEditor(minInt = -100, maxInt = 100)
+    @ExposeEditor(min = -100, max = 100)
     var layer: Int = 0
         set(value) {
             if (value in Constants.minLayerIndex until Constants.maxLayerIndex) field = value
@@ -45,10 +40,17 @@ class GameObject(@ExposeEditor var tag: Tag,
     @JsonProperty("states") private val states: MutableSet<GameObjectState> = mutableSetOf(GameObjectState("default").apply(initDefaultState))
 
     @JsonProperty("currentState") private var currentState: Int = 0
+        set(value) {
+            if(value in states.indices) {
+                field = value
+                if(container != null)
+                    states.elementAt(value).toggleActive(container!!)
+            }
+        }
 
     var initialState: Int = 0
         set(value) {
-            if (value in 0 until states.size) {
+            if (value in states.indices) {
                 field = value
             }
         }
@@ -69,6 +71,8 @@ class GameObject(@ExposeEditor var tag: Tag,
             }
         }
 
+    private var isRessourcesLoaded = false
+
     @JsonIgnore
     fun getCurrentState() = states.elementAt(currentState)
 
@@ -82,7 +86,6 @@ class GameObject(@ExposeEditor var tag: Tag,
     fun size() = box.size
 
     fun removeFromParent() {
-        getCurrentState().inactive()
         onRemoveFromParent(this)
         container?.removeGameObject(this)
     }
@@ -105,13 +108,8 @@ class GameObject(@ExposeEditor var tag: Tag,
     }
 
     fun setState(stateIndex: Int) {
-        if (stateIndex in 0 until states.size) {
-            if (stateIndex != currentState) {
-                getCurrentState().inactive()
-            }
+        if (stateIndex in states.indices) {
             currentState = stateIndex
-
-            getCurrentState().active()
         }
     }
 
@@ -121,6 +119,13 @@ class GameObject(@ExposeEditor var tag: Tag,
 
     override fun render(batch: Batch) {
         getCurrentState().render(batch)
+    }
+
+    override fun loadResources(assetManager: AssetManager) {
+        if(!isRessourcesLoaded) {
+            states.forEach { it.loadResources(assetManager) }
+            isRessourcesLoaded = true
+        }
     }
 
     override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
@@ -141,7 +146,8 @@ class GameObjectTweenAccessor : TweenAccessor<GameObject> {
         POS_XY(2),
         SIZE_X(3),
         SIZE_Y(4),
-        SIZE_XY(5);
+        SIZE_XY(5),
+        ATLAS_ALPHA(6);
 
         companion object {
             fun fromType(tweenType: Int) = values().firstOrNull { it.tweenType == tweenType }
@@ -170,6 +176,9 @@ class GameObjectTweenAccessor : TweenAccessor<GameObject> {
             GameObjectTween.SIZE_XY -> {
                 gameObject.box.size = Size(newValues[0].roundToInt(), newValues[1].roundToInt())
             }
+            GameObjectTween.ATLAS_ALPHA -> {
+                gameObject.getCurrentState().getComponent<AtlasComponent>()?.alpha = newValues[0]
+            }
             else -> Log.error { "Tween inconnu : $tweenType" }
         }
     }
@@ -196,6 +205,9 @@ class GameObjectTweenAccessor : TweenAccessor<GameObject> {
             }
             GameObjectTween.SIZE_XY -> {
                 returnValues[0] = gameObject.box.width.toFloat(); returnValues[1] = gameObject.box.height.toFloat(); return 2
+            }
+            GameObjectTween.ATLAS_ALPHA -> {
+                returnValues[0] = gameObject.getCurrentState().getComponent<AtlasComponent>()?.alpha?: 0f; return 1
             }
             else -> Log.error { "Tween inconnu : $tweenType" }
         }

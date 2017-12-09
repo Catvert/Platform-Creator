@@ -35,8 +35,6 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
 
         Log.info { "Initialisation en cours.. \n Taille : ${Gdx.graphics.width}x${Gdx.graphics.height}" }
 
-
-
         Locales.load()
 
         GameKeys.loadKeysConfig()
@@ -241,7 +239,7 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
          * Permet de retourner le logo du jeu
          */
         fun generateLogo(container: GameObjectContainer): GameObject {
-            return container.createGameObject("logo", GameObject.Tag.Sprite, getLogoRect(), {
+            return container.createGameObject("logo", "logo", getLogoRect(), {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("logo", Constants.gameLogoPath.toFileWrapper()))
             })
         }
@@ -249,11 +247,11 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
         /**
          * Permet de retourner la taille du logo au cas où la taille de l'écran changerait.
          */
-        private fun getLogoSize() = Size(Gdx.graphics.width / 3 * 2, Gdx.graphics.height / 4)
+        private fun getLogoSize() = Size(Gdx.graphics.width / 3, Gdx.graphics.height / 10)
 
         fun getLogoRect(): Rect {
             val size = getLogoSize()
-            return Rect(Point(Gdx.graphics.width / 2 - size.width / 2, Gdx.graphics.height - size.height), size)
+            return Rect(Point(Gdx.graphics.width / 2 - size.width / 2, Gdx.graphics.height - size.height * 3 / 2), size)
         }
     }
 }

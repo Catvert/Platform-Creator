@@ -1,7 +1,6 @@
 package be.catvert.pc.components.logics
 
-import be.catvert.pc.GameObject
-import be.catvert.pc.Log
+import be.catvert.pc.*
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
 import be.catvert.pc.actions.PhysicsAction
@@ -10,10 +9,7 @@ import be.catvert.pc.components.LogicsComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.GameObjectMatrixContainer
 import be.catvert.pc.containers.Level
-import be.catvert.pc.utility.ExposeEditor
-import be.catvert.pc.utility.Point
-import be.catvert.pc.utility.Rect
-import be.catvert.pc.utility.Signal
+import be.catvert.pc.utility.*
 import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
@@ -36,31 +32,9 @@ enum class MovementType {
 data class JumpData(var isJumping: Boolean = false, var targetHeight: Int = 0, var startJumping: Boolean = false, var forceJumping: Boolean = false)
 
 /**
- * Enum permettant de connaître le côté toucher lors d'une collision
- */
-enum class CollisionSide {
-    OnLeft, OnRight, OnUp, OnDown;
-
-    operator fun unaryMinus(): CollisionSide = when (this) {
-        CollisionSide.OnLeft -> OnRight
-        CollisionSide.OnRight -> OnLeft
-        CollisionSide.OnUp -> OnDown
-        CollisionSide.OnDown -> OnUp
-    }
-}
-
-
-/**
- * Permet de déterminer quel mask l'entité doit utiliser pour les collisions
- */
-enum class MaskCollision {
-    ALL, ONLY_PLAYER, ONLY_ENEMY
-}
-
-/**
  * Listener lors d'une collision avec une autre entité pour le mask correspondant
  */
-data class CollisionListener(val gameObject: GameObject, val collideGameObject: GameObject, val side: CollisionSide)
+data class CollisionListener(val gameObject: GameObject, val collideGameObject: GameObject, val side: BoxSide)
 
 /**
  * Ce component permet d'ajouter à l'entité des propriétés physique tel que la gravité, vitesse de déplacement ...
@@ -69,18 +43,23 @@ data class CollisionListener(val gameObject: GameObject, val collideGameObject: 
  * @param moveSpeed : La vitesse de déplacement de l'entité qui sera utilisée avec les NextActions
  * @param movementType : Permet de définir le type de déplacement de l'entité
  * @param gravity : Permet de spécifier si la gravité est appliquée à l'entité
+ * @param maskCollision Masque à appliquer au gameObject
+ * @param onLeftAction Action appelée quand le gameObject se déplace vers la gauche
+ * @param onRightAction Action appelée quand le gameObject se déplace vers la droite
+ * @param onFallAction Action appelée quand le gameObject est en chute libre
+ * @param onNothingAction Action appelée quand le gameObject ne subit aucune action physique
  */
 class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
-                       @ExposeEditor(maxInt = 100) var moveSpeed: Int = 0,
+                       @ExposeEditor(max = 100) var moveSpeed: Int = 0,
                        @ExposeEditor var movementType: MovementType = MovementType.LINEAR,
                        @ExposeEditor var gravity: Boolean = !isStatic,
-                       @ExposeEditor var maskCollision: MaskCollision = MaskCollision.ALL,
-                       @ExposeEditor(maxInt = 1000) var jumpHeight: Int = 0,
+                       var ignoreTags: ArrayList<GameObjectTag> = arrayListOf(),
+                       @ExposeEditor(max = 1000) var jumpHeight: Int = 0,
                        @ExposeEditor var onLeftAction: Action = EmptyAction(),
                        @ExposeEditor var onRightAction: Action = EmptyAction(),
                        @ExposeEditor var onJumpAction: Action = EmptyAction(),
                        @ExposeEditor var onFallAction: Action = EmptyAction(),
-                       @ExposeEditor var onNothingAction: Action = EmptyAction()) : LogicsComponent() {
+                       @ExposeEditor var onNothingAction: Action = EmptyAction()) : LogicsComponent(), CustomEditorImpl {
     @JsonCreator private constructor() : this(true)
 
     /**
@@ -89,36 +68,38 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
     @JsonIgnore
     val physicsActions = mutableSetOf<PhysicsActions>()
 
+    /**
+     * Donnée définissant les paramètres de saut du gameObject
+     */
     private val jumpData: JumpData = JumpData()
 
     /**
-     * La vitesse de déplacement x actuelle de l'entité (à titre d'information)
+     * La vitesse de déplacement x actuelle de l'entité, permettant d'appliquer un lerp sur le gameObject si son type de déplacement est SMOOTH
      */
     private var actualMoveSpeedX = 0f
 
     /**
-     * La vitesse de déplacement y actuelle de l'entité (à titre d'information)
+     * La vitesse de déplacement y actuelle de l'entité, permettant d'appliquer un lerp sur le gameObject si son type de déplacement est SMOOTH
      */
     private var actualMoveSpeedY = 0f
 
     /**
-     * Signal appelé lorsque une entité ayant ce component touche cette entité
+     * Signal appelé lorsque un gameObject rentre en collision avec un autre gameObject ayant un PhysicsComponent
      */
     @JsonIgnore
     val onCollisionWith = Signal<CollisionListener>()
 
     /**
-     * Permet à l'entité de savoir si elle est sur le sol ou non
+     * Vitesse de la gravité, représente aussi la vitesse de saut (inversé)
      */
-    private var isOnGround = false
-
     private val gravitySpeed = 15
 
     private var level: Level? = null
 
-    override fun onAddToContainer(gameObject: GameObject, container: GameObjectContainer) {
-        super.onAddToContainer(gameObject, container)
-        level = container as? Level
+    override fun onStateActive(gameObject: GameObject, state: GameObjectState, container: GameObjectContainer) {
+        super.onStateActive(gameObject, state, container)
+
+        level = container.cast()
     }
 
     override fun update(gameObject: GameObject) {
@@ -127,7 +108,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         if (physicsActions.isEmpty())
             onNothingAction(gameObject)
 
-        if (gravity && (gameObject.container as? Level)?.applyGravity == true)
+        if (gravity && gameObject.container.cast<Level>()?.applyGravity == true)
             physicsActions += PhysicsAction.PhysicsActions.GRAVITY
 
         if (jumpData.forceJumping) {
@@ -148,7 +129,8 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                 PhysicsActions.JUMP -> {
                     if (!jumpData.isJumping) {
                         if (!jumpData.forceJumping) {
-                            if (!checkYMove(-1, gameObject)) {
+                            //  On vérifie si le gameObject est sur le sol
+                            if (!collideOnMove(0, -1, gameObject)) {
                                 return@action
                             }
                         } else {
@@ -166,7 +148,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                         onJumpAction(gameObject)
                     } else {
                         // Vérifie si le go est arrivé à la bonne hauteur de saut ou s'il rencontre un obstacle au dessus de lui
-                        if (gameObject.box.y >= jumpData.targetHeight || checkYMove(gravitySpeed, gameObject)) {
+                        if (gameObject.box.y >= jumpData.targetHeight || collideOnMove(0, gravitySpeed, gameObject)) {
                             gravity = true
                             jumpData.isJumping = false
                         } else {
@@ -179,6 +161,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
             }
         }
 
+        // Si le déplacement est de type "fluide", on applique une interpolation linéaire à la vitesse à appliquer au gameObject
         if (movementType == MovementType.SMOOTH) {
             moveSpeedX = MathUtils.lerp(actualMoveSpeedX, moveSpeedX, 0.2f)
             moveSpeedY = MathUtils.lerp(actualMoveSpeedY, moveSpeedY, 0.2f)
@@ -187,25 +170,17 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         actualMoveSpeedX = moveSpeedX
         actualMoveSpeedY = moveSpeedY
 
-        tryMove(moveSpeedX.roundToInt(), moveSpeedY.roundToInt(), gameObject) // move l'entité
+
+        tryMove(moveSpeedX.roundToInt(), moveSpeedY.roundToInt(), gameObject)
 
         physicsActions.clear()
 
         if (addJumpAfterClear)
             physicsActions += PhysicsActions.JUMP
-
-        isOnGround = checkYMove(-1, gameObject)
     }
 
     /**
-     * Permet de vérifier si l'entité est sur le sol ou pas
-     */
-    private fun checkYMove(moveY: Int, gameObject: GameObject) = collideOnMove(0, moveY, gameObject)
-
-    /**
-     * Permet d'essayer de déplacer une entité ayant un physicsComponent
-     * @param moveX : Le déplacement x
-     * @param moveY : Le déplacement y
+     * Permet d'essayer le déplacement physique d'un gameObject si il ne rencontre aucun obstacle
      */
     private fun tryMove(moveX: Int, moveY: Int, gameObject: GameObject) {
         if (moveX != 0 || moveY != 0) {
@@ -245,10 +220,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
     }
 
     /**
-     * Permet de tester si un déplacement est possible ou non
-     * @param moveX : Le déplacement x
-     * @param moveY : Le déplacement y
-     * @param gameObject : Le gameObject a testé
+     * Permet de tester si un déplacement physique est possible ou non
      */
     private fun collideOnMove(moveX: Int, moveY: Int, gameObject: GameObject): Boolean {
         val newRect = Rect(gameObject.box)
@@ -257,25 +229,19 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         if (level?.matrixRect?.contains(newRect) == false)
             return true
 
-        (gameObject.container as? GameObjectMatrixContainer)?.apply {
+        gameObject.container.cast<GameObjectMatrixContainer>()?.apply {
             this.getAllGameObjectsInCells(getRectCells(newRect)).filter {
-                it.id != gameObject.id
-                        && when (it.getCurrentState().getComponent<PhysicsComponent>()?.maskCollision) {
-                    MaskCollision.ALL -> true
-                    MaskCollision.ONLY_PLAYER -> gameObject.tag == GameObject.Tag.Player
-                    MaskCollision.ONLY_ENEMY -> gameObject.tag == GameObject.Tag.Enemy
-                    null -> false
-                }
+                it !== gameObject && it.getCurrentState().getComponent<PhysicsComponent>()?.ignoreTags?.contains(gameObject.tag) == false
             }.forEach {
                 if (newRect.overlaps(it.box)) {
                     val side = when {
-                        moveX > 0 -> CollisionSide.OnRight
-                        moveX < 0 -> CollisionSide.OnLeft
-                        moveY > 0 -> CollisionSide.OnUp
-                        moveY < 0 -> CollisionSide.OnDown
+                        moveX > 0 -> BoxSide.Right
+                        moveX < 0 -> BoxSide.Left
+                        moveY > 0 -> BoxSide.Up
+                        moveY < 0 -> BoxSide.Down
                         else -> {
                             Log.warn { "Collision invalide !" }
-                            CollisionSide.OnLeft
+                            BoxSide.Left
                         }
                     }
 
@@ -287,5 +253,11 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
             }
         }
         return false
+    }
+
+    override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
+        ImguiHelper.addImguiWidgetsArray("ignore tags", ignoreTags, { Tags.Player.tag }, {
+            ImguiHelper.gameObjectTag(it, level)
+        })
     }
 }

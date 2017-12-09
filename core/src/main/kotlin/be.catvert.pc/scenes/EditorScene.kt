@@ -93,6 +93,8 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
         var showSaveLevelExitWindow = false
 
+        var showInfoGameObjectWindow = false
+
         init {
             when (background.type) {
                 BackgroundType.Standard -> settingsLevelStandardBackgroundIndex[0] = PCGame.standardBackgrounds().indexOfFirst { it.backgroundFile.get() == (background as StandardBackground).backgroundFile.get() }
@@ -124,8 +126,6 @@ class EditorScene(val level: Level) : Scene(level.background) {
     private val onSelectPoint = Signal<Point>()
     private val onSelectGO = Signal<GameObject>()
 
-    private val prefabs = mutableSetOf(*PrefabFactory.values().map { it.prefab }.toTypedArray())
-
     private var selectLayer = 0
 
     /**
@@ -152,12 +152,11 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
     private val editorSceneUI = EditorSceneUI(level.background)
 
+    private val prefabs = mutableSetOf(*PrefabFactory.values().map { it.prefab }.toTypedArray())
+
     init {
         gameObjectContainer.allowUpdatingGO = false
-
-        Utility.getFilesRecursivly(Constants.prefabsDirPath, Constants.prefabExtension).forEach {
-            prefabs.add(SerializationFactory.deserializeFromFile(it))
-        }
+        prefabs.addAll(level.resourcesPrefabs())
     }
 
     override fun postBatchRender() {
@@ -165,7 +164,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
         drawUI()
 
-        (gameObjectContainer as Level).drawDebug()
+        gameObjectContainer.cast<Level>()?.drawDebug()
 
         shapeRenderer.projectionMatrix = camera.combined
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
@@ -183,7 +182,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
         /**
          * Dessine les gameObjects qui n'ont pas de renderableComponent avec un box noir
          */
-        (gameObjectContainer as? Level)?.apply {
+        gameObjectContainer.cast<Level>()?.apply {
             getAllGameObjectsInCells(getActiveGridCells()).forEach {
                 if (it.getCurrentState().getComponent<AtlasComponent>()?.data?.isEmpty() != false) {
                     shapeRenderer.color = Color.GRAY
@@ -457,8 +456,13 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         selectGameObjectMode = SelectGOMode.NO_MODE
 
                         if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && !latestRightButtonClick) {
-                            clearSelectGameObjects()
-                            editorMode = EditorMode.NO_MODE
+                            if(findGameObjectUnderMouse(false) == null) {
+                                clearSelectGameObjects()
+                                editorMode = EditorMode.NO_MODE
+                            }
+                            else {
+                                editorSceneUI.showInfoGameObjectWindow = true
+                            }
                         }
                         if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_MOVE_ENTITY_LEFT.key)) {
                             moveGameObjects(-1, 0)
@@ -678,7 +682,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
         var moveCameraY = 0f
 
         if (editorMode == EditorMode.TRY_LEVEL) {
-            (gameObjectContainer as Level).moveCameraToFollowGameObject(camera, true)
+            gameObjectContainer.cast<Level>()?.moveCameraToFollowGameObject(camera, true)
         } else {
             if (Gdx.input.isKeyPressed(GameKeys.EDITOR_CAMERA_LEFT.key))
                 moveCameraX -= cameraMoveSpeed
@@ -712,7 +716,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
         camera.update()
 
         if (background is ParallaxBackground)
-            (background as ParallaxBackground).updateCamera(camera)
+            background.cast<ParallaxBackground>()?.updateCamera(camera)
     }
 
     /**
@@ -780,11 +784,6 @@ class EditorScene(val level: Level) : Scene(level.background) {
         camera.position.set(backupTryModeCameraPos)
     }
 
-    private fun addPrefab(prefab: Prefab) {
-        prefabs.add(prefab)
-        SerializationFactory.serializeToFile(prefab, (Constants.prefabsDirPath.child("${prefab.name}.${Constants.prefabExtension}")))
-    }
-
     private fun saveLevelToFile() {
         try {
             SerializationFactory.serializeToFile(level, level.levelPath.toLocalFile())
@@ -812,7 +811,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                 }
             }
 
-            if (selectGameObject != null && selectGameObject?.container != null
+            if (editorSceneUI.showInfoGameObjectWindow && selectGameObject != null && selectGameObject?.container != null
                     && editorMode != EditorMode.SELECT_POINT && editorMode != EditorMode.SELECT_GO && editorMode != EditorMode.TRY_LEVEL) {
                 drawInfoGameObjectWindow(selectGameObject!!)
             }
@@ -902,7 +901,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                             }
 
                             if (ImguiHelper.enum("type de fond d'écran", editorSceneUI.settingsLevelBackgroundType)) {
-                                when (editorSceneUI.settingsLevelBackgroundType.obj as BackgroundType) {
+                                when (editorSceneUI.settingsLevelBackgroundType.obj.cast<BackgroundType>()) {
                                     BackgroundType.Standard -> {
                                         updateBackground(PCGame.standardBackgrounds()[0])
                                     }
@@ -912,7 +911,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                                 }
                             }
 
-                            when (editorSceneUI.settingsLevelBackgroundType.obj as BackgroundType) {
+                            when (editorSceneUI.settingsLevelBackgroundType.obj.cast<BackgroundType>()) {
                                 BackgroundType.Standard -> {
                                     if (editorSceneUI.settingsLevelStandardBackgroundIndex[0] == -1) {
                                         editorSceneUI.settingsLevelStandardBackgroundIndex[0] = PCGame.standardBackgrounds().indexOfFirst { it == level.background }
@@ -933,20 +932,15 @@ class EditorScene(val level: Level) : Scene(level.background) {
                                 }
                             }
 
-                            if (button("Sélectionner le gameObject suivi", Vec2(-1, 20f))) {
-                                editorMode = EditorMode.SELECT_GO
-                                onSelectGO.register(true) {
-                                    level.followGameObjectID = it.id
-                                }
-                            }
+                            ImguiHelper.gameObjectTag(level::followGameObjectTag, level, "suivi de la caméra")
 
                             inputInt("largeur", level::matrixWidth)
                             inputInt("hauteur", level::matrixHeight)
                         }
                     }
                     menu("Créer un gameObject") {
-                        GameObject.Tag.values().forEach { tag ->
-                            menu(tag.name) {
+                        level.tags.forEach { tag ->
+                            menu(tag) {
                                 prefabs.filter { it.prefabGO.tag == tag }.forEach {
                                     menuItem(it.name) {
                                         val gameObject = it.create(Point())
@@ -992,7 +986,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
         val addComponentTitle = "Ajouter un component"
 
         with(ImGui) {
-            functionalProgramming.withWindow("Réglages du gameObject", null, WindowFlags.AlwaysAutoResize.i) {
+            functionalProgramming.withWindow("Réglages du gameObject", editorSceneUI::showInfoGameObjectWindow, WindowFlags.AlwaysAutoResize.i) {
                 if (button("Supprimer ce gameObject", Vec2(-1, 20f))) {
                     gameObject.removeFromParent()
                     if (selectGameObject === gameObject) {
@@ -1053,7 +1047,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                     inputText("Nom", name)
 
                     if (button("Ajouter")) {
-                        addPrefab(Prefab(String(name), gameObject))
+                        level.addPrefab(Prefab(String(name), gameObject))
                         closeCurrentPopup()
                     }
 

@@ -6,7 +6,7 @@ import ktx.assets.toLocalFile
  * Objet permettant d'accéder aux antes du jeu
  */
 object Constants {
-    const val gameTitle = "Platform Creator"
+    const val gameTitle = "Platform-Creator"
     const val gameVersion = 2.0f
 
     const val maxGameObjectSize = 500
@@ -46,6 +46,5 @@ object Constants {
     val levelDataFile = "data.$levelExtension"
 
     val defaultAtlasPath = assetsDirPath.child("game/notexture_atlas.atlas").toFileWrapper() to "notexture"
-    val defaultTexturePath = assetsDirPath.child("game/notexture.png")
     val defaultSoundPath = assetsDirPath.child("game/nosound.wav")
 }

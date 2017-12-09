@@ -1,6 +1,7 @@
 package be.catvert.pc.components.logics
 
 import be.catvert.pc.GameObject
+import be.catvert.pc.GameObjectState
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
 import be.catvert.pc.actions.RemoveGOAction
@@ -15,64 +16,61 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 import imgui.ImGui
 
-class LifeComponent(onDeathAction: Action, lifePointActions: ArrayList<LifePointActions> = arrayListOf()) : BasicComponent(), CustomEditorImpl {
+/**
+ * Component permettant d'ajouter des points de vie à un gameObject
+ * Chaque point de vie à une action quand celui-ci devient actif et inactif
+ */
+class LifeComponent(onDeathAction: Action, lifePointActions: ArrayList<Action> = arrayListOf()) : BasicComponent(), CustomEditorImpl {
     @JsonCreator private constructor() : this(RemoveGOAction(), arrayListOf())
-
-    data class LifePointActions(@ExposeEditor var onStartAction: Action, @ExposeEditor var onEndAction: Action) : CustomEditorImpl {
-        override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
-            with(ImGui) {
-                if (treeNode(labelName)) {
-                    ImguiHelper.addImguiWidget("start", ::onStartAction, gameObject, level, ExposeEditorFactory.empty)
-                    ImguiHelper.addImguiWidget("end", ::onEndAction, gameObject, level, ExposeEditorFactory.empty)
-                    treePop()
-                }
-            }
-        }
-    }
 
     private lateinit var gameObject: GameObject
 
     @JsonProperty("lpActions")
-    private var lpActions = arrayListOf(LifePointActions(EmptyAction(), onDeathAction), *lifePointActions.toTypedArray())
+    private var lpActions = arrayListOf(onDeathAction, *lifePointActions.toTypedArray())
 
     @JsonProperty("lifePoint")
     private var lifePoint: Int = this.lpActions.size
 
+    /**
+     * Permet de retirer un point de vie à un gameObject
+     */
     fun removeLifePoint() {
         if (lifePoint > 1) {
-            lpActions.elementAt(lifePoint - 1).onEndAction(gameObject)
+            lpActions.elementAt(lifePoint - 1).invoke(gameObject)
             --lifePoint
-            lpActions.elementAt(lifePoint - 1).onStartAction(gameObject)
         } else if (lifePoint != -1) {
-            lpActions.elementAt(0).onEndAction(gameObject)
+            lpActions.elementAt(0).invoke(gameObject)
             lifePoint = -1
         }
     }
 
+    /**
+     * Permet de supprimer tout les points de vie à un gameObject
+     */
     fun kill() {
-        lpActions.elementAt(0).onEndAction(gameObject)
+        lpActions.elementAt(0).invoke(gameObject)
         lifePoint = -1
     }
 
+    /**
+     * Permet de rajouter un point de vie au gameObject
+     */
     fun addLifePoint() {
         if (lpActions.size > lifePoint) {
             ++lifePoint
-            lpActions.elementAt(lifePoint - 1).onStartAction(gameObject)
         }
     }
 
-    override fun onAddToContainer(gameObject: GameObject, container: GameObjectContainer) {
-        super.onAddToContainer(gameObject, container)
+    override fun onStateActive(gameObject: GameObject, state: GameObjectState, container: GameObjectContainer) {
+        super.onStateActive(gameObject, state, container)
 
         this.gameObject = gameObject
-
-        lpActions.elementAt(lifePoint - 1).onStartAction(gameObject)
     }
 
     override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
         var index = 0
-        ImguiHelper.addImguiWidgetsArray("life actions", lpActions, { LifePointActions(EmptyAction(), EmptyAction()) }, {
-            it.obj.insertImgui("vie ${++index}", gameObject, level)
+        ImguiHelper.addImguiWidgetsArray("life actions", lpActions, { EmptyAction() }, {
+            ImguiHelper.action("vie ${++index}", it, gameObject, level)
             false
         })
     }

@@ -80,7 +80,7 @@ class ParallaxBackground(val parallaxDataFile: FileWrapper) : Background(Backgro
 
     override fun render(batch: Batch) {
         layers.forEach {
-            batch.draw(it.layer, it.x, if (it.applyYOffset) yOffset.toFloat() else 0f, width.toFloat(), Gdx.graphics.height.toFloat())
+            batch.draw(it.layer, it.x, if (it.applyYOffset) yOffset else 0f, width.toFloat(), Gdx.graphics.height.toFloat())
         }
     }
 }

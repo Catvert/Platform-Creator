@@ -1,6 +1,6 @@
 spritesheet_complete.png
 format: RGBA8888
-filter: Linear,Linear
+filter: Nearest,Nearest
 repeat: none
 blockBrown
   rotate: false

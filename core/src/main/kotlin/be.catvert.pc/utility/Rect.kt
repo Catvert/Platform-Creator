@@ -81,8 +81,8 @@ class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
         with(ImGui) {
             if (collapsingHeader(labelName)) {
                 functionalProgramming.withIndent {
-                    ImguiHelper.addImguiWidget("position", ::position, gameObject, level, ExposeEditorFactory.createExposeEditor(maxInt = level.matrixRect.width))
-                    ImguiHelper.addImguiWidget("taille", ::size, gameObject, level, ExposeEditorFactory.createExposeEditor(maxInt = Constants.maxGameObjectSize))
+                    ImguiHelper.addImguiWidget("position", ::position, gameObject, level, ExposeEditorFactory.createExposeEditor(max = level.matrixRect.width))
+                    ImguiHelper.addImguiWidget("taille", ::size, gameObject, level, ExposeEditorFactory.createExposeEditor(max = Constants.maxGameObjectSize))
                 }
             }
         }

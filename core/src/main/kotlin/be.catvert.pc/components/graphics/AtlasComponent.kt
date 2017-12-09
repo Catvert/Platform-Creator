@@ -3,10 +3,10 @@ package be.catvert.pc.components.graphics
 import be.catvert.pc.GameObject
 import be.catvert.pc.PCGame
 import be.catvert.pc.components.RenderableComponent
-import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -21,14 +21,20 @@ import ktx.collections.gdxArrayOf
 import ktx.collections.isEmpty
 
 /**
- * Component permettant d'ajouter une texture chargée au préalable depuis un atlas et une région
- * @param atlasPath Le chemin vers l'atlas en question
- * @param region La région à utiliser
+ * Component permettant d'ajouter des textures et animations au gameObject
+ * @param currentIndex L'atlas actuel à dessiner
+ * @param data Les atlas disponibles pour le gameObject
  */
 class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) : RenderableComponent(), CustomEditorImpl {
     constructor(currentIndex: Int = 0, vararg data: AtlasData) : this(currentIndex, arrayListOf(*data))
     @JsonCreator private constructor() : this(0, arrayListOf())
 
+    /**
+     * Représente un atlas, donc une texture ou une animation
+     * @param name Le nom de l'atlas
+     * @param regions Les régions disponibles dans l'atlas, une region correspond à une texture, en ajoutant plusieurs textures, on obtient une animation
+     * @param frameDuration Représente la vitesse de transition entre 2 régions. Si la frameDuration correspond à 1, il s'écoulera 1 seconde entre chaque region.
+     */
     class AtlasData(var name: String, vararg regions: Pair<FileWrapper, String>, frameDuration: Float = 1f / regions.size) {
         @JsonCreator constructor() : this("default", Constants.defaultAtlasPath)
         constructor(name: String, atlasFile: FileWrapper, animation: String, frameDuration: Float) : this(name, *findAnimationRegions(atlasFile, animation), frameDuration = frameDuration)
@@ -45,45 +51,67 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
 
         private lateinit var animation: Animation<TextureAtlas.AtlasRegion>
 
+        /**
+         * Représente le temps écoulé depuis le début de l'affichage de l'atlas, si le stateTime = 1.3f et que le frameDuration = 1f, la deuxième région sera dessiné.
+         */
         private var stateTime = 0f
 
         fun render(gameObject: GameObject, flipX: Boolean, flipY: Boolean, batch: Batch) {
+            /**
+             * Si le nombre de région est <= à 1, il n'y a pas besoin de mettre à jour le temps écoulé car de toute façon une seule région sera dessinée.
+             */
             if (regions.size > 1)
                 stateTime += Gdx.graphics.deltaTime
             batch.draw(animation.getKeyFrame(stateTime), gameObject.box, flipX, flipY)
         }
 
+        /**
+         * Permet de mettre à jour l'atlas, si par exemple des régions sont modifiées.
+         */
         fun updateAtlas(frameDuration: Float = this.frameDuration) {
             this.animation = loadAnimation()
             this.frameDuration = frameDuration
         }
 
+        /**
+         * Permet de changer la texture d'une région si celle-ci est un pack, dans ce cas, la région prendra la TextureRegion précédente du pack.
+         */
         fun previousFrameRegion(regionIndex: Int) {
             this.regions.elementAtOrNull(regionIndex)?.apply {
-                val atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(this.first).asset
-                val region = loadRegion(this)
-                val index = atlas.regions.indexOf(region)
+                if(this.second != textureIdentifier) {
+                    val atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(this.first).asset
+                    val region = loadRegion(this)
+                    val index = atlas.regions.indexOf(region)
 
-                if (index > 0) {
-                    this@AtlasData.regions[regionIndex] = this.first to atlas.regions[index - 1].name
-                    updateAtlas()
+                    if (index > 0) {
+                        this@AtlasData.regions[regionIndex] = this.first to atlas.regions[index - 1].name
+                        updateAtlas()
+                    }
                 }
             }
         }
 
+        /**
+         * Permet de changer la texture d'une région si celle-ci est un pack, dans ce cas, la région prendra la TextureRegion suivante du pack.
+         */
         fun nextFrameRegion(regionIndex: Int) {
             this.regions.elementAtOrNull(regionIndex)?.apply {
-                val atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(this.first).asset
-                val region = loadRegion(this)
-                val index = atlas.regions.indexOf(region)
+                if(this.second != textureIdentifier) {
+                    val atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(this.first).asset
+                    val region = loadRegion(this)
+                    val index = atlas.regions.indexOf(region)
 
-                if (index < atlas.regions.size - 1) {
-                    this@AtlasData.regions[regionIndex] = this.first to atlas.regions[index + 1].name
-                    updateAtlas()
+                    if (index < atlas.regions.size - 1) {
+                        this@AtlasData.regions[regionIndex] = this.first to atlas.regions[index + 1].name
+                        updateAtlas()
+                    }
                 }
             }
         }
 
+        /**
+         * Permet de charger l'animation responsable d'animer les différentes régions si il y en a plusieurs.
+         */
         private fun loadAnimation(): Animation<TextureAtlas.AtlasRegion> {
             val frames = gdxArrayOf<TextureAtlas.AtlasRegion>()
 
@@ -98,10 +126,14 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
         }
 
         companion object {
+            /**
+             * Permet de charger une région depuis un pack ou une texture.
+             */
             fun loadRegion(region: Pair<FileWrapper, String>): TextureAtlas.AtlasRegion {
                 return if (region.first.get().exists()) {
-                    if (region.second != AtlasComponent.textureIdentifier)
+                    if (region.second != AtlasComponent.textureIdentifier) {
                         PCGame.assetManager.loadOnDemand<TextureAtlas>(region.first).asset.findRegion(region.second)
+                    }
                     else {
                         val texture = PCGame.assetManager.loadOnDemand<Texture>(region.first).asset
                         TextureAtlas.AtlasRegion(texture, 0, 0, texture.width, texture.height)
@@ -113,8 +145,8 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
         }
     }
 
-    override fun onAddToContainer(gameObject: GameObject, container: GameObjectContainer) {
-        super.onAddToContainer(gameObject, container)
+    override fun loadResources(assetManager: AssetManager) {
+        super.loadResources(assetManager)
         data.forEach {
             it.updateAtlas()
         }
@@ -154,6 +186,9 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
         }
     }
 
+    /**
+     * Permet de dessiner la fenêtre permettant d'éditer les différentes régions de l'atlas actuel.
+     */
     private fun drawEditWindow(gameObject: GameObject, level: Level) {
         with(ImGui) {
             setNextWindowSizeConstraints(Vec2(500f, 200f), Vec2(500f, 500f))
@@ -167,7 +202,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                             addAtlasName = String(atlasName)
                     }
                     if (button("Ajouter", Vec2(-1, 20f))) {
-                        data.add(AtlasData(addAtlasName))
+                        data.add(AtlasData(addAtlasName).apply { updateAtlas() })
                         closeCurrentPopup()
                     }
                     if (button("Fermer", Vec2(-1, 20f)))
@@ -321,7 +356,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                                             }
                                         }
                                         AtlasComponent.EditAtlasType.Animations -> {
-                                            findAnimationInAtlas(atlas).forEach {
+                                            findAnimationInPack(atlas).forEach {
                                                 val region = atlas.findRegion(it + "_0")
                                                 val imgBtnSize = Vec2(Math.min(region.regionWidth, 200), Math.min(region.regionHeight, 200))
 
@@ -378,6 +413,9 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
         private var showEditAtlasWindow = false
         private val textureIdentifier = "\$texture_atlas"
 
+        /**
+         * Permet de charger les différentes régions requise pour une animation prédéfinies dans un pack
+         */
         private fun findAnimationRegions(atlasFile: FileWrapper, animation: String): Array<Pair<FileWrapper, String>> {
             val atlas = PCGame.assetManager.loadOnDemand<TextureAtlas>(atlasFile).asset
             val regions = mutableListOf<String>()
@@ -391,10 +429,13 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
             return regions.map { atlasFile to it }.toTypedArray()
         }
 
-        private fun findAnimationInAtlas(atlas: TextureAtlas): List<String> {
+        /**
+         * Permet de trouver les différentes animations prédéfinies dans un pack
+         */
+        private fun findAnimationInPack(textureAtlas: TextureAtlas): List<String> {
             val animationRegionNames = mutableListOf<String>()
 
-            atlas.regions.forEach {
+            textureAtlas.regions.forEach {
                 if (it.name.endsWith("_0")) {
                     animationRegionNames += it.name.removeSuffix("_0")
                 }

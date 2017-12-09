@@ -8,8 +8,6 @@ import com.fasterxml.jackson.annotation.JsonCreator
 /**
  * Action permettant de téléporter un gameObject à un point précis
  */
-
-//TODO maxInt
 class TeleportAction(@ExposeEditor var teleportPoint: Point) : Action {
     @JsonCreator private constructor() : this(Point())
 
