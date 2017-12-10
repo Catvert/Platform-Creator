@@ -148,7 +148,7 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
                 Log.warn { "Un niveau portant le même nom existe déjà !" }
             } else
                 levelDir.mkdirs()
-            val level = Level(levelDir.child(Constants.levelDataFile).path(), Constants.gameVersion, PCGame.standardBackgrounds().elementAtOrNull(1) ?: StandardBackground(FileWrapper("")))
+            val level = Level(levelDir.child(Constants.levelDataFile).path(), Constants.gameVersion, PCGame.parallaxBackgrounds().elementAtOrNull(0) ?: PCGame.standardBackgrounds().elementAtOrNull(0) ?:StandardBackground(FileWrapper("")))
 
             PrefabFactory.Player.prefab.create(Point(100, 100), level)
 

@@ -87,7 +87,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
 
     override fun update() {
         activeGridCells.clear()
-        activeGridCells.addAll(getRectCells(activeRect))
+        activeGridCells.addAll(getCellsInRect(activeRect))
 
         if (Gdx.input.isKeyJustPressed(GameKeys.DEBUG_MODE.key))
             drawDebugCells = !drawDebugCells
@@ -201,7 +201,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
      * Permet de retourner les cellules présentes dans le box spécifié
      * @param rect Le box
      */
-    fun getRectCells(rect: Rect): List<GridCell> {
+    fun getCellsInRect(rect: Rect): List<GridCell> {
         val cells = mutableListOf<GridCell>()
 
         fun rectContains(x: Int, y: Int): Boolean {
@@ -244,16 +244,13 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
      * @param entity L'entité à mettre à jour
      */
     private fun setGameObjectToGrid(gameObject: GameObject) {
-        // if (gameObject.gridCells.isEmpty())
-        //   gameObject.active = false
-
         gameObject.gridCells.forEach {
             matrixGrid[it.x][it.y].first.remove(gameObject)
         }
 
         gameObject.gridCells.clear()
 
-        getRectCells(gameObject.box).forEach {
+        getCellsInRect(gameObject.box).forEach {
             matrixGrid[it.x][it.y].first.add(gameObject)
             gameObject.gridCells.add(it)
         }
@@ -289,14 +286,16 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
         return list
     }
 
+    fun getAllGameObjectsInCells(inRect: Rect): Set<GameObject> = getAllGameObjectsInCells(getCellsInRect(inRect))
+
     /**
      * Permet de retourné les entités présentent dans le box spécifiés
      * @param rect le box dans lequel les entités seront retournées
      * @param overlaps permet de spécifier si le mode de détection est en overlaps ou contains
      */
-    fun getAllGameObjectsInRect(rect: Rect, overlaps: Boolean = true): Set<GameObject> {
+    /*fun getAllGameObjectsInRect(rect: Rect, overlaps: Boolean = true): Set<GameObject> {
         val list = mutableSetOf<GameObject>()
-        val gridCells = getRectCells(rect)
+        val gridCells = getCellsInRect(rect)
         gridCells.forEach {
             matrixGrid[it.x][it.y].first.forEach {
                 if (overlaps) {
@@ -310,5 +309,5 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
             }
         }
         return list
-    }
+    }*/
 }

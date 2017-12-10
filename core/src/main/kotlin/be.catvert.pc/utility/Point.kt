@@ -1,5 +1,7 @@
 package be.catvert.pc.utility
 
+import com.badlogic.gdx.math.Vector2
+
 
 /**
  * Classe de donnée représentant un point dans l'espace

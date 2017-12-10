@@ -164,6 +164,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
                             if (currentLevel in levels.indices) {
                                 levels[currentLevel].dir.deleteDirectory()
                                 levels.removeAt(currentLevel)
+                                closeCurrentPopup()
                             }
                         } catch (e: IOException) {
                             Log.error(e) { "Erreur survenue lors de la suppression du niveau !" }

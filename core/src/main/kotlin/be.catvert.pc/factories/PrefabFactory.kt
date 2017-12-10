@@ -4,8 +4,8 @@ import be.catvert.pc.GameKeys
 import be.catvert.pc.GameObject
 import be.catvert.pc.Prefab
 import be.catvert.pc.actions.*
-import be.catvert.pc.components.SoundComponent
-import be.catvert.pc.components.TweenComponent
+import be.catvert.pc.components.basics.SoundComponent
+import be.catvert.pc.components.basics.TweenComponent
 import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.components.logics.*
 import be.catvert.pc.components.logics.ai.AIComponent
@@ -50,7 +50,7 @@ enum class PrefabFactory(val prefab: Prefab) {
                         InputComponent.InputData(GameKeys.GAME_PLAYER_JUMP.key, true, PhysicsAction(PhysicsAction.PhysicsActions.JUMP))
                 )
 
-                this += PhysicsComponent(false, 10, MovementType.SMOOTH, jumpHeight = 200).apply {
+                this += PhysicsComponent(false, 10, false, MovementType.SMOOTH, jumpHeight = 200).apply {
                     val walkAction = AtlasAction(1)
                     onRightAction = walkAction
                     onLeftAction = walkAction

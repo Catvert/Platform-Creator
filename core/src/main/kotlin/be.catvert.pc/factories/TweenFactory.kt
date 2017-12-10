@@ -3,7 +3,7 @@ package be.catvert.pc.factories
 import be.catvert.pc.GameObjectTweenAccessor
 import be.catvert.pc.actions.EmptyAction
 import be.catvert.pc.actions.RemoveGOAction
-import be.catvert.pc.components.TweenComponent
+import be.catvert.pc.components.basics.TweenComponent
 import be.catvert.pc.components.graphics.AtlasComponent
 
 enum class TweenFactory(val tween: () -> TweenComponent.TweenData) {

@@ -1,14 +1,15 @@
-package be.catvert.pc.components
+package be.catvert.pc.components.basics
 
 import aurelienribon.tweenengine.Tween
 import be.catvert.pc.GameObject
 import be.catvert.pc.GameObjectTweenAccessor
 import be.catvert.pc.PCGame
 import be.catvert.pc.actions.Action
+import be.catvert.pc.components.BasicComponent
+import be.catvert.pc.components.Component
 import be.catvert.pc.containers.Level
 import be.catvert.pc.factories.TweenFactory
 import be.catvert.pc.utility.CustomEditorImpl
-import be.catvert.pc.utility.ExposeEditor
 import be.catvert.pc.utility.ImguiHelper
 import com.fasterxml.jackson.annotation.JsonCreator
 import glm_.vec2.Vec2

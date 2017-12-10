@@ -1,7 +1,7 @@
 package be.catvert.pc.actions
 
 import be.catvert.pc.GameObject
-import be.catvert.pc.components.SoundComponent
+import be.catvert.pc.components.basics.SoundComponent
 import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.CustomEditorImpl
 import com.fasterxml.jackson.annotation.JsonCreator

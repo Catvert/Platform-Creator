@@ -4,6 +4,7 @@ import be.catvert.pc.GameObject
 import be.catvert.pc.GameObjectState
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
+import be.catvert.pc.actions.MoveAction
 import be.catvert.pc.actions.PhysicsAction
 import be.catvert.pc.components.LogicsComponent
 import be.catvert.pc.components.logics.PhysicsComponent
@@ -17,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
  * Si le gameObject rencontre un obstacle, il ira dans la direction opposé
  * @param orientation L'orientation dans laquelle le gameObject se déplacer (verticalement/horizontalement)
  */
-class SimpleMoverAIComponent(orientation: SimpleMoverOrientation, reverse: Boolean) : LogicsComponent() {
+class SimpleMoverAIComponent(orientation: SimpleMoverOrientation, reverse: Boolean, @ExposeEditor var holdGameObjects: Boolean = false) : LogicsComponent() {
     @JsonCreator private constructor() : this(SimpleMoverOrientation.HORIZONTAL, false)
 
     enum class SimpleMoverOrientation {
@@ -95,9 +96,27 @@ class SimpleMoverAIComponent(orientation: SimpleMoverOrientation, reverse: Boole
     }
 
     override fun update(gameObject: GameObject) {
+        if (holdGameObjects) {
+            gameObject.getCurrentState().getComponent<PhysicsComponent>()?.apply {
+                val moveX = when(orientation) {
+                    SimpleMoverAIComponent.SimpleMoverOrientation.HORIZONTAL -> if(reverse) moveSpeed else -moveSpeed
+                    SimpleMoverAIComponent.SimpleMoverOrientation.VERTICAL -> 0
+                }
+                val moveY = when(orientation) {
+                    SimpleMoverAIComponent.SimpleMoverOrientation.HORIZONTAL -> 0
+                    SimpleMoverAIComponent.SimpleMoverOrientation.VERTICAL -> if(reverse) moveSpeed else -moveSpeed
+                }
+
+                getCollisionsGameObjectOnSide(gameObject, BoxSide.Up).forEach {
+                    MoveAction(moveX, moveY, true).invoke(it)
+                }
+            }
+        }
+
         if (!reverse)
             firstAction(gameObject)
         else
             secondAction(gameObject)
+
     }
 }

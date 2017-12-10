@@ -10,6 +10,7 @@ import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.GameObjectMatrixContainer
 import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.*
+import com.badlogic.gdx.Game
 import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
@@ -51,6 +52,7 @@ data class CollisionListener(val gameObject: GameObject, val collideGameObject: 
  */
 class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                        @ExposeEditor(max = 100) var moveSpeed: Int = 0,
+                       @ExposeEditor var isSensor: Boolean = false,
                        @ExposeEditor var movementType: MovementType = MovementType.LINEAR,
                        @ExposeEditor var gravity: Boolean = !isStatic,
                        var ignoreTags: ArrayList<GameObjectTag> = arrayListOf(),
@@ -89,6 +91,14 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
     @JsonIgnore
     val onCollisionWith = Signal<CollisionListener>()
 
+    @JsonIgnore
+    val onSensorOverlapsBy = Signal<GameObject>()
+
+    @JsonIgnore
+    val onSensorOutBy = Signal<GameObject>()
+
+    private val sensorOverlaps = mutableSetOf<GameObject>()
+
     /**
      * Vitesse de la gravité, représente aussi la vitesse de saut (inversé)
      */
@@ -103,7 +113,9 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
     }
 
     override fun update(gameObject: GameObject) {
-        if (isStatic) return
+        if(isSensor)
+            checkSensorOverlaps(gameObject)
+        if (isStatic || isSensor) return
 
         if (physicsActions.isEmpty())
             onNothingAction(gameObject)
@@ -170,7 +182,6 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         actualMoveSpeedX = moveSpeedX
         actualMoveSpeedY = moveSpeedY
 
-
         tryMove(moveSpeedX.roundToInt(), moveSpeedY.roundToInt(), gameObject)
 
         physicsActions.clear()
@@ -179,10 +190,29 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
             physicsActions += PhysicsActions.JUMP
     }
 
+    private fun checkSensorOverlaps(gameObject: GameObject) {
+        val checkedGameObject = mutableSetOf<GameObject>()
+
+        level?.getAllGameObjectsInCells(gameObject.box)?.filter { it !== gameObject }?.forEach {
+            if(!sensorOverlaps.contains(it)) {
+                onSensorOverlapsBy(it)
+                sensorOverlaps += it
+            }
+
+            checkedGameObject += it
+        }
+
+        sensorOverlaps.filter { !checkedGameObject.contains(it) }.forEach {
+            onSensorOutBy(it)
+            sensorOverlaps.remove(it)
+        }
+    }
+
+
     /**
      * Permet d'essayer le déplacement physique d'un gameObject si il ne rencontre aucun obstacle
      */
-    private fun tryMove(moveX: Int, moveY: Int, gameObject: GameObject) {
+    fun tryMove(moveX: Int, moveY: Int, gameObject: GameObject) {
         if (moveX != 0 || moveY != 0) {
             var newMoveX = moveX
             var newMoveY = moveY
@@ -222,16 +252,21 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
     /**
      * Permet de tester si un déplacement physique est possible ou non
      */
-    private fun collideOnMove(moveX: Int, moveY: Int, gameObject: GameObject): Boolean {
+    fun collideOnMove(moveX: Int, moveY: Int, gameObject: GameObject): Boolean {
         val newRect = Rect(gameObject.box)
         newRect.position = Point(newRect.x + moveX, newRect.y + moveY)
 
         if (level?.matrixRect?.contains(newRect) == false)
             return true
 
-        gameObject.container.cast<GameObjectMatrixContainer>()?.apply {
-            this.getAllGameObjectsInCells(getRectCells(newRect)).filter {
-                it !== gameObject && it.getCurrentState().getComponent<PhysicsComponent>()?.ignoreTags?.contains(gameObject.tag) == false
+        level?.apply {
+            this.getAllGameObjectsInCells(newRect).filter { filter ->
+                filter !== gameObject && let {
+                    filter.getCurrentState().getComponent<PhysicsComponent>()?.apply {
+                        return@let !isSensor && ignoreTags.contains(gameObject.tag) == false
+                    }
+                    true
+                }
             }.forEach {
                 if (newRect.overlaps(it.box)) {
                     val side = when {
@@ -253,6 +288,37 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
             }
         }
         return false
+    }
+
+    fun getCollisionsGameObjectOnSide(gameObject: GameObject, boxSide: BoxSide): Set<GameObject> {
+        val collideGameObjects = mutableSetOf<GameObject>()
+
+        level?.getAllGameObjectsInCells(gameObject.box)?.filter { it !== gameObject }?.forEach {
+            when(boxSide) {
+                BoxSide.Left -> {
+                    if(it.box.x + it.box.width == gameObject.box.x) {
+                        collideGameObjects += it
+                    }
+                }
+                BoxSide.Right -> {
+                    if(it.box.x == gameObject.box.x + gameObject.box.width) {
+                        collideGameObjects += it
+                    }
+                }
+                BoxSide.Up -> {
+                    if(it.box.y == gameObject.box.y + gameObject.box.height) {
+                        collideGameObjects += it
+                    }
+                }
+                BoxSide.Down -> {
+                    if(it.box.y + it.box.height == gameObject.box.y) {
+                        collideGameObjects += it
+                    }
+                }
+            }
+        }
+
+        return collideGameObjects
     }
 
     override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {

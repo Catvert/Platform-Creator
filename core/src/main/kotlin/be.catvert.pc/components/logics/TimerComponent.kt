@@ -1,8 +1,9 @@
-package be.catvert.pc.components
+package be.catvert.pc.components.logics
 
 import be.catvert.pc.GameObject
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
+import be.catvert.pc.components.LogicsComponent
 import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.CustomEditorImpl
 import be.catvert.pc.utility.ExposeEditor

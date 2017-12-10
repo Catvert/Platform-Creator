@@ -1,0 +1,132 @@
+
+smc_clouds.png
+size: 2048,2048
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+cloudy_1/Cloud Middle
+  rotate: false
+  xy: 1544, 1482
+  size: 128, 64
+  orig: 128, 64
+  offset: 0, 0
+  index: -1
+default_1/Cloud 1 Left
+  rotate: false
+  xy: 516, 1548
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+default_1/Cloud 1 Middle
+  rotate: false
+  xy: 2, 260
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+default_1/Cloud 2
+  rotate: false
+  xy: 1030, 1160
+  size: 512, 128
+  orig: 512, 128
+  offset: 0, 0
+  index: -1
+grey_1/Cloud Small
+  rotate: false
+  xy: 1802, 1740
+  size: 128, 64
+  orig: 128, 64
+  offset: 0, 0
+  index: -1
+light_yellow_1/Cloud LY 1
+  rotate: false
+  xy: 1030, 1030
+  size: 256, 128
+  orig: 256, 128
+  offset: 0, 0
+  index: -1
+light_yellow_1/Cloud LY 10
+  rotate: false
+  xy: 2, 1034
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+light_yellow_1/Cloud LY 2
+  rotate: false
+  xy: 2, 776
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+light_yellow_1/Cloud LY 3
+  rotate: false
+  xy: 516, 1290
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+light_yellow_1/Cloud LY 4
+  rotate: false
+  xy: 516, 902
+  size: 512, 128
+  orig: 512, 128
+  offset: 0, 0
+  index: -1
+light_yellow_1/Cloud LY 5
+  rotate: false
+  xy: 1030, 1548
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+light_yellow_1/Cloud LY 6
+  rotate: false
+  xy: 2, 518
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+light_yellow_1/Cloud LY 7
+  rotate: false
+  xy: 516, 1032
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+light_yellow_1/Cloud LY 8
+  rotate: false
+  xy: 1030, 1290
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+light_yellow_1/Cloud LY 9
+  rotate: false
+  xy: 2, 1292
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+lightblue_1/Cloud LB Left
+  rotate: false
+  xy: 1544, 1548
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+lightblue_1/Cloud LB Middle
+  rotate: false
+  xy: 2, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+lightblue_1/Cloud LB Right
+  rotate: false
+  xy: 516, 644
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1

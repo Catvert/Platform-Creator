@@ -1,7 +1,8 @@
-package be.catvert.pc.components
+package be.catvert.pc.components.basics
 
 import be.catvert.pc.GameObject
 import be.catvert.pc.PCGame
+import be.catvert.pc.components.BasicComponent
 import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.CustomEditorImpl
@@ -14,7 +15,6 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
 import imgui.functionalProgramming
 import ktx.assets.Asset
-import ktx.assets.getAsset
 import ktx.assets.load
 import ktx.assets.toLocalFile
 

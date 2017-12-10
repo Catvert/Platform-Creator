@@ -300,6 +300,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
             val mousePosVec2 = Vector2(Gdx.input.x.toFloat(), Gdx.input.y.toFloat())
             val mousePos = mousePosVec2.toPoint()
             val mousePosInWorld = camera.unproject(Vector3(mousePosVec2, 0f)).toPoint()
+            val latestMousePosInWorld = camera.unproject(Vector3(latestMousePos.x.toFloat(), latestMousePos.y.toFloat(), 0f)).toPoint()
 
             when (editorMode) {
                 EditorMode.NO_MODE -> {
@@ -320,9 +321,11 @@ class EditorScene(val level: Level) : Scene(level.background) {
                     } else if (latestLeftButtonClick && selectRectangleData.rectangleStarted) { // Bouton gauche de la souris relaché pendant cette frame
                         selectRectangleData.rectangleStarted = false
 
-                        level.getAllGameObjectsInRect(selectRectangleData.getRect(), false).forEach {
-                            addSelectGameObject(it)
-                            editorMode = EditorMode.SELECT
+                        level.getAllGameObjectsInCells(selectRectangleData.getRect()).forEach {
+                            if(selectRectangleData.getRect().contains(it.box)) {
+                                addSelectGameObject(it)
+                                editorMode = EditorMode.SELECT
+                            }
                         }
                     }
 
@@ -335,12 +338,30 @@ class EditorScene(val level: Level) : Scene(level.background) {
                     }
 
                     if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_FLIPX.key)) {
-                        val gameObject = findGameObjectUnderMouse(true)
-                        gameObject?.getCurrentState()?.inverseFlipRenderable(true, false)
+                        findGameObjectUnderMouse(true)?.getCurrentState()?.inverseFlipRenderable(true, false)
                     }
                     if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_FLIPY.key)) {
-                        val gameObject = findGameObjectUnderMouse(true)
-                        gameObject?.getCurrentState()?.inverseFlipRenderable(true, false)
+                        findGameObjectUnderMouse(true)?.getCurrentState()?.inverseFlipRenderable(false, true)
+                    }
+                    if(Gdx.input.isKeyJustPressed(GameKeys.EDITOR_MOVE_ENTITY_LEFT.key)) {
+                        findGameObjectUnderMouse(true)?.apply {
+                            if(getStates().size == 1) {
+                                getCurrentState().getComponent<AtlasComponent>()?.apply {
+                                    if(data.size == 1)
+                                        data.elementAt(0).previousFrameRegion(0)
+                                }
+                            }
+                        }
+                    }
+                    if(Gdx.input.isKeyJustPressed(GameKeys.EDITOR_MOVE_ENTITY_RIGHT.key)) {
+                        findGameObjectUnderMouse(true)?.apply {
+                            if(getStates().size == 1) {
+                                getCurrentState().getComponent<AtlasComponent>()?.apply {
+                                    if(data.size == 1)
+                                        data.elementAt(0).nextFrameRegion(0)
+                                }
+                            }
+                        }
                     }
                 }
                 EditorMode.SELECT -> {
@@ -400,7 +421,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                                     }
                                 }
                             }
-                        } else if (selectGameObject != null && latestMousePos != mousePos) { // Le joueur maintient le clique gauche durant plusieurs frames et a bougé la souris {
+                        } else if (selectGameObject != null) { // Le joueur maintient le clique gauche durant plusieurs frames et a bougé la souris {
                             if (selectGameObjectMode == SelectGOMode.NO_MODE)
                                 selectGameObjectMode = SelectGOMode.MOVE
 
@@ -444,10 +465,10 @@ class EditorScene(val level: Level) : Scene(level.background) {
                                     }
                                 }
                                 SelectGOMode.MOVE -> {
-                                    val moveX = selectGORect.x + selectGORect.width / 2 - mousePosInWorld.x
-                                    val moveY = selectGORect.y + selectGORect.height / 2 - mousePosInWorld.y
+                                    val moveX = mousePosInWorld.x - latestMousePosInWorld.x
+                                    val moveY = mousePosInWorld.y - latestMousePosInWorld.y
 
-                                    moveGameObjects(-moveX, -moveY)
+                                    moveGameObjects(moveX, moveY)
                                 }
                             }
                         }
@@ -656,7 +677,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                 editorSceneUI.showSaveLevelExitWindow = true
         }
 
-        if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_GRID_MODE.key)) {
+        if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_GRID_MODE.key) && editorMode != EditorMode.TRY_LEVEL) {
             gridMode.active = !gridMode.active
         }
 
@@ -893,6 +914,20 @@ class EditorScene(val level: Level) : Scene(level.background) {
                     }
 
                     menu("Éditer") {
+                        menu("Tags") {//TODO inputText
+                            ImguiHelper.addImguiWidgetsArray("tags", level.tags, { "test" }, {
+                                val buf = it.obj.toCharArray()
+                                if(ImGui.inputText("", buf)) {
+                                    level.findGameObjectsByTag(it.obj).forEach {
+                                   //     it.tag = "ahah"
+                                    }
+
+                                 //   it.obj = "ahah"
+                                    return@addImguiWidgetsArray true
+                                }
+                                false
+                            })
+                        }
                         menu("Options du niveau") {
                             fun updateBackground(newBackground: Background) {
                                 editorSceneUI.settingsLevelBackgroundType.obj = newBackground.type

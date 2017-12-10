@@ -1,0 +1,419 @@
+
+smc_blocks.png
+size: 4096,2048
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+brick/Brick Blue
+  rotate: false
+  xy: 1550, 68
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+brick/Brick Red
+  rotate: false
+  xy: 2574, 836
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+brick/Brick Tile 1
+  rotate: false
+  xy: 776, 68
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+brick/Brick Tile 2
+  rotate: false
+  xy: 3346, 1610
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+brick/Brick Yellow
+  rotate: false
+  xy: 2574, 1094
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+cloud/Cloud
+  rotate: false
+  xy: 2058, 838
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+extra/Blue X
+  rotate: false
+  xy: 2, 68
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+extra/Corded
+  rotate: false
+  xy: 2058, 580
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+extra/Mushroom
+  rotate: false
+  xy: 2058, 1096
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+ice/Ice 1
+  rotate: false
+  xy: 2316, 1096
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+ice/Ice 2
+  rotate: false
+  xy: 2572, 1610
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+ice/Ice 3
+  rotate: false
+  xy: 260, 68
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+metal/Metal Blue
+  rotate: false
+  xy: 2, 2
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+metal/Metal Green
+  rotate: false
+  xy: 2574, 770
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+metal/Metal Grey
+  rotate: false
+  xy: 2832, 1286
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+metal/Metal Red
+  rotate: false
+  xy: 3862, 1802
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+metal/Metal Stone Black
+  rotate: false
+  xy: 2316, 838
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+metal/Metal Stone Blue
+  rotate: false
+  xy: 1292, 68
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+metal/Metal Stone Green
+  rotate: false
+  xy: 2058, 322
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+metal/Metal Stone Grey
+  rotate: false
+  xy: 2316, 580
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+metal/Metal Stone Red
+  rotate: false
+  xy: 2066, 64
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+metal/Metal Stone Violet
+  rotate: false
+  xy: 2324, 64
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+metal/Metal Stone Yellow
+  rotate: false
+  xy: 2316, 322
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+metal/Yellow
+  rotate: false
+  xy: 3090, 1544
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+pipe/Pipe C Green Middle
+  rotate: false
+  xy: 1544, 326
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+pipe/connection/plastic_1/green/Pipe C Green Middle
+  rotate: false
+  xy: 1544, 326
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+pipe/Pipe C Orange Right Up
+  rotate: false
+  xy: 1030, 1354
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+pipe/connection/plastic_1/orange/Pipe C Orange Right Up
+  rotate: false
+  xy: 1030, 1354
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+pipe/Pipe C Red Middle
+  rotate: false
+  xy: 1030, 840
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+pipe/connection/plastic_1/red/Pipe C Red Middle
+  rotate: false
+  xy: 1030, 840
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+pipe/Pipe C Red Right Up
+  rotate: false
+  xy: 2, 326
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+pipe/connection/plastic_1/red/Pipe C Red Right Up
+  rotate: false
+  xy: 2, 326
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+pipe/Pipe C Red Up
+  rotate: false
+  xy: 1544, 1354
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+pipe/connection/plastic_1/red/Pipe C Red Up
+  rotate: false
+  xy: 1544, 1354
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+pipe/connection/metal_1/grey/Pipe Connection Metal
+  rotate: false
+  xy: 516, 326
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+pipe/Pipe Connection Metal
+  rotate: false
+  xy: 516, 326
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+pipe/connection/plastic_1/blue/Pipe C Blue Plastic Middle
+  rotate: false
+  xy: 2058, 1354
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+pipe/Pipe C Blue Plastic Middle
+  rotate: false
+  xy: 2058, 1354
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+pipe/connection/plastic_1/blue/Pipe C Blue Right Up
+  rotate: false
+  xy: 516, 840
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+pipe/Pipe C Blue Right Up
+  rotate: false
+  xy: 516, 840
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+pipe/connection/plastic_1/blue/Pipe C Blue Up
+  rotate: false
+  xy: 1030, 326
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+pipe/Pipe C Blue Up
+  rotate: false
+  xy: 1030, 326
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+pipe/connection/plastic_1/green/Pipe C Green Right Up
+  rotate: false
+  xy: 1544, 840
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+pipe/Pipe C Green Right Up
+  rotate: false
+  xy: 1544, 840
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+pipe/connection/plastic_1/green/Pipe C Green Up
+  rotate: false
+  xy: 2, 840
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+pipe/Pipe C Green Up
+  rotate: false
+  xy: 2, 840
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+pipe/connection/plastic_1/orange/Pipe C Orange Middle
+  rotate: false
+  xy: 2, 1354
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+pipe/Pipe C Orange Middle
+  rotate: false
+  xy: 2, 1354
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+pipe/connection/plastic_1/orange/Pipe C Orange Up
+  rotate: false
+  xy: 516, 1354
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+pipe/Pipe C Orange Up
+  rotate: false
+  xy: 516, 1354
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+sand/Sand 1
+  rotate: false
+  xy: 3862, 1736
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+sand/Sand 2
+  rotate: false
+  xy: 1808, 64
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+screw/Screw
+  rotate: false
+  xy: 2574, 1352
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+slime/Slime
+  rotate: false
+  xy: 2832, 1352
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+stone/Stone 1
+  rotate: false
+  xy: 1034, 68
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+stone/Stone 2
+  rotate: false
+  xy: 3604, 1610
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+toy/Ball 1
+  rotate: false
+  xy: 3088, 1610
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+wood/Wood 1
+  rotate: false
+  xy: 2830, 1610
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+wood/Wood 2
+  rotate: false
+  xy: 518, 68
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
