@@ -47,6 +47,7 @@ abstract class Scene(protected var background: Background) : Renderable, Updeata
         batch.projectionMatrix = PCGame.defaultProjection
         batch.use {
             background.render(it)
+
             it.projectionMatrix = camera.combined
             gameObjectContainer.render(it)
         }

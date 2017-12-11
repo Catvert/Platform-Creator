@@ -118,7 +118,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
     private val gridMode = GridMode()
 
     private var selectGameObjectMode = SelectGOMode.NO_MODE
-    private var resizeGameObjectMode = ResizeMode.PROPORTIONAL
+    private var resizeGameObjectMode = ResizeMode.FREE
 
     private val selectGameObjects = mutableSetOf<GameObject>()
     private var selectGameObject: GameObject? = null

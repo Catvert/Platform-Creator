@@ -121,9 +121,9 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
         getCurrentState().render(batch)
     }
 
-    override fun loadResources(assetManager: AssetManager) {
-        if(!isRessourcesLoaded) {
-            states.forEach { it.loadResources(assetManager) }
+    override fun loadResources() {
+        if(!isRessourcesLoaded) { // TODO nécessaire?
+            states.forEach { it.loadResources() }
             isRessourcesLoaded = true
         }
     }

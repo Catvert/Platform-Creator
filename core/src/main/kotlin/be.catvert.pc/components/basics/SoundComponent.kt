@@ -4,10 +4,7 @@ import be.catvert.pc.GameObject
 import be.catvert.pc.PCGame
 import be.catvert.pc.components.BasicComponent
 import be.catvert.pc.containers.Level
-import be.catvert.pc.utility.Constants
-import be.catvert.pc.utility.CustomEditorImpl
-import be.catvert.pc.utility.ImguiHelper
-import be.catvert.pc.utility.ResourceLoader
+import be.catvert.pc.utility.*
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.files.FileHandle
@@ -16,6 +13,7 @@ import imgui.ImGui
 import imgui.functionalProgramming
 import ktx.assets.Asset
 import ktx.assets.load
+import ktx.assets.loadOnDemand
 import ktx.assets.toLocalFile
 
 /**
@@ -25,38 +23,29 @@ class SoundComponent(var sounds: ArrayList<SoundData>) : BasicComponent(), Custo
     constructor(vararg sounds: SoundData) : this(arrayListOf(*sounds))
     @JsonCreator private constructor() : this(arrayListOf())
 
-    class SoundData(soundFile: FileHandle, var levelResources: Boolean = false) : CustomEditorImpl, ResourceLoader {
-        @JsonCreator private constructor() : this(Constants.defaultSoundPath)
+    class SoundData(var soundFile: FileWrapper, var levelResources: Boolean = false) : CustomEditorImpl, ResourceLoader {
+        @JsonCreator private constructor() : this(Constants.defaultSoundPath.toFileWrapper())
 
-        var soundPath = soundFile.path()
-
-        private lateinit var sound: Asset<Sound>
+        private var sound: Sound? = null
 
         fun play() {
-            sound.asset.play(PCGame.soundVolume)
+            sound?.play(PCGame.soundVolume)
         }
 
-        override fun loadResources(assetManager: AssetManager) {
-            sound = assetManager.load(soundPath)
-            sound.load()
+        override fun loadResources() {
+            sound = ResourceManager.getSound(soundFile.get())
         }
 
-        override fun toString(): String = soundPath.toLocalFile().nameWithoutExtension()
+        override fun toString(): String = soundFile.get().nameWithoutExtension()
 
         override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
             with(ImGui) {
                 val soundsResources = if (levelResources) level.resourcesSounds() else PCGame.gameSounds
 
-                val index = intArrayOf(soundsResources.indexOf(soundPath.toLocalFile()))
+                val index = intArrayOf(soundsResources.indexOf(soundFile.get()))
                 functionalProgramming.withItemWidth(100f) {
                     if (combo("son", index, soundsResources.map { it.nameWithoutExtension() })) {
-                        soundPath = soundsResources[index[0]].path()
-                        loadResources()
-                    }
-
-                    sameLine()
-                    if (button("jouer")) {
-                        play()
+                        soundFile = soundsResources[index[0]].toFileWrapper()
                     }
 
                     sameLine()
@@ -74,13 +63,13 @@ class SoundComponent(var sounds: ArrayList<SoundData>) : BasicComponent(), Custo
             sounds[soundIndex].play()
     }
 
-    override fun loadResources(assetManager: AssetManager) {
-        super.loadResources(assetManager)
-        sounds.forEach { it.loadResources(assetManager) }
+    override fun loadResources() {
+        super.loadResources()
+        sounds.forEach { it.loadResources() }
     }
 
     override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
-        ImguiHelper.addImguiWidgetsArray("sons", sounds, { SoundData(Constants.defaultSoundPath) }, {
+        ImguiHelper.addImguiWidgetsArray("sons", sounds, { SoundData(Constants.defaultSoundPath.toFileWrapper()) }, {
             it.obj.insertImgui(it.obj.toString(), gameObject, level)
             false
         })

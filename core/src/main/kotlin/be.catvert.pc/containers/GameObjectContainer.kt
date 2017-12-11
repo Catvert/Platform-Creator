@@ -5,10 +5,7 @@ import be.catvert.pc.GameObjectState
 import be.catvert.pc.GameObjectTag
 import be.catvert.pc.PCGame
 import be.catvert.pc.serialization.PostDeserialization
-import be.catvert.pc.utility.Rect
-import be.catvert.pc.utility.Renderable
-import be.catvert.pc.utility.ResourceLoader
-import be.catvert.pc.utility.Updeatable
+import be.catvert.pc.utility.*
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -36,7 +33,7 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
     }
 
     open fun addGameObject(gameObject: GameObject): GameObject {
-        gameObject.loadResources(PCGame.assetManager)
+        gameObject.loadResources()
 
         gameObjects.add(gameObject)
         gameObject.container = this
@@ -54,9 +51,9 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
 
     protected open fun onRemoveGameObject(gameObject: GameObject) {}
 
-    override fun loadResources(assetManager: AssetManager) {
+    override fun loadResources() {
         gameObjects.forEach {
-            it.loadResources(assetManager)
+            it.loadResources()
         }
     }
 

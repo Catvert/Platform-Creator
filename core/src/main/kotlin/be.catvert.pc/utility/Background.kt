@@ -21,11 +21,10 @@ enum class BackgroundType {
 sealed class Background(val type: BackgroundType) : Renderable
 
 class StandardBackground(val backgroundFile: FileWrapper) : Background(BackgroundType.Standard) {
-    private val background = if (backgroundFile.get().exists()) PCGame.assetManager.loadOnDemand<Texture>(backgroundFile) else null
+    private val background = ResourceManager.getTexture(backgroundFile.get())
+
     override fun render(batch: Batch) {
-        background?.apply {
-            batch.draw(this.asset, 0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
-        }
+        batch.draw(background, 0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
     }
 }
 
@@ -48,7 +47,7 @@ class ParallaxBackground(val parallaxDataFile: FileWrapper) : Background(Backgro
                 val layerFile = it.getString("file")
                 val applyYOffset = it.getBoolean("applyYOffset")
                 val speed = it.getFloat("speed")
-                layers += Layer(TextureRegion(PCGame.assetManager.loadOnDemand<Texture>(parallaxDataFile.get().parent().child(layerFile)).asset.apply { setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat) }), applyYOffset, speed)
+                layers += Layer(TextureRegion(ResourceManager.getTexture(parallaxDataFile.get().parent().child(layerFile)).apply { setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat) }), applyYOffset, speed)
             }
         } catch (e: Exception) {
             Log.error(e) { "Une erreur s'est produite lors du chargement d'un fond d'écran parallax !" }

@@ -1,0 +1,327 @@
+
+smc_enemy.png
+size: 2048,2048
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+furball/blue/dead
+  rotate: false
+  xy: 1544, 1238
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+furball/blue/turn
+  rotate: false
+  xy: 776, 31
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+furball/blue/walk_0
+  rotate: false
+  xy: 1030, 468
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+furball/blue/walk_1
+  rotate: false
+  xy: 1544, 1496
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+furball/blue/walk_2
+  rotate: false
+  xy: 1544, 1754
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+furball/blue/walk_3
+  rotate: false
+  xy: 2, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+furball/blue/walk_4
+  rotate: false
+  xy: 1544, 980
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+furball/blue/walk_5
+  rotate: false
+  xy: 260, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+furball/blue/walk_6
+  rotate: false
+  xy: 1288, 468
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+furball/blue/walk_7
+  rotate: false
+  xy: 518, 31
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+furball/boss/dead
+  rotate: false
+  xy: 516, 715
+  size: 512, 426
+  orig: 512, 426
+  offset: 0, 0
+  index: -1
+furball/boss/hit
+  rotate: false
+  xy: 1030, 1579
+  size: 512, 431
+  orig: 512, 431
+  offset: 0, 0
+  index: -1
+furball/boss/turn
+  rotate: false
+  xy: 1030, 726
+  size: 512, 424
+  orig: 512, 424
+  offset: 0, 0
+  index: -1
+furball/boss/walk_0
+  rotate: false
+  xy: 516, 289
+  size: 512, 424
+  orig: 512, 424
+  offset: 0, 0
+  index: -1
+furball/boss/walk_1
+  rotate: false
+  xy: 2, 260
+  size: 512, 431
+  orig: 512, 431
+  offset: 0, 0
+  index: -1
+furball/boss/walk_2
+  rotate: false
+  xy: 2, 1128
+  size: 512, 439
+  orig: 512, 439
+  offset: 0, 0
+  index: -1
+furball/boss/walk_3
+  rotate: false
+  xy: 516, 1143
+  size: 512, 432
+  orig: 512, 432
+  offset: 0, 0
+  index: -1
+furball/boss/walk_4
+  rotate: false
+  xy: 1030, 1152
+  size: 512, 425
+  orig: 512, 425
+  offset: 0, 0
+  index: -1
+furball/boss/walk_5
+  rotate: false
+  xy: 516, 1577
+  size: 512, 433
+  orig: 512, 433
+  offset: 0, 0
+  index: -1
+furball/boss/walk_6
+  rotate: false
+  xy: 2, 1569
+  size: 512, 441
+  orig: 512, 441
+  offset: 0, 0
+  index: -1
+furball/boss/walk_7
+  rotate: false
+  xy: 2, 693
+  size: 512, 433
+  orig: 512, 433
+  offset: 0, 0
+  index: -1
+furball/brown/walk_0
+  rotate: false
+  xy: 1292, 32
+  size: 256, 216
+  orig: 256, 216
+  offset: 0, 0
+  index: -1
+furball/brown/walk_1
+  rotate: false
+  xy: 1544, 762
+  size: 256, 216
+  orig: 256, 216
+  offset: 0, 0
+  index: -1
+furball/brown/walk_2
+  rotate: false
+  xy: 1546, 544
+  size: 256, 216
+  orig: 256, 216
+  offset: 0, 0
+  index: -1
+furball/brown/walk_3
+  rotate: false
+  xy: 1732, 98
+  size: 256, 216
+  orig: 256, 216
+  offset: 0, 0
+  index: -1
+furball/brown/walk_4
+  rotate: false
+  xy: 1546, 326
+  size: 256, 216
+  orig: 256, 216
+  offset: 0, 0
+  index: -1
+furball/brown/walk_5
+  rotate: false
+  xy: 1034, 32
+  size: 256, 216
+  orig: 256, 216
+  offset: 0, 0
+  index: -1
+furball/brown/walk_6
+  rotate: false
+  xy: 1292, 250
+  size: 250, 216
+  orig: 250, 216
+  offset: 0, 0
+  index: -1
+furball/brown/walk_7
+  rotate: false
+  xy: 1034, 250
+  size: 256, 216
+  orig: 256, 216
+  offset: 0, 0
+  index: -1
+turtle/green/walk_0
+  rotate: false
+  xy: 1802, 1239
+  size: 180, 256
+  orig: 180, 256
+  offset: 0, 0
+  index: -1
+turtle/green/walk_1
+  rotate: false
+  xy: 1802, 981
+  size: 180, 256
+  orig: 180, 256
+  offset: 0, 0
+  index: -1
+turtle/green/walk_2
+  rotate: false
+  xy: 1550, 68
+  size: 180, 256
+  orig: 180, 256
+  offset: 0, 0
+  index: -1
+turtle/red/shell_front
+  rotate: false
+  xy: 1804, 573
+  size: 242, 202
+  orig: 242, 202
+  offset: 0, 0
+  index: -1
+turtle/red/shell_move_1
+  rotate: false
+  xy: 1802, 777
+  size: 237, 202
+  orig: 237, 202
+  offset: 0, 0
+  index: -1
+turtle/red/walk_0
+  rotate: false
+  xy: 1802, 1497
+  size: 197, 255
+  orig: 197, 255
+  offset: 0, 0
+  index: -1
+turtle/red/walk_1
+  rotate: false
+  xy: 1802, 1754
+  size: 205, 256
+  orig: 205, 256
+  offset: 0, 0
+  index: -1
+turtle/red/walk_2
+  rotate: false
+  xy: 1804, 316
+  size: 180, 255
+  orig: 180, 255
+  offset: 0, 0
+  index: -1
+
+smc_enemy2.png
+size: 2048,512
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+furball/brown/dead
+  rotate: false
+  xy: 2, 217
+  size: 256, 213
+  orig: 256, 213
+  offset: 0, 0
+  index: -1
+furball/brown/turn
+  rotate: false
+  xy: 2, 2
+  size: 256, 213
+  orig: 256, 213
+  offset: 0, 0
+  index: -1
+turtle/green/shell_front
+  rotate: false
+  xy: 518, 28
+  size: 256, 200
+  orig: 256, 200
+  offset: 0, 0
+  index: -1
+turtle/green/shell_move_0
+  rotate: false
+  xy: 260, 230
+  size: 256, 200
+  orig: 256, 200
+  offset: 0, 0
+  index: -1
+turtle/green/shell_move_1
+  rotate: false
+  xy: 260, 28
+  size: 256, 200
+  orig: 256, 200
+  offset: 0, 0
+  index: -1
+turtle/green/shell_move_2
+  rotate: false
+  xy: 518, 230
+  size: 256, 200
+  orig: 256, 200
+  offset: 0, 0
+  index: -1
+turtle/red/shell_move_0
+  rotate: false
+  xy: 776, 231
+  size: 254, 199
+  orig: 254, 199
+  offset: 0, 0
+  index: -1
+turtle/red/shell_move_2
+  rotate: false
+  xy: 776, 30
+  size: 254, 199
+  orig: 254, 199
+  offset: 0, 0
+  index: -1

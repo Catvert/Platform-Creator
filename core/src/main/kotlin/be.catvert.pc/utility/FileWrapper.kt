@@ -10,7 +10,7 @@ class FileWrapper(file: FileHandle) {
     constructor(path: String) : this(path.toLocalFile())
     @JsonCreator private constructor() : this("")
 
-    @JsonProperty("path") private var file = file.path()
+    @JsonProperty("path") private var file: String = file.path()
 
     @JsonIgnore
     fun setFile(file: FileHandle) {

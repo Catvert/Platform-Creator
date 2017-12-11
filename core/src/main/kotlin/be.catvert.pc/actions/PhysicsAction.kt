@@ -13,7 +13,7 @@ class PhysicsAction(@ExposeEditor var physicsAction: PhysicsActions) : Action {
     @JsonCreator private constructor() : this(PhysicsActions.GO_LEFT)
 
     enum class PhysicsActions {
-        GO_LEFT, GO_RIGHT, GO_UP, GO_DOWN, GRAVITY, JUMP;
+        GO_LEFT, GO_RIGHT, GO_UP, GO_DOWN, JUMP;
     }
 
     override fun invoke(gameObject: GameObject) {

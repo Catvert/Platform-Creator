@@ -4,10 +4,7 @@ import be.catvert.pc.components.Component
 import be.catvert.pc.components.LogicsComponent
 import be.catvert.pc.components.RenderableComponent
 import be.catvert.pc.containers.GameObjectContainer
-import be.catvert.pc.utility.Renderable
-import be.catvert.pc.utility.ResourceLoader
-import be.catvert.pc.utility.Updeatable
-import be.catvert.pc.utility.cast
+import be.catvert.pc.utility.*
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonCreator
@@ -96,8 +93,8 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
         }
     }
 
-    override fun loadResources(assetManager: AssetManager) {
-        components.forEach { it.loadResources(assetManager) }
+    override fun loadResources() {
+        components.forEach { it.loadResources() }
     }
 
     override fun toString(): String = name

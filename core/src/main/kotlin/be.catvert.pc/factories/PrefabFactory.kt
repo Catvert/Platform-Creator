@@ -21,12 +21,12 @@ enum class PrefabFactory(val prefab: Prefab) {
     Empty(Prefab("empty", GameObject(Tags.Empty.tag, box = Rect(size = Size(50, 50))))),
     Sprite(
             Prefab("sprite", GameObject(Tags.Sprite.tag, box = Rect(size = Size(50, 50))) {
-                this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.atlasDirPath.child("Extended Tiles/grassSheet.atlas").toFileWrapper() to "slice01_01"))
+                this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.atlasKenneyDirPath.child("grassSheets.atlas").toFileWrapper() to "slice01_01"))
             })
     ),
     PhysicsSprite(
             Prefab("physics sprite", GameObject(Tags.Sprite.tag, box = Rect(size = Size(50, 50))) {
-                this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.atlasDirPath.child("Extended Tiles/grassSheet.atlas").toFileWrapper() to "slice01_01"))
+                this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.atlasKenneyDirPath.child("grassSheet.atlas").toFileWrapper() to "slice01_01"))
                 this += PhysicsComponent(true)
             })
     ),
@@ -34,7 +34,7 @@ enum class PrefabFactory(val prefab: Prefab) {
             Prefab("player", GameObject("player", box = Rect(size = Size(48, 98))) {
                 val jumpSoundIndex = 0
 
-                val atlas = Constants.atlasDirPath.child("More Enemies Animations/aliens.atlas").toFileWrapper()
+                val atlas = Constants.atlasKenneyDirPath.child("aliens.atlas").toFileWrapper()
 
                 this += AtlasComponent(0,
                         AtlasComponent.AtlasData("stand", atlas to "alienGreen_stand"),
@@ -59,7 +59,7 @@ enum class PrefabFactory(val prefab: Prefab) {
                     onFallAction = AtlasAction(3)
                 }
 
-                this += SoundComponent(SoundComponent.SoundData(Constants.soundsDirPath.child("player/jump.ogg")))
+                this += SoundComponent(SoundComponent.SoundData(Constants.soundsDirPath.child("player/jump.ogg").toFileWrapper()))
 
                 this += LifeComponent(LevelAction(LevelAction.LevelActions.FAIL_EXIT))
             }.apply {
@@ -68,7 +68,7 @@ enum class PrefabFactory(val prefab: Prefab) {
     ),
     Spider(
             Prefab("spider", GameObject(Tags.Enemy.tag, box = Rect(size = Size(48, 48))) {
-                this += AtlasComponent(0, AtlasComponent.AtlasData("walk", Constants.atlasDirPath.child("More Enemies Animations/enemies.atlas").toFileWrapper(), "spider_walk", 0.33f))
+                this += AtlasComponent(0, AtlasComponent.AtlasData("walk", Constants.atlasKenneyDirPath.child("enemies.atlas").toFileWrapper(), "spider_walk", 0.33f))
                 this += PhysicsComponent(false, 5)
                 this += TweenComponent(TweenFactory.RemoveGOTween())
                 this += LifeComponent(TweenAction(0))
@@ -78,7 +78,7 @@ enum class PrefabFactory(val prefab: Prefab) {
     ),
     SnakeSlime(
             Prefab("snake slime", GameObject(Tags.Enemy.tag, box = Rect(size = Size(35, 120))) {
-                this += AtlasComponent(0, AtlasComponent.AtlasData("base", Constants.atlasDirPath.child("More Enemies Animations/enemies.atlas").toFileWrapper(), "snakeSlime", 0.33f))
+                this += AtlasComponent(0, AtlasComponent.AtlasData("base", Constants.atlasKenneyDirPath.child("enemies.atlas").toFileWrapper(), "snakeSlime", 0.33f))
                 this += PhysicsComponent(true)
                 this += LifeComponent(RemoveGOAction())
                 this += AIComponent(arrayListOf(Tags.Player.tag), LifeAction(LifeAction.LifeActions.REMOVE_LP), arrayListOf(BoxSide.Down, BoxSide.Right, BoxSide.Left, BoxSide.Down), LifeAction(LifeAction.LifeActions.REMOVE_LP), arrayListOf())
@@ -86,7 +86,7 @@ enum class PrefabFactory(val prefab: Prefab) {
     ),
     Bee(
             Prefab("bee", GameObject(Tags.Enemy.tag, box = Rect(size = Size(35, 35))) {
-                this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.atlasDirPath.child("More Enemies Animations/enemies.atlas").toFileWrapper() to "bee"))
+                this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.atlasKenneyDirPath.child("enemies.atlas").toFileWrapper() to "bee"))
                 this += PhysicsComponent(false, 5, gravity = false)
                 this += LifeComponent(RemoveGOAction())
                 this += AIComponent(arrayListOf(Tags.Player.tag), LifeAction(LifeAction.LifeActions.REMOVE_LP), arrayListOf(BoxSide.Down, BoxSide.Right, BoxSide.Left), LifeAction(LifeAction.LifeActions.REMOVE_LP), arrayListOf(BoxSide.Up))
@@ -95,9 +95,9 @@ enum class PrefabFactory(val prefab: Prefab) {
     ),
     GoldCoin(
             Prefab("gold coin", GameObject(Tags.Special.tag, box = Rect(size = Size(35, 35))) {
-                this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.atlasDirPath.child("Jumper Pack/spritesheet_jumper.atlas").toFileWrapper() to "coin_gold"))
+                this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.atlasKenneyDirPath.child("jumper.atlas").toFileWrapper() to "coin_gold"))
                 this += PhysicsComponent(true)
-                this += SoundComponent(SoundComponent.SoundData(Constants.soundsDirPath.child("coin.wav")))
+                this += SoundComponent(SoundComponent.SoundData(Constants.soundsDirPath.child("coin.wav").toFileWrapper()))
                 this += AIComponent(arrayListOf(Tags.Player.tag), EmptyAction(), arrayListOf(), MultiplexerAction(ScoreAction(1), RemoveGOAction(), SoundAction(0)), arrayListOf(BoxSide.Left, BoxSide.Right, BoxSide.Up, BoxSide.Down))
             })
     ),

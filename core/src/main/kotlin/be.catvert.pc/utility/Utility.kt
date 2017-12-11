@@ -7,6 +7,7 @@ import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Shape2D
@@ -53,6 +54,8 @@ inline fun <reified T : Any> AssetManager.loadOnDemand(file: FileWrapper): Asset
 inline fun <reified T : Any> AssetManager.loadOnDemand(file: FileHandle): Asset<T> = this.loadOnDemand(file.path())
 
 fun FileHandle.toFileWrapper() = FileWrapper(this)
+
+fun Texture.toAtlasRegion() =  TextureAtlas.AtlasRegion(this, 0, 0, width, height)
 
 inline fun <reified T : Any> Any?.cast(): T? = this as? T
 

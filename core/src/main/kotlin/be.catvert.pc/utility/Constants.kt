@@ -27,6 +27,9 @@ object Constants {
     val keysConfigPath = assetsDirPath.child("keysConfig.json")
 
     val atlasDirPath = assetsDirPath.child("atlas")
+    val atlasKenneyDirPath = atlasDirPath.child("kenney")
+    val atlaSMCDirPath = atlasDirPath.child("smc")
+
     val texturesDirPath = assetsDirPath.child("textures")
     val soundsDirPath = assetsDirPath.child("sounds")
     val backgroundsDirPath = assetsDirPath.child("backgrounds")
@@ -45,6 +48,5 @@ object Constants {
 
     val levelDataFile = "data.$levelExtension"
 
-    val defaultAtlasPath = assetsDirPath.child("game/notexture_atlas.atlas").toFileWrapper() to "notexture"
     val defaultSoundPath = assetsDirPath.child("game/nosound.wav")
 }

@@ -15,8 +15,11 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics
 import com.badlogic.gdx.files.FileHandle
+import com.badlogic.gdx.graphics.Pixmap
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.Matrix4
 import glm_.vec2.Vec2
 import glm_.vec4.Vec4
@@ -34,6 +37,8 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
         super.create()
 
         Log.info { "Initialisation en cours.. \n Taille : ${Gdx.graphics.width}x${Gdx.graphics.height}" }
+
+        ResourceManager.init()
 
         Locales.load()
 
@@ -62,10 +67,18 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
 
         mainBackground = StandardBackground(Constants.gameBackgroundMenuPath.toFileWrapper())
 
-        gameAtlas = Utility.getFilesRecursivly(Constants.atlasDirPath, *Constants.levelAtlasExtension)
+        gameAtlas = let {
+            val atlas = mutableMapOf<FileHandle, List<FileHandle>>()
 
+            Constants.atlasDirPath.list().forEach {
+                if(it.isDirectory) {
+                    atlas[it] = Utility.getFilesRecursivly(it, *Constants.levelAtlasExtension)
+                }
+            }
+
+            atlas
+        }
         gameTextures = Utility.getFilesRecursivly(Constants.texturesDirPath, *Constants.levelTextureExtension)
-
         gameSounds = Utility.getFilesRecursivly(Constants.soundsDirPath, *Constants.levelSoundExtension)
 
         val handle = (Gdx.graphics as Lwjgl3Graphics).window.let {
@@ -108,7 +121,7 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
 
         mainFont.dispose()
 
-        assetManager.dispose()
+        ResourceManager.dispose()
 
         Log.dispose()
 
@@ -196,7 +209,7 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
         lateinit var defaultProjection: Matrix4
             private set
 
-        lateinit var gameAtlas: List<FileHandle>
+        lateinit var gameAtlas: Map<FileHandle, List<FileHandle>>
             private set
         lateinit var gameTextures: List<FileHandle>
             private set
@@ -204,6 +217,7 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
             private set
         lateinit var mainBackground: Background
             private set
+
 
         val actionsClasses = let {
             val list = mutableListOf<KClass<out Action>>()
@@ -228,8 +242,6 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
                 if (value in 0.0..1.0)
                     field = value
             }
-
-        val assetManager = AssetManager()
 
         val tweenManager = TweenManager()
 

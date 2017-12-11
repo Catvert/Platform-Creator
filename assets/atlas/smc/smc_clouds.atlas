@@ -6,35 +6,35 @@ filter: Nearest,Nearest
 repeat: none
 cloudy_1/Cloud Middle
   rotate: false
-  xy: 1544, 1482
+  xy: 1802, 1740
   size: 128, 64
   orig: 128, 64
   offset: 0, 0
   index: -1
 default_1/Cloud 1 Left
   rotate: false
-  xy: 516, 1548
+  xy: 2, 260
   size: 512, 256
   orig: 512, 256
   offset: 0, 0
   index: -1
 default_1/Cloud 1 Middle
   rotate: false
-  xy: 2, 260
+  xy: 2, 1034
   size: 512, 256
   orig: 512, 256
   offset: 0, 0
   index: -1
 default_1/Cloud 2
   rotate: false
-  xy: 1030, 1160
+  xy: 516, 902
   size: 512, 128
   orig: 512, 128
   offset: 0, 0
   index: -1
 grey_1/Cloud Small
   rotate: false
-  xy: 1802, 1740
+  xy: 1544, 1482
   size: 128, 64
   orig: 128, 64
   offset: 0, 0
@@ -48,7 +48,7 @@ light_yellow_1/Cloud LY 1
   index: -1
 light_yellow_1/Cloud LY 10
   rotate: false
-  xy: 2, 1034
+  xy: 516, 1548
   size: 512, 256
   orig: 512, 256
   offset: 0, 0
@@ -69,7 +69,7 @@ light_yellow_1/Cloud LY 3
   index: -1
 light_yellow_1/Cloud LY 4
   rotate: false
-  xy: 516, 902
+  xy: 1030, 1160
   size: 512, 128
   orig: 512, 128
   offset: 0, 0
@@ -111,21 +111,21 @@ light_yellow_1/Cloud LY 9
   index: -1
 lightblue_1/Cloud LB Left
   rotate: false
-  xy: 1544, 1548
+  xy: 2, 2
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 lightblue_1/Cloud LB Middle
   rotate: false
-  xy: 2, 2
+  xy: 516, 644
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 lightblue_1/Cloud LB Right
   rotate: false
-  xy: 516, 644
+  xy: 1544, 1548
   size: 256, 256
   orig: 256, 256
   offset: 0, 0

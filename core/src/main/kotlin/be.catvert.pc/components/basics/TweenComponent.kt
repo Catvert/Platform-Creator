@@ -82,7 +82,7 @@ class TweenComponent(var tweens: ArrayList<TweenData>) : BasicComponent(), Custo
                         val index = intArrayOf(PCGame.componentsClasses.indexOf(it.obj.kotlin))
                         functionalProgramming.withItemWidth(150f) {
                             if (combo("", index, PCGame.componentsClasses.map { it.simpleName ?: "Nom inconnu" })) {
-                                keepComponents.set(keepComponents.indexOf(it.obj), PCGame.componentsClasses[index[0]].java)
+                                keepComponents[keepComponents.indexOf(it.obj)] = PCGame.componentsClasses[index[0]].java
                                 return@addImguiWidgetsArray true
                             }
                         }

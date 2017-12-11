@@ -7,13 +7,13 @@ import be.catvert.pc.actions.PhysicsAction
 import be.catvert.pc.actions.PhysicsAction.PhysicsActions
 import be.catvert.pc.components.LogicsComponent
 import be.catvert.pc.containers.GameObjectContainer
-import be.catvert.pc.containers.GameObjectMatrixContainer
 import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.*
-import com.badlogic.gdx.Game
 import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
+import imgui.ImGui
+import imgui.functionalProgramming
 import kotlin.math.roundToInt
 
 /**
@@ -52,16 +52,18 @@ data class CollisionListener(val gameObject: GameObject, val collideGameObject: 
  */
 class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                        @ExposeEditor(max = 100) var moveSpeed: Int = 0,
-                       @ExposeEditor var isSensor: Boolean = false,
+                       var isSensor: Boolean = false,
                        @ExposeEditor var movementType: MovementType = MovementType.LINEAR,
                        @ExposeEditor var gravity: Boolean = !isStatic,
                        var ignoreTags: ArrayList<GameObjectTag> = arrayListOf(),
                        @ExposeEditor(max = 1000) var jumpHeight: Int = 0,
-                       @ExposeEditor var onLeftAction: Action = EmptyAction(),
-                       @ExposeEditor var onRightAction: Action = EmptyAction(),
-                       @ExposeEditor var onJumpAction: Action = EmptyAction(),
-                       @ExposeEditor var onFallAction: Action = EmptyAction(),
-                       @ExposeEditor var onNothingAction: Action = EmptyAction()) : LogicsComponent(), CustomEditorImpl {
+                       var onLeftAction: Action = EmptyAction(),
+                       var onRightAction: Action = EmptyAction(),
+                       var onJumpAction: Action = EmptyAction(),
+                       var onFallAction: Action = EmptyAction(),
+                       var onNothingAction: Action = EmptyAction(),
+                       var onSensorIn: Action = EmptyAction(),
+                       var onSensorOut: Action = EmptyAction()) : LogicsComponent(), CustomEditorImpl {
     @JsonCreator private constructor() : this(true)
 
     /**
@@ -91,12 +93,6 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
     @JsonIgnore
     val onCollisionWith = Signal<CollisionListener>()
 
-    @JsonIgnore
-    val onSensorOverlapsBy = Signal<GameObject>()
-
-    @JsonIgnore
-    val onSensorOutBy = Signal<GameObject>()
-
     private val sensorOverlaps = mutableSetOf<GameObject>()
 
     /**
@@ -113,15 +109,12 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
     }
 
     override fun update(gameObject: GameObject) {
-        if(isSensor)
+        if (isSensor)
             checkSensorOverlaps(gameObject)
         if (isStatic || isSensor) return
 
         if (physicsActions.isEmpty())
             onNothingAction(gameObject)
-
-        if (gravity && gameObject.container.cast<Level>()?.applyGravity == true)
-            physicsActions += PhysicsAction.PhysicsActions.GRAVITY
 
         if (jumpData.forceJumping) {
             physicsActions += PhysicsAction.PhysicsActions.JUMP
@@ -131,13 +124,15 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         var moveSpeedY = 0f
         var addJumpAfterClear = false
 
+        if (gravity && gameObject.container.cast<Level>()?.applyGravity == true)
+            moveSpeedY -= gravitySpeed
+
         physicsActions.forEach action@ {
             when (it) {
                 PhysicsActions.GO_LEFT -> moveSpeedX -= moveSpeed
                 PhysicsActions.GO_RIGHT -> moveSpeedX += moveSpeed
                 PhysicsActions.GO_UP -> moveSpeedY += moveSpeed
                 PhysicsActions.GO_DOWN -> moveSpeedY -= moveSpeed
-                PhysicsActions.GRAVITY -> if (gravity) moveSpeedY -= gravitySpeed
                 PhysicsActions.JUMP -> {
                     if (!jumpData.isJumping) {
                         if (!jumpData.forceJumping) {
@@ -193,9 +188,9 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
     private fun checkSensorOverlaps(gameObject: GameObject) {
         val checkedGameObject = mutableSetOf<GameObject>()
 
-        level?.getAllGameObjectsInCells(gameObject.box)?.filter { it !== gameObject }?.forEach {
-            if(!sensorOverlaps.contains(it)) {
-                onSensorOverlapsBy(it)
+        level?.getAllGameObjectsInCells(gameObject.box)?.filter { it !== gameObject && gameObject.box.overlaps(it.box) }?.forEach {
+            if (!sensorOverlaps.contains(it)) {
+                onSensorIn(gameObject)
                 sensorOverlaps += it
             }
 
@@ -203,7 +198,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         }
 
         sensorOverlaps.filter { !checkedGameObject.contains(it) }.forEach {
-            onSensorOutBy(it)
+            onSensorOut(gameObject)
             sensorOverlaps.remove(it)
         }
     }
@@ -294,24 +289,24 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         val collideGameObjects = mutableSetOf<GameObject>()
 
         level?.getAllGameObjectsInCells(gameObject.box)?.filter { it !== gameObject }?.forEach {
-            when(boxSide) {
+            when (boxSide) {
                 BoxSide.Left -> {
-                    if(it.box.x + it.box.width == gameObject.box.x) {
+                    if (it.box.x + it.box.width == gameObject.box.x) {
                         collideGameObjects += it
                     }
                 }
                 BoxSide.Right -> {
-                    if(it.box.x == gameObject.box.x + gameObject.box.width) {
+                    if (it.box.x == gameObject.box.x + gameObject.box.width) {
                         collideGameObjects += it
                     }
                 }
                 BoxSide.Up -> {
-                    if(it.box.y == gameObject.box.y + gameObject.box.height) {
+                    if (it.box.y == gameObject.box.y + gameObject.box.height) {
                         collideGameObjects += it
                     }
                 }
                 BoxSide.Down -> {
-                    if(it.box.y + it.box.height == gameObject.box.y) {
+                    if (it.box.y + it.box.height == gameObject.box.y) {
                         collideGameObjects += it
                     }
                 }
@@ -322,6 +317,24 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
     }
 
     override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
+        functionalProgramming.collapsingHeader("move actions") {
+            ImguiHelper.action("left action", ::onLeftAction, gameObject, level)
+            ImguiHelper.action("right action", ::onRightAction, gameObject, level)
+            ImguiHelper.action("jump action", ::onLeftAction, gameObject, level)
+            ImguiHelper.action("fall action", ::onLeftAction, gameObject, level)
+           // ImguiHelper.action("up action", ::onUpAction, gameObject, level)
+           // ImguiHelper.action("down action", ::onDownAction, gameObject, level)
+            ImguiHelper.action("nothing action", ::onNothingAction, gameObject, level)
+        }
+
+        ImGui.checkbox("sensor", ::isSensor)
+        if(isSensor) {
+            functionalProgramming.collapsingHeader("sensor props") {
+                ImguiHelper.action("in action", ::onSensorIn, gameObject, level)
+                ImguiHelper.action("out action", ::onSensorOut, gameObject, level)
+            }
+        }
+
         ImguiHelper.addImguiWidgetsArray("ignore tags", ignoreTags, { Tags.Player.tag }, {
             ImguiHelper.gameObjectTag(it, level)
         })

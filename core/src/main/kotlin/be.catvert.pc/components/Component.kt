@@ -5,6 +5,7 @@ import be.catvert.pc.GameObjectState
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.utility.ReflectionUtility
 import be.catvert.pc.utility.ResourceLoader
+import be.catvert.pc.utility.ResourceManager
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonIgnore
@@ -19,7 +20,7 @@ sealed class Component : ResourceLoader {
 
     open fun onStateActive(gameObject: GameObject, state: GameObjectState, container: GameObjectContainer) {}
 
-    override fun loadResources(assetManager: AssetManager) {}
+    override fun loadResources() {}
 }
 
 /**

@@ -31,7 +31,7 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
 
     @JsonIgnore
     var exit: (success: Boolean) -> Unit = {
-        PCGame.assetManager.loadOnDemand<Sound>(if (it) "sounds/game-over-success.wav".toLocalFile() else "sounds/game-over-fail.wav".toLocalFile()).asset.play(PCGame.soundVolume)
+        ResourceManager.getSound(if (it) Constants.soundsDirPath.child("game-over-success.wav") else Constants.soundsDirPath.child("game-over-fail.wav"))?.play(PCGame.soundVolume)
         SceneManager.loadScene(EndLevelScene(levelPath))
     }
 
@@ -146,8 +146,9 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
             val levelDir = (Constants.levelDirPath.child(levelName))
             if (levelDir.exists()) {
                 Log.warn { "Un niveau portant le même nom existe déjà !" }
-            } else
-                levelDir.mkdirs()
+                levelDir.deleteDirectory()
+            }
+            levelDir.mkdirs()
             val level = Level(levelDir.child(Constants.levelDataFile).path(), Constants.gameVersion, PCGame.parallaxBackgrounds().elementAtOrNull(0) ?: PCGame.standardBackgrounds().elementAtOrNull(0) ?:StandardBackground(FileWrapper("")))
 
             PrefabFactory.Player.prefab.create(Point(100, 100), level)
