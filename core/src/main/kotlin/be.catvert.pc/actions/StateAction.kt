@@ -18,7 +18,7 @@ class StateAction(var stateIndex: Int) : Action, CustomEditorImpl {
             gameObject.setState(stateIndex)
     }
 
-    override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
         with(ImGui) {
             functionalProgramming.withItemWidth(100f) {
                 combo("state", ::stateIndex, gameObject.getStates().map { it.name })

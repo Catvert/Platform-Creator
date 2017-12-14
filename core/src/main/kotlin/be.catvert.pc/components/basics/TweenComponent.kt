@@ -67,9 +67,9 @@ class TweenComponent(var tweens: ArrayList<TweenData>) : BasicComponent(), Custo
         }
 
 
-        override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
+        override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
             with(ImGui) {
-                if (treeNode(labelName)) {
+                if (treeNode(label)) {
                     val index = intArrayOf(GameObjectTweenAccessor.GameObjectTween.values().indexOf(type))
 
                     functionalProgramming.withItemWidth(100f) {
@@ -78,7 +78,7 @@ class TweenComponent(var tweens: ArrayList<TweenData>) : BasicComponent(), Custo
                         inputFloatN("target", target, target.size, 1, 0)
                         sliderFloat("interval", ::duration, 0f, 10f, "%.1f")
                     }
-                    ImguiHelper.addImguiWidgetsArray("keep components", keepComponents, { PCGame.componentsClasses[0].java }, {
+                    ImguiHelper.addImguiWidgetsArray("keep components", keepComponents, { it.simpleName }, { PCGame.componentsClasses[0].java }, {
                         val index = intArrayOf(PCGame.componentsClasses.indexOf(it.obj.kotlin))
                         functionalProgramming.withItemWidth(150f) {
                             if (combo("", index, PCGame.componentsClasses.map { it.simpleName ?: "Nom inconnu" })) {
@@ -108,12 +108,9 @@ class TweenComponent(var tweens: ArrayList<TweenData>) : BasicComponent(), Custo
 
     private val addTweenTitle = "Ajouter un tween"
     private var currentTweenIndex = 0
-    override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
         with(ImGui) {
-            ImguiHelper.addImguiWidgetsArray("tweens", tweens, { TweenFactory.EmptyTween() }, {
-                it.obj.insertImgui(it.obj.name, gameObject, level)
-                false
-            }) {
+            ImguiHelper.addImguiWidgetsArray("tweens", tweens, { it.name }, { TweenFactory.EmptyTween() }, gameObject, level) {
                 if (button("Ajouter depuis..", Vec2(-1, 20f)))
                     openPopup(addTweenTitle)
 

@@ -38,18 +38,17 @@ class SoundComponent(var sounds: ArrayList<SoundData>) : BasicComponent(), Custo
 
         override fun toString(): String = soundFile.get().nameWithoutExtension()
 
-        override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
+        override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
             with(ImGui) {
                 val soundsResources = if (levelResources) level.resourcesSounds() else PCGame.gameSounds
 
                 val index = intArrayOf(soundsResources.indexOf(soundFile.get()))
                 functionalProgramming.withItemWidth(100f) {
+                    checkbox("Sons importés", ::levelResources)
+
                     if (combo("son", index, soundsResources.map { it.nameWithoutExtension() })) {
                         soundFile = soundsResources[index[0]].toFileWrapper()
                     }
-
-                    sameLine()
-                    checkbox("Sons importés", ::levelResources)
                 }
             }
         }
@@ -68,10 +67,7 @@ class SoundComponent(var sounds: ArrayList<SoundData>) : BasicComponent(), Custo
         sounds.forEach { it.loadResources() }
     }
 
-    override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
-        ImguiHelper.addImguiWidgetsArray("sons", sounds, { SoundData(Constants.defaultSoundPath.toFileWrapper()) }, {
-            it.obj.insertImgui(it.obj.toString(), gameObject, level)
-            false
-        })
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
+        ImguiHelper.addImguiWidgetsArray("sons", sounds, { it.toString() }, { SoundData(Constants.defaultSoundPath.toFileWrapper()) }, gameObject, level)
     }
 }

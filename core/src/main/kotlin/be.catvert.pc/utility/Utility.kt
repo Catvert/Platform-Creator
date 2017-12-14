@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Graphics
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.files.FileHandle
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
@@ -56,6 +57,20 @@ inline fun <reified T : Any> AssetManager.loadOnDemand(file: FileHandle): Asset<
 fun FileHandle.toFileWrapper() = FileWrapper(this)
 
 fun Texture.toAtlasRegion() =  TextureAtlas.AtlasRegion(this, 0, 0, width, height)
+
+fun Batch.useColor(color: Color, block: Batch.() -> Unit) {
+    val oldColor = this.color.cpy()
+    this.color = color
+    this.block()
+    this.color = oldColor
+}
+
+fun ShapeRenderer.useColor(color: Color, block: ShapeRenderer.() -> Unit) {
+    val oldColor = this.color.cpy()
+    this.color = color
+    this.block()
+    this.color = oldColor
+}
 
 inline fun <reified T : Any> Any?.cast(): T? = this as? T
 

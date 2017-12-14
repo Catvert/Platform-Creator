@@ -5,6 +5,7 @@ import aurelienribon.tweenengine.Tween
 import be.catvert.pc.Log
 import be.catvert.pc.PCGame
 import be.catvert.pc.utility.*
+import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.utils.Disposable
 import imgui.ImGui
@@ -29,6 +30,7 @@ object SceneManager : Updeatable, Renderable, Resizable, Disposable {
                 waitingScene[scene.javaClass] = NextWaitingScene(scene, applyTransition, disposeCurrentScene)
                 return
             }
+
             nextScene = scene
 
             nextScene?.alpha = 0f

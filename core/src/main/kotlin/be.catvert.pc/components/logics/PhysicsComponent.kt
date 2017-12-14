@@ -30,12 +30,25 @@ enum class MovementType {
  * @property startJumping : Débute le saut de l'entité
  * @property forceJumping : Permet de forcer le saut de l'entité
  */
-data class JumpData(var isJumping: Boolean = false, var targetHeight: Int = 0, var startJumping: Boolean = false, var forceJumping: Boolean = false)
+private data class JumpData(var isJumping: Boolean = false, var targetHeight: Int = 0, var startJumping: Boolean = false)
 
 /**
  * Listener lors d'une collision avec une autre entité pour le mask correspondant
  */
 data class CollisionListener(val gameObject: GameObject, val collideGameObject: GameObject, val side: BoxSide)
+
+data class SensorData(@ExposeEditor var isSensor: Boolean = false, var target: GameObjectTag = Tags.Player.tag, var sensorIn: Action = EmptyAction(), var sensorOut: Action = EmptyAction()) : CustomEditorImpl {
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
+        if(isSensor) {
+            functionalProgramming.collapsingHeader("sensor props") {
+                ImguiHelper.gameObjectTag(::target, level, "sensor target")
+                ImguiHelper.action("in action", ::sensorIn, gameObject, level)
+                ImguiHelper.action("out action", ::sensorOut, gameObject, level)
+            }
+        }
+    }
+    val sensorOverlaps: MutableSet<GameObject> = mutableSetOf()
+}
 
 /**
  * Ce component permet d'ajouter à l'entité des propriétés physique tel que la gravité, vitesse de déplacement ...
@@ -52,18 +65,16 @@ data class CollisionListener(val gameObject: GameObject, val collideGameObject: 
  */
 class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                        @ExposeEditor(max = 100) var moveSpeed: Int = 0,
-                       var isSensor: Boolean = false,
                        @ExposeEditor var movementType: MovementType = MovementType.LINEAR,
                        @ExposeEditor var gravity: Boolean = !isStatic,
-                       var ignoreTags: ArrayList<GameObjectTag> = arrayListOf(),
+                       @ExposeEditor val sensor: SensorData = SensorData(false),
+                       val ignoreTags: ArrayList<GameObjectTag> = arrayListOf(),
                        @ExposeEditor(max = 1000) var jumpHeight: Int = 0,
                        var onLeftAction: Action = EmptyAction(),
                        var onRightAction: Action = EmptyAction(),
                        var onJumpAction: Action = EmptyAction(),
                        var onFallAction: Action = EmptyAction(),
-                       var onNothingAction: Action = EmptyAction(),
-                       var onSensorIn: Action = EmptyAction(),
-                       var onSensorOut: Action = EmptyAction()) : LogicsComponent(), CustomEditorImpl {
+                       var onNothingAction: Action = EmptyAction()) : LogicsComponent(), CustomEditorImpl {
     @JsonCreator private constructor() : this(true)
 
     /**
@@ -93,8 +104,6 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
     @JsonIgnore
     val onCollisionWith = Signal<CollisionListener>()
 
-    private val sensorOverlaps = mutableSetOf<GameObject>()
-
     /**
      * Vitesse de la gravité, représente aussi la vitesse de saut (inversé)
      */
@@ -109,16 +118,12 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
     }
 
     override fun update(gameObject: GameObject) {
-        if (isSensor)
+        if (sensor.isSensor)
             checkSensorOverlaps(gameObject)
-        if (isStatic || isSensor) return
+        if (isStatic || sensor.isSensor) return
 
         if (physicsActions.isEmpty())
             onNothingAction(gameObject)
-
-        if (jumpData.forceJumping) {
-            physicsActions += PhysicsAction.PhysicsActions.JUMP
-        }
 
         var moveSpeedX = 0f
         var moveSpeedY = 0f
@@ -133,15 +138,13 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                 PhysicsActions.GO_RIGHT -> moveSpeedX += moveSpeed
                 PhysicsActions.GO_UP -> moveSpeedY += moveSpeed
                 PhysicsActions.GO_DOWN -> moveSpeedY -= moveSpeed
-                PhysicsActions.JUMP -> {
+                PhysicsActions.JUMP, PhysicsActions.FORCE_JUMP -> {
                     if (!jumpData.isJumping) {
-                        if (!jumpData.forceJumping) {
+                        if (it != PhysicsActions.FORCE_JUMP) {
                             //  On vérifie si le gameObject est sur le sol
                             if (!collideOnMove(0, -1, gameObject)) {
                                 return@action
                             }
-                        } else {
-                            jumpData.forceJumping = false
                         }
                         jumpData.isJumping = true
                         jumpData.targetHeight = gameObject.box.y + jumpHeight
@@ -188,18 +191,20 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
     private fun checkSensorOverlaps(gameObject: GameObject) {
         val checkedGameObject = mutableSetOf<GameObject>()
 
-        level?.getAllGameObjectsInCells(gameObject.box)?.filter { it !== gameObject && gameObject.box.overlaps(it.box) }?.forEach {
-            if (!sensorOverlaps.contains(it)) {
-                onSensorIn(gameObject)
-                sensorOverlaps += it
+        sensor.apply {
+            level?.getAllGameObjectsInCells(gameObject.box)?.filter { it !== gameObject && it.tag == sensor.target && gameObject.box.overlaps(it.box) }?.forEach {
+                if (!sensorOverlaps.contains(it)) {
+                    sensorIn(gameObject)
+                    sensorOverlaps += it
+                }
+
+                checkedGameObject += it
             }
 
-            checkedGameObject += it
-        }
-
-        sensorOverlaps.filter { !checkedGameObject.contains(it) }.forEach {
-            onSensorOut(gameObject)
-            sensorOverlaps.remove(it)
+            sensorOverlaps.filter { !checkedGameObject.contains(it) }.forEach {
+                sensorOut(gameObject)
+                sensorOverlaps.remove(it)
+            }
         }
     }
 
@@ -256,9 +261,9 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
 
         level?.apply {
             this.getAllGameObjectsInCells(newRect).filter { filter ->
-                filter !== gameObject && let {
+                filter !== gameObject && filter.getCurrentState().hasComponent<PhysicsComponent>() && let { // TODO refactoring
                     filter.getCurrentState().getComponent<PhysicsComponent>()?.apply {
-                        return@let !isSensor && ignoreTags.contains(gameObject.tag) == false
+                        return@let !sensor.isSensor && ignoreTags.contains(gameObject.tag) == false
                     }
                     true
                 }
@@ -316,27 +321,18 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         return collideGameObjects
     }
 
-    override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
         functionalProgramming.collapsingHeader("move actions") {
-            ImguiHelper.action("left action", ::onLeftAction, gameObject, level)
-            ImguiHelper.action("right action", ::onRightAction, gameObject, level)
-            ImguiHelper.action("jump action", ::onLeftAction, gameObject, level)
-            ImguiHelper.action("fall action", ::onLeftAction, gameObject, level)
+            ImguiHelper.action("on left", ::onLeftAction, gameObject, level)
+            ImguiHelper.action("on right", ::onRightAction, gameObject, level)
+            ImguiHelper.action("on jump", ::onLeftAction, gameObject, level)
+            ImguiHelper.action("on fall", ::onLeftAction, gameObject, level)
+
            // ImguiHelper.action("up action", ::onUpAction, gameObject, level)
            // ImguiHelper.action("down action", ::onDownAction, gameObject, level)
-            ImguiHelper.action("nothing action", ::onNothingAction, gameObject, level)
+            ImguiHelper.action("on nothing", ::onNothingAction, gameObject, level)
         }
 
-        ImGui.checkbox("sensor", ::isSensor)
-        if(isSensor) {
-            functionalProgramming.collapsingHeader("sensor props") {
-                ImguiHelper.action("in action", ::onSensorIn, gameObject, level)
-                ImguiHelper.action("out action", ::onSensorOut, gameObject, level)
-            }
-        }
-
-        ImguiHelper.addImguiWidgetsArray("ignore tags", ignoreTags, { Tags.Player.tag }, {
-            ImguiHelper.gameObjectTag(it, level)
-        })
+        ImguiHelper.addImguiWidgetsArray("ignore tags", ignoreTags, { it }, { Tags.Player.tag }, gameObject, level, ExposeEditorFactory.createExposeEditor(customType = CustomType.TAG_STRING))
     }
 }

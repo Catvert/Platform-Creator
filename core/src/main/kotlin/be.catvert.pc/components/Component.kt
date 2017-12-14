@@ -16,8 +16,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
 sealed class Component : ResourceLoader {
-    var name = ReflectionUtility.simpleNameOf(this).removeSuffix("Component")
-
     open fun onStateActive(gameObject: GameObject, state: GameObjectState, container: GameObjectContainer) {}
 
     override fun loadResources() {}

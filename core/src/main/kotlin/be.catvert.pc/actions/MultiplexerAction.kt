@@ -21,9 +21,7 @@ class MultiplexerAction(var actions: ArrayList<Action>) : Action, CustomEditorIm
         }
     }
 
-    override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
-        ImguiHelper.addImguiWidgetsArray("actions", actions, { EmptyAction() }, {
-            ImguiHelper.addImguiWidget(ReflectionUtility.simpleNameOf(it.obj), it, gameObject, level, ExposeEditorFactory.empty)
-        })
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
+        ImguiHelper.addImguiWidgetsArray("actions", actions, { ReflectionUtility.simpleNameOf(it) }, { EmptyAction() }, gameObject, level)
     }
 }

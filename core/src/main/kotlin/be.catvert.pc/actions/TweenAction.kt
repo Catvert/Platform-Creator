@@ -19,7 +19,7 @@ class TweenAction(var tweenIndex: Int) : Action, CustomEditorImpl {
         gameObject.getCurrentState().getComponent<TweenComponent>()?.startTween(gameObject, tweenIndex)
     }
 
-    override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
         with(ImGui) {
             val tweens = gameObject.getCurrentState().getComponent<TweenComponent>()?.tweens ?: arrayListOf()
             functionalProgramming.withItemWidth(100f) {

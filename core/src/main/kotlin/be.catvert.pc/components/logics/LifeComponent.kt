@@ -67,12 +67,8 @@ class LifeComponent(onDeathAction: Action, lifePointActions: ArrayList<Action> =
         this.gameObject = gameObject
     }
 
-    override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
-        var index = 0
-        ImguiHelper.addImguiWidgetsArray("life actions", lpActions, { EmptyAction() }, {
-            ImguiHelper.action("vie ${++index}", it, gameObject, level)
-            false
-        })
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
+        ImguiHelper.addImguiWidgetsArray("life actions", lpActions, { "vie ${lpActions.indexOf(it) + 1}" }, { EmptyAction() }, gameObject, level)
     }
 
 }

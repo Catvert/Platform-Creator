@@ -20,7 +20,7 @@ class AtlasAction(var atlasIndex: Int) : Action, CustomEditorImpl {
         }
     }
 
-    override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
         with(ImGui) {
             val atlasData = gameObject.getCurrentState().getComponent<AtlasComponent>()?.data ?: arrayListOf()
 

@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.Disposable
 import imgui.ImGui
 import ktx.app.use
 
+
 /**
  * Classe abstraite permettant l'implémentation d'une scène
  */

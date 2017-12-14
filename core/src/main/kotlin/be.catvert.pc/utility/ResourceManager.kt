@@ -38,6 +38,10 @@ object ResourceManager : Disposable {
         defaultPackRegion = TextureAtlas.AtlasRegion(defaultTexture, 0, 0, 64, 64)
     }
 
+    fun unloadAssets() {
+        assetManager.clear()
+    }
+
     fun getTexture(file: FileHandle): Texture = tryLoad(file)?: defaultTexture
 
     fun getPack(file: FileHandle): TextureAtlas = tryLoad(file)?: defaultPack

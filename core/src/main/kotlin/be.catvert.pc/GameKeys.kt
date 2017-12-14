@@ -37,6 +37,8 @@ enum class GameKeys(var key: Int, val description: String) {
     EDITOR_MOVE_ENTITY_RIGHT(Input.Keys.RIGHT, "Editor move entity 1 pixel right"),
     EDITOR_MOVE_ENTITY_UP(Input.Keys.UP, "Editor move entity 1 pixel up"),
     EDITOR_MOVE_ENTITY_DOWN(Input.Keys.DOWN, "Editor move entity 1 pixel down"),
+    EDITOR_ATLAS_PREVIOUS_FRAME(Input.Keys.LEFT, "Editor previous atlas frame"),
+    EDITOR_ATLAS_NEXT_FRAME(Input.Keys.RIGHT, "Editor next atlas frame"),
     EDITOR_TRY_LEVEL(Input.Keys.F2, "Editor try level"),
 
     DEBUG_MODE(Input.Keys.F12, "Debug Mode"),

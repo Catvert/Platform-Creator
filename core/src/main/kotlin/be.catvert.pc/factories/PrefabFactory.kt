@@ -21,7 +21,7 @@ enum class PrefabFactory(val prefab: Prefab) {
     Empty(Prefab("empty", GameObject(Tags.Empty.tag, box = Rect(size = Size(50, 50))))),
     Sprite(
             Prefab("sprite", GameObject(Tags.Sprite.tag, box = Rect(size = Size(50, 50))) {
-                this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.atlasKenneyDirPath.child("grassSheets.atlas").toFileWrapper() to "slice01_01"))
+                this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.atlasKenneyDirPath.child("grassSheet.atlas").toFileWrapper() to "slice01_01"))
             })
     ),
     PhysicsSprite(
@@ -50,7 +50,7 @@ enum class PrefabFactory(val prefab: Prefab) {
                         InputComponent.InputData(GameKeys.GAME_PLAYER_JUMP.key, true, PhysicsAction(PhysicsAction.PhysicsActions.JUMP))
                 )
 
-                this += PhysicsComponent(false, 10, false, MovementType.SMOOTH, jumpHeight = 200).apply {
+                this += PhysicsComponent(false, 10, MovementType.SMOOTH, jumpHeight = 200).apply {
                     val walkAction = AtlasAction(1)
                     onRightAction = walkAction
                     onLeftAction = walkAction
@@ -96,9 +96,8 @@ enum class PrefabFactory(val prefab: Prefab) {
     GoldCoin(
             Prefab("gold coin", GameObject(Tags.Special.tag, box = Rect(size = Size(35, 35))) {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.atlasKenneyDirPath.child("jumper.atlas").toFileWrapper() to "coin_gold"))
-                this += PhysicsComponent(true)
                 this += SoundComponent(SoundComponent.SoundData(Constants.soundsDirPath.child("coin.wav").toFileWrapper()))
-                this += AIComponent(arrayListOf(Tags.Player.tag), EmptyAction(), arrayListOf(), MultiplexerAction(ScoreAction(1), RemoveGOAction(), SoundAction(0)), arrayListOf(BoxSide.Left, BoxSide.Right, BoxSide.Up, BoxSide.Down))
+                this += PhysicsComponent(true, sensor = SensorData(true, sensorIn = MultiplexerAction(SoundAction(0), ScoreAction(1), RemoveGOAction())))
             })
     ),
     BlockEnemy(

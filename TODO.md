@@ -3,12 +3,13 @@
 ## A FAIRE
 
 - Javadoc + commentaires
-- [Optimisation] Texture, Atlas et Animation qui charge les assets depuis l'assetManager toutes les frames dans imgui
 - Ajouter la possibilité de supprimer une ressource importé
 - Écran de chargement d'un niveau
 - Enlever possibilité de créer un tag unknown
 
 ## BUGS
+
+- Gridmode + copie de plusieurs gameObject d'un coup
 
 ## IDÉE
 

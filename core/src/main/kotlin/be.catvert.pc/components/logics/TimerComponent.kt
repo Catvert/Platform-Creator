@@ -35,7 +35,7 @@ class TimerComponent(interval: Float, @ExposeEditor var timerAction: Action) : L
         timer.update()
     }
 
-    override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
         functionalProgramming.withItemWidth(100f) {
             ImGui.sliderFloat("interval", ::interval, 0f, 10f)
         }

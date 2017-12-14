@@ -7,9 +7,7 @@ import be.catvert.pc.components.BasicComponent
 import be.catvert.pc.components.logics.PhysicsComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
-import be.catvert.pc.utility.BoxSide
-import be.catvert.pc.utility.CustomEditorImpl
-import be.catvert.pc.utility.ImguiHelper
+import be.catvert.pc.utility.*
 import be.catvert.pc.utility.ImguiHelper.enum
 import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
@@ -53,20 +51,16 @@ class AIComponent(var targets: ArrayList<GameObjectTag>, var actionTarget: Actio
         }
     }
 
-    override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
         with(ImGui) {
-            ImguiHelper.addImguiWidgetsArray("cibles", targets, { Tags.Player.tag }, {
-                ImguiHelper.gameObjectTag(it, level)
-            })
-            ImguiHelper.addImguiWidgetsArray("conditions cible", actionCondTarget, { BoxSide.Left }, {
-                enum("side", it.cast())
-            }) {
-                ImguiHelper.action("action cible ", ::actionTarget, gameObject, level)
+            ImguiHelper.addImguiWidgetsArray("cibles", targets, { it }, { Tags.Player.tag }, gameObject, level, ExposeEditorFactory.createExposeEditor(customType = CustomType.TAG_STRING))
+
+            ImguiHelper.addImguiWidgetsArray("cible", actionCondTarget, { it.name },  { BoxSide.Left }, gameObject, level) {
+                ImguiHelper.action("action", ::actionTarget, gameObject, level)
             }
-            ImguiHelper.addImguiWidgetsArray("conditions gameObject", actionCondThis, { BoxSide.Left }, {
-                enum("side", it.cast())
-            }) {
-                ImguiHelper.action("action go", ::actionOnThis, gameObject, level)
+
+            ImguiHelper.addImguiWidgetsArray("ce gameObject", actionCondThis, { it.name }, { BoxSide.Left }, gameObject, level) {
+                ImguiHelper.action("action", ::actionOnThis, gameObject, level)
             }
         }
     }

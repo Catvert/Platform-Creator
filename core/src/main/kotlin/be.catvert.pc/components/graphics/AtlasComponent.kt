@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonIgnore
 import glm_.vec2.Vec2
 import glm_.vec4.Vec4
 import imgui.ImGui
@@ -63,8 +64,10 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
              */
             if (regions.size > 1)
                 stateTime += Gdx.graphics.deltaTime
-            batch.draw(animation.getKeyFrame(stateTime), gameObject.box, flipX, flipY)
+            batch.draw(currentKeyFrame(), gameObject.box, flipX, flipY)
         }
+
+        fun currentKeyFrame() = animation.getKeyFrame(stateTime)
 
         /**
          * Permet de mettre à jour l'atlas, si par exemple des régions sont modifiées.
@@ -165,7 +168,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
     private var addAtlasName = "test"
     private var ressourcesCollapsing = false
 
-    override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
         with(ImGui) {
             functionalProgramming.withItemWidth(100f) {
                 combo("atlas initial", ::currentIndex, data.map { it.name })

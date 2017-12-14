@@ -77,9 +77,9 @@ class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
 
     fun overlaps(rect: Rect) = this.x < rect.x + rect.width && this.x + this.width > rect.x && this.y < rect.y + rect.height && this.y + this.height > rect.y
 
-    override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
         with(ImGui) {
-            if (collapsingHeader(labelName)) {
+            if (collapsingHeader(label)) {
                 functionalProgramming.withIndent {
                     ImguiHelper.addImguiWidget("position", ::position, gameObject, level, ExposeEditorFactory.createExposeEditor(max = level.matrixRect.width))
                     ImguiHelper.addImguiWidget("taille", ::size, gameObject, level, ExposeEditorFactory.createExposeEditor(max = Constants.maxGameObjectSize))

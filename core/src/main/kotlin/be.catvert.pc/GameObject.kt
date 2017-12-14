@@ -34,7 +34,7 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
             if (value in Constants.minLayerIndex until Constants.maxLayerIndex) field = value
         }
 
-    @ExposeEditor(customName = "action out of map")
+    @ExposeEditor(customName = "on out of map")
     var onOutOfMapAction: Action = RemoveGOAction()
 
     @JsonProperty("states") private val states: MutableSet<GameObjectState> = mutableSetOf(GameObjectState("default").apply(initDefaultState))
@@ -70,8 +70,6 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
                 setState(initialState)
             }
         }
-
-    private var isRessourcesLoaded = false
 
     @JsonIgnore
     fun getCurrentState() = states.elementAt(currentState)
@@ -122,13 +120,10 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
     }
 
     override fun loadResources() {
-        if(!isRessourcesLoaded) { // TODO nécessaire?
-            states.forEach { it.loadResources() }
-            isRessourcesLoaded = true
-        }
+        states.forEach { it.loadResources() }
     }
 
-    override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
         with(ImGui) {
             functionalProgramming.withItemWidth(100f) {
                 if (combo("State initial", ::initialState, getStates().map { it.name }))

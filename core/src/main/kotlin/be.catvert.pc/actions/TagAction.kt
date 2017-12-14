@@ -16,7 +16,7 @@ class TagAction(@ExposeEditor(customType = CustomType.TAG_STRING) val tag: GameO
         }
     }
 
-    override fun insertImgui(labelName: String, gameObject: GameObject, level: Level) {
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
         gameObject.container.cast<Level>()?.findGameObjectsByTag(tag)?.firstOrNull()?.apply {
             ImguiHelper.action("action", ::action, this, level)
         }
