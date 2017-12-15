@@ -9,7 +9,7 @@ import be.catvert.pc.utility.Point
 import com.fasterxml.jackson.annotation.JsonCreator
 
 class SpawnAction(@ExposeEditor var prefab: Prefab, @ExposeEditor var spawnSide: BoxSide) : Action {
-    @JsonCreator private constructor(): this(PrefabFactory.Bee.prefab, BoxSide.Left)
+    @JsonCreator private constructor(): this(PrefabFactory.Spider_Kenney.prefab, BoxSide.Left)
 
     override fun invoke(gameObject: GameObject) {
         var x = gameObject.box.x

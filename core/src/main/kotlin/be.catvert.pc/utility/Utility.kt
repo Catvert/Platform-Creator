@@ -58,14 +58,14 @@ fun FileHandle.toFileWrapper() = FileWrapper(this)
 
 fun Texture.toAtlasRegion() =  TextureAtlas.AtlasRegion(this, 0, 0, width, height)
 
-fun Batch.useColor(color: Color, block: Batch.() -> Unit) {
+fun Batch.withColor(color: Color, block: Batch.() -> Unit) {
     val oldColor = this.color.cpy()
     this.color = color
     this.block()
     this.color = oldColor
 }
 
-fun ShapeRenderer.useColor(color: Color, block: ShapeRenderer.() -> Unit) {
+fun ShapeRenderer.withColor(color: Color, block: ShapeRenderer.() -> Unit) {
     val oldColor = this.color.cpy()
     this.color = color
     this.block()

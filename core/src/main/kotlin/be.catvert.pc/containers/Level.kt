@@ -22,7 +22,7 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
     private val levelTextures = levelPath.toLocalFile().parent().child("textures") to mutableListOf<FileHandle>()
     private val levelAtlas = levelPath.toLocalFile().parent().child("atlas") to mutableListOf<FileHandle>()
     private val levelSounds = levelPath.toLocalFile().parent().child("sounds") to mutableListOf<FileHandle>()
-    private val levelPrefabs = levelPath.toLocalFile().parent().child("prefabs") to mutableListOf(*PrefabFactory.values().map { it.prefab }.toTypedArray())
+    private val levelPrefabs = levelPath.toLocalFile().parent().child("prefabs") to mutableListOf<Prefab>()
 
     val tags = arrayListOf(*Tags.values().map { it.tag }.toTypedArray())
 
@@ -151,7 +151,7 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
             levelDir.mkdirs()
             val level = Level(levelDir.child(Constants.levelDataFile).path(), Constants.gameVersion, PCGame.parallaxBackgrounds().elementAtOrNull(0) ?: PCGame.standardBackgrounds().elementAtOrNull(0) ?:StandardBackground(FileWrapper("")))
 
-            PrefabFactory.Player.prefab.create(Point(100, 100), level)
+            PrefabFactory.Player_Kenney.prefab.create(Point(100, 100), level)
 
             level.loadResources()
 

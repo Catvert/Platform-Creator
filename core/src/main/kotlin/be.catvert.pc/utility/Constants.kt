@@ -1,5 +1,6 @@
 package be.catvert.pc.utility
 
+import be.catvert.pc.serialization.SerializationFactory
 import ktx.assets.toLocalFile
 
 /**
@@ -17,6 +18,8 @@ object Constants {
 
     const val assetsDir = "assets/"
 
+    val serializationType = SerializationFactory.MapperType.JSON
+
     private val assetsDirPath = "assets/".toLocalFile()
 
     val bundlesDirPath = assetsDirPath.child("i18n_bundles")
@@ -28,7 +31,7 @@ object Constants {
 
     val atlasDirPath = assetsDirPath.child("atlas")
     val atlasKenneyDirPath = atlasDirPath.child("kenney")
-    val atlaSMCDirPath = atlasDirPath.child("smc")
+    val atlasSMCDirPath = atlasDirPath.child("smc")
 
     val texturesDirPath = assetsDirPath.child("textures")
     val soundsDirPath = assetsDirPath.child("sounds")

@@ -1,0 +1,731 @@
+
+smc_maryo.png
+size: 2048,2048
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+big/climb_left
+  rotate: false
+  xy: 1069, 1048
+  size: 344, 496
+  orig: 344, 496
+  offset: 0, 0
+  index: -1
+big/climb_right
+  rotate: false
+  xy: 723, 1044
+  size: 344, 500
+  orig: 344, 500
+  offset: 0, 0
+  index: -1
+big/up_right
+  rotate: false
+  xy: 1415, 1054
+  size: 297, 494
+  orig: 297, 494
+  offset: 0, 0
+  index: -1
+fire/climb_left
+  rotate: false
+  xy: 684, 527
+  size: 344, 500
+  orig: 344, 500
+  offset: 0, 0
+  index: -1
+fire/climb_right
+  rotate: false
+  xy: 1208, 1550
+  size: 344, 496
+  orig: 344, 496
+  offset: 0, 0
+  index: -1
+fire/throw_right_1
+  rotate: false
+  xy: 1627, 1572
+  size: 411, 474
+  orig: 411, 474
+  offset: 0, 0
+  index: -1
+flying/duck_right
+  rotate: false
+  xy: 1885, 13
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+flying/fly_right_0
+  rotate: false
+  xy: 1627, 13
+  size: 256, 128
+  orig: 256, 128
+  offset: 0, 0
+  index: -1
+flying/walk_right_1
+  rotate: false
+  xy: 1554, 1918
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: -1
+flying/walk_right_holding_1
+  rotate: false
+  xy: 1554, 1788
+  size: 64, 128
+  orig: 64, 128
+  offset: 0, 0
+  index: -1
+ghost/climb_left
+  rotate: false
+  xy: 516, 1546
+  size: 344, 500
+  orig: 344, 500
+  offset: 0, 0
+  index: -1
+ghost/climb_right
+  rotate: false
+  xy: 1281, 45
+  size: 344, 496
+  orig: 344, 496
+  offset: 0, 0
+  index: -1
+ghost/up_right
+  rotate: false
+  xy: 1346, 552
+  size: 297, 494
+  orig: 297, 494
+  offset: 0, 0
+  index: -1
+ice/climb_left
+  rotate: false
+  xy: 862, 1546
+  size: 344, 500
+  orig: 344, 500
+  offset: 0, 0
+  index: -1
+ice/climb_right
+  rotate: false
+  xy: 2, 1534
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+ice/fall_right
+  rotate: false
+  xy: 600, 5
+  size: 363, 503
+  orig: 363, 503
+  offset: 0, 0
+  index: -1
+ice/fall_right_holding
+  rotate: false
+  xy: 372, 1029
+  size: 349, 503
+  orig: 349, 503
+  offset: 0, 0
+  index: -1
+ice/stand_right
+  rotate: false
+  xy: 2, 2
+  size: 304, 506
+  orig: 304, 506
+  offset: 0, 0
+  index: -1
+ice/stand_right_holding
+  rotate: false
+  xy: 308, 2
+  size: 290, 506
+  orig: 290, 506
+  offset: 0, 0
+  index: -1
+ice/throw_right_2
+  rotate: false
+  xy: 2, 1020
+  size: 368, 512
+  orig: 368, 512
+  offset: 0, 0
+  index: -1
+ice/walk_right_0
+  rotate: false
+  xy: 1030, 543
+  size: 314, 499
+  orig: 314, 499
+  offset: 0, 0
+  index: -1
+ice/walk_right_1
+  rotate: false
+  xy: 2, 510
+  size: 340, 508
+  orig: 340, 508
+  offset: 0, 0
+  index: -1
+ice/walk_right_holding_0
+  rotate: false
+  xy: 965, 26
+  size: 314, 499
+  orig: 314, 499
+  offset: 0, 0
+  index: -1
+ice/walk_right_holding_1
+  rotate: false
+  xy: 344, 510
+  size: 338, 508
+  orig: 338, 508
+  offset: 0, 0
+  index: -1
+small/fall_right
+  rotate: false
+  xy: 1645, 143
+  size: 380, 463
+  orig: 380, 463
+  offset: 0, 0
+  index: -1
+small/walk_right_0
+  rotate: false
+  xy: 1714, 1090
+  size: 332, 480
+  orig: 332, 480
+  offset: 0, 0
+  index: -1
+small/walk_right_holding_0
+  rotate: false
+  xy: 1714, 608
+  size: 332, 480
+  orig: 332, 480
+  offset: 0, 0
+  index: -1
+
+smc_maryo2.png
+size: 2048,2048
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+big/duck_right
+  rotate: false
+  xy: 1435, 1290
+  size: 290, 272
+  orig: 290, 272
+  offset: 0, 0
+  index: -1
+big/stand_right
+  rotate: false
+  xy: 978, 1557
+  size: 330, 485
+  orig: 330, 485
+  offset: 0, 0
+  index: -1
+big/walk_right_0
+  rotate: false
+  xy: 1041, 593
+  size: 334, 480
+  orig: 334, 480
+  offset: 0, 0
+  index: -1
+big/walk_right_1
+  rotate: false
+  xy: 612, 1557
+  size: 364, 485
+  orig: 364, 485
+  offset: 0, 0
+  index: -1
+big/walk_right_holding_1
+  rotate: false
+  xy: 2, 742
+  size: 357, 476
+  orig: 357, 476
+  offset: 0, 0
+  index: -1
+fire/duck_right
+  rotate: false
+  xy: 1735, 838
+  size: 290, 272
+  orig: 290, 272
+  offset: 0, 0
+  index: -1
+fire/fall_right_holding
+  rotate: false
+  xy: 1668, 1590
+  size: 371, 452
+  orig: 371, 452
+  offset: 0, 0
+  index: -1
+fire/throw_right_0
+  rotate: false
+  xy: 708, 1075
+  size: 433, 480
+  orig: 433, 480
+  offset: 0, 0
+  index: -1
+fire/up_right
+  rotate: false
+  xy: 2, 1548
+  size: 297, 494
+  orig: 297, 494
+  offset: 0, 0
+  index: -1
+fire/walk_right_1
+  rotate: false
+  xy: 1310, 1564
+  size: 356, 478
+  orig: 356, 478
+  offset: 0, 0
+  index: -1
+flying/climb_right
+  rotate: false
+  xy: 260, 2
+  size: 128, 256
+  orig: 128, 256
+  offset: 0, 0
+  index: -1
+flying/fall_right_1
+  rotate: false
+  xy: 1703, 70
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+flying/fall_right_1_holding
+  rotate: false
+  xy: 437, 511
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+flying/fly_right_1
+  rotate: false
+  xy: 1143, 1153
+  size: 256, 128
+  orig: 256, 128
+  offset: 0, 0
+  index: -1
+flying/fly_right_2
+  rotate: false
+  xy: 390, 123
+  size: 256, 128
+  orig: 256, 128
+  offset: 0, 0
+  index: -1
+flying/fly_right_3
+  rotate: false
+  xy: 648, 6
+  size: 256, 128
+  orig: 256, 128
+  offset: 0, 0
+  index: -1
+flying/jump_right_holding
+  rotate: false
+  xy: 437, 253
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+flying/slow_fall_right
+  rotate: false
+  xy: 2, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+ghost/duck_right
+  rotate: false
+  xy: 1143, 1283
+  size: 290, 272
+  orig: 290, 272
+  offset: 0, 0
+  index: -1
+ghost/jump_right
+  rotate: false
+  xy: 695, 136
+  size: 344, 453
+  orig: 344, 453
+  offset: 0, 0
+  index: -1
+ghost/stand_right_holding
+  rotate: false
+  xy: 1735, 1112
+  size: 310, 476
+  orig: 310, 476
+  offset: 0, 0
+  index: -1
+ice/duck_right
+  rotate: false
+  xy: 361, 769
+  size: 264, 290
+  orig: 264, 290
+  offset: 0, 0
+  index: -1
+ice/jump_right
+  rotate: false
+  xy: 1703, 328
+  size: 334, 475
+  orig: 334, 475
+  offset: 0, 0
+  index: -1
+ice/throw_right_1
+  rotate: false
+  xy: 2, 260
+  size: 433, 480
+  orig: 433, 480
+  offset: 0, 0
+  index: -1
+ice/up_right
+  rotate: false
+  xy: 1375, 114
+  size: 326, 477
+  orig: 326, 477
+  offset: 0, 0
+  index: -1
+small/climb_left
+  rotate: false
+  xy: 367, 1061
+  size: 339, 489
+  orig: 339, 489
+  offset: 0, 0
+  index: -1
+small/climb_right
+  rotate: false
+  xy: 708, 591
+  size: 331, 482
+  orig: 331, 482
+  offset: 0, 0
+  index: -1
+small/duck_right
+  rotate: false
+  xy: 2, 1220
+  size: 363, 326
+  orig: 363, 326
+  offset: 0, 0
+  index: -1
+small/stand_right
+  rotate: false
+  xy: 1041, 115
+  size: 332, 476
+  orig: 332, 476
+  offset: 0, 0
+  index: -1
+small/stand_right_holding
+  rotate: false
+  xy: 1401, 805
+  size: 332, 476
+  orig: 332, 476
+  offset: 0, 0
+  index: -1
+small/up_right
+  rotate: false
+  xy: 301, 1552
+  size: 309, 490
+  orig: 309, 490
+  offset: 0, 0
+  index: -1
+
+smc_maryo3.png
+size: 2048,2048
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+big/fall_right
+  rotate: false
+  xy: 505, 136
+  size: 371, 452
+  orig: 371, 452
+  offset: 0, 0
+  index: -1
+big/fall_right_holding
+  rotate: false
+  xy: 1297, 603
+  size: 371, 452
+  orig: 371, 452
+  offset: 0, 0
+  index: -1
+big/jump_right
+  rotate: false
+  xy: 1684, 1058
+  size: 344, 453
+  orig: 344, 453
+  offset: 0, 0
+  index: -1
+big/jump_right_holding
+  rotate: false
+  xy: 878, 98
+  size: 357, 470
+  orig: 357, 470
+  offset: 0, 0
+  index: -1
+big/stand_right_holding
+  rotate: false
+  xy: 640, 1512
+  size: 310, 476
+  orig: 310, 476
+  offset: 0, 0
+  index: -1
+fire/fall_right
+  rotate: false
+  xy: 968, 1057
+  size: 368, 454
+  orig: 368, 454
+  offset: 0, 0
+  index: -1
+fire/jump_right_holding
+  rotate: false
+  xy: 1670, 603
+  size: 344, 453
+  orig: 344, 453
+  offset: 0, 0
+  index: -1
+fire/stand_right
+  rotate: false
+  xy: 2, 1512
+  size: 324, 476
+  orig: 324, 476
+  offset: 0, 0
+  index: -1
+fire/stand_right_holding
+  rotate: false
+  xy: 328, 1512
+  size: 310, 476
+  orig: 310, 476
+  offset: 0, 0
+  index: -1
+fire/walk_right_holding_1
+  rotate: false
+  xy: 938, 570
+  size: 357, 475
+  orig: 357, 475
+  offset: 0, 0
+  index: -1
+flying/fall_right
+  rotate: false
+  xy: 2, 996
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+flying/jump_right
+  rotate: false
+  xy: 2, 1254
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+flying/run_right_0
+  rotate: false
+  xy: 375, 776
+  size: 128, 256
+  orig: 128, 256
+  offset: 0, 0
+  index: -1
+flying/run_right_1
+  rotate: false
+  xy: 375, 518
+  size: 128, 256
+  orig: 128, 256
+  offset: 0, 0
+  index: -1
+flying/run_right_holding_1
+  rotate: false
+  xy: 375, 260
+  size: 128, 256
+  orig: 128, 256
+  offset: 0, 0
+  index: -1
+flying/walk_right_0
+  rotate: false
+  xy: 375, 2
+  size: 128, 256
+  orig: 128, 256
+  offset: 0, 0
+  index: -1
+ghost/fall_right
+  rotate: false
+  xy: 2, 542
+  size: 371, 452
+  orig: 371, 452
+  offset: 0, 0
+  index: -1
+ghost/fall_right_holding
+  rotate: false
+  xy: 2, 88
+  size: 371, 452
+  orig: 371, 452
+  offset: 0, 0
+  index: -1
+ghost/jump_right_holding
+  rotate: false
+  xy: 1338, 1058
+  size: 344, 453
+  orig: 344, 453
+  offset: 0, 0
+  index: -1
+ghost/stand_right
+  rotate: false
+  xy: 260, 1034
+  size: 324, 476
+  orig: 324, 476
+  offset: 0, 0
+  index: -1
+ghost/walk_right_1
+  rotate: false
+  xy: 1311, 1513
+  size: 357, 475
+  orig: 357, 475
+  offset: 0, 0
+  index: -1
+ghost/walk_right_holding_1
+  rotate: false
+  xy: 952, 1513
+  size: 357, 475
+  orig: 357, 475
+  offset: 0, 0
+  index: -1
+ice/jump_right_holding
+  rotate: false
+  xy: 1670, 1513
+  size: 331, 475
+  orig: 331, 475
+  offset: 0, 0
+  index: -1
+small/dead_right
+  rotate: false
+  xy: 586, 590
+  size: 350, 455
+  orig: 350, 455
+  offset: 0, 0
+  index: -1
+small/fall_right_holding
+  rotate: false
+  xy: 586, 1047
+  size: 380, 463
+  orig: 380, 463
+  offset: 0, 0
+  index: -1
+small/walk_right_1
+  rotate: false
+  xy: 1297, 128
+  size: 353, 473
+  orig: 353, 473
+  offset: 0, 0
+  index: -1
+small/walk_right_holding_1
+  rotate: false
+  xy: 1652, 128
+  size: 353, 473
+  orig: 353, 473
+  offset: 0, 0
+  index: -1
+
+smc_maryo4.png
+size: 2048,1024
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+big/walk_right_holding_0
+  rotate: false
+  xy: 350, 476
+  size: 328, 472
+  orig: 328, 472
+  offset: 0, 0
+  index: -1
+fire/jump_right
+  rotate: false
+  xy: 1670, 495
+  size: 344, 453
+  orig: 344, 453
+  offset: 0, 0
+  index: -1
+fire/walk_right_0
+  rotate: false
+  xy: 350, 2
+  size: 325, 472
+  orig: 325, 472
+  offset: 0, 0
+  index: -1
+fire/walk_right_holding_0
+  rotate: false
+  xy: 680, 477
+  size: 328, 471
+  orig: 328, 471
+  offset: 0, 0
+  index: -1
+flying/climb_left
+  rotate: false
+  xy: 1197, 219
+  size: 128, 256
+  orig: 128, 256
+  offset: 0, 0
+  index: -1
+flying/duck_right_start
+  rotate: false
+  xy: 1457, 219
+  size: 128, 256
+  orig: 128, 256
+  offset: 0, 0
+  index: -1
+flying/fall_right_holding
+  rotate: false
+  xy: 1670, 237
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+flying/right
+  rotate: false
+  xy: 937, 219
+  size: 128, 256
+  orig: 128, 256
+  offset: 0, 0
+  index: -1
+flying/right_holding
+  rotate: false
+  xy: 1327, 219
+  size: 128, 256
+  orig: 128, 256
+  offset: 0, 0
+  index: -1
+flying/run_right_holding_0
+  rotate: false
+  xy: 1067, 219
+  size: 128, 256
+  orig: 128, 256
+  offset: 0, 0
+  index: -1
+flying/up_right
+  rotate: false
+  xy: 807, 219
+  size: 128, 256
+  orig: 128, 256
+  offset: 0, 0
+  index: -1
+flying/walk_right_holding_0
+  rotate: false
+  xy: 677, 218
+  size: 128, 256
+  orig: 128, 256
+  offset: 0, 0
+  index: -1
+ghost/walk_right_0
+  rotate: false
+  xy: 1340, 477
+  size: 328, 471
+  orig: 328, 471
+  offset: 0, 0
+  index: -1
+ghost/walk_right_holding_0
+  rotate: false
+  xy: 1010, 477
+  size: 328, 471
+  orig: 328, 471
+  offset: 0, 0
+  index: -1
+small/jump_right
+  rotate: false
+  xy: 2, 8
+  size: 346, 469
+  orig: 346, 469
+  offset: 0, 0
+  index: -1
+small/jump_right_holding
+  rotate: false
+  xy: 2, 479
+  size: 346, 469
+  orig: 346, 469
+  offset: 0, 0
+  index: -1

@@ -1,0 +1,34 @@
+
+smc_signs.png
+size: 2048,512
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+default_1/1_danger
+  rotate: false
+  xy: 2, 2
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+default_1/1_ending
+  rotate: false
+  xy: 1030, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+default_1/1_ending_big
+  rotate: false
+  xy: 516, 2
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+default_1/1_ending_right_up
+  rotate: false
+  xy: 1288, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1

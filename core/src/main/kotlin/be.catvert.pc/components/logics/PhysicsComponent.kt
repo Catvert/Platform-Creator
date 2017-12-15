@@ -5,6 +5,7 @@ import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
 import be.catvert.pc.actions.PhysicsAction
 import be.catvert.pc.actions.PhysicsAction.PhysicsActions
+import be.catvert.pc.actions.TagAction
 import be.catvert.pc.components.LogicsComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
@@ -12,6 +13,7 @@ import be.catvert.pc.utility.*
 import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
+import imgui.Col
 import imgui.ImGui
 import imgui.functionalProgramming
 import kotlin.math.roundToInt
@@ -28,7 +30,6 @@ enum class MovementType {
  * @property isJumping : Permet de savoir si l'entité est entrain de sauté
  * @property targetHeight : La hauteur en y à atteindre
  * @property startJumping : Débute le saut de l'entité
- * @property forceJumping : Permet de forcer le saut de l'entité
  */
 private data class JumpData(var isJumping: Boolean = false, var targetHeight: Int = 0, var startJumping: Boolean = false)
 
@@ -50,6 +51,8 @@ data class SensorData(@ExposeEditor var isSensor: Boolean = false, var target: G
     val sensorOverlaps: MutableSet<GameObject> = mutableSetOf()
 }
 
+data class CollisionAction(@ExposeEditor var side: BoxSide = BoxSide.Left, @ExposeEditor(customType = CustomType.TAG_STRING) var target: GameObjectTag = Tags.Player.tag, @ExposeEditor var action: Action = EmptyAction(), @ExposeEditor var tagAction: TagAction = TagAction(Tags.Player.tag, EmptyAction()))
+
 /**
  * Ce component permet d'ajouter à l'entité des propriétés physique tel que la gravité, vitesse de déplacement ...
  * Une entité contenant ce component ne pourra pas être traversé par une autre entité ayant également ce component
@@ -57,7 +60,6 @@ data class SensorData(@ExposeEditor var isSensor: Boolean = false, var target: G
  * @param moveSpeed : La vitesse de déplacement de l'entité qui sera utilisée avec les NextActions
  * @param movementType : Permet de définir le type de déplacement de l'entité
  * @param gravity : Permet de spécifier si la gravité est appliquée à l'entité
- * @param maskCollision Masque à appliquer au gameObject
  * @param onLeftAction Action appelée quand le gameObject se déplace vers la gauche
  * @param onRightAction Action appelée quand le gameObject se déplace vers la droite
  * @param onFallAction Action appelée quand le gameObject est en chute libre
@@ -69,6 +71,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                        @ExposeEditor var gravity: Boolean = !isStatic,
                        @ExposeEditor val sensor: SensorData = SensorData(false),
                        val ignoreTags: ArrayList<GameObjectTag> = arrayListOf(),
+                       val collisionsActions: ArrayList<CollisionAction> = arrayListOf(),
                        @ExposeEditor(max = 1000) var jumpHeight: Int = 0,
                        var onLeftAction: Action = EmptyAction(),
                        var onRightAction: Action = EmptyAction(),
@@ -280,8 +283,21 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                         }
                     }
 
-                    gameObject.getCurrentState().getComponent<PhysicsComponent>()?.onCollisionWith?.invoke(CollisionListener(gameObject, it, side))
-                    it.getCurrentState().getComponent<PhysicsComponent>()?.onCollisionWith?.invoke(CollisionListener(it, gameObject, -side))
+                    gameObject.getCurrentState().getComponent<PhysicsComponent>()?.apply {
+                        collisionsActions.firstOrNull { collisionAction -> collisionAction.side == side && collisionAction.target == it.tag }?.apply {
+                            action(gameObject)
+                            tagAction(it)
+                        }
+                        onCollisionWith.invoke(CollisionListener(gameObject, it, side))
+                    }
+
+                    it.getCurrentState().getComponent<PhysicsComponent>()?.apply {
+                        collisionsActions.firstOrNull { collisionAction -> collisionAction.side == -side && collisionAction.target == gameObject.tag }?.apply {
+                            action(it)
+                            tagAction(gameObject)
+                        }
+                        onCollisionWith.invoke(CollisionListener(it, gameObject, -side))
+                    }
 
                     return true
                 }
@@ -327,12 +343,10 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
             ImguiHelper.action("on right", ::onRightAction, gameObject, level)
             ImguiHelper.action("on jump", ::onLeftAction, gameObject, level)
             ImguiHelper.action("on fall", ::onLeftAction, gameObject, level)
-
-           // ImguiHelper.action("up action", ::onUpAction, gameObject, level)
-           // ImguiHelper.action("down action", ::onDownAction, gameObject, level)
             ImguiHelper.action("on nothing", ::onNothingAction, gameObject, level)
         }
 
         ImguiHelper.addImguiWidgetsArray("ignore tags", ignoreTags, { it }, { Tags.Player.tag }, gameObject, level, ExposeEditorFactory.createExposeEditor(customType = CustomType.TAG_STRING))
+        ImguiHelper.addImguiWidgetsArray("collisions actions", collisionsActions, { it.side.name }, { CollisionAction() }, gameObject, level)
     }
 }
