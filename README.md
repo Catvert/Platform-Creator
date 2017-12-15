@@ -1,7 +1,7 @@
 # Platform Creator
 
 ## Description du jeu
-Platform creator est un jeu de plateformes utilisant les ressources de Kenney. Le jeu n'est pas encore **totalement utilisable** et de nombreux changements vont arriver.
+Platform creator est un jeu de plateforme utilisant les ressources de Kenney et SMC. Le jeu n'est pas encore totalement utilisable et de nombreux changements vont arriver.
 
 ![Menu principal](FAQ/mainmenu.png)
 
