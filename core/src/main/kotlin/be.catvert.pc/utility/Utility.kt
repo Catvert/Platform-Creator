@@ -29,10 +29,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaConstructor
 
-
-fun Batch.draw(texture: Texture, rect: Rect, flipX: Boolean = false, flipY: Boolean = false) = this.draw(texture, rect.position.x.toFloat(), rect.position.y.toFloat(), rect.size.width.toFloat(), rect.size.height.toFloat(), 0, 0, texture.width, texture.height, flipX, flipY)
-
-fun Batch.draw(textureRegion: TextureRegion, rect: Rect, flipX: Boolean = false, flipY: Boolean = false) {
+fun Batch.draw(textureRegion: TextureRegion, rect: Rect, flipX: Boolean = false, flipY: Boolean = false, rotation: Float = 0f) {
     if (flipX && !textureRegion.isFlipX || !flipX && textureRegion.isFlipX) {
         textureRegion.flip(true, false)
     }
@@ -40,7 +37,7 @@ fun Batch.draw(textureRegion: TextureRegion, rect: Rect, flipX: Boolean = false,
         textureRegion.flip(false, true)
     }
 
-    this.draw(textureRegion, rect.position.x.toFloat(), rect.position.y.toFloat(), rect.size.width.toFloat(), rect.size.height.toFloat())
+    this.draw(textureRegion, rect.x.toFloat(), rect.y.toFloat(), rect.width / 2f, rect.height / 2f, rect.width.toFloat(), rect.height.toFloat(), 1f, 1f, rotation)
 }
 
 fun ShapeRenderer.rect(rect: Rect) = this.rect(rect.x.toFloat(), rect.y.toFloat(), rect.width.toFloat(), rect.height.toFloat())

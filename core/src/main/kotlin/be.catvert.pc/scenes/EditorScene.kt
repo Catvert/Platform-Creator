@@ -5,6 +5,7 @@ import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
 import be.catvert.pc.factories.PrefabFactory
+import be.catvert.pc.factories.PrefabSetup
 import be.catvert.pc.factories.PrefabType
 import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.*
@@ -14,6 +15,7 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
+import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Circle
 import com.badlogic.gdx.math.MathUtils
@@ -103,6 +105,13 @@ class EditorScene(val level: Level) : Scene(level.background) {
         var showSaveLevelExitWindow = false
 
         var showInfoGameObjectWindow = false
+
+        var showGameObjectsWindow = true
+        var gameObjectsTypeIndex = 0
+        var gameObjectsSpriteShowImportedPack = false
+        var gameObjectsSpritePackIndex = 0
+        var gameObjectsSpritePackTypeIndex = 0
+        var gameObjectsSpritePhysics = true
 
         init {
             when (background.type) {
@@ -250,13 +259,15 @@ class EditorScene(val level: Level) : Scene(level.background) {
                 val mousePosInWorld: Point = camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)).let { Point(it.x.roundToInt(), it.y.roundToInt()) }
 
                 selectGameObjects.forEach { go ->
-                    val posX = if (go === selectGameObject) mousePosInWorld.x - go.box.width / 2 else mousePosInWorld.x + (go.position().x - (selectGameObject?.let { it.position().x + it.size().width / 2 } ?: 0))
-                    val posY = if (go === selectGameObject) mousePosInWorld.y - go.box.height / 2 else mousePosInWorld.y + (go.position().y - (selectGameObject?.let { it.position().y + it.size().height / 2 } ?: 0))
-                    // TODO BUG Grid
-                    val rect = if (gridMode.active)
-                        gridMode.getRectCellOf(level.activeRect, Point(posX, posY))
-                    else
-                        Rect(posX, posY, go.box.width, go.box.height)
+                    val rect: Rect? = if (gridMode.active) {
+                        val pos = if (go === selectGameObject) Point(mousePosInWorld.x, mousePosInWorld.y) else Point(mousePosInWorld.x + (go.position().x - (selectGameObject?.position()?.x ?: 0)), mousePosInWorld.y + (go.position().y - (selectGameObject?.position()?.y ?: 0)))
+                        gridMode.getRectCellOf(level.activeRect, pos)
+                    } else {
+                        val pos = if(go === selectGameObject) Point(mousePosInWorld.x - go.size().width / 2, mousePosInWorld.y - go.size().height / 2) else Point(mousePosInWorld.x + (go.position().x - (selectGameObject?.let { it.position().x + it.size().width / 2 } ?: 0)), mousePosInWorld.y + (go.position().y - (selectGameObject?.let { it.position().y + it.size().height / 2 } ?: 0)))
+                        Rect(pos, go.box.size)
+                    }
+
+                    // TODO BUG Grid quand plusieurs entités n'ayant pas le même y par exemple, ne donne pas le même résultat en prévisualisation
 
                     if (rect != null) {
                         go.getCurrentState().getComponent<AtlasComponent>()?.apply {
@@ -268,11 +279,13 @@ class EditorScene(val level: Level) : Scene(level.background) {
                                     }
                                 }
                             }
-                        }?: shapeRenderer.withColor(Color.GRAY) { rect(rect) }
+                        } ?: shapeRenderer.withColor(Color.GRAY) { rect(rect) }
                     }
 
-                    shapeRenderer.withColor(if (go === selectGameObject) Color.GREEN else Color.OLIVE) {
-                        rect(go.box)
+                    if (go.container != null) {
+                        shapeRenderer.withColor(if (go === selectGameObject) Color.GREEN else Color.OLIVE) {
+                            rect(go.box)
+                        }
                     }
                 }
             }
@@ -642,7 +655,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                             level.addGameObject(SerializationFactory.copy(it).apply {
                                 val pos = Point(copySelectGO.position().x + deltaX, copySelectGO.position().y + deltaY)
 
-                                if(gridMode.active)
+                                if (gridMode.active)
                                     gridMode.putGameObject(level.activeRect, pos, this)
                                 else
                                     this.box.position = pos
@@ -778,6 +791,12 @@ class EditorScene(val level: Level) : Scene(level.background) {
             background.cast<ParallaxBackground>()?.updateCamera(camera)
     }
 
+    private fun setCopyGameObject(gameObject: GameObject) {
+        clearSelectGameObjects()
+        addSelectGameObject(gameObject)
+        editorMode = EditorMode.COPY
+    }
+
     /**
      * Permet d'ajouter une nouvelle entité sélectionnée
      */
@@ -857,11 +876,14 @@ class EditorScene(val level: Level) : Scene(level.background) {
         with(ImGui) {
             drawMainMenuBar()
 
+            if (editorSceneUI.showGameObjectsWindow && editorMode != EditorMode.TRY_LEVEL)
+                drawGameObjectsWindow()
+
             if (gridMode.active)
                 drawGridSettingsWindow()
 
             val goUnderMouse = findGameObjectUnderMouse(false)
-            if (goUnderMouse != null) {
+            if (goUnderMouse != null && !isUIHover) {
                 functionalProgramming.withTooltip {
                     text(goUnderMouse.name)
                     text("layer: %s", goUnderMouse.layer)
@@ -940,6 +962,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                             }
                         }
                         menuItem("Essayer le niveau") {
+                            ImGui.cursorPosY = 100f
                             launchTryLevel()
                         }
                         menuItem("Sauvegarder") {
@@ -1015,15 +1038,12 @@ class EditorScene(val level: Level) : Scene(level.background) {
                     menu("Créer un gameObject") {
                         fun createGO(prefab: Prefab) {
                             val gameObject = prefab.create(Point()).apply { loadResources() }
-
-                            clearSelectGameObjects()
-                            addSelectGameObject(gameObject)
-                            editorMode = EditorMode.COPY
+                            setCopyGameObject(gameObject)
                         }
 
                         PrefabType.values().forEach { type ->
                             menu(type.name) {
-                                if(type == PrefabType.All) {
+                                if (type == PrefabType.All) {
                                     level.resourcesPrefabs().forEach {
                                         menuItem(it.name) {
                                             createGO(it)
@@ -1060,6 +1080,74 @@ class EditorScene(val level: Level) : Scene(level.background) {
                 if (dragInt2("décalage", offset, 1f, 0)) {
                     gridMode.offsetX = offset[0]
                     gridMode.offsetY = offset[1]
+                }
+            }
+        }
+    }
+
+    private fun drawGameObjectsWindow() {
+        val windowSize = Vec2(Gdx.graphics.width / 7, Gdx.graphics.height)
+        with(ImGui) {
+            setNextWindowSize(windowSize)
+            setNextWindowPos(Vec2(Gdx.graphics.width - windowSize.x, 0), Cond.Once)
+            functionalProgramming.withWindow("Game objects", editorSceneUI::showGameObjectsWindow, WindowFlags.NoResize.i) {
+                functionalProgramming.withItemWidth(-1) {
+                    combo("type", editorSceneUI::gameObjectsTypeIndex, level.tags.apply { remove(Tags.Empty.tag) })
+                }
+                val tag = level.tags.elementAtOrElse(editorSceneUI.gameObjectsTypeIndex, { Tags.Sprite.tag })
+
+                fun addImageBtn(region: TextureAtlas.AtlasRegion, prefab: Prefab, showTooltip: Boolean) {
+                    if (imageButton(region.texture.textureObjectHandle, Vec2(50, 50), Vec2(region.u, region.v), Vec2(region.u2, region.v2))) {
+                        setCopyGameObject(prefab.create(Point()).apply { loadResources() })
+                    }
+
+                    if (showTooltip && isMouseHoveringRect(itemRectMin, itemRectMax)) {
+                        functionalProgramming.withTooltip {
+                            text(prefab.name)
+                        }
+                    }
+                }
+
+                when (tag) {
+                    Tags.Sprite.tag -> {
+                        functionalProgramming.withGroup {
+                            checkbox("pack importés", editorSceneUI::gameObjectsSpriteShowImportedPack)
+                            functionalProgramming.withItemWidth(-1) {
+                                if (!editorSceneUI.gameObjectsSpriteShowImportedPack) {
+                                    combo("dossier", editorSceneUI::gameObjectsSpritePackTypeIndex, PCGame.gameAtlas.map { it.key.name() })
+                                }
+                                combo("pack", editorSceneUI::gameObjectsSpritePackIndex,
+                                        if (editorSceneUI.gameObjectsSpriteShowImportedPack) level.resourcesAtlas().map { it.nameWithoutExtension() }
+                                        else PCGame.gameAtlas.entries.elementAtOrNull(editorSceneUI.gameObjectsSpritePackTypeIndex)?.value?.map { it.nameWithoutExtension() } ?: arrayListOf())
+                                checkbox("Physics", editorSceneUI::gameObjectsSpritePhysics)
+                            }
+                        }
+                        separator()
+                        (if (editorSceneUI.gameObjectsSpriteShowImportedPack) level.resourcesAtlas().getOrNull(editorSceneUI.gameObjectsSpritePackIndex) else PCGame.gameAtlas.entries.elementAtOrNull(editorSceneUI.gameObjectsSpritePackTypeIndex)?.value?.getOrNull(editorSceneUI.gameObjectsSpritePackIndex))?.also { atlasPath ->
+                            val atlas = ResourceManager.getPack(atlasPath)
+                            atlas.regions.sortedBy { it.name }.forEachIndexed { index, region ->
+                                val atlasRegion = atlasPath.toFileWrapper() to region.name
+                                val prefab = if (editorSceneUI.gameObjectsSpritePhysics) PrefabSetup.setupPhysicsSprite(atlasRegion) else PrefabSetup.setupSprite(atlasRegion)
+                                addImageBtn(region, prefab, false)
+                                if ((index + 1) % 3 != 0)
+                                    sameLine()
+                            }
+                        }
+                    }
+                    else -> {
+                        (PrefabFactory.values().map { it.prefab } + level.resourcesPrefabs()).filter { it.prefabGO.tag == tag }.forEachIndexed { index, it ->
+                            it.prefabGO.loadResources()
+
+                            it.prefabGO.getCurrentState().getComponent<AtlasComponent>()?.apply {
+                                data.elementAtOrNull(currentIndex)?.apply {
+                                    addImageBtn(currentKeyFrame(), it, true)
+
+                                    if ((index + 1) % 3 != 0)
+                                        sameLine()
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

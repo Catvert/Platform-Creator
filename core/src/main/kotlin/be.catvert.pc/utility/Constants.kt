@@ -29,14 +29,13 @@ object Constants {
 
     val keysConfigPath = assetsDirPath.child("keysConfig.json")
 
-    val atlasDirPath = assetsDirPath.child("atlas")
-    val atlasKenneyDirPath = atlasDirPath.child("kenney")
-    val atlasSMCDirPath = atlasDirPath.child("smc")
+    val packsDirPath = assetsDirPath.child("packs")
+    val packsKenneyDirPath = packsDirPath.child("kenney")
+    val packsSMCDirPath = packsDirPath.child("smc")
 
     val texturesDirPath = assetsDirPath.child("textures")
     val soundsDirPath = assetsDirPath.child("sounds")
     val backgroundsDirPath = assetsDirPath.child("backgrounds")
-    val prefabsDirPath = assetsDirPath.child("prefabs")
     val levelDirPath = assetsDirPath.child("levels")
 
     val gameBackgroundMenuPath = assetsDirPath.child("game/mainmenu.png")

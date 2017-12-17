@@ -24,6 +24,9 @@ import ktx.collections.isEmpty
  * @param currentIndex L'atlas actuel à dessiner
  * @param data Les atlas disponibles pour le gameObject
  */
+
+typealias AtlasRegion = Pair<FileWrapper, String>
+
 class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) : RenderableComponent(), CustomEditorImpl {
     constructor(currentIndex: Int = 0, vararg data: AtlasData) : this(currentIndex, arrayListOf(*data))
     @JsonCreator private constructor() : this(0, arrayListOf())
@@ -34,7 +37,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
      * @param regions Les régions disponibles dans l'atlas, une region correspond à une texture, en ajoutant plusieurs textures, on obtient une animation
      * @param frameDuration Représente la vitesse de transition entre 2 régions. Si la frameDuration correspond à 1, il s'écoulera 1 seconde entre chaque region.
      */
-    class AtlasData(var name: String, vararg regions: Pair<FileWrapper, String>, frameDuration: Float = 1f / regions.size) {
+    class AtlasData(var name: String, vararg regions: AtlasRegion, frameDuration: Float = 1f / regions.size) {
         @JsonCreator constructor() : this("default")
         constructor(name: String, packFile: FileWrapper, animation: String, frameDuration: Float) : this(name, *findAnimationRegions(packFile, animation), frameDuration = frameDuration)
         constructor(name: String, textureFile: FileWrapper) : this(name, textureFile to textureIdentifier)
@@ -55,13 +58,13 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
          */
         private var stateTime = 0f
 
-        fun render(gameObject: GameObject, flipX: Boolean, flipY: Boolean, batch: Batch) {
+        fun render(gameObject: GameObject, flipX: Boolean, flipY: Boolean, rotation: Rotation, batch: Batch) {
             /**
              * Si le nombre de région est <= à 1, il n'y a pas besoin de mettre à jour le temps écoulé car de toute façon une seule région sera dessinée.
              */
             if (regions.size > 1)
                 stateTime += Gdx.graphics.deltaTime
-            batch.draw(currentKeyFrame(), gameObject.box, flipX, flipY)
+            batch.draw(currentKeyFrame(), gameObject.box, flipX, flipY, rotation.degree)
         }
 
         fun currentKeyFrame() = animation.getKeyFrame(stateTime)
@@ -82,10 +85,13 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                 if(this.second != textureIdentifier) {
                     val atlas = ResourceManager.getPack(this.first.get())
                     val region = loadRegion(this)
-                    val index = atlas.regions.indexOf(region)
+
+                    val atlasRegions = atlas.regions.sortedBy { it.name }
+
+                    val index = atlasRegions.indexOf(region)
 
                     if (index > 0) {
-                        this@AtlasData.regions[regionIndex] = this.first to atlas.regions[index - 1].name
+                        this@AtlasData.regions[regionIndex] = this.first to atlasRegions[index - 1].name
                         updateAtlas()
                     }
                 }
@@ -100,10 +106,13 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                 if(this.second != textureIdentifier) {
                     val atlas = ResourceManager.getPack(this.first.get())
                     val region = loadRegion(this)
-                    val index = atlas.regions.indexOf(region)
+
+                    val atlasRegions = atlas.regions.sortedBy { it.name }
+
+                    val index = atlasRegions.indexOf(region)
 
                     if (index < atlas.regions.size - 1) {
-                        this@AtlasData.regions[regionIndex] = this.first to atlas.regions[index + 1].name
+                        this@AtlasData.regions[regionIndex] = this.first to atlasRegions[index + 1].name
                         updateAtlas()
                     }
                 }
@@ -130,7 +139,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
             /**
              * Permet de charger une région depuis un pack ou une texture.
              */
-            fun loadRegion(region: Pair<FileWrapper, String>): TextureAtlas.AtlasRegion {
+            fun loadRegion(region: AtlasRegion): TextureAtlas.AtlasRegion {
                 return if(region.second == AtlasComponent.textureIdentifier)
                     ResourceManager.getTexture(region.first.get()).toAtlasRegion()
                 else
@@ -147,7 +156,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
 
     override fun render(gameObject: GameObject, batch: Batch) {
         batch.setColor(1f, 1f, 1f, alpha)
-        data.elementAtOrNull(currentIndex)?.render(gameObject, flipX, flipY, batch)
+        data.elementAtOrNull(currentIndex)?.render(gameObject, flipX, flipY, rotation, batch)
         batch.setColor(1f, 1f, 1f, 1f)
     }
 
@@ -342,7 +351,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                             when (editAtlasType) {
                                 AtlasComponent.EditAtlasType.Pack -> {
                                     if (atlasPath.exists()) {
-                                        atlas.regions.forEach { region ->
+                                        atlas.regions.sortedBy { it.name }.forEach { region ->
                                             if (imageButton(region.texture.textureObjectHandle, imgBtnSize, Vec2(region.u, region.v), Vec2(region.u2, region.v2))) {
                                                 data.elementAtOrNull(atlasIndex)?.apply {
                                                     if (regionIndex in this.regions.indices) {

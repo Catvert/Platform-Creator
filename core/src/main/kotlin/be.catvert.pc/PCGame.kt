@@ -12,14 +12,10 @@ import be.catvert.pc.scenes.SceneManager
 import be.catvert.pc.scenes.SceneTweenAccessor
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics
 import com.badlogic.gdx.files.FileHandle
-import com.badlogic.gdx.graphics.Pixmap
-import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.Matrix4
 import glm_.vec2.Vec2
 import glm_.vec4.Vec4
@@ -70,7 +66,7 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
         gameAtlas = let {
             val atlas = mutableMapOf<FileHandle, List<FileHandle>>()
 
-            Constants.atlasDirPath.list().forEach {
+            Constants.packsDirPath.list().forEach {
                 if(it.isDirectory) {
                     atlas[it] = Utility.getFilesRecursivly(it, *Constants.levelAtlasExtension)
                 }

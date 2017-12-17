@@ -10,6 +10,7 @@
 ## BUGS
 
 - Gridmode + copie de plusieurs gameObject d'un coup
+- Placement de sprite à la position y = 0 -> suppression
 
 ## IDÉE
 

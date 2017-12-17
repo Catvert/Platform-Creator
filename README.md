@@ -5,9 +5,9 @@ Platform creator est un jeu de plateforme utilisant les ressources de Kenney et 
 
 ![Menu principal](FAQ/mainmenu.png)
 
-![En jeu](FAQ/ingame.png)
-
 ![Editeur de niveau](FAQ/editor.png)
+
+![Editeur de niveau 2](FAQ/editor_1.png)
 
 ## Licence
 

@@ -1,12 +1,12 @@
 
-smc_enemies.png
+enemies.png
 size: 2048,2048
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
 furball/blue/dead
   rotate: false
-  xy: 2, 2
+  xy: 518, 31
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
@@ -20,21 +20,21 @@ furball/blue/turn
   index: -1
 furball/blue/walk_0
   rotate: false
-  xy: 1030, 468
+  xy: 1544, 1754
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 furball/blue/walk_1
   rotate: false
-  xy: 1544, 1496
+  xy: 2, 2
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 furball/blue/walk_2
   rotate: false
-  xy: 518, 31
+  xy: 1030, 468
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
@@ -48,7 +48,7 @@ furball/blue/walk_3
   index: -1
 furball/blue/walk_4
   rotate: false
-  xy: 1544, 1754
+  xy: 1544, 1496
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
@@ -151,44 +151,44 @@ furball/boss/walk_7
   orig: 512, 433
   offset: 0, 0
   index: -1
-furball/brown/dead
-  rotate: false
-  xy: 1546, 329
-  size: 256, 213
-  orig: 256, 213
-  offset: 0, 0
-  index: -1
 furball/brown/walk_0
-  rotate: false
-  xy: 1292, 32
-  size: 256, 216
-  orig: 256, 216
-  offset: 0, 0
-  index: -1
-furball/brown/walk_2
-  rotate: false
-  xy: 1034, 32
-  size: 256, 216
-  orig: 256, 216
-  offset: 0, 0
-  index: -1
-furball/brown/walk_3
-  rotate: false
-  xy: 1732, 98
-  size: 256, 216
-  orig: 256, 216
-  offset: 0, 0
-  index: -1
-furball/brown/walk_4
   rotate: false
   xy: 1544, 762
   size: 256, 216
   orig: 256, 216
   offset: 0, 0
   index: -1
-furball/brown/walk_5
+furball/brown/walk_1
+  rotate: false
+  xy: 1732, 98
+  size: 256, 216
+  orig: 256, 216
+  offset: 0, 0
+  index: -1
+furball/brown/walk_2
+  rotate: false
+  xy: 1292, 32
+  size: 256, 216
+  orig: 256, 216
+  offset: 0, 0
+  index: -1
+furball/brown/walk_3
+  rotate: false
+  xy: 1034, 250
+  size: 256, 216
+  orig: 256, 216
+  offset: 0, 0
+  index: -1
+furball/brown/walk_4
   rotate: false
   xy: 1546, 544
+  size: 256, 216
+  orig: 256, 216
+  offset: 0, 0
+  index: -1
+furball/brown/walk_5
+  rotate: false
+  xy: 1546, 326
   size: 256, 216
   orig: 256, 216
   offset: 0, 0
@@ -202,7 +202,7 @@ furball/brown/walk_6
   index: -1
 furball/brown/walk_7
   rotate: false
-  xy: 1034, 250
+  xy: 1034, 32
   size: 256, 216
   orig: 256, 216
   offset: 0, 0
@@ -223,7 +223,7 @@ turtle/green/walk_1
   index: -1
 turtle/green/walk_2
   rotate: false
-  xy: 1550, 71
+  xy: 1550, 68
   size: 180, 256
   orig: 180, 256
   offset: 0, 0
@@ -264,11 +264,18 @@ turtle/red/walk_2
   offset: 0, 0
   index: -1
 
-smc_enemies2.png
+enemies2.png
 size: 2048,512
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
+furball/brown/dead
+  rotate: false
+  xy: 2, 217
+  size: 256, 213
+  orig: 256, 213
+  offset: 0, 0
+  index: -1
 furball/brown/turn
   rotate: false
   xy: 2, 2
@@ -276,51 +283,44 @@ furball/brown/turn
   orig: 256, 213
   offset: 0, 0
   index: -1
-furball/brown/walk_1
-  rotate: false
-  xy: 2, 217
-  size: 256, 216
-  orig: 256, 216
-  offset: 0, 0
-  index: -1
 turtle/green/shell_front
   rotate: false
-  xy: 518, 31
+  xy: 518, 230
   size: 256, 200
   orig: 256, 200
   offset: 0, 0
   index: -1
 turtle/green/shell_move
   rotate: false
-  xy: 260, 31
+  xy: 260, 28
   size: 256, 200
   orig: 256, 200
   offset: 0, 0
   index: -1
 turtle/green/shell_move_0
   rotate: false
-  xy: 260, 233
+  xy: 260, 230
   size: 256, 200
   orig: 256, 200
   offset: 0, 0
   index: -1
 turtle/green/shell_move_1
   rotate: false
-  xy: 518, 233
+  xy: 518, 28
   size: 256, 200
   orig: 256, 200
   offset: 0, 0
   index: -1
 turtle/red/shell_move_0
   rotate: false
-  xy: 776, 33
+  xy: 776, 231
   size: 254, 199
   orig: 254, 199
   offset: 0, 0
   index: -1
 turtle/red/shell_move_1
   rotate: false
-  xy: 776, 234
+  xy: 776, 30
   size: 254, 199
   orig: 254, 199
   offset: 0, 0

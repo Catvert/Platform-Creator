@@ -1,5 +1,5 @@
 
-smc_pipes.png
+pipes.png
 size: 2048,2048
 format: RGBA8888
 filter: Nearest,Nearest
@@ -27,14 +27,14 @@ green/up
   index: -1
 green/ver
   rotate: false
-  xy: 2, 776
+  xy: 516, 776
   size: 512, 256
   orig: 512, 256
   offset: 0, 0
   index: -1
 grey/up
   rotate: false
-  xy: 516, 776
+  xy: 2, 518
   size: 512, 256
   orig: 512, 256
   offset: 0, 0
@@ -55,7 +55,7 @@ orange/up
   index: -1
 orange/ver
   rotate: false
-  xy: 516, 1034
+  xy: 2, 776
   size: 512, 256
   orig: 512, 256
   offset: 0, 0
@@ -69,7 +69,7 @@ yellow/up
   index: -1
 yellow/ver
   rotate: false
-  xy: 2, 518
+  xy: 516, 1034
   size: 512, 256
   orig: 512, 256
   offset: 0, 0

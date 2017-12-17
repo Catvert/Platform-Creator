@@ -3,6 +3,7 @@ package be.catvert.pc.components
 import be.catvert.pc.GameObject
 import be.catvert.pc.GameObjectState
 import be.catvert.pc.containers.GameObjectContainer
+import be.catvert.pc.utility.ExposeEditor
 import be.catvert.pc.utility.ReflectionUtility
 import be.catvert.pc.utility.ResourceLoader
 import be.catvert.pc.utility.ResourceManager
@@ -36,6 +37,10 @@ abstract class LogicsComponent : Component() {
 /**
  * Component ayant le besoin de dessiner
  */
-abstract class RenderableComponent(var flipX: Boolean = false, var flipY: Boolean = false, @JsonIgnore var alpha: Float = 1f) : Component() {
+abstract class RenderableComponent(@ExposeEditor var flipX: Boolean = false, @ExposeEditor var flipY: Boolean = false, @ExposeEditor var rotation: Rotation = Rotation.Zero, @JsonIgnore var alpha: Float = 1f) : Component() {
+    enum class Rotation(val degree: Float) {
+        Zero(0f), Quarter(90f), Half(180f), ThreeQuarter(270f)
+    }
+
     abstract fun render(gameObject: GameObject, batch: Batch)
 }

@@ -4,6 +4,7 @@ eclipse.project.name = appName + '-core'
 dependencies {
     compile "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
     compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     compile "net.dermetfan.libgdx-utils:libgdx-utils:$utilsVersion"
