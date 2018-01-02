@@ -14,8 +14,7 @@ class StateAction(var stateIndex: Int) : Action, CustomEditorImpl {
     @JsonCreator private constructor() : this(0)
 
     override fun invoke(gameObject: GameObject) {
-        if(gameObject.getCurrentStateIndex() != stateIndex)
-            gameObject.setState(stateIndex)
+        gameObject.setState(stateIndex)
     }
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level) {

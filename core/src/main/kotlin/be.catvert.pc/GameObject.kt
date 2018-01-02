@@ -26,7 +26,8 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
                  @ExposeEditor var name: String = tag,
                  @ExposeEditor var box: Rect = Rect(size = Size(1, 1)),
                  container: GameObjectContainer? = null,
-                 initDefaultState: GameObjectState.() -> Unit = {}) : Updeatable, Renderable, ResourceLoader, CustomEditorImpl {
+                 initDefaultState: GameObjectState.() -> Unit = {},
+                 vararg otherStates: GameObjectState = arrayOf()) : Updeatable, Renderable, ResourceLoader, CustomEditorImpl {
 
     @ExposeEditor(min = -100, max = 100)
     var layer: Int = 0
@@ -37,7 +38,7 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
     @ExposeEditor(customName = "on out of map")
     var onOutOfMapAction: Action = RemoveGOAction()
 
-    @JsonProperty("states") private val states: MutableSet<GameObjectState> = mutableSetOf(GameObjectState("default").apply(initDefaultState))
+    @JsonProperty("states") private val states: MutableSet<GameObjectState> = mutableSetOf(GameObjectState("default").apply(initDefaultState), *otherStates)
 
     @JsonProperty("currentState") private var currentState: Int = 0
         set(value) {

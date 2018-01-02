@@ -12,12 +12,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 abstract class GameObjectMatrixContainer : GameObjectContainer() {
     private val shapeRenderer = ShapeRenderer()
 
-    @JsonIgnore
-    val minMatrixSize = 10
-
-    var matrixWidth = minMatrixSize
+    var matrixWidth = Constants.minMatrixSize
         set(value) {
-            if (value >= minMatrixSize) {
+            if (value >= Constants.minMatrixSize) {
                 if (value > field) {
                     for (i in 0 until value - field) {
                         addLineWidth()
@@ -31,9 +28,9 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
                 }
             }
         }
-    var matrixHeight = minMatrixSize
+    var matrixHeight = Constants.minMatrixSize
         set(value) {
-            if (value >= minMatrixSize) {
+            if (value >= Constants.minMatrixSize) {
                 if (value > field) {
                     for (i in 0 until value - field) {
                         addLineHeight()
@@ -47,18 +44,16 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
                 }
             }
         }
-
-    private val matrixSizeCell = 200
     /**
      * La matrix permettant de stoquer les différentes entités selon leur position dans l'espace
      */
-    private val matrixGrid = matrix2d(matrixWidth, matrixHeight, { row: Int, width: Int -> MutableList(width) { col -> mutableListOf<GameObject>() to Rect(row * matrixSizeCell, col * matrixSizeCell, matrixSizeCell, matrixSizeCell) } })
+    private val matrixGrid = matrix2d(matrixWidth, matrixHeight, { row: Int, width: Int -> MutableList(width) { col -> mutableListOf<GameObject>() } })
     /**
      * Le box illustrant la matrix
      */
 
     @JsonIgnore
-    var matrixRect = Rect(0, 0, matrixSizeCell * matrixWidth, matrixSizeCell * matrixHeight)
+    var matrixRect = Rect(0, 0, Constants.matrixCellSize * matrixWidth, Constants.matrixCellSize * matrixHeight)
         private set
 
     /**
@@ -115,9 +110,9 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
         if (drawDebugCells) {
             shapeRenderer.projectionMatrix = PCGame.mainBatch.projectionMatrix
             shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
-            matrixGrid.forEach {
-                it.forEach {
-                    shapeRenderer.rect(it.second)
+            matrixGrid.forEachIndexed { x, it ->
+                it.forEachIndexed { y, it ->
+                    shapeRenderer.rect(getRectangleCell(x, y))
                 }
             }
             shapeRenderer.rect(activeRect)
@@ -126,49 +121,48 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     }
 
     private fun addLineWidth() {
-        val width = mutableListOf<Pair<MutableList<GameObject>, Rect>>()
-        matrixGrid.last().map { it.second }.forEach {
-            width.add(mutableListOf<GameObject>() to Rect(it.x + matrixSizeCell, it.y, matrixSizeCell, matrixSizeCell))
+        val width = mutableListOf<MutableList<GameObject>>()
+        matrixGrid.last().forEach {
+            width.add(mutableListOf())
         }
 
         matrixGrid.add(width)
 
-        matrixRect.width += matrixSizeCell
+        matrixRect.width += Constants.matrixCellSize
     }
 
     private fun removeLineWidth() {
         val last = matrixGrid.last().apply {
             forEach {
-                it.first.forEach {
+                it.forEach {
                     removeGameObject(it)
                 }
             }
         }
         matrixGrid.remove(last)
 
-        matrixRect.width -= matrixSizeCell
+        matrixRect.width -= Constants.matrixCellSize
     }
 
     private fun addLineHeight() {
         matrixGrid.forEach {
-            val lastRect = it.last().second
-            it.add(mutableListOf<GameObject>() to Rect(lastRect.x, lastRect.y + matrixSizeCell, matrixSizeCell, matrixSizeCell))
+            it.add(mutableListOf())
         }
 
-        matrixRect.height += matrixSizeCell
+        matrixRect.height += Constants.matrixCellSize
     }
 
     private fun removeLineHeight() {
         matrixGrid.forEach {
             val last = it.last().apply {
-                it.last().first.forEach {
+                it.last().forEach {
                     removeGameObject(it)
                 }
             }
             it.remove(last)
         }
 
-        matrixRect.height -= matrixSizeCell
+        matrixRect.height -= Constants.matrixCellSize
     }
 
     override fun addGameObject(gameObject: GameObject): GameObject {
@@ -182,7 +176,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     override fun onRemoveGameObject(gameObject: GameObject) {
         super.onRemoveGameObject(gameObject)
         gameObject.gridCells.forEach {
-            matrixGrid.elementAtOrNull(it.x)?.elementAtOrNull(it.y)?.first?.remove(gameObject)
+            matrixGrid.elementAtOrNull(it.x)?.elementAtOrNull(it.y)?.remove(gameObject)
         }
         gameObject.gridCells.clear()
     }
@@ -191,6 +185,8 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
         super.onPostDeserialization()
         setGameObjectsToMatrix(gameObjects)
     }
+
+    private fun getRectangleCell(x: Int, y: Int) = Rect(x * Constants.matrixCellSize, y * Constants.matrixCellSize, Constants.matrixCellSize, Constants.matrixCellSize)
 
     private fun addRectListener(gameObject: GameObject) {
         gameObject.box.onPositionChange.register { setGameObjectToGrid(gameObject) }
@@ -209,12 +205,12 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
                 return false
             }
 
-            return rect.overlaps(matrixGrid[x][y].second)
+            return rect.overlaps(getRectangleCell(x, y))
         }
 
         if (matrixRect.overlaps(rect)) {
-            var x = Math.max(0, rect.x / matrixSizeCell)
-            var y = Math.max(0, rect.y / matrixSizeCell)
+            var x = Math.max(0, rect.x / Constants.matrixCellSize)
+            var y = Math.max(0, rect.y / Constants.matrixCellSize)
             if (rectContains(x, y)) {
                 cells += GridCell(x, y)
                 val firstXCell = x
@@ -245,13 +241,13 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
      */
     private fun setGameObjectToGrid(gameObject: GameObject) {
         gameObject.gridCells.forEach {
-            matrixGrid[it.x][it.y].first.remove(gameObject)
+            matrixGrid[it.x][it.y].remove(gameObject)
         }
 
         gameObject.gridCells.clear()
 
         getCellsInRect(gameObject.box).forEach {
-            matrixGrid[it.x][it.y].first.add(gameObject)
+            matrixGrid[it.x][it.y].add(gameObject)
             gameObject.gridCells.add(it)
         }
     }
@@ -259,7 +255,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     private fun clearMatrix() {
         matrixGrid.forEach {
             it.forEach {
-                it.first.clear()
+                it.clear()
             }
         }
     }
@@ -281,33 +277,10 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     fun getAllGameObjectsInCells(cells: List<GridCell>): Set<GameObject> {
         val list = mutableSetOf<GameObject>()
         cells.forEach {
-            list += matrixGrid[it.x][it.y].first
+            list += matrixGrid[it.x][it.y]
         }
         return list
     }
 
     fun getAllGameObjectsInCells(inRect: Rect): Set<GameObject> = getAllGameObjectsInCells(getCellsInRect(inRect))
-
-    /**
-     * Permet de retourné les entités présentent dans le box spécifiés
-     * @param rect le box dans lequel les entités seront retournées
-     * @param overlaps permet de spécifier si le mode de détection est en overlaps ou contains
-     */
-    /*fun getAllGameObjectsInRect(rect: Rect, overlaps: Boolean = true): Set<GameObject> {
-        val list = mutableSetOf<GameObject>()
-        val gridCells = getCellsInRect(rect)
-        gridCells.forEach {
-            matrixGrid[it.x][it.y].first.forEach {
-                if (overlaps) {
-                    if (rect.overlaps(it.box))
-                        list += it
-                } else {
-                    if (rect.contains(it.box))
-                        list += it
-                }
-
-            }
-        }
-        return list
-    }*/
 }

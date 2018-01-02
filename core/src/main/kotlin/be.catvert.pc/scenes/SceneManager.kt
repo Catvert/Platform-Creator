@@ -12,8 +12,8 @@ import imgui.ImGui
 import imgui.impl.LwjglGL3
 import ktx.app.clearScreen
 
-object SceneManager : Updeatable, Renderable, Resizable, Disposable {
-    private var currentScene: Scene = MainMenuScene()
+class SceneManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Disposable {
+    private var currentScene: Scene = initialScene
     private var nextScene: Scene? = null
 
     fun currentScene() = currentScene

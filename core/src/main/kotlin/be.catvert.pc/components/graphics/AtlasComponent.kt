@@ -18,6 +18,7 @@ import imgui.functionalProgramming
 import ktx.assets.toLocalFile
 import ktx.collections.gdxArrayOf
 import ktx.collections.isEmpty
+import kotlin.reflect.KMutableProperty0
 
 /**
  * Component permettant d'ajouter des textures et animations au gameObject
@@ -37,12 +38,19 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
      * @param regions Les régions disponibles dans l'atlas, une region correspond à une texture, en ajoutant plusieurs textures, on obtient une animation
      * @param frameDuration Représente la vitesse de transition entre 2 régions. Si la frameDuration correspond à 1, il s'écoulera 1 seconde entre chaque region.
      */
-    class AtlasData(var name: String, vararg regions: AtlasRegion, frameDuration: Float = 1f / regions.size) {
+    class AtlasData(var name: String, vararg regions: AtlasRegion, animationPlayMode: Animation.PlayMode = Animation.PlayMode.LOOP, frameDuration: Float = 1f / regions.size) {
         @JsonCreator constructor() : this("default")
-        constructor(name: String, packFile: FileWrapper, animation: String, frameDuration: Float) : this(name, *findAnimationRegions(packFile, animation), frameDuration = frameDuration)
+        constructor(name: String, packFile: FileWrapper, animation: String, frameDuration: Float,  animationPlayMode: Animation.PlayMode = Animation.PlayMode.LOOP) : this(name, *findAnimationRegions(packFile, animation), animationPlayMode = animationPlayMode, frameDuration = frameDuration)
         constructor(name: String, textureFile: FileWrapper) : this(name, textureFile to textureIdentifier)
 
         var regions = arrayListOf(*regions)
+
+        var animationPlayMode: Animation.PlayMode = animationPlayMode
+            set(value) {
+                field = value
+                if(::animation.isInitialized)
+                    animation.playMode = value
+            }
 
         var frameDuration: Float = frameDuration
             set(value) {
@@ -132,7 +140,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
             if (frames.isEmpty())
                 frames.add(ResourceManager.defaultPackRegion)
 
-            return Animation(frameDuration, frames, Animation.PlayMode.LOOP)
+            return Animation(frameDuration, frames, animationPlayMode)
         }
 
         companion object {
@@ -180,7 +188,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                 combo("atlas initial", ::currentIndex, data.map { it.name })
             }
 
-            if (button("Éditer", Vec2(-1, 20f))) {
+            if (button("Éditer", Vec2(-1, 0))) {
                 showEditAtlasWindow = true
             }
 
@@ -206,11 +214,11 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                         if (inputText("Nom", atlasName))
                             addAtlasName = String(atlasName)
                     }
-                    if (button("Ajouter", Vec2(-1, 20f))) {
+                    if (button("Ajouter", Vec2(-1, 0))) {
                         data.add(AtlasData(addAtlasName).apply { updateAtlas() })
                         closeCurrentPopup()
                     }
-                    if (button("Fermer", Vec2(-1, 20f)))
+                    if (button("Fermer", Vec2(-1, 0)))
                         closeCurrentPopup()
                 }
 
@@ -263,11 +271,11 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
 
                             functionalProgramming.withGroup {
                                 functionalProgramming.withGroup {
-                                    if (button("<-", Vec2((regionBtnSize.x + 5f) / 2f, 20f))) {
+                                    if (button("<-", Vec2((regionBtnSize.x + 5f) / 2f, 0))) {
                                         this.previousFrameRegion(index)
                                     }
                                     sameLine()
-                                    if (button("->", Vec2((regionBtnSize.x + 5f) / 2f, 20f))) {
+                                    if (button("->", Vec2((regionBtnSize.x + 5f) / 2f, 0))) {
                                         this.nextFrameRegion(index)
                                     }
                                 }
@@ -282,7 +290,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                                 }
 
                                 functionalProgramming.withId("suppr region $index") {
-                                    if (button("Suppr.", Vec2(regionBtnSize.x + 10f, 20f))) {
+                                    if (button("Suppr.", Vec2(regionBtnSize.x + 10f, 0))) {
                                         data.elementAtOrNull(atlasIndex)?.apply {
                                             this.regions.removeAt(index)
                                             updateAtlas()
@@ -304,6 +312,9 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                             functionalProgramming.withItemWidth(calcItemWidth()) {
                                 sliderFloat("Vitesse", ::frameDuration, 0f, 1f)
                             }
+                            val playModeItem = ImguiHelper.Item(animationPlayMode)
+                            if(ImguiHelper.enum("play mode", playModeItem.cast()))
+                                animationPlayMode = playModeItem.obj
                         }
 
                         separator()

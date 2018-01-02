@@ -111,14 +111,14 @@ class TweenComponent(var tweens: ArrayList<TweenData>) : BasicComponent(), Custo
     override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
         with(ImGui) {
             ImguiHelper.addImguiWidgetsArray("tweens", tweens, { it.name }, { TweenFactory.EmptyTween() }, gameObject, level) {
-                if (button("Ajouter depuis..", Vec2(-1, 20f)))
+                if (button("Ajouter depuis..", Vec2(-1, 0)))
                     openPopup(addTweenTitle)
 
                 if (beginPopup(addTweenTitle)) {
                     functionalProgramming.withItemWidth(100f) {
                         combo("tweens", ::currentTweenIndex, TweenFactory.values().map { it.name })
                     }
-                    if (button("Ajouter", Vec2(-1, 20f))) {
+                    if (button("Ajouter", Vec2(-1, 0))) {
                         tweens.add(TweenFactory.values()[currentTweenIndex]())
                         closeCurrentPopup()
                     }

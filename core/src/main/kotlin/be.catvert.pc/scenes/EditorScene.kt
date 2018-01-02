@@ -12,6 +12,7 @@ import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
@@ -38,7 +39,7 @@ import kotlin.math.roundToInt
  * Scène de l'éditeur de niveau
  */
 class EditorScene(val level: Level) : Scene(level.background) {
-    enum class EditorMode {
+    private enum class EditorMode {
         NO_MODE, SELECT, COPY, SELECT_POINT, SELECT_GO, TRY_LEVEL
     }
 
@@ -102,7 +103,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
         val settingsLevelBackgroundType: ImguiHelper.Item<Enum<*>> = ImguiHelper.Item(background.type)
 
-        var showSaveLevelExitWindow = false
+        var showExitWindow = false
 
         var showInfoGameObjectWindow = false
 
@@ -112,6 +113,8 @@ class EditorScene(val level: Level) : Scene(level.background) {
         var gameObjectsSpritePackIndex = 0
         var gameObjectsSpritePackTypeIndex = 0
         var gameObjectsSpritePhysics = true
+        var gameObjectsSpriteRealSize = true
+        var gameObjectsSpriteCustomSize = Size(50, 50)
 
         init {
             when (background.type) {
@@ -125,7 +128,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
     override val camera: OrthographicCamera = OrthographicCamera(Constants.levelCameraRatio, Constants.levelCameraRatio * (Gdx.graphics.height.toFloat() / Gdx.graphics.width))
 
-    private val shapeRenderer = ShapeRenderer()
+    private val shapeRenderer = ShapeRenderer().apply { setAutoShapeType(true) }
 
     private val editorFont = BitmapFont(Constants.editorFontPath)
 
@@ -182,6 +185,10 @@ class EditorScene(val level: Level) : Scene(level.background) {
         gameObjectContainer.cast<Level>()?.drawDebug()
 
         shapeRenderer.projectionMatrix = camera.combined
+
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
 
         shapeRenderer.withColor(Color.GOLDENROD) {
@@ -221,9 +228,15 @@ class EditorScene(val level: Level) : Scene(level.background) {
                  * Dessine le box en cour de création
                  */
                 if (selectRectangleData.rectangleStarted) {
-                    shapeRenderer.withColor(Color.FIREBRICK) {
+                    shapeRenderer.set(ShapeRenderer.ShapeType.Filled)
+                    shapeRenderer.withColor(Color.FIREBRICK.apply { a = 0.5f }) {
                         rect(selectRectangleData.getRect())
                     }
+                    shapeRenderer.set(ShapeRenderer.ShapeType.Line)
+                    shapeRenderer.withColor(Color.RED) {
+                        rect(selectRectangleData.getRect())
+                    }
+
                 }
             }
             EditorMode.SELECT -> {
@@ -725,7 +738,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
             if (editorMode == EditorMode.TRY_LEVEL)
                 finishTryLevel()
             else
-                editorSceneUI.showSaveLevelExitWindow = true
+                editorSceneUI.showExitWindow = true
         }
 
         if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_GRID_MODE.key) && editorMode != EditorMode.TRY_LEVEL) {
@@ -897,32 +910,35 @@ class EditorScene(val level: Level) : Scene(level.background) {
                 drawInfoGameObjectWindow(selectGameObject!!)
             }
 
-            if (editorSceneUI.showSaveLevelExitWindow) {
-                val windowSize = Vec2(375f, 60f)
-                setNextWindowSize(windowSize, Cond.Once)
-                setNextWindowPos(Vec2(Gdx.graphics.width / 2f - windowSize.x / 2f, Gdx.graphics.height / 2f - windowSize.y / 2f), Cond.Once)
-                functionalProgramming.withWindow("Sauvegarder avant de quitter?", editorSceneUI::showSaveLevelExitWindow, WindowFlags.NoResize.i or WindowFlags.NoCollapse.i) {
-                    fun showMainMenu() {
-                        editorSceneUI.showSaveLevelExitWindow = false
-                        SceneManager.loadScene(MainMenuScene())
-                    }
+            if (editorSceneUI.showExitWindow) {
+                drawExitWindow()
+            }
+        }
+    }
 
-                    if (button("Sauvegarder")) {
-                        saveLevelToFile()
-                        showMainMenu()
-                    }
-                    sameLine()
-                    if (button("Abandonner les modifications")) {
-                        if (!level.levelPath.toLocalFile().exists()) {
-                            level.deleteFiles()
-                        }
-                        showMainMenu()
-                    }
-                    sameLine()
-                    if (button("Annuler")) {
-                        editorSceneUI.showSaveLevelExitWindow = false
-                    }
+    private fun drawExitWindow() {
+        val windowSize = Vec2(375f, 55f)
+        ImGui.setNextWindowSize(windowSize, Cond.Once)
+        ImGui.setNextWindowPos(Vec2(Gdx.graphics.width / 2f - windowSize.x / 2f, Gdx.graphics.height / 2f - windowSize.y / 2f), Cond.Once)
+        functionalProgramming.withWindow("Sauvegarder avant de quitter?", editorSceneUI::showExitWindow, WindowFlags.NoResize.i or WindowFlags.NoCollapse.i) {
+            fun showMainMenu() {
+                PCGame.sceneManager.loadScene(MainMenuScene())
+            }
+
+            if (ImGui.button("Sauvegarder")) {
+                saveLevelToFile()
+                showMainMenu()
+            }
+            ImGui.sameLine()
+            if (ImGui.button("Abandonner les modifications")) {
+                if (!level.levelPath.toLocalFile().exists()) {
+                    level.deleteFiles()
                 }
+                showMainMenu()
+            }
+            ImGui.sameLine()
+            if (ImGui.button("Annuler")) {
+                editorSceneUI.showExitWindow = false
             }
         }
     }
@@ -970,7 +986,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         }
                         separator()
                         menuItem("Quitter") {
-                            editorSceneUI.showSaveLevelExitWindow = true
+                            editorSceneUI.showExitWindow = true
                         }
                     }
 
@@ -980,11 +996,6 @@ class EditorScene(val level: Level) : Scene(level.background) {
                             ImguiHelper.addImguiWidgetsArray("tags", level.tags, { it }, { "test" }, {
                                 val buf = it.obj.toCharArray()
                                 if (ImGui.inputText("", buf)) {
-                                    level.findGameObjectsByTag(it.obj).forEach {
-                                        //     it.tag = "ahah"
-                                    }
-
-                                    //   it.obj = "ahah"
                                     return@addImguiWidgetsArray true
                                 }
                                 false
@@ -1086,7 +1097,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
     }
 
     private fun drawGameObjectsWindow() {
-        val windowSize = Vec2(Gdx.graphics.width / 7, Gdx.graphics.height)
+        val windowSize = Vec2(225, Gdx.graphics.height)
         with(ImGui) {
             setNextWindowSize(windowSize)
             setNextWindowPos(Vec2(Gdx.graphics.width - windowSize.x, 0), Cond.Once)
@@ -1120,6 +1131,9 @@ class EditorScene(val level: Level) : Scene(level.background) {
                                         if (editorSceneUI.gameObjectsSpriteShowImportedPack) level.resourcesAtlas().map { it.nameWithoutExtension() }
                                         else PCGame.gameAtlas.entries.elementAtOrNull(editorSceneUI.gameObjectsSpritePackTypeIndex)?.value?.map { it.nameWithoutExtension() } ?: arrayListOf())
                                 checkbox("Physics", editorSceneUI::gameObjectsSpritePhysics)
+                                checkbox("Taille réelle", editorSceneUI::gameObjectsSpriteRealSize)
+                                if(!editorSceneUI.gameObjectsSpriteRealSize)
+                                    ImguiHelper.size(editorSceneUI::gameObjectsSpriteCustomSize, Size(1), Size(Constants.maxGameObjectSize))
                             }
                         }
                         separator()
@@ -1127,7 +1141,8 @@ class EditorScene(val level: Level) : Scene(level.background) {
                             val atlas = ResourceManager.getPack(atlasPath)
                             atlas.regions.sortedBy { it.name }.forEachIndexed { index, region ->
                                 val atlasRegion = atlasPath.toFileWrapper() to region.name
-                                val prefab = if (editorSceneUI.gameObjectsSpritePhysics) PrefabSetup.setupPhysicsSprite(atlasRegion) else PrefabSetup.setupSprite(atlasRegion)
+                                val size = if(editorSceneUI.gameObjectsSpriteRealSize) region.let { Size(it.regionWidth, it.regionHeight) } else Size(50, 50)
+                                val prefab = if (editorSceneUI.gameObjectsSpritePhysics) PrefabSetup.setupPhysicsSprite(atlasRegion, size) else PrefabSetup.setupSprite(atlasRegion, size)
                                 addImageBtn(region, prefab, false)
                                 if ((index + 1) % 3 != 0)
                                     sameLine()
@@ -1160,7 +1175,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
         with(ImGui) {
             functionalProgramming.withWindow("Réglages du gameObject", editorSceneUI::showInfoGameObjectWindow, WindowFlags.AlwaysAutoResize.i) {
-                if (button("Supprimer ce gameObject", Vec2(-1, 20f))) {
+                if (button("Supprimer ce gameObject", Vec2(-1, 0))) {
                     gameObject.removeFromParent()
                     if (selectGameObject === gameObject) {
                         selectGameObject = null
@@ -1169,7 +1184,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                     }
                 }
 
-                if (button("Créer un prefab", Vec2(-1, 20f)))
+                if (button("Créer un prefab", Vec2(-1, 0)))
                     openPopup(createPrefabTitle)
 
                 ImguiHelper.insertImguiExposeEditorField(gameObject, gameObject, level)
@@ -1202,14 +1217,14 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         if (component != null) {
                             functionalProgramming.withIndent {
                                 ImguiHelper.insertImguiExposeEditorField(component, gameObject, level)
-                                if (button("Supprimer ce comp.", Vec2(-1, 20f))) {
+                                if (button("Supprimer ce comp.", Vec2(-1, 0))) {
                                     gameObject.getStates().elementAtOrNull(editorSceneUI.gameObjectCurrentStateIndex)?.removeComponent(component)
                                 }
                             }
                         }
                         separator()
                         pushItemFlag(ItemFlags.Disabled.i, gameObject.getStates().elementAtOrNull(editorSceneUI.gameObjectCurrentStateIndex)?.getComponents()?.size == PCGame.componentsClasses.size)
-                        if (button("Ajouter un component", Vec2(-1, 20f)))
+                        if (button("Ajouter un component", Vec2(-1, 0)))
                             openPopup(addComponentTitle)
                         popItemFlag()
                     }

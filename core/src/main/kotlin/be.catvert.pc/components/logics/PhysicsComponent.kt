@@ -29,9 +29,8 @@ enum class MovementType {
  * Classe de données permettant de gérer les sauts notament en définissant la hauteur du saut
  * @property isJumping : Permet de savoir si l'entité est entrain de sauté
  * @property targetHeight : La hauteur en y à atteindre
- * @property startJumping : Débute le saut de l'entité
  */
-private data class JumpData(var isJumping: Boolean = false, var targetHeight: Int = 0, var startJumping: Boolean = false)
+private data class JumpData(var isJumping: Boolean = false, var targetHeight: Int = 0)
 
 /**
  * Listener lors d'une collision avec une autre entité pour le mask correspondant
@@ -151,7 +150,6 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                         }
                         jumpData.isJumping = true
                         jumpData.targetHeight = gameObject.box.y + jumpHeight
-                        jumpData.startJumping = true
 
                         gravity = false
 
@@ -168,7 +166,6 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                             moveSpeedY = gravitySpeed.toFloat()
                             addJumpAfterClear = true
                         }
-                        jumpData.startJumping = false
                     }
                 }
             }
@@ -279,12 +276,12 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                         moveY < 0 -> BoxSide.Down
                         else -> {
                             Log.warn { "Collision invalide !" }
-                            BoxSide.Left
+                            BoxSide.All
                         }
                     }
 
                     gameObject.getCurrentState().getComponent<PhysicsComponent>()?.apply {
-                        collisionsActions.firstOrNull { collisionAction -> collisionAction.side == side && collisionAction.target == it.tag }?.apply {
+                        collisionsActions.firstOrNull { collisionAction -> (collisionAction.side == side || collisionAction.side == BoxSide.All)&& collisionAction.target == it.tag }?.apply {
                             action(gameObject)
                             tagAction(it)
                         }
@@ -292,7 +289,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                     }
 
                     it.getCurrentState().getComponent<PhysicsComponent>()?.apply {
-                        collisionsActions.firstOrNull { collisionAction -> collisionAction.side == -side && collisionAction.target == gameObject.tag }?.apply {
+                        collisionsActions.firstOrNull { collisionAction -> (collisionAction.side == -side || collisionAction.side == BoxSide.All)&& collisionAction.target == gameObject.tag }?.apply {
                             action(it)
                             tagAction(gameObject)
                         }
@@ -330,6 +327,9 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                     if (it.box.y + it.box.height == gameObject.box.y) {
                         collideGameObjects += it
                     }
+                }
+                BoxSide.All -> {
+                    collideGameObjects += it
                 }
             }
         }

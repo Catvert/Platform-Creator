@@ -7,8 +7,7 @@ import be.catvert.pc.components.basics.TweenComponent
 import be.catvert.pc.components.graphics.AtlasComponent
 
 enum class TweenFactory(val tween: () -> TweenComponent.TweenData) {
-    EmptyTween({ TweenComponent.TweenData("empty tween", GameObjectTweenAccessor.GameObjectTween.NOTHING, floatArrayOf(0f), 0f, arrayListOf(), EmptyAction()) }),
-    RemoveGOTween({ TweenComponent.TweenData("remove go tween", GameObjectTweenAccessor.GameObjectTween.ATLAS_ALPHA, floatArrayOf(0f), 0.5f, arrayListOf(AtlasComponent::class.java), RemoveGOAction(), false) });
-
+    EmptyTween({ TweenComponent.TweenData("empty", GameObjectTweenAccessor.GameObjectTween.NOTHING, floatArrayOf(0f), 0f, arrayListOf(), EmptyAction()) }),
+    RemoveGOTween({ TweenComponent.TweenData("remove go", GameObjectTweenAccessor.GameObjectTween.ATLAS_ALPHA, floatArrayOf(0f), 0.5f, arrayListOf(AtlasComponent::class.java), RemoveGOAction(), false) });
     operator fun invoke() = tween()
 }

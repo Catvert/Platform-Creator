@@ -14,6 +14,9 @@ object Constants {
     const val minLayerIndex = -100
     const val maxLayerIndex = 100
 
+    const val minMatrixSize = 10
+    const val matrixCellSize = 200
+
     const val levelCameraRatio = 2000f
 
     const val assetsDir = "assets/"
@@ -21,6 +24,8 @@ object Constants {
     val serializationType = SerializationFactory.MapperType.JSON
 
     private val assetsDirPath = "assets/".toLocalFile()
+
+    const val configPath = assetsDir + "config.json"
 
     val bundlesDirPath = assetsDirPath.child("i18n_bundles")
 

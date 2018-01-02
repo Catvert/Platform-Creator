@@ -1,0 +1,83 @@
+
+items.png
+size: 2048,1024
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+fireplant
+  rotate: false
+  xy: 260, 132
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+fireplant_left
+  rotate: false
+  xy: 518, 648
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+fireplant_right
+  rotate: false
+  xy: 2, 132
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+moon_1
+  rotate: false
+  xy: 2, 648
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+moon_2
+  rotate: false
+  xy: 2, 390
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+mushroom_blue
+  rotate: false
+  xy: 260, 390
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+mushroom_ghost
+  rotate: false
+  xy: 776, 648
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+mushroom_green
+  rotate: false
+  xy: 518, 390
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+mushroom_poison
+  rotate: false
+  xy: 260, 648
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+mushroom_red
+  rotate: false
+  xy: 518, 132
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+star
+  rotate: false
+  xy: 2, 2
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1

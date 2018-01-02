@@ -7,11 +7,13 @@ import be.catvert.pc.components.Component
 import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.i18n.Locales
+import be.catvert.pc.scenes.MainMenuScene
 import be.catvert.pc.scenes.Scene
 import be.catvert.pc.scenes.SceneManager
 import be.catvert.pc.scenes.SceneTweenAccessor
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.g2d.BitmapFont
@@ -20,6 +22,7 @@ import com.badlogic.gdx.math.Matrix4
 import glm_.vec2.Vec2
 import glm_.vec4.Vec4
 import imgui.Col
+import imgui.DEBUG
 import imgui.ImGui
 import imgui.impl.LwjglGL3
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner
@@ -28,9 +31,14 @@ import uno.glfw.GlfwWindow
 import kotlin.reflect.KClass
 
 /** [com.badlogic.gdx.ApplicationListener, implementation shared by all platforms.  */
-class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
+class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
     override fun create() {
         super.create()
+        // Permet de supprimer les logs d'imgui
+        DEBUG = false
+
+        PCGame.soundVolume = initialConfig.soundVolume
+        PCGame.darkUI = initialConfig.darkUI
 
         Log.info { "Initialisation en cours.. \n Taille : ${Gdx.graphics.width}x${Gdx.graphics.height}" }
 
@@ -43,7 +51,6 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
         mainBatch = SpriteBatch()
         hudBatch = SpriteBatch()
 
-        PCGame.soundVolume = initialSoundVolume
         PCGame.defaultProjection = mainBatch.projectionMatrix.cpy()
 
         PCGame.mainFont = BitmapFont(Constants.mainFontPath)
@@ -77,13 +84,9 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
         gameTextures = Utility.getFilesRecursivly(Constants.texturesDirPath, *Constants.levelTextureExtension)
         gameSounds = Utility.getFilesRecursivly(Constants.soundsDirPath, *Constants.levelSoundExtension)
 
-        val handle = (Gdx.graphics as Lwjgl3Graphics).window.let {
-            it::class.java.getDeclaredField("windowHandle").apply { isAccessible = true }.getLong(it)
-        }
-        LwjglGL3.init(GlfwWindow(handle), false)
+        LwjglGL3.init(GlfwWindow((Gdx.graphics as Lwjgl3Graphics).window.windowHandle), false)
 
-        setupImguiStyle()
-        ImGui.styleColorsDark()
+        sceneManager = SceneManager(MainMenuScene())
     }
 
     override fun render() {
@@ -91,29 +94,32 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
 
         Gdx.graphics.setTitle(Constants.gameTitle + " - ${Gdx.graphics.framesPerSecond} FPS")
 
-        SceneManager.update()
+        sceneManager.update()
 
         tweenManager.update(Gdx.graphics.deltaTime)
 
-        SceneManager.render(mainBatch)
+        sceneManager.render(mainBatch)
 
-        SceneManager.currentScene().calcIsUIHover()
+        sceneManager.currentScene().calcIsUIHover()
     }
 
     override fun resize(width: Int, height: Int) {
         super.resize(width, height)
 
-        SceneManager.resize(Size(width, height))
+        sceneManager.resize(Size(width, height))
         defaultProjection.setToOrtho2D(0f, 0f, width.toFloat(), height.toFloat())
     }
 
     override fun dispose() {
         super.dispose()
 
+        GameConfig.saveGameConfig()
+        GameKeys.saveKeysConfig()
+
         mainBatch.dispose()
         hudBatch.dispose()
 
-        SceneManager.dispose()
+        sceneManager.dispose()
 
         mainFont.dispose()
 
@@ -196,6 +202,8 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
         lateinit var hudBatch: SpriteBatch
             private set
 
+        lateinit var sceneManager: SceneManager
+
         /**
          * Le font principal du jeu
          */
@@ -213,7 +221,6 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
             private set
         lateinit var mainBackground: Background
             private set
-
 
         val actionsClasses = let {
             val list = mutableListOf<KClass<out Action>>()
@@ -239,10 +246,20 @@ class PCGame(private val initialSoundVolume: Float) : KtxApplicationAdapter {
                     field = value
             }
 
+        var darkUI = false
+            set(value) {
+                field = value
+                if(value)
+                    ImGui.styleColorsDark()
+                else
+                    ImGui.styleColorsLight()
+            }
+
         val tweenManager = TweenManager()
 
         fun standardBackgrounds() = standardBackgrounds.toList()
         fun parallaxBackgrounds() = parallaxBackgrounds.toList()
+
         /**
          * Permet de retourner le logo du jeu
          */

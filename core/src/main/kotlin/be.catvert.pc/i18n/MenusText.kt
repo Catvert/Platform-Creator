@@ -23,8 +23,7 @@ enum class MenusText(val key: String) {
     MM_SELECT_LEVEL_NAME_CONFIRM("mm_selectLevelName_confirm"),
 
     MM_SETTINGS_WINDOW_TITLE("mm_settingsWindowTitle"),
-    MM_SETTINGS_SCREEN_WIDTH("mm_settingsScreenWidth"),
-    MM_SETTINGS_SCREEN_HEIGHT("mm_settingsScreenHeight"),
+    MM_SETTINGS_SCREEN_SIZE("mm_settingsScreenSize"),
     MM_SETTINGS_FULLSCREEN("mm_settingsFullscreen"),
     MM_SETTINGS_SOUND("mm_settingsSound"),
     MM_SETTINGS_APPLY("mm_settingsApply"),

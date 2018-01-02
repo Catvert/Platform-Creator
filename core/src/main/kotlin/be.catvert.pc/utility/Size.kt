@@ -1,9 +1,11 @@
 package be.catvert.pc.utility
 
-
 /**
- * Classe de donnée représentant une taille
+ * Représente une taille avec une largeur et une hauteur
  */
-data class Size(val width: Int = 0, val height: Int = 0) {
+data class Size(val width: Int, val height: Int) {
+    constructor(size: Int): this(size, size)
+    constructor(): this(0, 0)
+
     override fun toString(): String = "{ $width ; $height }"
 }

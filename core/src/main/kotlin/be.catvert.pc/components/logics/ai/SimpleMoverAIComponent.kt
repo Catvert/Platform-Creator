@@ -18,8 +18,8 @@ import com.fasterxml.jackson.annotation.JsonCreator
  * Si le gameObject rencontre un obstacle, il ira dans la direction opposé
  * @param orientation L'orientation dans laquelle le gameObject se déplacer (verticalement/horizontalement)
  */
-class SimpleMoverAIComponent(orientation: SimpleMoverOrientation, reverse: Boolean, @ExposeEditor var holdGameObjects: Boolean = false) : LogicsComponent() {
-    @JsonCreator private constructor() : this(SimpleMoverOrientation.HORIZONTAL, false)
+class SimpleMoverAIComponent(orientation: SimpleMoverOrientation, reverse: Boolean = false, @ExposeEditor("hold game objects") var holdGameObjects: Boolean = false) : LogicsComponent() {
+    @JsonCreator private constructor() : this(SimpleMoverOrientation.HORIZONTAL)
 
     enum class SimpleMoverOrientation {
         HORIZONTAL, VERTICAL

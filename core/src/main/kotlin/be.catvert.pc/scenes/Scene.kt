@@ -6,6 +6,7 @@ import be.catvert.pc.PCGame
 import be.catvert.pc.components.RenderableComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.utility.*
+import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.utils.Disposable

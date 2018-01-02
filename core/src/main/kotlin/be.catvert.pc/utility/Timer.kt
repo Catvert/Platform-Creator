@@ -2,6 +2,9 @@ package be.catvert.pc.utility
 
 import com.badlogic.gdx.Gdx
 
+/**
+ * Permet d'effectuer une action à chaque interval du chronomètre.
+ */
 class Timer(var interval: Float) : Updeatable {
     private var timerDelta = 0f
 

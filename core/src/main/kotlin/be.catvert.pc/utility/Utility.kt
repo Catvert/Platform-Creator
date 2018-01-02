@@ -76,66 +76,14 @@ object Utility {
         val files = mutableListOf<FileHandle>()
 
         dir.list().forEach {
-            if (it.isDirectory)
-                files += getFilesRecursivly(it, *fileExt)
-            else {
-                if (fileExt.isEmpty() || fileExt.contains(it.extension()))
-                    files += it
-            }
-        }
+                    if (it.isDirectory)
+                        files += getFilesRecursivly(it, *fileExt)
+                    else {
+                        if (fileExt.isEmpty() || fileExt.contains(it.extension()))
+                            files += it
+                    }
+                }
         return files
-    }
-
-    private val configPath = Constants.assetsDir + "config.json"
-
-    data class GameConfig(val width: Int, val height: Int, val fullscreen: Boolean, val soundVolume: Float)
-
-    /**
-     * Charge le fichier de configuration du jeu
-     */
-    fun loadGameConfig(): GameConfig {
-        if (File(configPath).exists()) {
-            try {
-                val root = JsonReader().parse(FileReader(configPath))
-
-                val screenWidth = root.getInt("width")
-                val screenHeight = root.getInt("height")
-                val fullscreen = root.getBoolean("fullscreen")
-                val soundVolume = root.getFloat("soundvolume")
-
-                return GameConfig(screenWidth, screenHeight, fullscreen, soundVolume)
-            } catch (e: Exception) {
-                System.err.println("Erreur lors du chargement de la configuration du jeu ! Erreur : ${e.message}")
-            }
-        }
-
-        return GameConfig(1280, 720, true, 1f)
-    }
-
-    /**
-     * Permet de sauvegarder la configuration du jeu
-     */
-    fun saveGameConfig(width: Int, height: Int): Boolean {
-        try {
-            val writer = JsonWriter(FileWriter(configPath, false))
-            writer.setOutputType(JsonWriter.OutputType.json)
-
-            writer.`object`()
-
-            writer.name("width").value(width)
-            writer.name("height").value(height)
-            writer.name("fullscreen").value(Gdx.graphics.isFullscreen)
-            writer.name("soundvolume").value(PCGame.soundVolume)
-
-            writer.pop()
-
-            writer.flush()
-            writer.close()
-
-            return true
-        } catch (e: IOException) {
-            return false
-        }
     }
 }
 
