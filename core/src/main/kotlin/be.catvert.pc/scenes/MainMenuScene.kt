@@ -3,15 +3,17 @@ package be.catvert.pc.scenes
 import be.catvert.pc.GameKeys
 import be.catvert.pc.Log
 import be.catvert.pc.PCGame
+import be.catvert.pc.PCGame.Companion.darkUI
 import be.catvert.pc.PCGame.Companion.soundVolume
 import be.catvert.pc.containers.Level
 import be.catvert.pc.i18n.MenusText
 import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.ImguiHelper
+import be.catvert.pc.utility.Signal
 import be.catvert.pc.utility.Size
-import be.catvert.pc.utility.Utility
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
+import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
@@ -29,6 +31,27 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
     private val glyphCreatedBy = GlyphLayout(PCGame.mainFont, "par Catvert - ${Constants.gameVersion}")
 
     private val logo = PCGame.generateLogo(gameObjectContainer)
+
+    private val settingsKeyProcessor = object : InputProcessor {
+        val keyDownSignal = Signal<Int>()
+
+        override fun mouseMoved(screenX: Int, screenY: Int) = false
+        override fun keyTyped(character: Char) = false
+        override fun scrolled(amount: Int) = false
+        override fun keyUp(keycode: Int) = false
+        override fun touchDragged(screenX: Int, screenY: Int, pointer: Int) = false
+        override fun keyDown(keycode: Int): Boolean {
+            keyDownSignal(keycode)
+            return false
+        }
+
+        override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int) = false
+        override fun touchUp(screenX: Int, screenY: Int, pointer: Int, button: Int) = false
+    }
+
+    init {
+        Gdx.input.inputProcessor = settingsKeyProcessor
+    }
 
     override fun postBatchRender() {
         super.postBatchRender()
@@ -49,21 +72,25 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
 
     //region UI
 
-    private val mainWindowSize = Vec2(200f, 110f)
+    private val mainWindowSize = Vec2(200f, 100f)
     private var showSelectLevelWindow = false
     private var showSettingsWindow = false
     private fun drawUI() {
         with(ImGui) {
             ImguiHelper.withCenteredWindow(MenusText.MM_WINDOW_TITLE(), null, mainWindowSize, WindowFlags.NoResize.i or WindowFlags.NoCollapse.i or WindowFlags.NoBringToFrontOnFocus) {
-                if (button(MenusText.MM_PLAY_BUTTON(), Vec2(-1, 20f))) {
+                if (button(MenusText.MM_PLAY_BUTTON(), Vec2(-1, 0f))) {
                     showSelectLevelWindow = true
                     openPopup(MenusText.MM_SELECT_LEVEL_WINDOW_TITLE())
                 }
-                if (button(MenusText.MM_SETTINGS_BUTTON(), Vec2(-1, 20f))) {
+                if (button(MenusText.MM_SETTINGS_BUTTON(), Vec2(-1, 0f))) {
+                    settingsKeys.forEach {
+                        settingsKeys[it.key] = false
+                        settingsKeyProcessor.keyDownSignal.clear()
+                    }
                     showSettingsWindow = true
                     openPopup(MenusText.MM_SETTINGS_WINDOW_TITLE())
                 }
-                if (button(MenusText.MM_EXIT_BUTTON(), Vec2(-1, 20f))) {
+                if (button(MenusText.MM_EXIT_BUTTON(), Vec2(-1, 0f))) {
                     Gdx.app.exit()
                 }
 
@@ -97,29 +124,29 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
                     combo("niveau", ::currentLevel, levels.map { it.toString() })
                 }
 
-                if (button(MenusText.MM_SELECT_LEVEL_PLAY_BUTTON(), Vec2(-1, 20f))) {
+                if (button(MenusText.MM_SELECT_LEVEL_PLAY_BUTTON(), Vec2(-1, 0f))) {
                     if (currentLevel in levels.indices) {
                         val level = Level.loadFromFile(levels[currentLevel].dir)
                         if (level != null)
-                            SceneManager.loadScene(GameScene(level))
+                            PCGame.sceneManager.loadScene(GameScene(level))
                         else
                             openPopup(errorLevelTitle)
                     }
                 }
-                if (button(MenusText.MM_SELECT_LEVEL_EDIT_BUTTON(), Vec2(-1, 20f))) {
+                if (button(MenusText.MM_SELECT_LEVEL_EDIT_BUTTON(), Vec2(-1, 0f))) {
                     if (currentLevel in levels.indices) {
                         val level = Level.loadFromFile(levels[currentLevel].dir)
                         if (level != null)
-                            SceneManager.loadScene(EditorScene(level))
+                            PCGame.sceneManager.loadScene(EditorScene(level))
                         else
                             openPopup(errorLevelTitle)
                     }
                 }
-                if (button(MenusText.MM_SELECT_LEVEL_COPY_BUTTON(), Vec2(-1, 20f))) {
+                if (button(MenusText.MM_SELECT_LEVEL_COPY_BUTTON(), Vec2(-1, 0f))) {
                     if (currentLevel in levels.indices)
                         openPopup(copyLevelTitle)
                 }
-                if (button(MenusText.MM_SELECT_LEVEL_DELETE_BUTTON(), Vec2(-1, 20f))) {
+                if (button(MenusText.MM_SELECT_LEVEL_DELETE_BUTTON(), Vec2(-1, 0f))) {
                     if (currentLevel in levels.indices)
                         openPopup(deleteLevelTitle)
                 }
@@ -127,7 +154,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
 
                 popItemFlag()
 
-                if (button(MenusText.MM_SELECT_LEVEL_NEW_BUTTON(), Vec2(-1, 20f))) {
+                if (button(MenusText.MM_SELECT_LEVEL_NEW_BUTTON(), Vec2(-1, 0f))) {
                     openPopup(newLevelTitle)
                 }
 
@@ -137,7 +164,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
                     }
                     if (button("Créer", Vec2(-1, 20))) {
                         val level = Level.newLevel(newLevelName)
-                        SceneManager.loadScene(EditorScene(level))
+                        PCGame.sceneManager.loadScene(EditorScene(level))
                         closeCurrentPopup()
                     }
                 }
@@ -151,15 +178,15 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
                         val levelDir = levels[currentLevel].dir
                         val copyLevelDir = levelDir.parent().child(copyLevelName)
                         levelDir.list().forEach {
-                            it.copyTo(copyLevelDir)
-                        }
+                                    it.copyTo(copyLevelDir)
+                                }
                         levels.add(LevelItem(copyLevelDir))
                         closeCurrentPopup()
                     }
                 }
 
                 functionalProgramming.popup(deleteLevelTitle) {
-                    if (button("Confirmer", Vec2(100f, 20))) {
+                    if (button("Confirmer", Vec2(100f, 0))) {
                         try {
                             if (currentLevel in levels.indices) {
                                 levels[currentLevel].dir.deleteDirectory()
@@ -174,7 +201,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
 
                 functionalProgramming.popupModal(errorLevelTitle) {
                     text("Une erreur est survenue lors du chargement du niveau !")
-                    if (button("Fermer", Vec2(-1, 20f)))
+                    if (button("Fermer", Vec2(-1, 0f)))
                         closeCurrentPopup()
                 }
             }
@@ -183,35 +210,51 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
 
     private var settingsWindowSize = intArrayOf(Gdx.graphics.width, Gdx.graphics.height)
     private val settingsFullscreen = booleanArrayOf(Gdx.graphics.isFullscreen)
+    private val settingsKeys = GameKeys.values().associate { it to false }.toMutableMap()
     private fun drawSettingsWindow() {
         with(ImGui) {
-            setNextWindowContentWidth(550f)
+            setNextWindowContentWidth(350f)
             ImguiHelper.popupModal(MenusText.MM_SETTINGS_WINDOW_TITLE(), ::showSettingsWindow, extraFlags = WindowFlags.NoResize.i) {
                 functionalProgramming.withGroup {
+                    checkbox(MenusText.MM_SETTINGS_FULLSCREEN(), settingsFullscreen)
                     if (!settingsFullscreen[0]) {
                         functionalProgramming.withItemWidth(100f) {
-                            inputInt2("taille de la fenêtre", settingsWindowSize)
+                            inputInt2(MenusText.MM_SETTINGS_SCREEN_SIZE(), settingsWindowSize)
                         }
                     }
-                    checkbox(MenusText.MM_SETTINGS_FULLSCREEN(), settingsFullscreen)
-                    functionalProgramming.withItemWidth(100f) {
-                        sliderFloat(MenusText.MM_SETTINGS_SOUND(), ::soundVolume, 0f, 1f, "%.1f")
-                    }
-                    if (button("Appliquer", Vec2(100f, 20))) {
+                    if (button("Appliquer", Vec2(100f, 0))) {
                         if (settingsFullscreen[0])
                             Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
                         else
                             Gdx.graphics.setWindowedMode(settingsWindowSize[0], settingsWindowSize[1])
-
-                        Utility.saveGameConfig(settingsWindowSize[0], settingsWindowSize[1])
                     }
+                    functionalProgramming.withItemWidth(100f) {
+                        sliderFloat(MenusText.MM_SETTINGS_SOUND(), ::soundVolume, 0f, 1f, "%.1f")
+                    }
+                    checkbox("interface sombre", PCGame.Companion::darkUI)
                 }
-                sameLine()
+                separator()
+                functionalProgramming.withChild("game keys", size = Vec2(350f, 200f)) {
+                    settingsKeys.forEach { keyValue ->
+                        text(keyValue.key.description)
+                        sameLine()
+                        cursorPosX = 250f
+                        functionalProgramming.withId(keyValue.key.name) {
+                            if (button(if (keyValue.value) "Appuiez.." else Input.Keys.toString(keyValue.key.key), Vec2(75f, 0))) {
+                                if (!keyValue.value) {
+                                    settingsKeys.forEach {
+                                        settingsKeys[it.key] = false
+                                        settingsKeyProcessor.keyDownSignal.clear()
+                                    }
 
-                functionalProgramming.withChild("game keys") {
-                    GameKeys.values().forEach {
-                        functionalProgramming.withItemWidth(50f) {
-                            inputText(it.description, Input.Keys.toString(it.key).toCharArray())
+                                    settingsKeys[keyValue.key] = true
+
+                                    settingsKeyProcessor.keyDownSignal.register(true) {
+                                        keyValue.key.key = it
+                                        settingsKeys[keyValue.key] = false
+                                    }
+                                }
+                            }
                         }
                     }
                 }

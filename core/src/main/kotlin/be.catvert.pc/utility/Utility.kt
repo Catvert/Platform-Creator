@@ -1,8 +1,5 @@
 package be.catvert.pc.utility
 
-import be.catvert.pc.PCGame
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Graphics
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
@@ -14,14 +11,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Shape2D
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
-import com.badlogic.gdx.utils.JsonReader
-import com.badlogic.gdx.utils.JsonWriter
 import ktx.assets.Asset
 import ktx.assets.loadOnDemand
-import java.io.File
-import java.io.FileReader
-import java.io.FileWriter
-import java.io.IOException
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
 import kotlin.math.roundToInt
@@ -53,7 +44,7 @@ inline fun <reified T : Any> AssetManager.loadOnDemand(file: FileHandle): Asset<
 
 fun FileHandle.toFileWrapper() = FileWrapper(this)
 
-fun Texture.toAtlasRegion() =  TextureAtlas.AtlasRegion(this, 0, 0, width, height)
+fun Texture.toAtlasRegion() = TextureAtlas.AtlasRegion(this, 0, 0, width, height)
 
 fun Batch.withColor(color: Color, block: Batch.() -> Unit) {
     val oldColor = this.color.cpy()
@@ -76,66 +67,14 @@ object Utility {
         val files = mutableListOf<FileHandle>()
 
         dir.list().forEach {
-            if (it.isDirectory)
-                files += getFilesRecursivly(it, *fileExt)
-            else {
-                if (fileExt.isEmpty() || fileExt.contains(it.extension()))
-                    files += it
-            }
-        }
+                    if (it.isDirectory)
+                        files += getFilesRecursivly(it, *fileExt)
+                    else {
+                        if (fileExt.isEmpty() || fileExt.contains(it.extension()))
+                            files += it
+                    }
+                }
         return files
-    }
-
-    private val configPath = Constants.assetsDir + "config.json"
-
-    data class GameConfig(val width: Int, val height: Int, val fullscreen: Boolean, val soundVolume: Float)
-
-    /**
-     * Charge le fichier de configuration du jeu
-     */
-    fun loadGameConfig(): GameConfig {
-        if (File(configPath).exists()) {
-            try {
-                val root = JsonReader().parse(FileReader(configPath))
-
-                val screenWidth = root.getInt("width")
-                val screenHeight = root.getInt("height")
-                val fullscreen = root.getBoolean("fullscreen")
-                val soundVolume = root.getFloat("soundvolume")
-
-                return GameConfig(screenWidth, screenHeight, fullscreen, soundVolume)
-            } catch (e: Exception) {
-                System.err.println("Erreur lors du chargement de la configuration du jeu ! Erreur : ${e.message}")
-            }
-        }
-
-        return GameConfig(1280, 720, true, 1f)
-    }
-
-    /**
-     * Permet de sauvegarder la configuration du jeu
-     */
-    fun saveGameConfig(width: Int, height: Int): Boolean {
-        try {
-            val writer = JsonWriter(FileWriter(configPath, false))
-            writer.setOutputType(JsonWriter.OutputType.json)
-
-            writer.`object`()
-
-            writer.name("width").value(width)
-            writer.name("height").value(height)
-            writer.name("fullscreen").value(Gdx.graphics.isFullscreen)
-            writer.name("soundvolume").value(PCGame.soundVolume)
-
-            writer.pop()
-
-            writer.flush()
-            writer.close()
-
-            return true
-        } catch (e: IOException) {
-            return false
-        }
     }
 }
 

@@ -1,7 +1,7 @@
 package be.catvert.pc.actions
 
 import be.catvert.pc.GameObject
-import be.catvert.pc.components.RenderableComponent
+import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.utility.ExposeEditor
 import be.catvert.pc.utility.cast
 import com.fasterxml.jackson.annotation.JsonCreator
@@ -18,15 +18,15 @@ class RenderAction(@ExposeEditor var action: RenderActions) : Action {
     }
 
     override fun invoke(gameObject: GameObject) {
-        gameObject.getCurrentState().getComponents().filter { it is RenderableComponent }.forEach {
-            it.cast<RenderableComponent>()?.apply {
-                when (action) {
-                    RenderAction.RenderActions.FLIP_X -> flipX = true
-                    RenderAction.RenderActions.FLIP_Y -> flipY = true
-                    RenderAction.RenderActions.UNFLIP_X -> flipX = false
-                    RenderAction.RenderActions.UNFLIP_Y -> flipY = false
+        gameObject.getCurrentState().getComponents().filter { it is AtlasComponent }.forEach {
+                    it.cast<AtlasComponent>()?.apply {
+                                when (action) {
+                                    RenderAction.RenderActions.FLIP_X -> flipX = true
+                                    RenderAction.RenderActions.FLIP_Y -> flipY = true
+                                    RenderAction.RenderActions.UNFLIP_X -> flipX = false
+                                    RenderAction.RenderActions.UNFLIP_Y -> flipY = false
+                                }
+                            }
                 }
-            }
-        }
     }
 }

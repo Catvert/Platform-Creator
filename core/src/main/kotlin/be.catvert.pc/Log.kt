@@ -5,6 +5,9 @@ import java.io.FileWriter
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+/**
+ * Permet d'écrire des informations de débuggage pendant l'exécution du jeu.
+ */
 object Log : Disposable {
     private val writer = FileWriter("last_log.txt")
 

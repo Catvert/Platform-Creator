@@ -9,13 +9,13 @@ import be.catvert.pc.utility.Point
 import com.fasterxml.jackson.annotation.JsonCreator
 
 class SpawnAction(@ExposeEditor var prefab: Prefab, @ExposeEditor var spawnSide: BoxSide) : Action {
-    @JsonCreator private constructor(): this(PrefabFactory.Spider_Kenney.prefab, BoxSide.Left)
+    @JsonCreator private constructor() : this(PrefabFactory.MushroomRed_SMC.prefab, BoxSide.Left)
 
     override fun invoke(gameObject: GameObject) {
         var x = gameObject.box.x
         var y = gameObject.box.y
 
-        when(spawnSide) {
+        when (spawnSide) {
             BoxSide.Left -> x -= prefab.prefabGO.box.width
             BoxSide.Right -> x += gameObject.box.width
             BoxSide.Up -> y += gameObject.box.height

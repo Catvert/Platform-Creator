@@ -1,7 +1,7 @@
 package be.catvert.pc.utility
 
 /**
- * Classe permettant de créer une matrix en kotlin, source : https://stackoverflow.com/questions/41941102/instantiating-generic-array-in-kotlin
+ * Classe permettant de créer une matrix(tableau 2D) en kotlin, source : https://stackoverflow.com/questions/41941102/instantiating-generic-array-in-kotlin
  * @param height La hauteur de la matrix
  * @param width La larguer de la matrix
  * @param init Méthode pour initialiser la matrix

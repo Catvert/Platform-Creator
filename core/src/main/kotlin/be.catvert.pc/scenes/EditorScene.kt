@@ -12,6 +12,7 @@ import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
@@ -38,7 +39,7 @@ import kotlin.math.roundToInt
  * Scène de l'éditeur de niveau
  */
 class EditorScene(val level: Level) : Scene(level.background) {
-    enum class EditorMode {
+    private enum class EditorMode {
         NO_MODE, SELECT, COPY, SELECT_POINT, SELECT_GO, TRY_LEVEL
     }
 
@@ -102,7 +103,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
         val settingsLevelBackgroundType: ImguiHelper.Item<Enum<*>> = ImguiHelper.Item(background.type)
 
-        var showSaveLevelExitWindow = false
+        var showExitWindow = false
 
         var showInfoGameObjectWindow = false
 
@@ -112,6 +113,8 @@ class EditorScene(val level: Level) : Scene(level.background) {
         var gameObjectsSpritePackIndex = 0
         var gameObjectsSpritePackTypeIndex = 0
         var gameObjectsSpritePhysics = true
+        var gameObjectsSpriteRealSize = false
+        var gameObjectsSpriteCustomSize = Size(50, 50)
 
         init {
             when (background.type) {
@@ -125,7 +128,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
     override val camera: OrthographicCamera = OrthographicCamera(Constants.levelCameraRatio, Constants.levelCameraRatio * (Gdx.graphics.height.toFloat() / Gdx.graphics.width))
 
-    private val shapeRenderer = ShapeRenderer()
+    private val shapeRenderer = ShapeRenderer().apply { setAutoShapeType(true) }
 
     private val editorFont = BitmapFont(Constants.editorFontPath)
 
@@ -182,6 +185,10 @@ class EditorScene(val level: Level) : Scene(level.background) {
         gameObjectContainer.cast<Level>()?.drawDebug()
 
         shapeRenderer.projectionMatrix = camera.combined
+
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
 
         shapeRenderer.withColor(Color.GOLDENROD) {
@@ -200,20 +207,20 @@ class EditorScene(val level: Level) : Scene(level.background) {
          * Dessine les gameObjects qui n'ont pas de renderableComponent avec un box noir
          */
         gameObjectContainer.cast<Level>()?.apply {
-            getAllGameObjectsInCells(getActiveGridCells()).forEach {
-                if (it.getCurrentState().getComponent<AtlasComponent>()?.data?.isEmpty() != false) {
-                    shapeRenderer.withColor(Color.GRAY) {
-                        rect(it.box)
+                    getAllGameObjectsInCells(getActiveGridCells()).forEach {
+                        if (it.getCurrentState().getComponent<AtlasComponent>()?.data?.isEmpty() != false) {
+                            shapeRenderer.withColor(Color.GRAY) {
+                                rect(it.box)
+                            }
+                        }
+
+                        if (it.layer == selectLayer || editorMode == EditorMode.TRY_LEVEL) {
+                            it.getCurrentState().getComponent<AtlasComponent>()?.alpha = 1f
+                        } else {
+                            it.getCurrentState().getComponent<AtlasComponent>()?.alpha = 0.5f
+                        }
                     }
                 }
-
-                if (it.layer == selectLayer || editorMode == EditorMode.TRY_LEVEL) {
-                    it.getCurrentState().setAlphaRenderable(1f)
-                } else {
-                    it.getCurrentState().setAlphaRenderable(0.5f)
-                }
-            }
-        }
 
         when (editorMode) {
             EditorMode.NO_MODE -> {
@@ -221,9 +228,15 @@ class EditorScene(val level: Level) : Scene(level.background) {
                  * Dessine le box en cour de création
                  */
                 if (selectRectangleData.rectangleStarted) {
-                    shapeRenderer.withColor(Color.FIREBRICK) {
+                    shapeRenderer.set(ShapeRenderer.ShapeType.Filled)
+                    shapeRenderer.withColor(Color.FIREBRICK.apply { a = 0.5f }) {
                         rect(selectRectangleData.getRect())
                     }
+                    shapeRenderer.set(ShapeRenderer.ShapeType.Line)
+                    shapeRenderer.withColor(Color.RED) {
+                        rect(selectRectangleData.getRect())
+                    }
+
                 }
             }
             EditorMode.SELECT -> {
@@ -260,10 +273,13 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
                 selectGameObjects.forEach { go ->
                     val rect: Rect? = if (gridMode.active) {
-                        val pos = if (go === selectGameObject) Point(mousePosInWorld.x, mousePosInWorld.y) else Point(mousePosInWorld.x + (go.position().x - (selectGameObject?.position()?.x ?: 0)), mousePosInWorld.y + (go.position().y - (selectGameObject?.position()?.y ?: 0)))
+                        val pos = if (go === selectGameObject) Point(mousePosInWorld.x, mousePosInWorld.y) else Point(mousePosInWorld.x + (go.position().x - (selectGameObject?.position()?.x
+                                ?: 0)), mousePosInWorld.y + (go.position().y - (selectGameObject?.position()?.y ?: 0)))
                         gridMode.getRectCellOf(level.activeRect, pos)
                     } else {
-                        val pos = if(go === selectGameObject) Point(mousePosInWorld.x - go.size().width / 2, mousePosInWorld.y - go.size().height / 2) else Point(mousePosInWorld.x + (go.position().x - (selectGameObject?.let { it.position().x + it.size().width / 2 } ?: 0)), mousePosInWorld.y + (go.position().y - (selectGameObject?.let { it.position().y + it.size().height / 2 } ?: 0)))
+                        val pos = if (go === selectGameObject) Point(mousePosInWorld.x - go.size().width / 2, mousePosInWorld.y - go.size().height / 2) else Point(mousePosInWorld.x + (go.position().x - (selectGameObject?.let { it.position().x + it.size().width / 2 }
+                                ?: 0)), mousePosInWorld.y + (go.position().y - (selectGameObject?.let { it.position().y + it.size().height / 2 }
+                                ?: 0)))
                         Rect(pos, go.box.size)
                     }
 
@@ -271,15 +287,15 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
                     if (rect != null) {
                         go.getCurrentState().getComponent<AtlasComponent>()?.apply {
-                            if (this.currentIndex in data.indices) {
-                                val data = this.data[currentIndex]
-                                PCGame.mainBatch.use {
-                                    it.withColor(Color.WHITE.apply { a = 0.5f }) {
-                                        it.draw(data.currentKeyFrame(), rect)
+                                    if (this.currentIndex in data.indices) {
+                                        val data = this.data[currentIndex]
+                                        PCGame.mainBatch.use {
+                                            it.withColor(Color.WHITE.apply { a = 0.5f }) {
+                                                it.draw(data.currentKeyFrame(), rect)
+                                            }
+                                        }
                                     }
-                                }
-                            }
-                        } ?: shapeRenderer.withColor(Color.GRAY) { rect(rect) }
+                                } ?: shapeRenderer.withColor(Color.GRAY) { rect(rect) }
                     }
 
                     if (go.container != null) {
@@ -368,11 +384,11 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         selectRectangleData.rectangleStarted = false
 
                         level.getAllGameObjectsInCells(selectRectangleData.getRect()).forEach {
-                            if (selectRectangleData.getRect().contains(it.box)) {
-                                addSelectGameObject(it)
-                                editorMode = EditorMode.SELECT
-                            }
-                        }
+                                    if (selectRectangleData.getRect().contains(it.box)) {
+                                        addSelectGameObject(it)
+                                        editorMode = EditorMode.SELECT
+                                    }
+                                }
                     }
 
                     if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_COPY_MODE.key)) {
@@ -384,18 +400,22 @@ class EditorScene(val level: Level) : Scene(level.background) {
                     }
 
                     if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_FLIPX.key)) {
-                        findGameObjectUnderMouse(true)?.getCurrentState()?.inverseFlipRenderable(true, false)
+                        findGameObjectUnderMouse(true)?.getCurrentState()?.getComponent<AtlasComponent>()?.apply {
+                                    flipX = !flipX
+                                }
                     }
                     if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_FLIPY.key)) {
-                        findGameObjectUnderMouse(true)?.getCurrentState()?.inverseFlipRenderable(false, true)
+                        findGameObjectUnderMouse(true)?.getCurrentState()?.getComponent<AtlasComponent>()?.apply {
+                                    flipY = !flipY
+                                }
                     }
                     if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_ATLAS_PREVIOUS_FRAME.key)) {
                         findGameObjectUnderMouse(true)?.apply {
                             if (getStates().size == 1) {
                                 getCurrentState().getComponent<AtlasComponent>()?.apply {
-                                    if (data.size == 1)
-                                        data.elementAt(0).previousFrameRegion(0)
-                                }
+                                            if (data.size == 1)
+                                                data.elementAt(0).previousFrameRegion(0)
+                                        }
                             }
                         }
                     }
@@ -403,9 +423,9 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         findGameObjectUnderMouse(true)?.apply {
                             if (getStates().size == 1) {
                                 getCurrentState().getComponent<AtlasComponent>()?.apply {
-                                    if (data.size == 1)
-                                        data.elementAt(0).nextFrameRegion(0)
-                                }
+                                            if (data.size == 1)
+                                                data.elementAt(0).nextFrameRegion(0)
+                                        }
                             }
                         }
                     }
@@ -421,14 +441,14 @@ class EditorScene(val level: Level) : Scene(level.background) {
                      */
                     fun moveGameObjects(moveX: Int, moveY: Int) {
                         if (selectGameObjects.let {
-                            var canMove = true
-                            it.forEach {
-                                if (!level.matrixRect.contains(Rect(it.box.x + moveX, it.box.y + moveY, it.box.width, it.box.height))) {
-                                    canMove = false
-                                }
-                            }
-                            canMove
-                        }) {
+                                    var canMove = true
+                                    it.forEach {
+                                        if (!level.matrixRect.contains(Rect(it.box.x + moveX, it.box.y + moveY, it.box.width, it.box.height))) {
+                                            canMove = false
+                                        }
+                                    }
+                                    canMove
+                                }) {
                             selectGameObjects.forEach {
                                 it.box.move(moveX, moveY)
                             }
@@ -488,14 +508,14 @@ class EditorScene(val level: Level) : Scene(level.background) {
                                     }
 
                                     if (selectGameObjects.let {
-                                        var canResize = true
-                                        it.forEach {
-                                            if (!level.matrixRect.contains(Rect(it.box.x, it.box.y, it.box.width - resizeX, it.box.height - resizeY))) {
-                                                canResize = false
-                                            }
-                                        }
-                                        canResize
-                                    }) {
+                                                var canResize = true
+                                                it.forEach {
+                                                    if (!level.matrixRect.contains(Rect(it.box.x, it.box.y, it.box.width - resizeX, it.box.height - resizeY))) {
+                                                        canResize = false
+                                                    }
+                                                }
+                                                canResize
+                                            }) {
                                         selectGameObjects.forEach {
                                             // On vérifie si le gameObject à redimensionner a le même tag que le gameObject sélectionné et qu'il peut être redimensionné
                                             if (it.tag == selectGameObject!!.tag) {
@@ -649,20 +669,20 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         val copyGameObjects = mutableListOf(copySelectGO)
 
                         selectGameObjects.filter { it !== selectGameObject }.forEach {
-                            val deltaX = it.position().x - selectGameObject!!.position().x
-                            val deltaY = it.position().y - selectGameObject!!.position().y
+                                    val deltaX = it.position().x - selectGameObject!!.position().x
+                                    val deltaY = it.position().y - selectGameObject!!.position().y
 
-                            level.addGameObject(SerializationFactory.copy(it).apply {
-                                val pos = Point(copySelectGO.position().x + deltaX, copySelectGO.position().y + deltaY)
+                                    level.addGameObject(SerializationFactory.copy(it).apply {
+                                        val pos = Point(copySelectGO.position().x + deltaX, copySelectGO.position().y + deltaY)
 
-                                if (gridMode.active)
-                                    gridMode.putGameObject(level.activeRect, pos, this)
-                                else
-                                    this.box.position = pos
+                                        if (gridMode.active)
+                                            gridMode.putGameObject(level.activeRect, pos, this)
+                                        else
+                                            this.box.position = pos
 
-                                copyGameObjects += this
-                            })
-                        }
+                                        copyGameObjects += this
+                                    })
+                                }
 
                         if (moveToCopyGO) {
                             clearSelectGameObjects()
@@ -725,7 +745,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
             if (editorMode == EditorMode.TRY_LEVEL)
                 finishTryLevel()
             else
-                editorSceneUI.showSaveLevelExitWindow = true
+                editorSceneUI.showExitWindow = true
         }
 
         if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_GRID_MODE.key) && editorMode != EditorMode.TRY_LEVEL) {
@@ -897,32 +917,35 @@ class EditorScene(val level: Level) : Scene(level.background) {
                 drawInfoGameObjectWindow(selectGameObject!!)
             }
 
-            if (editorSceneUI.showSaveLevelExitWindow) {
-                val windowSize = Vec2(375f, 60f)
-                setNextWindowSize(windowSize, Cond.Once)
-                setNextWindowPos(Vec2(Gdx.graphics.width / 2f - windowSize.x / 2f, Gdx.graphics.height / 2f - windowSize.y / 2f), Cond.Once)
-                functionalProgramming.withWindow("Sauvegarder avant de quitter?", editorSceneUI::showSaveLevelExitWindow, WindowFlags.NoResize.i or WindowFlags.NoCollapse.i) {
-                    fun showMainMenu() {
-                        editorSceneUI.showSaveLevelExitWindow = false
-                        SceneManager.loadScene(MainMenuScene())
-                    }
+            if (editorSceneUI.showExitWindow) {
+                drawExitWindow()
+            }
+        }
+    }
 
-                    if (button("Sauvegarder")) {
-                        saveLevelToFile()
-                        showMainMenu()
-                    }
-                    sameLine()
-                    if (button("Abandonner les modifications")) {
-                        if (!level.levelPath.toLocalFile().exists()) {
-                            level.deleteFiles()
-                        }
-                        showMainMenu()
-                    }
-                    sameLine()
-                    if (button("Annuler")) {
-                        editorSceneUI.showSaveLevelExitWindow = false
-                    }
+    private fun drawExitWindow() {
+        val windowSize = Vec2(375f, 55f)
+        ImGui.setNextWindowSize(windowSize, Cond.Once)
+        ImGui.setNextWindowPos(Vec2(Gdx.graphics.width / 2f - windowSize.x / 2f, Gdx.graphics.height / 2f - windowSize.y / 2f), Cond.Once)
+        functionalProgramming.withWindow("Sauvegarder avant de quitter?", editorSceneUI::showExitWindow, WindowFlags.NoResize.i or WindowFlags.NoCollapse.i) {
+            fun showMainMenu() {
+                PCGame.sceneManager.loadScene(MainMenuScene())
+            }
+
+            if (ImGui.button("Sauvegarder")) {
+                saveLevelToFile()
+                showMainMenu()
+            }
+            ImGui.sameLine()
+            if (ImGui.button("Abandonner les modifications")) {
+                if (!level.levelPath.toLocalFile().exists()) {
+                    level.deleteFiles()
                 }
+                showMainMenu()
+            }
+            ImGui.sameLine()
+            if (ImGui.button("Annuler")) {
+                editorSceneUI.showExitWindow = false
             }
         }
     }
@@ -970,7 +993,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         }
                         separator()
                         menuItem("Quitter") {
-                            editorSceneUI.showSaveLevelExitWindow = true
+                            editorSceneUI.showExitWindow = true
                         }
                     }
 
@@ -980,11 +1003,6 @@ class EditorScene(val level: Level) : Scene(level.background) {
                             ImguiHelper.addImguiWidgetsArray("tags", level.tags, { it }, { "test" }, {
                                 val buf = it.obj.toCharArray()
                                 if (ImGui.inputText("", buf)) {
-                                    level.findGameObjectsByTag(it.obj).forEach {
-                                        //     it.tag = "ahah"
-                                    }
-
-                                    //   it.obj = "ahah"
                                     return@addImguiWidgetsArray true
                                 }
                                 false
@@ -1042,21 +1060,21 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         }
 
                         PrefabType.values().forEach { type ->
-                            menu(type.name) {
-                                if (type == PrefabType.All) {
-                                    level.resourcesPrefabs().forEach {
-                                        menuItem(it.name) {
-                                            createGO(it)
+                                    menu(type.name) {
+                                        if (type == PrefabType.All) {
+                                            level.resourcesPrefabs().forEach {
+                                                        menuItem(it.name) {
+                                                            createGO(it)
+                                                        }
+                                                    }
                                         }
+                                        PrefabFactory.values().filter { it.type == type }.forEach {
+                                                    menuItem(it.name.removeSuffix("_${type.name}")) {
+                                                        createGO(it.prefab)
+                                                    }
+                                                }
                                     }
                                 }
-                                PrefabFactory.values().filter { it.type == type }.forEach {
-                                    menuItem(it.name.removeSuffix("_${type.name}")) {
-                                        createGO(it.prefab)
-                                    }
-                                }
-                            }
-                        }
                     }
                 } else {
                     menuItem("Arrêter l'essai") {
@@ -1086,7 +1104,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
     }
 
     private fun drawGameObjectsWindow() {
-        val windowSize = Vec2(Gdx.graphics.width / 7, Gdx.graphics.height)
+        val windowSize = Vec2(220f, Gdx.graphics.height)
         with(ImGui) {
             setNextWindowSize(windowSize)
             setNextWindowPos(Vec2(Gdx.graphics.width - windowSize.x, 0), Cond.Once)
@@ -1118,35 +1136,40 @@ class EditorScene(val level: Level) : Scene(level.background) {
                                 }
                                 combo("pack", editorSceneUI::gameObjectsSpritePackIndex,
                                         if (editorSceneUI.gameObjectsSpriteShowImportedPack) level.resourcesAtlas().map { it.nameWithoutExtension() }
-                                        else PCGame.gameAtlas.entries.elementAtOrNull(editorSceneUI.gameObjectsSpritePackTypeIndex)?.value?.map { it.nameWithoutExtension() } ?: arrayListOf())
+                                        else PCGame.gameAtlas.entries.elementAtOrNull(editorSceneUI.gameObjectsSpritePackTypeIndex)?.value?.map { it.nameWithoutExtension() }
+                                                ?: arrayListOf())
                                 checkbox("Physics", editorSceneUI::gameObjectsSpritePhysics)
+                                checkbox("Taille réelle", editorSceneUI::gameObjectsSpriteRealSize)
+                                if (!editorSceneUI.gameObjectsSpriteRealSize)
+                                    ImguiHelper.size(editorSceneUI::gameObjectsSpriteCustomSize, Size(1), Size(Constants.maxGameObjectSize))
                             }
                         }
                         separator()
                         (if (editorSceneUI.gameObjectsSpriteShowImportedPack) level.resourcesAtlas().getOrNull(editorSceneUI.gameObjectsSpritePackIndex) else PCGame.gameAtlas.entries.elementAtOrNull(editorSceneUI.gameObjectsSpritePackTypeIndex)?.value?.getOrNull(editorSceneUI.gameObjectsSpritePackIndex))?.also { atlasPath ->
                             val atlas = ResourceManager.getPack(atlasPath)
                             atlas.regions.sortedBy { it.name }.forEachIndexed { index, region ->
-                                val atlasRegion = atlasPath.toFileWrapper() to region.name
-                                val prefab = if (editorSceneUI.gameObjectsSpritePhysics) PrefabSetup.setupPhysicsSprite(atlasRegion) else PrefabSetup.setupSprite(atlasRegion)
-                                addImageBtn(region, prefab, false)
-                                if ((index + 1) % 3 != 0)
-                                    sameLine()
-                            }
+                                        val atlasRegion = atlasPath.toFileWrapper() to region.name
+                                        val size = if (editorSceneUI.gameObjectsSpriteRealSize) region.let { Size(it.regionWidth, it.regionHeight) } else Size(50, 50)
+                                        val prefab = if (editorSceneUI.gameObjectsSpritePhysics) PrefabSetup.setupPhysicsSprite(atlasRegion, size) else PrefabSetup.setupSprite(atlasRegion, size)
+                                        addImageBtn(region, prefab, false)
+                                        if ((index + 1) % 3 != 0)
+                                            sameLine()
+                                    }
                         }
                     }
                     else -> {
                         (PrefabFactory.values().map { it.prefab } + level.resourcesPrefabs()).filter { it.prefabGO.tag == tag }.forEachIndexed { index, it ->
-                            it.prefabGO.loadResources()
+                                    it.prefabGO.loadResources()
 
-                            it.prefabGO.getCurrentState().getComponent<AtlasComponent>()?.apply {
-                                data.elementAtOrNull(currentIndex)?.apply {
-                                    addImageBtn(currentKeyFrame(), it, true)
+                                    it.prefabGO.getCurrentState().getComponent<AtlasComponent>()?.apply {
+                                                data.elementAtOrNull(currentIndex)?.apply {
+                                                            addImageBtn(currentKeyFrame(), it, true)
 
-                                    if ((index + 1) % 3 != 0)
-                                        sameLine()
+                                                            if ((index + 1) % 3 != 0)
+                                                                sameLine()
+                                                        }
+                                            }
                                 }
-                            }
-                        }
                     }
                 }
             }
@@ -1160,7 +1183,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
         with(ImGui) {
             functionalProgramming.withWindow("Réglages du gameObject", editorSceneUI::showInfoGameObjectWindow, WindowFlags.AlwaysAutoResize.i) {
-                if (button("Supprimer ce gameObject", Vec2(-1, 20f))) {
+                if (button("Supprimer ce gameObject", Vec2(-1, 0))) {
                     gameObject.removeFromParent()
                     if (selectGameObject === gameObject) {
                         selectGameObject = null
@@ -1169,7 +1192,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                     }
                 }
 
-                if (button("Créer un prefab", Vec2(-1, 20f)))
+                if (button("Créer un prefab", Vec2(-1, 0)))
                     openPopup(createPrefabTitle)
 
                 ImguiHelper.insertImguiExposeEditorField(gameObject, gameObject, level)
@@ -1202,14 +1225,14 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         if (component != null) {
                             functionalProgramming.withIndent {
                                 ImguiHelper.insertImguiExposeEditorField(component, gameObject, level)
-                                if (button("Supprimer ce comp.", Vec2(-1, 20f))) {
+                                if (button("Supprimer ce comp.", Vec2(-1, 0))) {
                                     gameObject.getStates().elementAtOrNull(editorSceneUI.gameObjectCurrentStateIndex)?.removeComponent(component)
                                 }
                             }
                         }
                         separator()
                         pushItemFlag(ItemFlags.Disabled.i, gameObject.getStates().elementAtOrNull(editorSceneUI.gameObjectCurrentStateIndex)?.getComponents()?.size == PCGame.componentsClasses.size)
-                        if (button("Ajouter un component", Vec2(-1, 20f)))
+                        if (button("Ajouter un component", Vec2(-1, 0)))
                             openPopup(addComponentTitle)
                         popItemFlag()
                     }
@@ -1255,7 +1278,9 @@ class EditorScene(val level: Level) : Scene(level.background) {
                 if (beginPopup(addComponentTitle)) {
                     val components = PCGame.componentsClasses.filter { comp -> gameObject.getStates().elementAt(editorSceneUI.gameObjectCurrentStateIndex).getComponents().none { comp.isInstance(it) } }
                     functionalProgramming.withItemWidth(150f) {
-                        combo("component", editorSceneUI::gameObjectAddComponentComboIndex, components.map { it.simpleName ?: "Nom inconnu" })
+                        combo("component", editorSceneUI::gameObjectAddComponentComboIndex, components.map {
+                            it.simpleName ?: "Nom inconnu"
+                        })
                     }
                     if (button("Ajouter", Vec2(-1, 20))) {
                         if (editorSceneUI.gameObjectAddComponentComboIndex in components.indices) {

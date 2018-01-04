@@ -3,18 +3,15 @@ package be.catvert.pc.components.logics
 import be.catvert.pc.*
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
-import be.catvert.pc.actions.PhysicsAction
 import be.catvert.pc.actions.PhysicsAction.PhysicsActions
 import be.catvert.pc.actions.TagAction
-import be.catvert.pc.components.LogicsComponent
+import be.catvert.pc.components.Component
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
-import imgui.Col
-import imgui.ImGui
 import imgui.functionalProgramming
 import kotlin.math.roundToInt
 
@@ -29,9 +26,8 @@ enum class MovementType {
  * Classe de données permettant de gérer les sauts notament en définissant la hauteur du saut
  * @property isJumping : Permet de savoir si l'entité est entrain de sauté
  * @property targetHeight : La hauteur en y à atteindre
- * @property startJumping : Débute le saut de l'entité
  */
-private data class JumpData(var isJumping: Boolean = false, var targetHeight: Int = 0, var startJumping: Boolean = false)
+private data class JumpData(var isJumping: Boolean = false, var targetHeight: Int = 0)
 
 /**
  * Listener lors d'une collision avec une autre entité pour le mask correspondant
@@ -40,7 +36,7 @@ data class CollisionListener(val gameObject: GameObject, val collideGameObject: 
 
 data class SensorData(@ExposeEditor var isSensor: Boolean = false, var target: GameObjectTag = Tags.Player.tag, var sensorIn: Action = EmptyAction(), var sensorOut: Action = EmptyAction()) : CustomEditorImpl {
     override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
-        if(isSensor) {
+        if (isSensor) {
             functionalProgramming.collapsingHeader("sensor props") {
                 ImguiHelper.gameObjectTag(::target, level, "sensor target")
                 ImguiHelper.action("in action", ::sensorIn, gameObject, level)
@@ -48,6 +44,7 @@ data class SensorData(@ExposeEditor var isSensor: Boolean = false, var target: G
             }
         }
     }
+
     val sensorOverlaps: MutableSet<GameObject> = mutableSetOf()
 }
 
@@ -77,7 +74,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                        var onRightAction: Action = EmptyAction(),
                        var onJumpAction: Action = EmptyAction(),
                        var onFallAction: Action = EmptyAction(),
-                       var onNothingAction: Action = EmptyAction()) : LogicsComponent(), CustomEditorImpl {
+                       var onNothingAction: Action = EmptyAction()) : Component(), Updeatable, CustomEditorImpl {
     @JsonCreator private constructor() : this(true)
 
     /**
@@ -120,7 +117,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         level = container.cast()
     }
 
-    override fun update(gameObject: GameObject) {
+    override fun update() {
         if (sensor.isSensor)
             checkSensorOverlaps(gameObject)
         if (isStatic || sensor.isSensor) return
@@ -151,7 +148,6 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                         }
                         jumpData.isJumping = true
                         jumpData.targetHeight = gameObject.box.y + jumpHeight
-                        jumpData.startJumping = true
 
                         gravity = false
 
@@ -168,7 +164,6 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                             moveSpeedY = gravitySpeed.toFloat()
                             addJumpAfterClear = true
                         }
-                        jumpData.startJumping = false
                     }
                 }
             }
@@ -196,18 +191,18 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
 
         sensor.apply {
             level?.getAllGameObjectsInCells(gameObject.box)?.filter { it !== gameObject && it.tag == sensor.target && gameObject.box.overlaps(it.box) }?.forEach {
-                if (!sensorOverlaps.contains(it)) {
-                    sensorIn(gameObject)
-                    sensorOverlaps += it
-                }
+                        if (!sensorOverlaps.contains(it)) {
+                            sensorIn(gameObject)
+                            sensorOverlaps += it
+                        }
 
-                checkedGameObject += it
-            }
+                        checkedGameObject += it
+                    }
 
             sensorOverlaps.filter { !checkedGameObject.contains(it) }.forEach {
-                sensorOut(gameObject)
-                sensorOverlaps.remove(it)
-            }
+                        sensorOut(gameObject)
+                        sensorOverlaps.remove(it)
+                    }
         }
     }
 
@@ -264,44 +259,45 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
 
         level?.apply {
             this.getAllGameObjectsInCells(newRect).filter { filter ->
-                filter !== gameObject && filter.getCurrentState().hasComponent<PhysicsComponent>() && let { // TODO refactoring
-                    filter.getCurrentState().getComponent<PhysicsComponent>()?.apply {
-                        return@let !sensor.isSensor && ignoreTags.contains(gameObject.tag) == false
-                    }
-                    true
-                }
-            }.forEach {
-                if (newRect.overlaps(it.box)) {
-                    val side = when {
-                        moveX > 0 -> BoxSide.Right
-                        moveX < 0 -> BoxSide.Left
-                        moveY > 0 -> BoxSide.Up
-                        moveY < 0 -> BoxSide.Down
-                        else -> {
-                            Log.warn { "Collision invalide !" }
-                            BoxSide.Left
+                        filter !== gameObject && filter.getCurrentState().hasComponent<PhysicsComponent>() && let {
+                            // TODO refactoring
+                            filter.getCurrentState().getComponent<PhysicsComponent>()?.apply {
+                                        return@let !sensor.isSensor && ignoreTags.contains(gameObject.tag) == false
+                                    }
+                            true
+                        }
+                    }.forEach {
+                        if (newRect.overlaps(it.box)) {
+                            val side = when {
+                                moveX > 0 -> BoxSide.Right
+                                moveX < 0 -> BoxSide.Left
+                                moveY > 0 -> BoxSide.Up
+                                moveY < 0 -> BoxSide.Down
+                                else -> {
+                                    Log.warn { "Collision invalide !" }
+                                    BoxSide.All
+                                }
+                            }
+
+                            gameObject.getCurrentState().getComponent<PhysicsComponent>()?.apply {
+                                        collisionsActions.firstOrNull { collisionAction -> (collisionAction.side == side || collisionAction.side == BoxSide.All) && collisionAction.target == it.tag }?.apply {
+                                                    action(gameObject)
+                                                    tagAction(it)
+                                                }
+                                        onCollisionWith.invoke(CollisionListener(gameObject, it, side))
+                                    }
+
+                            it.getCurrentState().getComponent<PhysicsComponent>()?.apply {
+                                        collisionsActions.firstOrNull { collisionAction -> (collisionAction.side == -side || collisionAction.side == BoxSide.All) && collisionAction.target == gameObject.tag }?.apply {
+                                                    action(it)
+                                                    tagAction(gameObject)
+                                                }
+                                        onCollisionWith.invoke(CollisionListener(it, gameObject, -side))
+                                    }
+
+                            return true
                         }
                     }
-
-                    gameObject.getCurrentState().getComponent<PhysicsComponent>()?.apply {
-                        collisionsActions.firstOrNull { collisionAction -> collisionAction.side == side && collisionAction.target == it.tag }?.apply {
-                            action(gameObject)
-                            tagAction(it)
-                        }
-                        onCollisionWith.invoke(CollisionListener(gameObject, it, side))
-                    }
-
-                    it.getCurrentState().getComponent<PhysicsComponent>()?.apply {
-                        collisionsActions.firstOrNull { collisionAction -> collisionAction.side == -side && collisionAction.target == gameObject.tag }?.apply {
-                            action(it)
-                            tagAction(gameObject)
-                        }
-                        onCollisionWith.invoke(CollisionListener(it, gameObject, -side))
-                    }
-
-                    return true
-                }
-            }
         }
         return false
     }
@@ -310,29 +306,32 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         val collideGameObjects = mutableSetOf<GameObject>()
 
         level?.getAllGameObjectsInCells(gameObject.box)?.filter { it !== gameObject }?.forEach {
-            when (boxSide) {
-                BoxSide.Left -> {
-                    if (it.box.x + it.box.width == gameObject.box.x) {
-                        collideGameObjects += it
+                    when (boxSide) {
+                        BoxSide.Left -> {
+                            if (it.box.x + it.box.width == gameObject.box.x) {
+                                collideGameObjects += it
+                            }
+                        }
+                        BoxSide.Right -> {
+                            if (it.box.x == gameObject.box.x + gameObject.box.width) {
+                                collideGameObjects += it
+                            }
+                        }
+                        BoxSide.Up -> {
+                            if (it.box.y == gameObject.box.y + gameObject.box.height) {
+                                collideGameObjects += it
+                            }
+                        }
+                        BoxSide.Down -> {
+                            if (it.box.y + it.box.height == gameObject.box.y) {
+                                collideGameObjects += it
+                            }
+                        }
+                        BoxSide.All -> {
+                            collideGameObjects += it
+                        }
                     }
                 }
-                BoxSide.Right -> {
-                    if (it.box.x == gameObject.box.x + gameObject.box.width) {
-                        collideGameObjects += it
-                    }
-                }
-                BoxSide.Up -> {
-                    if (it.box.y == gameObject.box.y + gameObject.box.height) {
-                        collideGameObjects += it
-                    }
-                }
-                BoxSide.Down -> {
-                    if (it.box.y + it.box.height == gameObject.box.y) {
-                        collideGameObjects += it
-                    }
-                }
-            }
-        }
 
         return collideGameObjects
     }

@@ -6,84 +6,84 @@ filter: Nearest,Nearest
 repeat: none
 blocks/metal/Metal Blue
   rotate: false
-  xy: 1544, 8
+  xy: 1932, 138
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 blocks/metal/Metal Green
   rotate: false
-  xy: 1932, 72
+  xy: 1742, 6
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 blocks/metal/Metal Grey
   rotate: false
-  xy: 1676, 8
+  xy: 1544, 8
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 blocks/metal/Metal Red
   rotate: false
-  xy: 1932, 138
+  xy: 1676, 8
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 blocks/metal/Yellow
   rotate: false
-  xy: 1610, 8
+  xy: 1932, 72
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 blocks/pipe/Pipe C Blue Plastic Middle
   rotate: false
-  xy: 516, 1482
+  xy: 2, 968
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
 blocks/pipe/Pipe C Blue Right Up
   rotate: false
-  xy: 1544, 204
+  xy: 1544, 652
   size: 446, 446
   orig: 446, 446
   offset: 0, 0
   index: -1
 blocks/pipe/Pipe C Blue Up
   rotate: false
-  xy: 2, 4
+  xy: 1030, 582
   size: 512, 448
   orig: 512, 448
   offset: 0, 0
   index: -1
 blocks/pipe/Pipe C Green Middle
   rotate: false
-  xy: 2, 454
+  xy: 516, 968
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
 blocks/pipe/Pipe C Green Right Up
   rotate: false
-  xy: 1544, 652
+  xy: 1544, 1100
   size: 446, 446
   orig: 446, 446
   offset: 0, 0
   index: -1
 blocks/pipe/Pipe C Green Up
   rotate: false
-  xy: 1030, 1032
+  xy: 516, 518
   size: 512, 448
   orig: 512, 448
   offset: 0, 0
   index: -1
 blocks/pipe/Pipe C Orange Middle
   rotate: false
-  xy: 1030, 1482
+  xy: 2, 1482
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
@@ -97,42 +97,42 @@ blocks/pipe/Pipe C Orange Right Up
   index: -1
 blocks/pipe/Pipe C Orange Up
   rotate: false
-  xy: 1030, 582
+  xy: 2, 4
   size: 512, 448
   orig: 512, 448
   offset: 0, 0
   index: -1
 blocks/pipe/Pipe C Red Middle
   rotate: false
-  xy: 2, 1482
+  xy: 2, 454
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
 blocks/pipe/Pipe C Red Right Up
   rotate: false
-  xy: 1544, 1100
+  xy: 1544, 204
   size: 446, 446
   orig: 446, 446
   offset: 0, 0
   index: -1
 blocks/pipe/Pipe C Red Up
   rotate: false
-  xy: 516, 518
+  xy: 1030, 1032
   size: 512, 448
   orig: 512, 448
   offset: 0, 0
   index: -1
 blocks/pipe/Pipe Connection Metal
   rotate: false
-  xy: 516, 968
+  xy: 516, 1482
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
 blocks/sand/Sand 1
   rotate: false
-  xy: 1742, 6
+  xy: 1610, 8
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
@@ -142,6 +142,20 @@ clouds/cloudy_1/Cloud Middle
   xy: 1802, 72
   size: 128, 64
   orig: 128, 64
+  offset: 0, 0
+  index: -1
+clouds/default_1/Cloud 1 Left
+  rotate: false
+  xy: 1030, 324
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+clouds/default_1/Cloud 1 Middle
+  rotate: false
+  xy: 1030, 66
+  size: 512, 256
+  orig: 512, 256
   offset: 0, 0
   index: -1
 clouds/grey_1/Cloud Small
@@ -158,14 +172,7 @@ clouds/light_yellow_1/Cloud LY 1
   orig: 256, 128
   offset: 0, 0
   index: -1
-clouds/light_yellow_1/Cloud LY 2
-  rotate: false
-  xy: 516, 260
-  size: 512, 256
-  orig: 512, 256
-  offset: 0, 0
-  index: -1
-clouds/light_yellow_1/Cloud LY 5
+clouds/light_yellow_1/Cloud LY 3
   rotate: false
   xy: 516, 2
   size: 512, 256
@@ -174,21 +181,14 @@ clouds/light_yellow_1/Cloud LY 5
   index: -1
 clouds/light_yellow_1/Cloud LY 6
   rotate: false
-  xy: 1030, 324
-  size: 512, 256
-  orig: 512, 256
-  offset: 0, 0
-  index: -1
-clouds/light_yellow_1/Cloud LY 7
-  rotate: false
-  xy: 1030, 66
+  xy: 516, 260
   size: 512, 256
   orig: 512, 256
   offset: 0, 0
   index: -1
 clouds/light_yellow_1/Cloud LY 9
   rotate: false
-  xy: 2, 968
+  xy: 1030, 1482
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
@@ -199,303 +199,310 @@ size: 2048,2048
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-blocks/brick/Brick Tile 1
-  rotate: false
-  xy: 260, 776
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-blocks/brick/Brick Tile 2
+blocks/brick/Brick Blue
   rotate: false
   xy: 260, 518
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-blocks/brick/Brick Yellow
-  rotate: false
-  xy: 1034, 2
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-blocks/cloud/Cloud
-  rotate: false
-  xy: 1288, 1550
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-blocks/extra/Blue X
-  rotate: false
-  xy: 1292, 2
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-blocks/extra/Corded
-  rotate: false
-  xy: 516, 1164
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-blocks/extra/Mushroom
-  rotate: false
-  xy: 1550, 132
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-blocks/ice/Ice 1
-  rotate: false
-  xy: 2, 260
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-blocks/ice/Ice 2
-  rotate: false
-  xy: 2, 776
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-blocks/ice/Ice 3
-  rotate: false
-  xy: 774, 1164
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-blocks/metal/Metal Stone Black
-  rotate: false
-  xy: 1550, 1164
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-blocks/metal/Metal Stone Blue
-  rotate: false
-  xy: 1290, 1292
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-blocks/metal/Metal Stone Grey
-  rotate: false
-  xy: 518, 648
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-blocks/metal/Metal Stone Violet
-  rotate: false
-  xy: 1292, 518
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-blocks/metal/Metal Stone Yellow
-  rotate: false
-  xy: 1034, 518
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-blocks/screw/Screw
-  rotate: false
-  xy: 2, 2
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-blocks/stone/Stone 1
-  rotate: false
-  xy: 1292, 260
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-blocks/stone/Stone 2
-  rotate: false
-  xy: 1546, 1680
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-blocks/toy/Ball 1
-  rotate: false
-  xy: 1030, 1550
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-blocks/wood/Wood 1
-  rotate: false
-  xy: 260, 2
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-blocks/wood/Wood 2
-  rotate: false
-  xy: 1548, 1422
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-clouds/default_1/Cloud 1 Left
-  rotate: false
-  xy: 2, 1422
-  size: 512, 256
-  orig: 512, 256
-  offset: 0, 0
-  index: -1
-clouds/default_1/Cloud 1 Middle
-  rotate: false
-  xy: 516, 1422
-  size: 512, 256
-  orig: 512, 256
-  offset: 0, 0
-  index: -1
-clouds/default_1/Cloud 2
-  rotate: false
-  xy: 2, 1034
-  size: 512, 128
-  orig: 512, 128
-  offset: 0, 0
-  index: -1
-clouds/light_yellow_1/Cloud LY 10
-  rotate: false
-  xy: 2, 1164
-  size: 512, 256
-  orig: 512, 256
-  offset: 0, 0
-  index: -1
-clouds/light_yellow_1/Cloud LY 3
-  rotate: false
-  xy: 516, 1680
-  size: 512, 256
-  orig: 512, 256
-  offset: 0, 0
-  index: -1
-clouds/light_yellow_1/Cloud LY 4
-  rotate: false
-  xy: 1030, 1808
-  size: 512, 128
-  orig: 512, 128
-  offset: 0, 0
-  index: -1
-clouds/light_yellow_1/Cloud LY 8
-  rotate: false
-  xy: 2, 1680
-  size: 512, 256
-  orig: 512, 256
-  offset: 0, 0
-  index: -1
-clouds/lightblue_1/Cloud LB Left
-  rotate: false
-  xy: 518, 132
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-clouds/lightblue_1/Cloud LB Middle
+blocks/brick/Brick Red
   rotate: false
   xy: 260, 260
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-goldpiece/red/gr_0
-  rotate: false
-  xy: 1550, 906
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-goldpiece/red/gr_1
-  rotate: false
-  xy: 1550, 648
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-goldpiece/red/gr_2
-  rotate: false
-  xy: 1550, 390
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-goldpiece/red/gr_7
-  rotate: false
-  xy: 518, 390
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-goldpiece/red/gr_8
-  rotate: false
-  xy: 776, 906
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-goldpiece/red/gr_9
-  rotate: false
-  xy: 2, 518
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-goldpiece/yellow/gp_0
+blocks/brick/Brick Tile 1
   rotate: false
   xy: 776, 648
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-goldpiece/yellow/gp_1
+blocks/brick/Brick Tile 2
   rotate: false
   xy: 776, 390
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-goldpiece/yellow/gp_2
+blocks/cloud/Cloud
   rotate: false
-  xy: 776, 132
+  xy: 776, 906
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-goldpiece/yellow/gp_3
+blocks/extra/Corded
+  rotate: false
+  xy: 260, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+blocks/ice/Ice 1
+  rotate: false
+  xy: 518, 648
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+blocks/ice/Ice 2
+  rotate: false
+  xy: 1548, 1422
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+blocks/ice/Ice 3
+  rotate: false
+  xy: 518, 132
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+blocks/metal/Metal Stone Blue
+  rotate: false
+  xy: 1034, 260
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+blocks/metal/Metal Stone Grey
+  rotate: false
+  xy: 1292, 776
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+blocks/metal/Metal Stone Red
+  rotate: false
+  xy: 260, 776
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+blocks/metal/Metal Stone Yellow
+  rotate: false
+  xy: 1550, 648
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+blocks/sand/Sand 2
+  rotate: false
+  xy: 1292, 1034
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+blocks/screw/Screw
+  rotate: false
+  xy: 518, 390
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+blocks/slime/Slime
+  rotate: false
+  xy: 1292, 260
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+blocks/toy/Ball 1
+  rotate: false
+  xy: 1290, 1292
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+blocks/wood/Wood 1
   rotate: false
   xy: 1034, 1034
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-goldpiece/yellow/gp_4
+blocks/wood/Wood 2
   rotate: false
   xy: 1034, 776
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-goldpiece/yellow/gp_5
+clouds/default_1/Cloud 2
+  rotate: false
+  xy: 1030, 1808
+  size: 512, 128
+  orig: 512, 128
+  offset: 0, 0
+  index: -1
+clouds/light_yellow_1/Cloud LY 10
+  rotate: false
+  xy: 516, 1422
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+clouds/light_yellow_1/Cloud LY 2
+  rotate: false
+  xy: 2, 1680
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+clouds/light_yellow_1/Cloud LY 4
+  rotate: false
+  xy: 2, 1034
+  size: 512, 128
+  orig: 512, 128
+  offset: 0, 0
+  index: -1
+clouds/light_yellow_1/Cloud LY 5
+  rotate: false
+  xy: 2, 1164
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+clouds/light_yellow_1/Cloud LY 7
+  rotate: false
+  xy: 2, 1422
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+clouds/light_yellow_1/Cloud LY 8
+  rotate: false
+  xy: 516, 1680
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+clouds/lightblue_1/Cloud LB Left
+  rotate: false
+  xy: 1546, 1680
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+clouds/lightblue_1/Cloud LB Middle
+  rotate: false
+  xy: 776, 132
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+clouds/lightblue_1/Cloud LB Right
+  rotate: false
+  xy: 1034, 518
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+goldpiece/red/gr_2
+  rotate: false
+  xy: 516, 1164
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+goldpiece/red/gr_3
+  rotate: false
+  xy: 1030, 1550
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+goldpiece/red/gr_4
+  rotate: false
+  xy: 2, 776
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+goldpiece/red/gr_5
+  rotate: false
+  xy: 2, 518
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+goldpiece/red/gr_6
+  rotate: false
+  xy: 2, 260
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+goldpiece/red/gr_7
   rotate: false
   xy: 1032, 1292
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
+goldpiece/red/gr_8
+  rotate: false
+  xy: 2, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+goldpiece/red/gr_9
+  rotate: false
+  xy: 774, 1164
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+goldpiece/yellow/gp_0
+  rotate: false
+  xy: 1034, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+goldpiece/yellow/gp_1
+  rotate: false
+  xy: 1292, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+goldpiece/yellow/gp_2
+  rotate: false
+  xy: 1292, 518
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+goldpiece/yellow/gp_3
+  rotate: false
+  xy: 1550, 1164
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+goldpiece/yellow/gp_4
+  rotate: false
+  xy: 1550, 906
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+goldpiece/yellow/gp_5
+  rotate: false
+  xy: 1288, 1550
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
 goldpiece/yellow/gp_6
   rotate: false
-  xy: 1034, 260
+  xy: 1550, 390
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
@@ -509,14 +516,7 @@ goldpiece/yellow/gp_7
   index: -1
 goldpiece/yellow/gp_8
   rotate: false
-  xy: 1292, 1034
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-goldpiece/yellow/gp_9
-  rotate: false
-  xy: 1292, 776
+  xy: 1550, 132
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
@@ -527,79 +527,79 @@ size: 2048,1024
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-blocks/brick/Brick Blue
-  rotate: false
-  xy: 260, 2
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-blocks/brick/Brick Red
-  rotate: false
-  xy: 518, 2
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-blocks/metal/Metal Stone Green
+blocks/brick/Brick Yellow
   rotate: false
   xy: 260, 260
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-blocks/metal/Metal Stone Red
+blocks/extra/Blue X
   rotate: false
   xy: 518, 518
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-blocks/sand/Sand 2
-  rotate: false
-  xy: 518, 260
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-blocks/slime/Slime
-  rotate: false
-  xy: 2, 2
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-clouds/lightblue_1/Cloud LB Right
-  rotate: false
-  xy: 776, 518
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-goldpiece/red/gr_3
+blocks/extra/Mushroom
   rotate: false
   xy: 776, 260
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-goldpiece/red/gr_4
+blocks/metal/Metal Stone Black
   rotate: false
-  xy: 2, 518
+  xy: 518, 260
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-goldpiece/red/gr_5
+blocks/metal/Metal Stone Green
+  rotate: false
+  xy: 260, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+blocks/metal/Metal Stone Violet
   rotate: false
   xy: 2, 260
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-goldpiece/red/gr_6
+blocks/stone/Stone 1
   rotate: false
   xy: 260, 518
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+blocks/stone/Stone 2
+  rotate: false
+  xy: 2, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+goldpiece/red/gr_0
+  rotate: false
+  xy: 776, 518
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+goldpiece/red/gr_1
+  rotate: false
+  xy: 518, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+goldpiece/yellow/gp_9
+  rotate: false
+  xy: 2, 518
   size: 256, 256
   orig: 256, 256
   offset: 0, 0

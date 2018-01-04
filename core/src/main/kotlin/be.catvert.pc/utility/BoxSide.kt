@@ -1,7 +1,7 @@
 package be.catvert.pc.utility
 
 enum class BoxSide {
-    Left, Right, Up, Down;
+    Left, Right, Up, Down, All;
 
     /**
      * Permet d'inverser le côté de la collision
@@ -11,5 +11,6 @@ enum class BoxSide {
         BoxSide.Right -> Left
         BoxSide.Up -> Down
         BoxSide.Down -> Up
+        BoxSide.All -> All
     }
 }

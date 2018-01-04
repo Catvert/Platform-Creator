@@ -5,7 +5,6 @@ import be.catvert.pc.GameObject
 import be.catvert.pc.GameObjectTweenAccessor
 import be.catvert.pc.PCGame
 import be.catvert.pc.actions.Action
-import be.catvert.pc.components.BasicComponent
 import be.catvert.pc.components.Component
 import be.catvert.pc.containers.Level
 import be.catvert.pc.factories.TweenFactory
@@ -21,7 +20,7 @@ import imgui.functionalProgramming
  * Un tween représente l'application d'une interpolation sur une caractéristiques d'un gameObject
  * @see GameObjectTweenAccessor
  */
-class TweenComponent(var tweens: ArrayList<TweenData>) : BasicComponent(), CustomEditorImpl {
+class TweenComponent(var tweens: ArrayList<TweenData>) : Component(), CustomEditorImpl {
     constructor(vararg tweens: TweenData) : this(arrayListOf(*tweens))
     @JsonCreator private constructor() : this(arrayListOf())
 
@@ -46,9 +45,9 @@ class TweenComponent(var tweens: ArrayList<TweenData>) : BasicComponent(), Custo
 
             val tweenState = gameObject.addState("tween-state") {
                 gameObject.getCurrentState().getComponents().forEach {
-                    if (keepComponents.contains(it.javaClass))
-                        addComponent(it)
-                }
+                            if (keepComponents.contains(it.javaClass))
+                                addComponent(it)
+                        }
             }
 
             val lastState = gameObject.getCurrentStateIndex()
@@ -111,14 +110,14 @@ class TweenComponent(var tweens: ArrayList<TweenData>) : BasicComponent(), Custo
     override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
         with(ImGui) {
             ImguiHelper.addImguiWidgetsArray("tweens", tweens, { it.name }, { TweenFactory.EmptyTween() }, gameObject, level) {
-                if (button("Ajouter depuis..", Vec2(-1, 20f)))
+                if (button("Ajouter depuis..", Vec2(-1, 0)))
                     openPopup(addTweenTitle)
 
                 if (beginPopup(addTweenTitle)) {
                     functionalProgramming.withItemWidth(100f) {
                         combo("tweens", ::currentTweenIndex, TweenFactory.values().map { it.name })
                     }
-                    if (button("Ajouter", Vec2(-1, 20f))) {
+                    if (button("Ajouter", Vec2(-1, 0))) {
                         tweens.add(TweenFactory.values()[currentTweenIndex]())
                         closeCurrentPopup()
                     }

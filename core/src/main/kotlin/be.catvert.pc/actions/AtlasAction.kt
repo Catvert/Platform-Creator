@@ -1,7 +1,9 @@
 package be.catvert.pc.actions
 
 import be.catvert.pc.GameObject
+import be.catvert.pc.components.RequiredComponent
 import be.catvert.pc.components.graphics.AtlasComponent
+import be.catvert.pc.components.logics.PhysicsComponent
 import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.CustomEditorImpl
 import com.fasterxml.jackson.annotation.JsonCreator
@@ -11,13 +13,14 @@ import imgui.functionalProgramming
 /**
  * Action permettant de changer l'atlas en cour d'un gameObject
  */
+@RequiredComponent(AtlasComponent::class)
 class AtlasAction(var atlasIndex: Int) : Action, CustomEditorImpl {
     @JsonCreator private constructor() : this(-1)
 
     override fun invoke(gameObject: GameObject) {
         gameObject.getCurrentState().getComponent<AtlasComponent>()?.also {
-            it.currentIndex = atlasIndex
-        }
+                    it.currentIndex = atlasIndex
+                }
     }
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level) {

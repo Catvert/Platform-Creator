@@ -25,8 +25,8 @@ object ResourceManager : Disposable {
     fun init() {
         defaultTexture = let {
             val pixmap = Pixmap(64, 64, Pixmap.Format.RGBA8888)
-            for(x in 0..64) {
-                for(y in 0..64) {
+            for (x in 0..64) {
+                for (y in 0..64) {
                     pixmap.drawPixel(x, y, Color.rgba8888(Color.BLACK))
                 }
             }
@@ -42,11 +42,12 @@ object ResourceManager : Disposable {
         assetManager.clear()
     }
 
-    fun getTexture(file: FileHandle): Texture = tryLoad(file)?: defaultTexture
+    fun getTexture(file: FileHandle): Texture = tryLoad(file) ?: defaultTexture
 
-    fun getPack(file: FileHandle): TextureAtlas = tryLoad(file)?: defaultPack
+    fun getPack(file: FileHandle): TextureAtlas = tryLoad(file) ?: defaultPack
 
-    fun getPackRegion(file: FileHandle, region: String): TextureAtlas.AtlasRegion = tryLoad<TextureAtlas>(file)?.findRegion(region)?: defaultPackRegion
+    fun getPackRegion(file: FileHandle, region: String): TextureAtlas.AtlasRegion = tryLoad<TextureAtlas>(file)?.findRegion(region)
+            ?: defaultPackRegion
 
     fun getSound(file: FileHandle): Sound? = tryLoad(file)
 
@@ -54,7 +55,7 @@ object ResourceManager : Disposable {
 
     private inline fun <reified T : Any> tryLoad(file: FileHandle): T? {
         try {
-            return if(assetManager.isLoaded(file.path()))
+            return if (assetManager.isLoaded(file.path()))
                 assetManager.get(file.path())
             else {
                 if (file.exists() || T::class == I18NBundle::class)
@@ -64,7 +65,7 @@ object ResourceManager : Disposable {
                     null
                 }
             }
-        } catch(e: GdxRuntimeException) {
+        } catch (e: GdxRuntimeException) {
             Log.error(e) { "Erreur lors du chargement d'une ressource ! Chemin : ${file.path()}" }
         }
         Log.warn { "Ressource non trouvée : ${file.path()}" }

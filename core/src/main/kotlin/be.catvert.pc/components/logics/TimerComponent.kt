@@ -3,17 +3,18 @@ package be.catvert.pc.components.logics
 import be.catvert.pc.GameObject
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
-import be.catvert.pc.components.LogicsComponent
+import be.catvert.pc.components.Component
 import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.CustomEditorImpl
 import be.catvert.pc.utility.ExposeEditor
 import be.catvert.pc.utility.Timer
+import be.catvert.pc.utility.Updeatable
 import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
 import imgui.functionalProgramming
 
-class TimerComponent(interval: Float, @ExposeEditor var timerAction: Action) : LogicsComponent(), CustomEditorImpl {
-    @JsonCreator private constructor(): this(1f, EmptyAction())
+class TimerComponent(interval: Float, @ExposeEditor var timerAction: Action) : Component(), Updeatable, CustomEditorImpl {
+    @JsonCreator private constructor() : this(1f, EmptyAction())
 
     var interval = interval
         set(value) {
@@ -27,11 +28,7 @@ class TimerComponent(interval: Float, @ExposeEditor var timerAction: Action) : L
         }
     }
 
-    private lateinit var gameObject: GameObject
-
-    override fun update(gameObject: GameObject) {
-        this.gameObject = gameObject
-
+    override fun update() {
         timer.update()
     }
 

@@ -7,7 +7,6 @@ import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.*
-import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -18,7 +17,6 @@ import kotlin.math.roundToInt
 
 /**
  * Classe représentant un objet en jeu
- * @param id L'id du gameObject
  * @param box Représente le box de l'objet dans l'espace (position + taille)
  * @param container Item dans lequel l'objet va être implémenté
  */
@@ -26,7 +24,8 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
                  @ExposeEditor var name: String = tag,
                  @ExposeEditor var box: Rect = Rect(size = Size(1, 1)),
                  container: GameObjectContainer? = null,
-                 initDefaultState: GameObjectState.() -> Unit = {}) : Updeatable, Renderable, ResourceLoader, CustomEditorImpl {
+                 initDefaultState: GameObjectState.() -> Unit = {},
+                 vararg otherStates: GameObjectState = arrayOf()) : Updeatable, Renderable, ResourceLoader, CustomEditorImpl {
 
     @ExposeEditor(min = -100, max = 100)
     var layer: Int = 0
@@ -37,13 +36,15 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
     @ExposeEditor(customName = "on out of map")
     var onOutOfMapAction: Action = RemoveGOAction()
 
-    @JsonProperty("states") private val states: MutableSet<GameObjectState> = mutableSetOf(GameObjectState("default").apply(initDefaultState))
+    @JsonProperty("states")
+    private val states: MutableSet<GameObjectState> = mutableSetOf(GameObjectState("default").apply(initDefaultState), *otherStates)
 
-    @JsonProperty("currentState") private var currentState: Int = 0
+    @JsonProperty("currentState")
+    private var currentState: Int = 0
         set(value) {
-            if(value in states.indices) {
+            if (value in states.indices) {
                 field = value
-                if(container != null)
+                if (container != null)
                     states.elementAt(value).toggleActive(container!!)
             }
         }
@@ -66,7 +67,7 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
         set(value) {
             field = value
             if (value != null) {
-                states.forEach { it.onAddToContainer(this, value) }
+                states.forEach { it.onAddToContainer(this) }
                 setState(initialState)
             }
         }
@@ -90,7 +91,7 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
 
     fun addState(state: GameObjectState): Int {
         if (container != null)
-            state.onAddToContainer(this, container!!)
+            state.onAddToContainer(this)
         states.add(state)
         return states.size - 1
     }
@@ -202,7 +203,7 @@ class GameObjectTweenAccessor : TweenAccessor<GameObject> {
                 returnValues[0] = gameObject.box.width.toFloat(); returnValues[1] = gameObject.box.height.toFloat(); return 2
             }
             GameObjectTween.ATLAS_ALPHA -> {
-                returnValues[0] = gameObject.getCurrentState().getComponent<AtlasComponent>()?.alpha?: 0f; return 1
+                returnValues[0] = gameObject.getCurrentState().getComponent<AtlasComponent>()?.alpha ?: 0f; return 1
             }
             else -> Log.error { "Tween inconnu : $tweenType" }
         }

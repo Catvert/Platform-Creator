@@ -10,10 +10,10 @@
 ## BUGS
 
 - Gridmode + copie de plusieurs gameObject d'un coup
-- Placement de sprite à la position y = 0 -> suppression
 
 ## IDÉE
 
 - Structure, permet de créer une structure prédéfinie ou créer. Un peu à la méthode des prefabs sauf que c'est plusieurs gameObjects placé a côté de l'autre
 - Ajout du pseudo de l'utilisateur au premier lancement
-- Ajouter la possibilité d'importer des atlas .xml 
+- Ajouter la possibilité d'importer des atlas .xml
+- Permettre de redimensionner automatiquement une texture ayant des pixels transparents pour permettre de meilleurs collisions.

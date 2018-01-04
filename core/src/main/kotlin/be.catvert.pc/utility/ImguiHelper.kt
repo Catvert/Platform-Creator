@@ -5,7 +5,9 @@ import be.catvert.pc.GameObjectTag
 import be.catvert.pc.PCGame
 import be.catvert.pc.Prefab
 import be.catvert.pc.actions.Action
+import be.catvert.pc.components.RequiredComponent
 import be.catvert.pc.containers.Level
+import be.catvert.pc.factories.PrefabFactory
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import glm_.vec2.Vec2
@@ -19,13 +21,13 @@ object ImguiHelper {
         inline fun <reified T : Any> cast() = this as Item<T>
     }
 
-    fun <T : Any> addImguiWidgetsArray(label: String, array: ArrayList<T>, itemLabel: (item: T) -> String, createItem: () -> T, gameObject: GameObject, level: Level, itemExposeEditor: ExposeEditor = ExposeEditorFactory.empty, addCollapseItem: Boolean = true, endBlock: () -> Unit = {}): Boolean {
+    fun <T : Any> addImguiWidgetsArray(label: String, array: ArrayList<T>, itemLabel: (item: T) -> String, createItem: () -> T, gameObject: GameObject, level: Level, itemExposeEditor: ExposeEditor = ExposeEditorFactory.empty, endBlock: () -> Unit = {}): Boolean {
         return addImguiWidgetsArray(label, array, itemLabel, createItem, {
             addImguiWidget(itemLabel(it.obj), it, gameObject, level, itemExposeEditor)
-        }, addCollapseItem, endBlock)
+        }, endBlock)
     }
 
-    fun <T : Any> addImguiWidgetsArray(label: String, array: ArrayList<T>, itemLabel: (item: T) -> String, createItem: () -> T, itemBlock: (item: Item<T>) -> Boolean, addCollapseItem: Boolean = true, endBlock: () -> Unit = {}): Boolean {
+    fun <T : Any> addImguiWidgetsArray(label: String, array: ArrayList<T>, itemLabel: (item: T) -> String, createItem: () -> T, itemBlock: (item: Item<T>) -> Boolean, endBlock: () -> Unit = {}): Boolean {
         var valueChanged = false
 
         with(ImGui) {
@@ -44,16 +46,18 @@ object ImguiHelper {
                         sameLine()
 
                         val item = Item(array[index])
-                        functionalProgramming.withId(index) {
+                        functionalProgramming.withId("collapse $index") {
                             functionalProgramming.collapsingHeader(itemLabel(item.obj)) {
-                                if (itemBlock(item))
-                                    valueChanged = true
+                                functionalProgramming.withId("array item $index") {
+                                    if (itemBlock(item))
+                                        valueChanged = true
+                                }
                             }
                             array[index] = item.obj
                         }
                     }
                 }
-                if (button("Ajouter", Vec2(-1, 20f))) {
+                if (button("Ajouter", Vec2(-1, 0))) {
                     array.add(createItem())
                     valueChanged = true
                 }
@@ -157,6 +161,7 @@ object ImguiHelper {
 
     fun action(label: String, action: Item<Action>, gameObject: GameObject, level: Level): Boolean {
         var valueChanged = false
+
         with(ImGui) {
             val index = intArrayOf(PCGame.actionsClasses.indexOfFirst { it.isInstance(action.obj) })
 
@@ -195,10 +200,13 @@ object ImguiHelper {
 
     fun prefab(prefab: Item<Prefab>, level: Level, label: String = "prefab"): Boolean {
         var valueChanged = false
-        val selectedIndex = intArrayOf(level.resourcesPrefabs().indexOfFirst { it.name == prefab.obj.name })
+
+        val prefabs = level.resourcesPrefabs() + PrefabFactory.values().map { it.prefab }
+
+        val selectedIndex = intArrayOf(prefabs.indexOfFirst { it.name == prefab.obj.name })
         functionalProgramming.withItemWidth(100f) {
-            if (ImGui.combo(label, selectedIndex, level.resourcesPrefabs().map { it.name })) {
-                prefab.obj = level.resourcesPrefabs()[selectedIndex[0]]
+            if (ImGui.combo(label, selectedIndex, prefabs.map { it.name })) {
+                prefab.obj = prefabs[selectedIndex[0]]
                 valueChanged = true
             }
         }
@@ -219,6 +227,11 @@ object ImguiHelper {
             }
         }
         return valueChanged
+    }
+
+    fun size(size: KMutableProperty0<Size>, minSize: Size, maxSize: Size): Boolean {
+        val item = Item(size.get())
+        return size(item, minSize, maxSize).apply { size.set(item.obj) }
     }
 
     fun size(size: Item<Size>, minSize: Size, maxSize: Size): Boolean {
@@ -283,14 +296,14 @@ object ImguiHelper {
 
     fun insertImguiExposeEditorField(instance: Any, gameObject: GameObject, level: Level) {
         ReflectionUtility.getAllFieldsOf(instance.javaClass).filter { it.isAnnotationPresent(ExposeEditor::class.java) }.forEach { field ->
-            field.isAccessible = true
+                    field.isAccessible = true
 
-            val exposeField = field.getAnnotation(ExposeEditor::class.java)
-            val item = Item(field.get(instance))
-            if (addImguiWidget(if (exposeField.customName.isBlank()) field.name else exposeField.customName, item, gameObject, level, exposeField)) {
-                field.set(instance, item.obj)
-            }
-        }
+                    val exposeField = field.getAnnotation(ExposeEditor::class.java)
+                    val item = Item(field.get(instance))
+                    if (addImguiWidget(if (exposeField.customName.isBlank()) field.name else exposeField.customName, item, gameObject, level, exposeField)) {
+                        field.set(instance, item.obj)
+                    }
+                }
 
         if (instance is CustomEditorImpl) {
             instance.insertImgui(ReflectionUtility.simpleNameOf(instance), gameObject, level)

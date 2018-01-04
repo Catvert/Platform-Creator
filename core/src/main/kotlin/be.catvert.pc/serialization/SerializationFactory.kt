@@ -20,7 +20,7 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
 import java.io.IOException
 
 private class PostDeserializer(private val deserializer: JsonDeserializer<*>) : DelegatingDeserializer(deserializer) {
-    override fun newDelegatingInstance(newDelegatee: JsonDeserializer<*>): JsonDeserializer<*> = deserializer
+    override fun newDelegatingInstance(newDelegate: JsonDeserializer<*>): JsonDeserializer<*> = deserializer
 
     @Throws(IOException::class)
     override fun deserialize(jp: JsonParser, ctxt: DeserializationContext): Any {
@@ -56,7 +56,7 @@ object SerializationFactory {
     inline fun <reified T> deserializeFromJson(data: String): T = mapper.readValue(data, T::class.java)
     inline fun <reified T> deserializeFromSmile(data: ByteArray): T = mapper.readValue(data, T::class.java)
 
-    inline fun <reified T> copy(obj: T): T = when(Constants.serializationType) {
+    inline fun <reified T> copy(obj: T): T = when (Constants.serializationType) {
         SerializationFactory.MapperType.JSON -> deserializeFromJson(serializeToJson(obj))
         SerializationFactory.MapperType.SMILE -> deserializeFromSmile(serializeToSmile(obj))
     }

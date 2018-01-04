@@ -1,0 +1,118 @@
+
+box.png
+size: 2048,1024
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+brown1_1
+  rotate: false
+  xy: 2, 584
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+white1_1
+  rotate: false
+  xy: 2, 2
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+yellow/bonus/bonus_0
+  rotate: false
+  xy: 776, 326
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+yellow/bonus/bonus_1
+  rotate: false
+  xy: 776, 68
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+yellow/bonus/bonus_2
+  rotate: false
+  xy: 260, 68
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+yellow/bonus/bonus_3
+  rotate: false
+  xy: 2, 326
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+yellow/bonus/bonus_4
+  rotate: false
+  xy: 2, 68
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+yellow/bonus/bonus_5
+  rotate: false
+  xy: 518, 68
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+yellow/default
+  rotate: false
+  xy: 1292, 584
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+yellow/power_1
+  rotate: false
+  xy: 1034, 584
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+yellow/spin/spin_0
+  rotate: false
+  xy: 260, 326
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+yellow/spin/spin_1
+  rotate: false
+  xy: 518, 584
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+yellow/spin/spin_2
+  rotate: false
+  xy: 260, 584
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+yellow/spin/spin_3
+  rotate: false
+  xy: 518, 326
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+yellow/spin/spin_4
+  rotate: false
+  xy: 776, 584
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+yellow/spin/spin_disabled
+  rotate: false
+  xy: 1034, 326
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1

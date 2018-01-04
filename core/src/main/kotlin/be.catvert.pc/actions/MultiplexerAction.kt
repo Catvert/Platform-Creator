@@ -3,7 +3,6 @@ package be.catvert.pc.actions
 import be.catvert.pc.GameObject
 import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.CustomEditorImpl
-import be.catvert.pc.utility.ExposeEditorFactory
 import be.catvert.pc.utility.ImguiHelper
 import be.catvert.pc.utility.ReflectionUtility
 import com.fasterxml.jackson.annotation.JsonCreator
@@ -22,6 +21,6 @@ class MultiplexerAction(var actions: ArrayList<Action>) : Action, CustomEditorIm
     }
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
-        ImguiHelper.addImguiWidgetsArray("actions", actions, { ReflectionUtility.simpleNameOf(it) }, { EmptyAction() }, gameObject, level)
+        ImguiHelper.addImguiWidgetsArray(label, actions, { ReflectionUtility.simpleNameOf(it) }, { EmptyAction() }, gameObject, level)
     }
 }

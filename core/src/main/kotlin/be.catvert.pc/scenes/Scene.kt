@@ -3,7 +3,7 @@ package be.catvert.pc.scenes
 import aurelienribon.tweenengine.TweenAccessor
 import be.catvert.pc.Log
 import be.catvert.pc.PCGame
-import be.catvert.pc.components.RenderableComponent
+import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.graphics.OrthographicCamera
@@ -30,10 +30,10 @@ abstract class Scene(protected var background: Background) : Renderable, Updeata
         set(value) {
             field = value
             gameObjectContainer.getGameObjectsData().forEach {
-                it.getStates().forEach {
-                    it.getComponent<RenderableComponent>()?.alpha = value
-                }
-            }
+                        it.getStates().forEach {
+                                    it.getComponent<AtlasComponent>()?.alpha = value
+                                }
+                    }
         }
 
     protected open fun postBatchRender() {}

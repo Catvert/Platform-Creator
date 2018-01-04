@@ -11,126 +11,126 @@ candy_1/Candy Cane Middle
   orig: 128, 512
   offset: 0, 0
   index: -1
-castle_1/Castle Bottom Left
+castle_1/Castle Bottom
   rotate: false
-  xy: 1930, 928
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: -1
-castle_1/ground/bottom/Castle Bottom Left
-  rotate: false
-  xy: 1930, 928
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: -1
-castle_1/Castle Mid Left Bottom
-  rotate: false
-  xy: 1930, 1654
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: -1
-castle_1/ground/middle/Castle Mid Left Bottom
-  rotate: false
-  xy: 1930, 1654
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: -1
-castle_1/Castle Mid Left Top
-  rotate: false
-  xy: 1930, 1324
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: -1
-castle_1/ground/middle/Castle Mid Left Top
-  rotate: false
-  xy: 1930, 1324
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: -1
-castle_1/Castle Middle
-  rotate: false
-  xy: 1930, 862
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: -1
-castle_1/ground/middle/Castle Middle
-  rotate: false
-  xy: 1930, 862
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: -1
-castle_1/Castle Top
-  rotate: false
-  xy: 1162, 54
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: -1
-castle_1/ground/top/Castle Top
-  rotate: false
-  xy: 1162, 54
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: -1
-castle_1/Castle Top Left
-  rotate: false
-  xy: 1930, 1522
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: -1
-castle_1/ground/top/Castle Top Left
-  rotate: false
-  xy: 1930, 1522
+  xy: 1930, 1258
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 castle_1/ground/bottom/Castle Bottom
   rotate: false
-  xy: 1930, 1456
+  xy: 1930, 1258
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
-castle_1/Castle Bottom
+castle_1/Castle Middle
   rotate: false
-  xy: 1930, 1456
+  xy: 1930, 1390
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+castle_1/ground/middle/Castle Middle
+  rotate: false
+  xy: 1930, 1390
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+castle_1/Castle Top
+  rotate: false
+  xy: 1930, 1192
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+castle_1/ground/top/Castle Top
+  rotate: false
+  xy: 1930, 1192
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+castle_1/ground/bottom/Castle Bottom Left
+  rotate: false
+  xy: 1930, 1522
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+castle_1/Castle Bottom Left
+  rotate: false
+  xy: 1930, 1522
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 castle_1/ground/middle/Castle Mid Left
   rotate: false
-  xy: 1930, 1060
+  xy: 1930, 1786
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 castle_1/Castle Mid Left
   rotate: false
-  xy: 1930, 1060
+  xy: 1930, 1786
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
-desert_1/bones/Desert Bones Front
+castle_1/ground/middle/Castle Mid Left Bottom
+  rotate: false
+  xy: 1930, 1126
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+castle_1/Castle Mid Left Bottom
+  rotate: false
+  xy: 1930, 1126
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+castle_1/ground/middle/Castle Mid Left Top
+  rotate: false
+  xy: 1930, 994
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+castle_1/Castle Mid Left Top
+  rotate: false
+  xy: 1930, 994
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+castle_1/ground/top/Castle Top Left
+  rotate: false
+  xy: 1930, 1588
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+castle_1/Castle Top Left
+  rotate: false
+  xy: 1930, 1588
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+desert_1/bones/Desert Bones Middle
   rotate: false
   xy: 1800, 1144
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-desert_1/Desert Bones Front
+desert_1/Desert Bones Middle
   rotate: false
   xy: 1800, 1144
   size: 128, 128
@@ -139,21 +139,21 @@ desert_1/Desert Bones Front
   index: -1
 ghost_1/Ghost Joist 1
   rotate: false
-  xy: 1996, 1982
+  xy: 1996, 1916
   size: 32, 64
   orig: 32, 64
   offset: 0, 0
   index: -1
 ghost_1/Ghost Lamp 1
   rotate: false
-  xy: 1228, 86
+  xy: 1930, 828
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 ghost_1/Ghost Stone 1
   rotate: false
-  xy: 1930, 828
+  xy: 1162, 86
   size: 64, 32
   orig: 64, 32
   offset: 0, 0
@@ -167,7 +167,7 @@ ghost_1/Ghost Way Left
   index: -1
 ghost_1/Ghost Way Middle
   rotate: false
-  xy: 1996, 1782
+  xy: 1996, 1882
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
@@ -179,13 +179,6 @@ ghost_1/Ghost Window
   orig: 64, 128
   offset: 0, 0
   index: -1
-green_1/Green Hedges 1
-  rotate: false
-  xy: 1030, 250
-  size: 512, 256
-  orig: 512, 256
-  offset: 0, 0
-  index: -1
 green_1/Green Hedges Medium 1
   rotate: false
   xy: 2, 120
@@ -195,14 +188,14 @@ green_1/Green Hedges Medium 1
   index: -1
 green_1/Green Hedges Medium 2
   rotate: false
-  xy: 774, 54
+  xy: 516, 54
   size: 256, 64
   orig: 256, 64
   offset: 0, 0
   index: -1
 green_1/Green Hedges Small 1
   rotate: false
-  xy: 516, 54
+  xy: 774, 54
   size: 256, 64
   orig: 256, 64
   offset: 0, 0
@@ -228,90 +221,76 @@ green_1/Green Small Plants
   orig: 128, 64
   offset: 0, 0
   index: -1
+green_1/Green Small Plants 2
+  rotate: false
+  xy: 1806, 168
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
 green_2/Apple Green
   rotate: false
-  xy: 1930, 1390
+  xy: 1930, 1060
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 green_2/Gras Middle
   rotate: false
-  xy: 1930, 1852
+  xy: 1930, 862
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
-green_2/Green Trees Balloon Top
+green_2/Green Tendril Top
   rotate: false
-  xy: 516, 250
-  size: 512, 256
-  orig: 512, 256
-  offset: 0, 0
-  index: -1
-green_2/trees/balloon_tree/Green Trees Balloon Top
-  rotate: false
-  xy: 516, 250
-  size: 512, 256
-  orig: 512, 256
-  offset: 0, 0
-  index: -1
-green_2/Green Trees Trunk
-  rotate: false
-  xy: 1288, 120
+  xy: 1802, 558
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-green_2/trees/balloon_tree/trunk
+green_2/Green Trees Balloon Bottom
   rotate: false
-  xy: 1288, 120
-  size: 128, 128
-  orig: 128, 128
+  xy: 1030, 250
+  size: 512, 256
+  orig: 512, 256
   offset: 0, 0
   index: -1
-jungle_1/Jungle BeanStalk 1
+green_2/trees/balloon_tree/Green Trees Balloon Bottom
   rotate: false
-  xy: 1028, 1022
-  size: 512, 1024
-  orig: 512, 1024
+  xy: 1030, 250
+  size: 512, 256
+  orig: 512, 256
   offset: 0, 0
   index: -1
-jungle_1/beanstalk
+jungle_1/Jungle Big Plant 1
   rotate: false
-  xy: 1028, 1022
-  size: 512, 1024
-  orig: 512, 1024
+  xy: 1028, 508
+  size: 512, 512
+  orig: 512, 512
   offset: 0, 0
   index: -1
-jungle_1/Jungle Berry
+jungle_1/big_plant_1
   rotate: false
-  xy: 1996, 1816
-  size: 32, 32
-  orig: 32, 32
+  xy: 1028, 508
+  size: 512, 512
+  orig: 512, 512
   offset: 0, 0
   index: -1
-jungle_1/berry
-  rotate: false
-  xy: 1996, 1816
-  size: 32, 32
-  orig: 32, 32
-  offset: 0, 0
-  index: 1
 jungle_1/Jungle Big Plant 2
   rotate: false
-  xy: 1542, 1534
+  xy: 1544, 248
   size: 256, 512
   orig: 256, 512
   offset: 0, 0
   index: -1
-jungle_1/big_plant
+jungle_1/big_plant_2
   rotate: false
-  xy: 1542, 1534
+  xy: 1544, 248
   size: 256, 512
   orig: 256, 512
   offset: 0, 0
-  index: 2
+  index: -1
 jungle_1/Jungle Bridge Plank
   rotate: false
   xy: 1032, 86
@@ -326,112 +305,126 @@ jungle_1/bridge_plank
   orig: 128, 32
   offset: 0, 0
   index: -1
-jungle_1/Jungle Grass 3
+jungle_1/Jungle Grass 4
   rotate: false
-  xy: 1800, 1014
-  size: 128, 128
-  orig: 128, 128
+  xy: 1542, 1020
+  size: 256, 512
+  orig: 256, 512
   offset: 0, 0
   index: -1
-jungle_1/grass/3
+jungle_1/grass/4
   rotate: false
-  xy: 1800, 1014
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Ground HM Middle Left
-  rotate: false
-  xy: 1542, 762
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/ground/halfmassive/middle/left
-  rotate: false
-  xy: 1542, 762
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle KPlant Head
-  rotate: false
-  xy: 1930, 1786
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: -1
-jungle_1/kplant_head
-  rotate: false
-  xy: 1930, 1786
-  size: 64, 64
-  orig: 64, 64
+  xy: 1542, 1020
+  size: 256, 512
+  orig: 256, 512
   offset: 0, 0
   index: -1
 jungle_1/Jungle Slider 1 Blue Left
   rotate: false
-  xy: 1800, 1404
+  xy: 1800, 1014
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 jungle_1/slider/1_blue_left
   rotate: false
+  xy: 1800, 1014
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Slider 1 Blue Middle
+  rotate: false
+  xy: 1802, 298
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+jungle_1/slider/1_blue_middle
+  rotate: false
+  xy: 1802, 298
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Slider 1 Brown Left
+  rotate: false
+  xy: 1288, 120
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+jungle_1/slider/1_brown_left
+  rotate: false
+  xy: 1288, 120
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Slider 1 Green Left
+  rotate: false
+  xy: 1676, 118
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+jungle_1/slider/1_green_left
+  rotate: false
+  xy: 1676, 118
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Slider 1 Green Middle
+  rotate: false
   xy: 1800, 1404
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-jungle_1/Jungle Slider 2 Green Left
+jungle_1/slider/1_green_middle
   rotate: false
-  xy: 1800, 884
+  xy: 1800, 1404
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-jungle_1/slider/2_green_left
+jungle_1/beanstalk_2
   rotate: false
-  xy: 1800, 884
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Slider 2 Green Right
-  rotate: false
-  xy: 1806, 38
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: -1
-jungle_1/slider/2_green_right
-  rotate: false
-  xy: 1806, 38
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: -1
-jungle_1/beanstalk
-  rotate: false
-  xy: 1542, 1020
+  xy: 1542, 1534
   size: 256, 512
   orig: 256, 512
   offset: 0, 0
-  index: 2
+  index: -1
 jungle_1/Jungle BeanStalk 2
   rotate: false
-  xy: 1542, 1020
+  xy: 1542, 1534
   size: 256, 512
   orig: 256, 512
   offset: 0, 0
   index: -1
-jungle_1/bridge_frame_front
+jungle_1/berry_1
+  rotate: false
+  xy: 1328, 86
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Berry
+  rotate: false
+  xy: 1328, 86
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+jungle_1/bridge_frame_back
   rotate: false
   xy: 2, 508
   size: 1024, 512
   orig: 1024, 512
   offset: 0, 0
   index: -1
-jungle_1/Jungle Bridge Frame Front
+jungle_1/Jungle Bridge Frame Back
   rotate: false
   xy: 2, 508
   size: 1024, 512
@@ -466,102 +459,74 @@ jungle_1/Jungle Grass 2
   orig: 256, 128
   offset: 0, 0
   index: -1
-jungle_1/grass/4
+jungle_1/ground/plain/middle/left_bottom
   rotate: false
-  xy: 1544, 248
-  size: 256, 512
-  orig: 256, 512
+  xy: 1542, 762
+  size: 256, 256
+  orig: 256, 256
   offset: 0, 0
   index: -1
-jungle_1/Jungle Grass 4
+jungle_1/Jungle Ground Plain Middle Left Bottom
   rotate: false
-  xy: 1544, 248
-  size: 256, 512
-  orig: 256, 512
+  xy: 1542, 762
+  size: 256, 256
+  orig: 256, 256
   offset: 0, 0
   index: -1
 jungle_1/kplant
   rotate: false
-  xy: 1930, 994
+  xy: 1930, 1654
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 jungle_1/Jungle KPlant
   rotate: false
-  xy: 1930, 994
+  xy: 1930, 1654
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
-jungle_1/slider/1_brown_middle
+jungle_1/kplant_head
   rotate: false
-  xy: 1802, 558
-  size: 128, 128
-  orig: 128, 128
+  xy: 1930, 928
+  size: 64, 64
+  orig: 64, 64
   offset: 0, 0
   index: -1
-jungle_1/Jungle Slider 1 Brown Middle
+jungle_1/Jungle KPlant Head
   rotate: false
-  xy: 1802, 558
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: -1
-jungle_1/slider/1_green_middle
-  rotate: false
-  xy: 1802, 298
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Slider 1 Green Middle
-  rotate: false
-  xy: 1802, 298
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: -1
-jungle_1/slider/2_blue_left
-  rotate: false
-  xy: 1802, 688
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Slider 2 Blue Left
-  rotate: false
-  xy: 1802, 688
-  size: 128, 128
-  orig: 128, 128
+  xy: 1930, 928
+  size: 64, 64
+  orig: 64, 64
   offset: 0, 0
   index: -1
 jungle_1/slider/2_blue_right
   rotate: false
-  xy: 1806, 168
+  xy: 1802, 428
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 jungle_1/Jungle Slider 2 Blue Right
   rotate: false
-  xy: 1806, 168
+  xy: 1802, 428
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-jungle_1/slider/2_brown_left
+jungle_1/tree/2_front
   rotate: false
-  xy: 1800, 1274
-  size: 128, 128
-  orig: 128, 128
+  xy: 1028, 1022
+  size: 512, 1024
+  orig: 512, 1024
   offset: 0, 0
   index: -1
-jungle_1/Jungle Slider 2 Brown Left
+jungle_1/Jungle Tree 2 Front
   rotate: false
-  xy: 1800, 1274
-  size: 128, 128
-  orig: 128, 128
+  xy: 1028, 1022
+  size: 512, 1024
+  orig: 512, 1024
   offset: 0, 0
   index: -1
 jungle_2/rope_1_hor
@@ -578,74 +543,88 @@ jungle_2/Jungle Rope 1 Hor
   orig: 64, 32
   offset: 0, 0
   index: -1
+mushroom_1/Shaft
+  rotate: false
+  xy: 1806, 38
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+mushroom_1/platform/shaft
+  rotate: false
+  xy: 1806, 38
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+mushroom_1/Shaft Bottom
+  rotate: false
+  xy: 1800, 884
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+mushroom_1/platform/shaft_bottom
+  rotate: false
+  xy: 1800, 884
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
 mushroom_1/Shaft Riffle Top
   rotate: false
-  xy: 1676, 118
+  xy: 1802, 688
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 mushroom_1/platform/shaft_riffle_top
   rotate: false
-  xy: 1676, 118
+  xy: 1802, 688
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-mushroom_1/platform/shaft_top
+mushroom_1/platform/shaft_riffle
   rotate: false
-  xy: 1802, 428
+  xy: 1800, 1274
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-mushroom_1/Shaft Top
+mushroom_1/Shaft Riffle
   rotate: false
-  xy: 1802, 428
+  xy: 1800, 1274
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-plastic_1/Screw Up
+sand_1/Sand Middle
   rotate: false
-  xy: 1028, 508
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-plastic_1/screw_block_blue/up
-  rotate: false
-  xy: 1028, 508
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-sand_1/Sand Left Up
-  rotate: false
-  xy: 1930, 1192
+  xy: 1228, 54
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
-sand_1/ground/left_up
+sand_1/ground/middle
   rotate: false
-  xy: 1930, 1192
+  xy: 1228, 54
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
-sand_1/Sand Up
+sand_1/Sphinx Medium
   rotate: false
-  xy: 1930, 1258
-  size: 64, 64
-  orig: 64, 64
+  xy: 2, 250
+  size: 512, 256
+  orig: 512, 256
   offset: 0, 0
   index: -1
-sand_1/ground/up
+sand_1/sphinx_medium
   rotate: false
-  xy: 1930, 1258
-  size: 64, 64
-  orig: 64, 64
+  xy: 2, 250
+  size: 512, 256
+  orig: 512, 256
   offset: 0, 0
   index: -1
 sand_1/Tendril Top
@@ -662,70 +641,70 @@ sand_1/tendril_top
   orig: 64, 64
   offset: 0, 0
   index: -1
-sand_1/ground/middle
+sand_1/ground/left_up
   rotate: false
-  xy: 1930, 1588
+  xy: 1930, 1324
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
-sand_1/Sand Middle
+sand_1/Sand Left Up
   rotate: false
-  xy: 1930, 1588
+  xy: 1930, 1324
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+sand_1/ground/up
+  rotate: false
+  xy: 1930, 1456
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+sand_1/Sand Up
+  rotate: false
+  xy: 1930, 1456
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 sand_1/tendril
   rotate: false
-  xy: 1930, 1126
+  xy: 1930, 1852
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
-snow_1/Tree Middle
+snow_1/Tree Bottom
   rotate: false
-  xy: 2, 250
+  xy: 516, 250
   size: 512, 256
   orig: 512, 256
   offset: 0, 0
   index: -1
-snow_1/trees/balloon/middle
+snow_1/trees/balloon/bottom
   rotate: false
-  xy: 2, 250
+  xy: 516, 250
   size: 512, 256
   orig: 512, 256
   offset: 0, 0
   index: -1
-snow_1/Trees Lights
+snow_1/trees/fir_1/green_1/snow
   rotate: false
   xy: 2, 1022
   size: 1024, 1024
   orig: 1024, 1024
   offset: 0, 0
   index: -1
-snow_1/trees/fir_1/green_1/lights
+snow_1/Trees Snow
   rotate: false
   xy: 2, 1022
   size: 1024, 1024
   orig: 1024, 1024
   offset: 0, 0
   index: -1
-underground/cain
-  rotate: false
-  xy: 1996, 1850
-  size: 32, 64
-  orig: 32, 64
-  offset: 0, 0
-  index: -1
-underground/cain_end
-  rotate: false
-  xy: 1996, 1916
-  size: 32, 64
-  orig: 32, 64
-  offset: 0, 0
-  index: -1
-underground/rope
+underground/Rope End
   rotate: false
   xy: 2030, 2030
   size: 16, 16
@@ -734,12 +713,26 @@ underground/rope
   index: -1
 underground/rope_end
   rotate: false
-  xy: 2, 2
+  xy: 2030, 2030
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-underground/Rope End
+underground/cain
+  rotate: false
+  xy: 1996, 1982
+  size: 32, 64
+  orig: 32, 64
+  offset: 0, 0
+  index: -1
+underground/cain_end
+  rotate: false
+  xy: 1294, 54
+  size: 32, 64
+  orig: 32, 64
+  offset: 0, 0
+  index: -1
+underground/rope
   rotate: false
   xy: 2, 2
   size: 16, 16
@@ -754,14 +747,21 @@ filter: Nearest,Nearest
 repeat: none
 candy_1/Candy Cane 2 Middle
   rotate: false
-  xy: 522, 2
+  xy: 392, 2
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-desert_1/Desert Bones Back
+desert_1/Desert Bones Front
   rotate: false
-  xy: 1800, 1800
+  xy: 1288, 130
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+desert_1/bones/Desert Bones Front
+  rotate: false
+  xy: 1288, 130
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
@@ -773,401 +773,422 @@ desert_1/bones/Desert Bones Back
   orig: 128, 128
   offset: 0, 0
   index: -1
-desert_1/bones/Desert Bones Middle
+desert_1/Desert Bones Back
   rotate: false
-  xy: 1800, 1280
+  xy: 1800, 1800
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-desert_1/Desert Bones Middle
+green_1/slider/1/brown/Brown Slider Left
   rotate: false
-  xy: 1800, 1280
-  size: 128, 128
-  orig: 128, 128
+  xy: 1542, 640
+  size: 256, 256
+  orig: 256, 256
   offset: 0, 0
   index: -1
-green_1/Green Small Plants 2
+green_1/Brown Slider Left
   rotate: false
-  xy: 782, 2
-  size: 128, 128
-  orig: 128, 128
+  xy: 1542, 640
+  size: 256, 256
+  orig: 256, 256
   offset: 0, 0
   index: -1
 green_2/Green Tendril
   rotate: false
-  xy: 912, 2
+  xy: 1800, 1670
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-green_2/Green Tendril Top
+green_2/Green Trees Trunk
   rotate: false
-  xy: 1800, 1020
+  xy: 2, 2
   size: 128, 128
   orig: 128, 128
+  offset: 0, 0
+  index: -1
+green_2/trees/balloon_tree/trunk
+  rotate: false
+  xy: 2, 2
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+green_2/trees/balloon_tree/Green Trees Balloon Top
+  rotate: false
+  xy: 516, 132
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+green_2/Green Trees Balloon Top
+  rotate: false
+  xy: 516, 132
+  size: 512, 256
+  orig: 512, 256
   offset: 0, 0
   index: -1
 green_2/trees/balloon_tree/trunk_node
   rotate: false
-  xy: 132, 2
+  xy: 1800, 630
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 green_2/Green Trees Trunk Node
   rotate: false
-  xy: 132, 2
+  xy: 1800, 630
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-jungle_1/Jungle Bridge Frame Back
+green_3/ground/bottom/left
+  rotate: false
+  xy: 1542, 1672
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+green_3/Green Ground Bottom Left
+  rotate: false
+  xy: 1542, 1672
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Bridge Frame Front
   rotate: false
   xy: 2, 390
   size: 1024, 512
   orig: 1024, 512
   offset: 0, 0
   index: -1
-jungle_1/bridge_frame_back
+jungle_1/bridge_frame_front
   rotate: false
   xy: 2, 390
   size: 1024, 512
   orig: 1024, 512
   offset: 0, 0
   index: -1
-jungle_1/Jungle Slider 1 Brown Left
-  rotate: false
-  xy: 262, 2
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: -1
-jungle_1/slider/1_brown_left
-  rotate: false
-  xy: 262, 2
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Slider 1 Green Left
-  rotate: false
-  xy: 652, 2
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: -1
-jungle_1/slider/1_green_left
-  rotate: false
-  xy: 652, 2
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Slider 2 Blue Middle
+jungle_1/Jungle Slider 1 Brown Middle
   rotate: false
   xy: 1800, 1540
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+jungle_1/slider/1_brown_middle
+  rotate: false
+  xy: 1800, 1540
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Slider 2 Blue Left
+  rotate: false
+  xy: 1288, 260
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+jungle_1/slider/2_blue_left
+  rotate: false
+  xy: 1288, 260
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+jungle_1/beanstalk
+  rotate: false
+  xy: 1028, 904
+  size: 512, 1024
+  orig: 512, 1024
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle BeanStalk 1
+  rotate: false
+  xy: 1028, 904
+  size: 512, 1024
+  orig: 512, 1024
+  offset: 0, 0
+  index: -1
+jungle_1/grass/3
+  rotate: false
+  xy: 1800, 500
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Grass 3
+  rotate: false
+  xy: 1800, 500
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 jungle_1/slider/2_blue_middle
   rotate: false
-  xy: 1800, 1540
+  xy: 1800, 1150
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-jungle_1/Jungle Slider 2 Green Middle
+jungle_1/Jungle Slider 2 Blue Middle
   rotate: false
-  xy: 392, 2
+  xy: 1800, 1150
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-jungle_1/slider/2_green_middle
+jungle_1/slider/2_brown_left
   rotate: false
-  xy: 392, 2
+  xy: 1800, 1280
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-jungle_1/Jungle Tree 2
+jungle_1/Jungle Slider 2 Brown Left
   rotate: false
-  xy: 1028, 904
-  size: 512, 1024
-  orig: 512, 1024
-  offset: 0, 0
-  index: -1
-jungle_1/tree/2
-  rotate: false
-  xy: 1028, 904
-  size: 512, 1024
-  orig: 512, 1024
-  offset: 0, 0
-  index: -1
-jungle_1/bridge_rope_front
-  rotate: false
-  xy: 1544, 382
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Bridge Rope Front
-  rotate: false
-  xy: 1544, 382
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/ground/top/left
-  rotate: false
-  xy: 1542, 898
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Ground Top Left
-  rotate: false
-  xy: 1542, 898
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/slider/1_blue_middle
-  rotate: false
-  xy: 2, 2
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Slider 1 Blue Middle
-  rotate: false
-  xy: 2, 2
+  xy: 1800, 1280
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 jungle_1/slider/2_brown_middle
   rotate: false
-  xy: 1800, 760
+  xy: 1800, 1410
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 jungle_1/Jungle Slider 2 Brown Middle
   rotate: false
-  xy: 1800, 760
+  xy: 1800, 1410
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 jungle_1/slider/2_brown_right
   rotate: false
-  xy: 1042, 2
+  xy: 1800, 760
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 jungle_1/Jungle Slider 2 Brown Right
   rotate: false
-  xy: 1042, 2
+  xy: 1800, 760
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-jungle_2/Jungle Hedge 1 Red
+jungle_1/slider/2_green_left
   rotate: false
-  xy: 516, 132
-  size: 512, 256
-  orig: 512, 256
+  xy: 132, 2
+  size: 128, 128
+  orig: 128, 128
   offset: 0, 0
   index: -1
-jungle_2/hedge/1_red
+jungle_1/Jungle Slider 2 Green Left
   rotate: false
-  xy: 516, 132
+  xy: 132, 2
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+jungle_1/slider/2_green_middle
+  rotate: false
+  xy: 1800, 1020
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Slider 2 Green Middle
+  rotate: false
+  xy: 1800, 1020
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+jungle_1/slider/2_green_right
+  rotate: false
+  xy: 262, 2
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Slider 2 Green Right
+  rotate: false
+  xy: 262, 2
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+jungle_2/Jungle Hedge 1 Yellow
+  rotate: false
+  xy: 2, 132
   size: 512, 256
   orig: 512, 256
   offset: 0, 0
   index: -1
 jungle_2/hedge/1_yellow
   rotate: false
-  xy: 1030, 132
+  xy: 2, 132
   size: 512, 256
   orig: 512, 256
   offset: 0, 0
   index: -1
-jungle_2/Jungle Hedge 1 Yellow
+mushroom_1/Shaft Top
   rotate: false
-  xy: 1030, 132
-  size: 512, 256
-  orig: 512, 256
-  offset: 0, 0
-  index: -1
-mushroom_1/Shaft Bottom
-  rotate: false
-  xy: 1800, 1150
+  xy: 1800, 370
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-mushroom_1/platform/shaft_bottom
+mushroom_1/platform/shaft_top
   rotate: false
-  xy: 1800, 1150
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: -1
-mushroom_1/Shaft Double Riffle
-  rotate: false
-  xy: 1800, 1670
+  xy: 1800, 370
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 mushroom_1/platform/shaft_double_riffle
   rotate: false
-  xy: 1800, 1670
+  xy: 1800, 890
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-mushroom_1/platform/green/left
-  rotate: false
-  xy: 1542, 640
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-mushroom_1/Green Left
-  rotate: false
-  xy: 1542, 640
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-mushroom_1/platform/shaft
+mushroom_1/Shaft Double Riffle
   rotate: false
   xy: 1800, 890
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-mushroom_1/Shaft
-  rotate: false
-  xy: 1800, 890
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: -1
-mushroom_1/platform/shaft_riffle
-  rotate: false
-  xy: 1800, 1410
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: -1
-mushroom_1/Shaft Riffle
-  rotate: false
-  xy: 1800, 1410
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: -1
-plastic_1/Screw Green Down
+plastic_1/Screw Blue Right Up
   rotate: false
   xy: 1028, 390
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
-plastic_1/screw_block_green/down
+plastic_1/screw_block_blue/right_up
   rotate: false
   xy: 1028, 390
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
-snow_1/Ground Middle Left Top
+snow_1/Ground Bottom Right
   rotate: false
-  xy: 1544, 124
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-snow_1/ground/middle/left_top
-  rotate: false
-  xy: 1544, 124
+  xy: 1542, 382
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 snow_1/ground/bottom/right
   rotate: false
-  xy: 1542, 1156
+  xy: 1542, 382
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-snow_1/Ground Bottom Right
-  rotate: false
-  xy: 1542, 1156
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-snow_1/ground/halfmassive/middle/right
+snow_1/Ground Plain Top 1
   rotate: false
   xy: 1542, 1414
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-snow_1/Ground HF Right
+snow_1/ground/plain/top/1
   rotate: false
   xy: 1542, 1414
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-snow_1/trees/balloon/top
+snow_1/ground/halfmassive/top/right
   rotate: false
-  xy: 2, 132
-  size: 512, 256
-  orig: 512, 256
-  offset: 0, 0
-  index: -1
-snow_1/Tree Top
-  rotate: false
-  xy: 2, 132
-  size: 512, 256
-  orig: 512, 256
-  offset: 0, 0
-  index: -1
-snow_1/trees/fir_1/green_1/snow
-  rotate: false
-  xy: 2, 904
-  size: 1024, 1024
-  orig: 1024, 1024
-  offset: 0, 0
-  index: -1
-snow_1/Trees Snow
-  rotate: false
-  xy: 2, 904
-  size: 1024, 1024
-  orig: 1024, 1024
-  offset: 0, 0
-  index: -1
-underground/Ground Middle Right Top
-  rotate: false
-  xy: 1542, 1672
+  xy: 1542, 1156
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-underground/ground/middle/right_top
+snow_1/Ground HF Top Right
   rotate: false
-  xy: 1542, 1672
+  xy: 1542, 1156
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+snow_1/ground/plain/top/2
+  rotate: false
+  xy: 1676, 112
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+snow_1/Ground Plain Top 2
+  rotate: false
+  xy: 1676, 112
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+snow_1/trees/fir_1/green_1/lights
+  rotate: false
+  xy: 2, 904
+  size: 1024, 1024
+  orig: 1024, 1024
+  offset: 0, 0
+  index: -1
+snow_1/Trees Lights
+  rotate: false
+  xy: 2, 904
+  size: 1024, 1024
+  orig: 1024, 1024
+  offset: 0, 0
+  index: -1
+underground/Ground Left Bottom
+  rotate: false
+  xy: 1030, 132
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+underground/ground/middle/left_bottom
+  rotate: false
+  xy: 1030, 132
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+underground/Ground Middle Right
+  rotate: false
+  xy: 1542, 898
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+underground/ground/middle/right
+  rotate: false
+  xy: 1542, 898
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+underground/ground/bottom/right
+  rotate: false
+  xy: 1418, 124
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+underground/Ground Bottom Right
+  rotate: false
+  xy: 1418, 124
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
@@ -1180,665 +1201,644 @@ filter: Nearest,Nearest
 repeat: none
 desert_1/Desert Middle 1
   rotate: false
-  xy: 260, 2
+  xy: 260, 260
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 desert_1/ground/middle/Desert Middle 1
   rotate: false
-  xy: 260, 2
+  xy: 260, 260
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-desert_1/Desert Middle Left
+desert_1/Desert Top Right
   rotate: false
-  xy: 776, 260
+  xy: 1292, 1550
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-desert_1/ground/middle/Desert Middle Left
+desert_1/ground/top/Desert Top Right
   rotate: false
-  xy: 776, 260
+  xy: 1292, 1550
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-desert_1/ground/middle/Desert Middle Right
+green_1/Brown Slider Right
   rotate: false
-  xy: 518, 1292
+  xy: 2, 1292
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-desert_1/Desert Middle Right
+green_1/slider/1/brown/Brown Slider Right
   rotate: false
-  xy: 518, 1292
+  xy: 2, 1292
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-desert_1/ground/top/Desert Top 2
+green_1/slider/1/brown/Brown Slider Middle
   rotate: false
-  xy: 518, 1034
+  xy: 1292, 1034
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-desert_1/Desert Top 2
+green_1/Brown Slider Middle
   rotate: false
-  xy: 518, 1034
+  xy: 1292, 1034
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-green_1/Green Plant Head
+green_2/hedges/Green Hedges Small 2
   rotate: false
-  xy: 1550, 1292
+  xy: 776, 2
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-green_2/Green Hedges Cactus 1
+green_2/Green Hedges Small 2
   rotate: false
-  xy: 1034, 1292
+  xy: 776, 2
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-green_2/hedges/Green Hedges Cactus 1
+green_2/trees/balloon_tree/Green Trees Balloon Middle
   rotate: false
-  xy: 1034, 1292
-  size: 256, 256
-  orig: 256, 256
+  xy: 1032, 518
+  size: 512, 256
+  orig: 512, 256
   offset: 0, 0
   index: -1
-green_2/hedges/Green Hedges Cactus 2
+green_2/Green Trees Balloon Middle
   rotate: false
-  xy: 1034, 1550
-  size: 256, 256
-  orig: 256, 256
+  xy: 1032, 518
+  size: 512, 256
+  orig: 512, 256
   offset: 0, 0
   index: -1
-green_2/Green Hedges Cactus 2
+green_3/Green Ground Middle 1
   rotate: false
-  xy: 1034, 1550
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-green_3/Green Ground Bottom Left
-  rotate: false
-  xy: 518, 260
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-green_3/ground/bottom/left
-  rotate: false
-  xy: 518, 260
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-green_3/Green Ground Middle Left
-  rotate: false
-  xy: 2, 518
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-green_3/ground/middle/left
-  rotate: false
-  xy: 2, 518
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-green_3/Green Ground Top Left
-  rotate: false
-  xy: 518, 1550
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-green_3/ground/top/left
-  rotate: false
-  xy: 518, 1550
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-green_3/ground/bottom/1
-  rotate: false
-  xy: 1550, 518
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-green_3/Green Ground Bottom 1
-  rotate: false
-  xy: 1550, 518
+  xy: 1292, 2
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 green_3/ground/middle/1
   rotate: false
-  xy: 518, 518
+  xy: 1292, 2
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-green_3/Green Ground Middle 1
+green_3/Green Ground Top Left
   rotate: false
-  xy: 518, 518
+  xy: 2, 1034
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-jungle_1/Jungle Ground Bottom 2
+green_3/ground/top/left
   rotate: false
-  xy: 1034, 776
+  xy: 2, 1034
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-jungle_1/ground/bottom/2
+green_3/ground/middle/left_bottom
   rotate: false
-  xy: 1034, 776
+  xy: 1292, 1292
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-jungle_1/Jungle Ground HM Top Right
+green_3/Green Ground Middle Left Bottom
   rotate: false
-  xy: 776, 1034
+  xy: 1292, 1292
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-jungle_1/ground/halfmassive/top/right
+jungle_1/Jungle Bridge Rope Front
   rotate: false
-  xy: 776, 1034
+  xy: 516, 518
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-jungle_1/Jungle Ground Middle 2
+jungle_1/bridge_rope_front
   rotate: false
-  xy: 1550, 1034
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/ground/middle/2
-  rotate: false
-  xy: 1550, 1034
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Ground Middle Left
-  rotate: false
-  xy: 776, 2
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/ground/middle/left
-  rotate: false
-  xy: 776, 2
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Ground Middle Left Top
-  rotate: false
-  xy: 260, 776
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/ground/middle/left_top
-  rotate: false
-  xy: 260, 776
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Ground Middle Right
-  rotate: false
-  xy: 2, 260
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/ground/middle/right
-  rotate: false
-  xy: 2, 260
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Ground Middle Right Top
-  rotate: false
-  xy: 1548, 260
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/ground/middle/right_top
-  rotate: false
-  xy: 1548, 260
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Ground Plain Middle Left Bottom
-  rotate: false
-  xy: 260, 518
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/ground/plain/middle/left_bottom
-  rotate: false
-  xy: 260, 518
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Ground Plain Middle Right Top
-  rotate: false
-  xy: 776, 776
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/ground/plain/middle/right_top
-  rotate: false
-  xy: 776, 776
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Ground Plain Top 1
-  rotate: false
-  xy: 2, 1550
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/ground/plain/top/1
-  rotate: false
-  xy: 2, 1550
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Vine Middle
-  rotate: false
-  xy: 260, 1034
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/vine_middle
-  rotate: false
-  xy: 260, 1034
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/bridge_rope_back
-  rotate: false
-  xy: 776, 518
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Bridge Rope Back
-  rotate: false
-  xy: 776, 518
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/ground/bottom/left
-  rotate: false
-  xy: 1034, 1034
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Ground Bottom Left
-  rotate: false
-  xy: 1034, 1034
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/ground/bottom/right
-  rotate: false
-  xy: 260, 1292
+  xy: 516, 518
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 jungle_1/Jungle Ground Bottom Right
   rotate: false
-  xy: 260, 1292
+  xy: 1550, 1292
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-jungle_1/ground/halfmassive/middle/right
+jungle_1/ground/bottom/right
   rotate: false
-  xy: 1292, 518
+  xy: 1550, 1292
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-jungle_1/Jungle Ground HM Middle Right
+jungle_1/Jungle Ground Plain Middle Left Top
   rotate: false
-  xy: 1292, 518
+  xy: 2, 776
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-jungle_1/ground/halfmassive/top/left
+jungle_1/ground/plain/middle/left_top
   rotate: false
-  xy: 1292, 776
+  xy: 2, 776
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-jungle_1/Jungle Ground HM Top Left
+jungle_1/Jungle Ground Top 1
   rotate: false
-  xy: 1292, 776
+  xy: 2, 260
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-jungle_1/ground/top/2
+jungle_1/ground/top/1
   rotate: false
-  xy: 2, 1292
+  xy: 2, 260
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 jungle_1/Jungle Ground Top 2
   rotate: false
-  xy: 2, 1292
+  xy: 776, 1292
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-jungle_2/hedge/1_blue
+jungle_1/ground/top/2
   rotate: false
-  xy: 1034, 260
-  size: 512, 256
-  orig: 512, 256
+  xy: 776, 1292
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/bridge_rope_back
+  rotate: false
+  xy: 260, 1292
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Bridge Rope Back
+  rotate: false
+  xy: 260, 1292
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/ground/bottom/2
+  rotate: false
+  xy: 260, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Ground Bottom 2
+  rotate: false
+  xy: 260, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/ground/halfmassive/middle/left
+  rotate: false
+  xy: 1292, 260
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Ground HM Middle Left
+  rotate: false
+  xy: 1292, 260
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/ground/halfmassive/top/1
+  rotate: false
+  xy: 776, 776
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Ground HM Top 1
+  rotate: false
+  xy: 776, 776
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/ground/halfmassive/top/right
+  rotate: false
+  xy: 1034, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Ground HM Top Right
+  rotate: false
+  xy: 1034, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/ground/middle/2
+  rotate: false
+  xy: 776, 260
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Ground Middle 2
+  rotate: false
+  xy: 776, 260
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/ground/middle/left_top
+  rotate: false
+  xy: 1550, 1550
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Ground Middle Left Top
+  rotate: false
+  xy: 1550, 1550
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/ground/middle/right_bottom
+  rotate: false
+  xy: 518, 1292
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Ground Middle Right Bottom
+  rotate: false
+  xy: 518, 1292
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/ground/plain/middle/right_bottom
+  rotate: false
+  xy: 1034, 1034
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Ground Plain Middle Right Bottom
+  rotate: false
+  xy: 1034, 1034
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/ground/top/left
+  rotate: false
+  xy: 1034, 1292
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Ground Top Left
+  rotate: false
+  xy: 1034, 1292
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/vine_bottom
+  rotate: false
+  xy: 260, 1034
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Vine Bottom
+  rotate: false
+  xy: 260, 1034
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/vine_top
+  rotate: false
+  xy: 518, 1550
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Vine Top
+  rotate: false
+  xy: 518, 1550
+  size: 256, 256
+  orig: 256, 256
   offset: 0, 0
   index: -1
 jungle_2/Jungle Hedge 1 Blue
   rotate: false
-  xy: 1034, 260
+  xy: 1292, 776
   size: 512, 256
   orig: 512, 256
   offset: 0, 0
   index: -1
+jungle_2/hedge/1_blue
+  rotate: false
+  xy: 1292, 776
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+jungle_2/hedge/1_red
+  rotate: false
+  xy: 2, 518
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+jungle_2/Jungle Hedge 1 Red
+  rotate: false
+  xy: 2, 518
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+mushroom_1/Yellow Middle 1
+  rotate: false
+  xy: 518, 1034
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+mushroom_1/platform/gold/middle_1
+  rotate: false
+  xy: 518, 1034
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+mushroom_1/platform/green/middle_1
+  rotate: false
+  xy: 776, 1550
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
 mushroom_1/Green Middle 1
   rotate: false
-  xy: 260, 260
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-mushroom_1/platform/green/middle
-  rotate: false
-  xy: 260, 260
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: 1
-mushroom_1/Green Middle 2
-  rotate: false
-  xy: 1292, 1550
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-mushroom_1/platform/green/middle
-  rotate: false
-  xy: 1292, 1550
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: 2
-mushroom_1/Green Right
-  rotate: false
-  xy: 518, 2
+  xy: 776, 1550
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 mushroom_1/platform/green/right
   rotate: false
-  xy: 518, 2
+  xy: 518, 776
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-mushroom_1/Red Middle 1
+mushroom_1/Green Right
   rotate: false
-  xy: 1034, 518
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-mushroom_1/platform/red/middle
-  rotate: false
-  xy: 1034, 518
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: 1
-mushroom_1/Red Middle 2
-  rotate: false
-  xy: 776, 1550
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-mushroom_1/platform/red/middle
-  rotate: false
-  xy: 776, 1550
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: 2
-mushroom_1/Yellow Middle 2
-  rotate: false
-  xy: 2, 776
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-mushroom_1/platform/gold/middle
-  rotate: false
-  xy: 2, 776
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: 2
-mushroom_1/platform/gold/left
-  rotate: false
-  xy: 1292, 1292
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-mushroom_1/Yellow Left
-  rotate: false
-  xy: 1292, 1292
+  xy: 518, 776
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 mushroom_1/platform/red/left
   rotate: false
-  xy: 776, 1292
+  xy: 1550, 2
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 mushroom_1/Red Left
   rotate: false
-  xy: 776, 1292
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-snow_1/Ground Plain Middle Right
-  rotate: false
   xy: 1550, 2
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-snow_1/ground/plain/middle/right
+snow_1/Ground Bottom 2
   rotate: false
-  xy: 1550, 2
+  xy: 518, 260
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-snow_1/Ground Plain Right
+snow_1/ground/bottom/2
   rotate: false
-  xy: 2, 1034
+  xy: 518, 260
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-snow_1/ground/plain/top/right
+snow_1/Ground Bottom Left
   rotate: false
-  xy: 2, 1034
+  xy: 1546, 518
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-snow_1/Ground Plain Top 2
+snow_1/ground/bottom/left
   rotate: false
-  xy: 1292, 2
+  xy: 1546, 518
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-snow_1/ground/plain/top/2
+snow_1/Ground HF Top 1
   rotate: false
-  xy: 1292, 2
+  xy: 2, 1550
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-snow_1/ground/halfmassive/top/2
+snow_1/ground/halfmassive/top/1
   rotate: false
-  xy: 518, 776
+  xy: 2, 1550
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-snow_1/Ground HF Top 2
+snow_1/Ground Middle 2
   rotate: false
-  xy: 518, 776
+  xy: 774, 518
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-snow_1/ground/plain/middle/left_bottom
+snow_1/ground/middle/2
   rotate: false
-  xy: 260, 1550
+  xy: 774, 518
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+snow_1/Ground Plain Middle Left
+  rotate: false
+  xy: 1550, 260
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+snow_1/ground/plain/middle/left
+  rotate: false
+  xy: 1550, 260
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 snow_1/Ground Plain Middle Left Bottom
   rotate: false
+  xy: 518, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+snow_1/ground/plain/middle/left_bottom
+  rotate: false
+  xy: 518, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+snow_1/ground/halfmassive/top/left
+  rotate: false
+  xy: 2, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+snow_1/Ground HF Top Left
+  rotate: false
+  xy: 2, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+snow_1/ground/middle/1
+  rotate: false
   xy: 260, 1550
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-underground/Ground Bottom 1
+snow_1/Ground Middle 1
   rotate: false
-  xy: 2, 2
+  xy: 260, 1550
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+underground/Ground Bottom Left
+  rotate: false
+  xy: 1550, 1034
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+underground/ground/bottom/left
+  rotate: false
+  xy: 1550, 1034
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+underground/Ground Middle Left
+  rotate: false
+  xy: 1034, 260
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+underground/ground/middle/left
+  rotate: false
+  xy: 1034, 260
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 underground/ground/bottom/1
   rotate: false
-  xy: 2, 2
+  xy: 1034, 776
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-underground/Ground Middle 1
+underground/Ground Bottom 1
   rotate: false
-  xy: 1550, 1550
+  xy: 1034, 776
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-underground/ground/middle/1
+underground/ground/middle/right_top
   rotate: false
-  xy: 1550, 1550
+  xy: 260, 776
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-underground/Ground Middle Left Top
+underground/Ground Middle Right Top
   rotate: false
-  xy: 1550, 776
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-underground/ground/middle/left_top
-  rotate: false
-  xy: 1550, 776
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-underground/Ground Top 1
-  rotate: false
-  xy: 1034, 2
+  xy: 260, 776
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 underground/ground/top/1
   rotate: false
-  xy: 1034, 2
+  xy: 776, 1034
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-underground/ground/middle/right
+underground/Ground Top 1
   rotate: false
-  xy: 1292, 1034
+  xy: 776, 1034
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-underground/Ground Middle Right
+underground/ground/top/left
   rotate: false
-  xy: 1292, 1034
+  xy: 1034, 1550
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+underground/Ground Top Left
+  rotate: false
+  xy: 1034, 1550
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
@@ -1849,518 +1849,448 @@ size: 2048,2048
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-desert_1/Desert Middle 2
-  rotate: false
-  xy: 2, 1550
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
 desert_1/ground/middle/Desert Middle 2
   rotate: false
-  xy: 2, 1550
+  xy: 1550, 518
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-desert_1/Desert Top 1
+desert_1/Desert Middle 2
   rotate: false
-  xy: 260, 1034
+  xy: 1550, 518
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-desert_1/ground/top/Desert Top 1
+desert_1/ground/middle/Desert Middle Left
   rotate: false
-  xy: 260, 1034
+  xy: 1034, 518
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-desert_1/ground/top/Desert Top Right
+desert_1/Desert Middle Left
   rotate: false
-  xy: 1550, 1550
+  xy: 1034, 518
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-desert_1/Desert Top Right
+desert_1/ground/top/Desert Top 2
   rotate: false
-  xy: 1550, 1550
+  xy: 2, 518
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-green_1/Brown Slider Middle
+desert_1/Desert Top 2
+  rotate: false
+  xy: 2, 518
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+desert_1/ground/top/Desert Top Left
+  rotate: false
+  xy: 776, 1034
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+desert_1/Desert Top Left
+  rotate: false
+  xy: 776, 1034
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+green_2/Green Hedges Cactus 2
   rotate: false
   xy: 260, 2
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-green_1/slider/1/brown/Brown Slider Middle
+green_2/hedges/Green Hedges Cactus 2
   rotate: false
   xy: 260, 2
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-green_1/Brown Slider Right
+green_2/hedges/Green Hedges Cactus 1
   rotate: false
-  xy: 774, 776
+  xy: 776, 2
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-green_1/slider/1/brown/Brown Slider Right
+green_2/Green Hedges Cactus 1
   rotate: false
-  xy: 774, 776
+  xy: 776, 2
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-green_1/Green Plant
+green_2/hedges/Green Hedges Small 1
   rotate: false
-  xy: 260, 1292
+  xy: 2, 1034
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-green_1/slider/1/brown/Brown Slider Left
+green_2/Green Hedges Small 1
   rotate: false
-  xy: 1292, 1034
+  xy: 2, 1034
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-green_1/Brown Slider Left
+green_3/Green Ground Bottom 1
   rotate: false
-  xy: 1292, 1034
+  xy: 260, 1550
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-green_2/Green Trees Balloon Bottom
+green_3/ground/bottom/1
   rotate: false
-  xy: 774, 518
-  size: 512, 256
-  orig: 512, 256
-  offset: 0, 0
-  index: -1
-green_2/trees/balloon_tree/Green Trees Balloon Bottom
-  rotate: false
-  xy: 774, 518
-  size: 512, 256
-  orig: 512, 256
-  offset: 0, 0
-  index: -1
-green_2/Green Trees Balloon Middle
-  rotate: false
-  xy: 260, 518
-  size: 512, 256
-  orig: 512, 256
-  offset: 0, 0
-  index: -1
-green_2/trees/balloon_tree/Green Trees Balloon Middle
-  rotate: false
-  xy: 260, 518
-  size: 512, 256
-  orig: 512, 256
-  offset: 0, 0
-  index: -1
-green_2/hedges/Green Hedges Small 2
-  rotate: false
-  xy: 1292, 2
+  xy: 260, 1550
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-green_2/Green Hedges Small 2
-  rotate: false
-  xy: 1292, 2
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-green_3/ground/middle/left_bottom
-  rotate: false
-  xy: 1288, 518
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-green_3/Green Ground Middle Left Bottom
-  rotate: false
-  xy: 1288, 518
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Ground Bottom 1
-  rotate: false
-  xy: 1292, 1550
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/ground/bottom/1
-  rotate: false
-  xy: 1292, 1550
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Ground Plain Middle Left Top
-  rotate: false
-  xy: 1550, 2
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/ground/plain/middle/left_top
-  rotate: false
-  xy: 1550, 2
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Ground Plain Middle Right Bottom
-  rotate: false
-  xy: 518, 1034
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/ground/plain/middle/right_bottom
-  rotate: false
-  xy: 518, 1034
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Ground Top 1
-  rotate: false
-  xy: 2, 2
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/ground/top/1
-  rotate: false
-  xy: 2, 2
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Ground Top Right
+green_3/Green Ground Middle Left
   rotate: false
   xy: 518, 260
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-jungle_1/ground/top/right
+green_3/ground/middle/left
   rotate: false
   xy: 518, 260
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-jungle_1/ground/halfmassive/top/1
+green_3/Green Ground Middle Left Top
   rotate: false
-  xy: 1034, 1292
+  xy: 260, 776
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-jungle_1/Jungle Ground HM Top 1
+green_3/ground/middle/left_top
   rotate: false
-  xy: 1034, 1292
+  xy: 260, 776
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-jungle_1/ground/halfmassive/top/2
+green_3/ground/top/1
   rotate: false
-  xy: 516, 776
+  xy: 1292, 1550
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+green_3/Green Ground Top 1
+  rotate: false
+  xy: 1292, 1550
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 jungle_1/Jungle Ground HM Top 2
   rotate: false
-  xy: 516, 776
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/ground/middle/left_bottom
-  rotate: false
   xy: 518, 1550
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-jungle_1/Jungle Ground Middle Left Bottom
+jungle_1/ground/halfmassive/top/2
   rotate: false
   xy: 518, 1550
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/ground/middle/right_bottom
-  rotate: false
-  xy: 1032, 776
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Ground Middle Right Bottom
-  rotate: false
-  xy: 1032, 776
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/ground/plain/top/right
-  rotate: false
-  xy: 518, 1292
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 jungle_1/Jungle Ground Plain Top Right
   rotate: false
+  xy: 1292, 1034
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/ground/plain/top/right
+  rotate: false
+  xy: 1292, 1034
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/ground/bottom/1
+  rotate: false
+  xy: 260, 260
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Ground Bottom 1
+  rotate: false
+  xy: 260, 260
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/ground/bottom/left
+  rotate: false
+  xy: 1550, 260
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Ground Bottom Left
+  rotate: false
+  xy: 1550, 260
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/ground/middle/1
+  rotate: false
+  xy: 260, 1292
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Ground Middle 1
+  rotate: false
+  xy: 260, 1292
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/ground/middle/left
+  rotate: false
+  xy: 776, 260
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Ground Middle Left
+  rotate: false
+  xy: 776, 260
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/ground/middle/right
+  rotate: false
+  xy: 1034, 776
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Ground Middle Right
+  rotate: false
+  xy: 1034, 776
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/ground/middle/right_top
+  rotate: false
+  xy: 1550, 776
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Ground Middle Right Top
+  rotate: false
+  xy: 1550, 776
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/ground/plain/middle/left
+  rotate: false
   xy: 518, 1292
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-jungle_1/vine_bottom
+jungle_1/Jungle Ground Plain Middle Left
   rotate: false
-  xy: 2, 260
+  xy: 518, 1292
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-jungle_1/Jungle Vine Bottom
+jungle_1/ground/plain/middle/right
   rotate: false
-  xy: 2, 260
+  xy: 260, 518
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-mushroom_1/Red Right
+jungle_1/Jungle Ground Plain Middle Right
   rotate: false
-  xy: 1292, 260
+  xy: 260, 518
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/ground/plain/top/2
+  rotate: false
+  xy: 2, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Ground Plain Top 2
+  rotate: false
+  xy: 2, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/ground/plain/top/left
+  rotate: false
+  xy: 1550, 1550
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Ground Plain Top Left
+  rotate: false
+  xy: 1550, 1550
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/ground/top/right
+  rotate: false
+  xy: 776, 776
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Ground Top Right
+  rotate: false
+  xy: 776, 776
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_2/hedge/1_green
+  rotate: false
+  xy: 1290, 1292
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+jungle_2/Jungle Hedge 1 Green
+  rotate: false
+  xy: 1290, 1292
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+mushroom_1/Green Left
+  rotate: false
+  xy: 518, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+mushroom_1/platform/green/left
+  rotate: false
+  xy: 518, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+mushroom_1/platform/gold/right
+  rotate: false
+  xy: 518, 776
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+mushroom_1/Yellow Right
+  rotate: false
+  xy: 518, 776
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+mushroom_1/platform/red/middle_1
+  rotate: false
+  xy: 1034, 1034
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+mushroom_1/Red Middle 1
+  rotate: false
+  xy: 1034, 1034
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+mushroom_1/platform/red/middle_2
+  rotate: false
+  xy: 2, 1550
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+mushroom_1/Red Middle 2
+  rotate: false
+  xy: 2, 1550
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 mushroom_1/platform/red/right
   rotate: false
-  xy: 1292, 260
+  xy: 1292, 776
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-mushroom_1/platform/gold/middle
+mushroom_1/Red Right
   rotate: false
-  xy: 2, 1034
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: 1
-mushroom_1/Yellow Middle 1
-  rotate: false
-  xy: 2, 1034
+  xy: 1292, 776
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-sand_1/Sphinx Medium
-  rotate: false
-  xy: 2, 776
-  size: 512, 256
-  orig: 512, 256
-  offset: 0, 0
-  index: -1
-sand_1/sphinx_medium
-  rotate: false
-  xy: 2, 776
-  size: 512, 256
-  orig: 512, 256
-  offset: 0, 0
-  index: -1
-snow_1/Ground Bottom Left
-  rotate: false
-  xy: 1550, 260
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-snow_1/ground/bottom/left
-  rotate: false
-  xy: 1550, 260
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-snow_1/Ground HF Left
-  rotate: false
-  xy: 1550, 1292
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-snow_1/ground/halfmassive/middle/left
-  rotate: false
-  xy: 1550, 1292
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-snow_1/Ground Middle 2
-  rotate: false
-  xy: 1034, 260
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-snow_1/ground/middle/2
-  rotate: false
-  xy: 1034, 260
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-snow_1/Ground Plain Middle Left
-  rotate: false
-  xy: 518, 2
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-snow_1/ground/plain/middle/left
-  rotate: false
-  xy: 518, 2
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-snow_1/Ground Plain Top 1
-  rotate: false
-  xy: 776, 1034
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-snow_1/ground/plain/top/1
-  rotate: false
-  xy: 776, 1034
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-snow_1/Tree Bottom
-  rotate: false
-  xy: 1290, 776
-  size: 512, 256
-  orig: 512, 256
-  offset: 0, 0
-  index: -1
-snow_1/trees/balloon/bottom
-  rotate: false
-  xy: 1290, 776
-  size: 512, 256
-  orig: 512, 256
-  offset: 0, 0
-  index: -1
-snow_1/ground/bottom/2
+snow_1/Ground Bottom 1
   rotate: false
   xy: 2, 1292
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-snow_1/Ground Bottom 2
+snow_1/ground/bottom/1
   rotate: false
   xy: 2, 1292
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-snow_1/ground/halfmassive/top/1
+snow_1/Ground Middle Left Top
   rotate: false
-  xy: 1034, 1550
+  xy: 1034, 2
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-snow_1/Ground HF Top 1
-  rotate: false
-  xy: 1034, 1550
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-snow_1/ground/halfmassive/top/left
-  rotate: false
-  xy: 776, 2
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-snow_1/Ground HF Top Left
-  rotate: false
-  xy: 776, 2
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-snow_1/ground/halfmassive/top/right
-  rotate: false
-  xy: 1034, 1034
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-snow_1/Ground HF Top Right
-  rotate: false
-  xy: 1034, 1034
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-snow_1/ground/middle/1
-  rotate: false
-  xy: 776, 260
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-snow_1/Ground Middle 1
-  rotate: false
-  xy: 776, 260
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-snow_1/ground/middle/right_top
-  rotate: false
-  xy: 1292, 1292
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-snow_1/Ground Middle Right Top
-  rotate: false
-  xy: 1292, 1292
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-snow_1/ground/plain/middle/left_top
+snow_1/ground/middle/left_top
   rotate: false
   xy: 1034, 2
   size: 256, 256
@@ -2369,105 +2299,196 @@ snow_1/ground/plain/middle/left_top
   index: -1
 snow_1/Ground Plain Middle Left Top
   rotate: false
-  xy: 1034, 2
+  xy: 518, 518
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+snow_1/ground/plain/middle/left_top
+  rotate: false
+  xy: 518, 518
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+snow_1/Ground Plain Middle Right Bottom
+  rotate: false
+  xy: 1550, 1034
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+snow_1/ground/plain/middle/right_bottom
+  rotate: false
+  xy: 1550, 1034
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+snow_1/Ground Plain Middle Right Top
+  rotate: false
+  xy: 2, 260
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+snow_1/ground/plain/middle/right_top
+  rotate: false
+  xy: 2, 260
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+snow_1/Tree Middle
+  rotate: false
+  xy: 1292, 2
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+snow_1/trees/balloon/middle
+  rotate: false
+  xy: 1292, 2
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+snow_1/ground/halfmassive/middle/right
+  rotate: false
+  xy: 1292, 518
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+snow_1/Ground HF Right
+  rotate: false
+  xy: 1292, 518
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+snow_1/ground/middle/right_top
+  rotate: false
+  xy: 1034, 260
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+snow_1/Ground Middle Right Top
+  rotate: false
+  xy: 1034, 260
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+snow_1/ground/plain/middle/right
+  rotate: false
+  xy: 1034, 1550
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+snow_1/Ground Plain Middle Right
+  rotate: false
+  xy: 1034, 1550
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 snow_1/ground/plain/top/left
   rotate: false
-  xy: 776, 1550
+  xy: 260, 1034
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 snow_1/Ground Plain Left
   rotate: false
-  xy: 776, 1550
+  xy: 260, 1034
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-underground/Ground Bottom Left
+snow_1/ground/plain/top/right
   rotate: false
-  xy: 260, 260
+  xy: 1292, 260
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-underground/ground/bottom/left
+snow_1/Ground Plain Right
   rotate: false
-  xy: 260, 260
+  xy: 1292, 260
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-underground/Ground Middle Left
-  rotate: false
-  xy: 1546, 518
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-underground/ground/middle/left
-  rotate: false
-  xy: 1546, 518
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-underground/Ground Top Right
-  rotate: false
-  xy: 2, 518
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-underground/ground/top/right
-  rotate: false
-  xy: 2, 518
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-underground/ground/bottom/right
-  rotate: false
-  xy: 1550, 1034
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-underground/Ground Bottom Right
-  rotate: false
-  xy: 1550, 1034
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-underground/ground/middle/left_bottom
+snow_1/trees/balloon/top
   rotate: false
   xy: 776, 1292
-  size: 256, 256
-  orig: 256, 256
+  size: 512, 256
+  orig: 512, 256
   offset: 0, 0
   index: -1
-underground/Ground Left Bottom
+snow_1/Tree Top
   rotate: false
   xy: 776, 1292
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+underground/Ground Middle 1
+  rotate: false
+  xy: 2, 776
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-underground/ground/middle/right_bottom
+underground/ground/middle/1
   rotate: false
-  xy: 260, 1550
+  xy: 2, 776
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+underground/Ground Middle Left Top
+  rotate: false
+  xy: 518, 1034
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+underground/ground/middle/left_top
+  rotate: false
+  xy: 518, 1034
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 underground/Ground Middle Right Bottom
   rotate: false
-  xy: 260, 1550
+  xy: 776, 1550
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+underground/ground/middle/right_bottom
+  rotate: false
+  xy: 776, 1550
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+underground/ground/top/right
+  rotate: false
+  xy: 776, 518
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+underground/Ground Top Right
+  rotate: false
+  xy: 776, 518
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
@@ -2478,207 +2499,214 @@ size: 2048,2048
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-desert_1/ground/top/Desert Top Left
-  rotate: false
-  xy: 1544, 776
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-desert_1/Desert Top Left
-  rotate: false
-  xy: 1544, 776
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-green_2/Green Hedges Big 1
-  rotate: false
-  xy: 1030, 268
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-green_2/hedges/Green Hedges Big 1
-  rotate: false
-  xy: 1030, 268
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-green_2/hedges/Green Hedges Small 1
-  rotate: false
-  xy: 1542, 1034
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-green_2/Green Hedges Small 1
-  rotate: false
-  xy: 1542, 1034
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-green_3/ground/middle/left_top
-  rotate: false
-  xy: 1032, 10
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-green_3/Green Ground Middle Left Top
-  rotate: false
-  xy: 1032, 10
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Tree 2 Front
-  rotate: false
-  xy: 1028, 782
-  size: 512, 1024
-  orig: 512, 1024
-  offset: 0, 0
-  index: -1
-jungle_1/tree/2_front
-  rotate: false
-  xy: 1028, 782
-  size: 512, 1024
-  orig: 512, 1024
-  offset: 0, 0
-  index: -1
-jungle_1/ground/middle/1
-  rotate: false
-  xy: 774, 10
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Ground Middle 1
-  rotate: false
-  xy: 774, 10
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/ground/plain/top/left
-  rotate: false
-  xy: 516, 10
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Ground Plain Top Left
-  rotate: false
-  xy: 516, 10
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/vine_top
-  rotate: false
-  xy: 1544, 518
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Vine Top
-  rotate: false
-  xy: 1544, 518
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_2/Jungle Hedge 1 Green
-  rotate: false
-  xy: 2, 10
-  size: 512, 256
-  orig: 512, 256
-  offset: 0, 0
-  index: -1
-jungle_2/hedge/1_green
-  rotate: false
-  xy: 2, 10
-  size: 512, 256
-  orig: 512, 256
-  offset: 0, 0
-  index: -1
-mushroom_1/platform/gold/right
-  rotate: false
-  xy: 1548, 2
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-mushroom_1/Yellow Right
-  rotate: false
-  xy: 1548, 2
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-plastic_1/Screw Green Right Up
-  rotate: false
-  xy: 2, 268
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-plastic_1/screw_block_green/right_up
-  rotate: false
-  xy: 2, 268
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-snow_1/Ground Bottom 1
+desert_1/ground/middle/Desert Middle Right
   rotate: false
   xy: 1542, 1292
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-snow_1/ground/bottom/1
+desert_1/Desert Middle Right
   rotate: false
   xy: 1542, 1292
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-snow_1/Ground Plain Middle Right Bottom
+green_1/Green Hedges 1
+  rotate: false
+  xy: 2, 10
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+green_1/Green Plant Head
+  rotate: false
+  xy: 1290, 10
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Ground Middle Left Bottom
+  rotate: false
+  xy: 774, 10
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/ground/middle/left_bottom
+  rotate: false
+  xy: 774, 10
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Tree 2
+  rotate: false
+  xy: 1028, 782
+  size: 512, 1024
+  orig: 512, 1024
+  offset: 0, 0
+  index: -1
+jungle_1/tree/2
+  rotate: false
+  xy: 1028, 782
+  size: 512, 1024
+  orig: 512, 1024
+  offset: 0, 0
+  index: -1
+jungle_1/ground/plain/middle/right_top
+  rotate: false
+  xy: 1544, 518
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Ground Plain Middle Right Top
+  rotate: false
+  xy: 1544, 518
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/ground/plain/top/1
+  rotate: false
+  xy: 516, 10
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Ground Plain Top 1
+  rotate: false
+  xy: 516, 10
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/vine_middle
+  rotate: false
+  xy: 1542, 1034
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Vine Middle
+  rotate: false
+  xy: 1542, 1034
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+mushroom_1/Green Middle 2
+  rotate: false
+  xy: 1542, 1550
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+mushroom_1/platform/green/middle_2
+  rotate: false
+  xy: 1542, 1550
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+mushroom_1/Yellow Middle 2
   rotate: false
   xy: 1548, 260
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-snow_1/ground/plain/middle/right_bottom
+mushroom_1/platform/gold/middle_2
   rotate: false
   xy: 1548, 260
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-snow_1/SnowMan
+mushroom_1/platform/gold/left
+  rotate: false
+  xy: 1032, 10
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+mushroom_1/Yellow Left
+  rotate: false
+  xy: 1032, 10
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+plastic_1/Screw Red Left Up
+  rotate: false
+  xy: 1030, 268
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+plastic_1/screw_block_red/left_up
+  rotate: false
+  xy: 1030, 268
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+plastic_1/screw_block_grey/middle
   rotate: false
   xy: 516, 268
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
-snow_1/snowman
+plastic_1/Screw Grey Middle
   rotate: false
   xy: 516, 268
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
-  index: 1
-snow_1/Trees Normal
+  index: -1
+plastic_1/screw_block_red/middle
   rotate: false
-  xy: 2, 782
-  size: 1024, 1024
-  orig: 1024, 1024
+  xy: 2, 268
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+plastic_1/Screw Red Middle
+  rotate: false
+  xy: 2, 268
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+snow_1/Ground HF Left
+  rotate: false
+  xy: 1544, 776
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+snow_1/ground/halfmassive/middle/left
+  rotate: false
+  xy: 1544, 776
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+snow_1/ground/halfmassive/top/2
+  rotate: false
+  xy: 1548, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+snow_1/Ground HF Top 2
+  rotate: false
+  xy: 1548, 2
+  size: 256, 256
+  orig: 256, 256
   offset: 0, 0
   index: -1
 snow_1/trees/fir_1/green_1/normal
@@ -2688,32 +2716,11 @@ snow_1/trees/fir_1/green_1/normal
   orig: 1024, 1024
   offset: 0, 0
   index: -1
-snow_1/ground/plain/middle/right_top
+snow_1/Trees Normal
   rotate: false
-  xy: 1290, 10
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-snow_1/Ground Plain Middle Right Top
-  rotate: false
-  xy: 1290, 10
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-underground/Ground Top Left
-  rotate: false
-  xy: 1542, 1550
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-underground/ground/top/left
-  rotate: false
-  xy: 1542, 1550
-  size: 256, 256
-  orig: 256, 256
+  xy: 2, 782
+  size: 1024, 1024
+  orig: 1024, 1024
   offset: 0, 0
   index: -1
 
@@ -2722,314 +2729,300 @@ size: 2048,2048
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-green_2/hedges/Green Hedges Big 3
-  rotate: false
-  xy: 2, 2
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-green_2/Green Hedges Big 3
-  rotate: false
-  xy: 2, 2
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-green_3/Green Ground Top 1
-  rotate: false
-  xy: 260, 1544
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-green_3/ground/top/1
-  rotate: false
-  xy: 260, 1544
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Ground Plain Middle Left
+desert_1/ground/top/Desert Top 1
   rotate: false
   xy: 518, 1544
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-jungle_1/ground/plain/middle/left
+desert_1/Desert Top 1
   rotate: false
   xy: 518, 1544
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-jungle_1/Jungle Tree 1
-  rotate: false
-  xy: 516, 516
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-jungle_1/tree/1
-  rotate: false
-  xy: 516, 516
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-jungle_1/ground/plain/middle/right
-  rotate: false
-  xy: 2, 1544
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/Jungle Ground Plain Middle Right
-  rotate: false
-  xy: 2, 1544
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-jungle_1/ground/plain/top/2
+green_1/Green Plant
   rotate: false
   xy: 776, 1544
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
-jungle_1/Jungle Ground Plain Top 2
-  rotate: false
-  xy: 776, 1544
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-plastic_1/Screw Green Middle
-  rotate: false
-  xy: 2, 516
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-plastic_1/screw_block_green/middle
-  rotate: false
-  xy: 2, 516
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-plastic_1/Screw Red Right Down
-  rotate: false
-  xy: 1030, 774
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-plastic_1/screw_block_red/right_down
-  rotate: false
-  xy: 1030, 774
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-plastic_1/screw_block_blue/right_up
-  rotate: false
-  xy: 516, 2
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-plastic_1/Screw Blue Right Up
-  rotate: false
-  xy: 516, 2
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-plastic_1/screw_block_green/up
-  rotate: false
-  xy: 516, 1030
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-plastic_1/Screw Green Up
-  rotate: false
-  xy: 516, 1030
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-plastic_1/screw_block_grey/left_up
-  rotate: false
-  xy: 1030, 260
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-plastic_1/Screw Grey Left Up
-  rotate: false
-  xy: 1030, 260
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-plastic_1/screw_block_red/up
-  rotate: false
-  xy: 1034, 1288
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-plastic_1/Screw Red Up
-  rotate: false
-  xy: 1034, 1288
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-snow_1/Window Medium 1
-  rotate: false
-  xy: 2, 1030
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-snow_1/windows/medium
-  rotate: false
-  xy: 2, 1030
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: 1
-
-grounds7.png
-size: 2048,2048
-format: RGBA8888
-filter: Nearest,Nearest
-repeat: none
 green_2/hedges/Green Hedges Big 2
   rotate: false
-  xy: 2, 2
+  xy: 1030, 774
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
 green_2/Green Hedges Big 2
   rotate: false
-  xy: 2, 2
+  xy: 1030, 774
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
-jungle_1/Jungle Big Plant 1
+jungle_1/ground/halfmassive/middle/right
   rotate: false
-  xy: 2, 1030
-  size: 512, 512
-  orig: 512, 512
+  xy: 260, 1544
+  size: 256, 256
+  orig: 256, 256
   offset: 0, 0
   index: -1
-jungle_1/big_plant
+jungle_1/Jungle Ground HM Middle Right
   rotate: false
-  xy: 2, 1030
-  size: 512, 512
-  orig: 512, 512
+  xy: 260, 1544
+  size: 256, 256
+  orig: 256, 256
   offset: 0, 0
-  index: 1
+  index: -1
+jungle_1/ground/halfmassive/top/left
+  rotate: false
+  xy: 2, 1544
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Ground HM Top Left
+  rotate: false
+  xy: 2, 1544
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
 plastic_1/Screw Green Left Up
   rotate: false
-  xy: 516, 2
+  xy: 2, 516
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
 plastic_1/screw_block_green/left_up
   rotate: false
-  xy: 516, 2
+  xy: 2, 516
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
 plastic_1/Screw Green Right Down
   rotate: false
-  xy: 1030, 2
+  xy: 516, 516
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
 plastic_1/screw_block_green/right_down
   rotate: false
-  xy: 1030, 2
+  xy: 516, 516
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+plastic_1/Screw Green Up
+  rotate: false
+  xy: 2, 1030
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+plastic_1/screw_block_green/up
+  rotate: false
+  xy: 2, 1030
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
 plastic_1/Screw Grey Right Down
   rotate: false
-  xy: 516, 516
+  xy: 1030, 260
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
 plastic_1/screw_block_grey/right_down
   rotate: false
-  xy: 516, 516
+  xy: 1030, 260
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
-plastic_1/Screw Grey Up
+plastic_1/Screw Red Right Down
   rotate: false
-  xy: 1030, 516
+  xy: 2, 2
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
-plastic_1/screw_block_grey/up
+plastic_1/screw_block_red/right_down
   rotate: false
-  xy: 1030, 516
+  xy: 2, 2
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
-plastic_1/Screw Red Left Up
+plastic_1/screw_block_blue/right_down
   rotate: false
-  xy: 2, 516
+  xy: 516, 2
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
-plastic_1/screw_block_red/left_up
+plastic_1/Screw Blue Right Down
   rotate: false
-  xy: 2, 516
+  xy: 516, 2
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
-plastic_1/screw_block_grey/down
+plastic_1/screw_block_blue/up
   rotate: false
   xy: 516, 1030
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+plastic_1/Screw Up
+  rotate: false
+  xy: 516, 1030
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+snow_1/snowman_1
+  rotate: false
+  xy: 1034, 1288
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+snow_1/SnowMan
+  rotate: false
+  xy: 1034, 1288
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+
+grounds7.png
+size: 2048,2048
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+candy_1/Candy Cane Top
+  rotate: false
+  xy: 1030, 516
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+green_2/hedges/Green Hedges Big 1
+  rotate: false
+  xy: 2, 516
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+green_2/Green Hedges Big 1
+  rotate: false
+  xy: 2, 516
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+plastic_1/Screw Blue Middle
+  rotate: false
+  xy: 2, 1030
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+plastic_1/screw_block_blue/middle
+  rotate: false
+  xy: 2, 1030
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
 plastic_1/Screw Grey Down
   rotate: false
+  xy: 2, 2
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+plastic_1/screw_block_grey/down
+  rotate: false
+  xy: 2, 2
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+plastic_1/screw_block_grey/left_up
+  rotate: false
+  xy: 516, 516
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+plastic_1/Screw Grey Left Up
+  rotate: false
+  xy: 516, 516
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+plastic_1/screw_block_grey/right_up
+  rotate: false
   xy: 516, 1030
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
-plastic_1/screw_block_red/middle
+plastic_1/Screw Grey Right Up
+  rotate: false
+  xy: 516, 1030
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+plastic_1/screw_block_red/down
+  rotate: false
+  xy: 1030, 2
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+plastic_1/Screw Red Down
+  rotate: false
+  xy: 1030, 2
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+plastic_1/screw_block_red/right_up
+  rotate: false
+  xy: 516, 2
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+plastic_1/Screw Red Right Up
+  rotate: false
+  xy: 516, 2
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+snow_1/windows/medium_1
   rotate: false
   xy: 1030, 1030
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
-plastic_1/Screw Red Middle
+snow_1/Window Medium 1
   rotate: false
   xy: 1030, 1030
   size: 512, 512
@@ -3042,121 +3035,121 @@ size: 2048,2048
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-candy_1/Candy Cane Top
+green_2/Green Hedges Big 3
   rotate: false
-  xy: 516, 516
+  xy: 516, 2
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+green_2/hedges/Green Hedges Big 3
+  rotate: false
+  xy: 516, 2
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+jungle_1/Jungle Tree 1
+  rotate: false
+  xy: 1030, 1030
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+jungle_1/tree/1
+  rotate: false
+  xy: 1030, 1030
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
 jungle_1/tree/1_front
   rotate: false
-  xy: 1030, 2
+  xy: 2, 516
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
 jungle_1/Jungle Tree 1 Front
   rotate: false
-  xy: 1030, 2
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-plastic_1/Screw Blue Middle
-  rotate: false
-  xy: 516, 1030
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-plastic_1/screw_block_blue/middle
-  rotate: false
-  xy: 516, 1030
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-plastic_1/Screw Grey Middle
-  rotate: false
-  xy: 1030, 516
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-plastic_1/screw_block_grey/middle
-  rotate: false
-  xy: 1030, 516
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-plastic_1/Screw Red Right Up
-  rotate: false
   xy: 2, 516
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-plastic_1/screw_block_red/right_up
-  rotate: false
-  xy: 2, 516
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-plastic_1/screw_block_blue/down
-  rotate: false
-  xy: 516, 2
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
 plastic_1/Screw Blue Down
   rotate: false
-  xy: 516, 2
+  xy: 1030, 2
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
-plastic_1/screw_block_blue/right_down
+plastic_1/screw_block_blue/down
   rotate: false
-  xy: 2, 1030
+  xy: 1030, 2
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
-plastic_1/Screw Blue Right Down
-  rotate: false
-  xy: 2, 1030
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-plastic_1/screw_block_grey/right_up
-  rotate: false
-  xy: 1030, 1030
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-plastic_1/Screw Grey Right Up
-  rotate: false
-  xy: 1030, 1030
-  size: 512, 512
-  orig: 512, 512
-  offset: 0, 0
-  index: -1
-plastic_1/screw_block_red/down
+plastic_1/Screw Grey Up
   rotate: false
   xy: 2, 2
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
-plastic_1/Screw Red Down
+plastic_1/screw_block_grey/up
   rotate: false
   xy: 2, 2
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+plastic_1/screw_block_blue/left_up
+  rotate: false
+  xy: 516, 516
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+plastic_1/Screw Blue Left Up
+  rotate: false
+  xy: 516, 516
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+plastic_1/screw_block_green/down
+  rotate: false
+  xy: 1030, 516
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+plastic_1/Screw Green Down
+  rotate: false
+  xy: 1030, 516
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+plastic_1/screw_block_green/middle
+  rotate: false
+  xy: 516, 1030
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+plastic_1/Screw Green Middle
+  rotate: false
+  xy: 516, 1030
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+snow_1/Snow Hills Top
+  rotate: false
+  xy: 2, 1030
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
@@ -3202,21 +3195,28 @@ green_2/hedges/Green Hedges Cactus 4
   orig: 512, 1024
   offset: 0, 0
   index: -1
-plastic_1/screw_block_blue/left_up
+plastic_1/screw_block_green/right_up
   rotate: false
   xy: 2, 2
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
-plastic_1/Screw Blue Left Up
+plastic_1/Screw Green Right Up
   rotate: false
   xy: 2, 2
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
-snow_1/Snow Hills Top
+plastic_1/screw_block_red/up
+  rotate: false
+  xy: 1030, 1028
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+plastic_1/Screw Red Up
   rotate: false
   xy: 1030, 1028
   size: 512, 512

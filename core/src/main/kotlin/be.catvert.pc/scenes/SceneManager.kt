@@ -5,15 +5,14 @@ import aurelienribon.tweenengine.Tween
 import be.catvert.pc.Log
 import be.catvert.pc.PCGame
 import be.catvert.pc.utility.*
-import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.utils.Disposable
 import imgui.ImGui
 import imgui.impl.LwjglGL3
 import ktx.app.clearScreen
 
-object SceneManager : Updeatable, Renderable, Resizable, Disposable {
-    private var currentScene: Scene = MainMenuScene()
+class SceneManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Disposable {
+    private var currentScene: Scene = initialScene
     private var nextScene: Scene? = null
 
     fun currentScene() = currentScene
@@ -41,19 +40,19 @@ object SceneManager : Updeatable, Renderable, Resizable, Disposable {
             Timeline.createSequence()
                     .beginParallel()
                     .push(Tween.to(currentScene, SceneTweenAccessor.SceneTween.ALPHA.tweenType, 0.5f).target(0f).setCallback { _, _ ->
-                        setScene(scene, disposeCurrentScene)
-                    })
+                                setScene(scene, disposeCurrentScene)
+                            })
                     .push(Tween.to(scene, SceneTweenAccessor.SceneTween.ALPHA.tweenType, 0.5f).target(1f).setCallback { _, _ ->
-                        nextScene = null
-                        isTransitionRunning = false
+                                nextScene = null
+                                isTransitionRunning = false
 
-                        if (waitingScene.isNotEmpty()) {
-                            val scene = waitingScene.entries.elementAt(0)
-                            waitingScene.remove(scene.key)
-                            val (nextScene, applyTransition, disposeCurrentScene) = scene.value
-                            loadScene(nextScene, applyTransition, disposeCurrentScene)
-                        }
-                    })
+                                if (waitingScene.isNotEmpty()) {
+                                    val scene = waitingScene.entries.elementAt(0)
+                                    waitingScene.remove(scene.key)
+                                    val (nextScene, applyTransition, disposeCurrentScene) = scene.value
+                                    loadScene(nextScene, applyTransition, disposeCurrentScene)
+                                }
+                            })
                     .end()
                     .start(PCGame.tweenManager)
         } else {

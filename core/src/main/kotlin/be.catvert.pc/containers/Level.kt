@@ -6,11 +6,8 @@ import be.catvert.pc.Prefab
 import be.catvert.pc.Tags
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.scenes.EndLevelScene
-import be.catvert.pc.scenes.SceneManager
 import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.*
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.math.MathUtils
@@ -32,7 +29,7 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
     @JsonIgnore
     var exit: (success: Boolean) -> Unit = {
         ResourceManager.getSound(if (it) Constants.soundsDirPath.child("game-over-success.wav") else Constants.soundsDirPath.child("game-over-fail.wav"))?.play(PCGame.soundVolume)
-        SceneManager.loadScene(EndLevelScene(levelPath))
+        PCGame.sceneManager.loadScene(EndLevelScene(levelPath))
     }
 
     @JsonIgnore
@@ -58,12 +55,12 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
         else
             levelSounds.second.addAll(Utility.getFilesRecursivly(levelSounds.first, *Constants.levelSoundExtension))
 
-        if(!levelPrefabs.first.exists())
+        if (!levelPrefabs.first.exists())
             levelPrefabs.first.mkdirs()
         else {
             Utility.getFilesRecursivly(levelPrefabs.first, Constants.prefabExtension).forEach {
-                levelPrefabs.second.add(SerializationFactory.deserializeFromFile(it))
-            }
+                        levelPrefabs.second.add(SerializationFactory.deserializeFromFile(it))
+                    }
         }
 
         if (background is ParallaxBackground)
@@ -121,7 +118,8 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
         return followGameObject != null
     }
 
-    @JsonIgnore fun getTimer() = timer.timer
+    @JsonIgnore
+    fun getTimer() = timer.timer
 
     fun deleteFiles() {
         if (!levelPath.toLocalFile().exists()) {
@@ -149,7 +147,8 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
                 levelDir.deleteDirectory()
             }
             levelDir.mkdirs()
-            val level = Level(levelDir.child(Constants.levelDataFile).path(), Constants.gameVersion, PCGame.parallaxBackgrounds().elementAtOrNull(0) ?: PCGame.standardBackgrounds().elementAtOrNull(0) ?:StandardBackground(FileWrapper("")))
+            val level = Level(levelDir.child(Constants.levelDataFile).path(), Constants.gameVersion, PCGame.parallaxBackgrounds().elementAtOrNull(0)
+                    ?: PCGame.standardBackgrounds().elementAtOrNull(0) ?: StandardBackground(FileWrapper("")))
 
             PrefabFactory.Player_Kenney.prefab.create(Point(100, 100), level)
 

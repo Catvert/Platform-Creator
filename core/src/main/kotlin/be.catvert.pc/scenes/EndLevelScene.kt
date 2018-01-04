@@ -29,10 +29,10 @@ class EndLevelScene(private val levelPath: String) : Scene(PCGame.mainBackground
                 if (button("Recommencer", Vec2(-1, 20))) {
                     val level = Level.loadFromFile(levelPath.toLocalFile().parent())
                     if (level != null)
-                        SceneManager.loadScene(GameScene(level))
+                        PCGame.sceneManager.loadScene(GameScene(level))
                 }
                 if (button("Quitter", Vec2(-1, 20))) {
-                    SceneManager.loadScene(MainMenuScene(), false)
+                    PCGame.sceneManager.loadScene(MainMenuScene(), false)
                 }
             }
         }

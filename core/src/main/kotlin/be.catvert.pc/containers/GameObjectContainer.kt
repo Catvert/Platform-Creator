@@ -3,18 +3,19 @@ package be.catvert.pc.containers
 import be.catvert.pc.GameObject
 import be.catvert.pc.GameObjectState
 import be.catvert.pc.GameObjectTag
-import be.catvert.pc.PCGame
 import be.catvert.pc.serialization.PostDeserialization
-import be.catvert.pc.utility.*
-import com.badlogic.gdx.Game
-import com.badlogic.gdx.assets.AssetManager
+import be.catvert.pc.utility.Rect
+import be.catvert.pc.utility.Renderable
+import be.catvert.pc.utility.ResourceLoader
+import be.catvert.pc.utility.Updeatable
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 
 
 abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization, ResourceLoader {
-    @JsonProperty("objects") protected val gameObjects: MutableSet<GameObject> = mutableSetOf()
+    @JsonProperty("objects")
+    protected val gameObjects: MutableSet<GameObject> = mutableSetOf()
 
     @JsonIgnore
     var allowRenderingGO = true

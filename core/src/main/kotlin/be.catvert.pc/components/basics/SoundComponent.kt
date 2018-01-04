@@ -2,24 +2,18 @@ package be.catvert.pc.components.basics
 
 import be.catvert.pc.GameObject
 import be.catvert.pc.PCGame
-import be.catvert.pc.components.BasicComponent
+import be.catvert.pc.components.Component
 import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.*
-import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.audio.Sound
-import com.badlogic.gdx.files.FileHandle
 import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
 import imgui.functionalProgramming
-import ktx.assets.Asset
-import ktx.assets.load
-import ktx.assets.loadOnDemand
-import ktx.assets.toLocalFile
 
 /**
  * Component permettant d'ajouter des sons à un gameObject
  */
-class SoundComponent(var sounds: ArrayList<SoundData>) : BasicComponent(), CustomEditorImpl {
+class SoundComponent(var sounds: ArrayList<SoundData>) : Component(), ResourceLoader, CustomEditorImpl {
     constructor(vararg sounds: SoundData) : this(arrayListOf(*sounds))
     @JsonCreator private constructor() : this(arrayListOf())
 
@@ -63,7 +57,6 @@ class SoundComponent(var sounds: ArrayList<SoundData>) : BasicComponent(), Custo
     }
 
     override fun loadResources() {
-        super.loadResources()
         sounds.forEach { it.loadResources() }
     }
 

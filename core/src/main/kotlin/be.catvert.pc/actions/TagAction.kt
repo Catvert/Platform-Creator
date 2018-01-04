@@ -8,17 +8,17 @@ import be.catvert.pc.utility.*
 import com.fasterxml.jackson.annotation.JsonCreator
 
 class TagAction(@ExposeEditor(customType = CustomType.TAG_STRING) val tag: GameObjectTag, var action: Action) : Action, CustomEditorImpl {
-    @JsonCreator private constructor(): this(Tags.Player.tag, EmptyAction())
+    @JsonCreator private constructor() : this(Tags.Player.tag, EmptyAction())
 
     override fun invoke(gameObject: GameObject) {
         gameObject.container.cast<Level>()?.findGameObjectsByTag(tag)?.forEach {
-            action(it)
-        }
+                    action(it)
+                }
     }
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
         gameObject.container.cast<Level>()?.findGameObjectsByTag(tag)?.firstOrNull()?.apply {
-            ImguiHelper.action("action", ::action, this, level)
-        }
+                    ImguiHelper.action("action", ::action, this, level)
+                }
     }
 }
