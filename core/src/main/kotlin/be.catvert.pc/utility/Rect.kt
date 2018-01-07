@@ -2,8 +2,10 @@ package be.catvert.pc.utility
 
 import be.catvert.pc.GameObject
 import be.catvert.pc.containers.Level
+import be.catvert.pc.scenes.EditorScene
 import com.fasterxml.jackson.annotation.JsonIgnore
 import imgui.ImGui
+import imgui.findBestPopupWindowPos
 import imgui.functionalProgramming
 
 class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
@@ -77,12 +79,12 @@ class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
 
     fun overlaps(rect: Rect) = this.x < rect.x + rect.width && this.x + this.width > rect.x && this.y < rect.y + rect.height && this.y + this.height > rect.y
 
-    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         with(ImGui) {
             if (collapsingHeader(label)) {
                 functionalProgramming.withIndent {
-                    ImguiHelper.addImguiWidget("position", ::position, gameObject, level, ExposeEditorFactory.createExposeEditor(max = level.matrixRect.width))
-                    ImguiHelper.addImguiWidget("taille", ::size, gameObject, level, ExposeEditorFactory.createExposeEditor(max = Constants.maxGameObjectSize))
+                    ImguiHelper.point(::position, Point(), Point(level.matrixRect.width, level.matrixRect.height), editorSceneUI)
+                    ImguiHelper.addImguiWidget("taille", ::size, gameObject, level, ExposeEditorFactory.createExposeEditor(max = Constants.maxGameObjectSize), editorSceneUI)
                 }
             }
         }

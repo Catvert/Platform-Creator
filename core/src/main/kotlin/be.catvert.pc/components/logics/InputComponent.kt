@@ -5,6 +5,7 @@ import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
 import be.catvert.pc.components.Component
 import be.catvert.pc.containers.Level
+import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
@@ -32,8 +33,8 @@ class InputComponent(var inputs: ArrayList<InputData>) : Component(), Updeatable
         }
     }
 
-    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
-        ImguiHelper.addImguiWidgetsArray("inputs", inputs, { item -> Input.Keys.toString(item.key) }, { InputData() }, gameObject, level)
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+        ImguiHelper.addImguiWidgetsArray("inputs", inputs, { item -> Input.Keys.toString(item.key) }, { InputData() }, gameObject, level, editorSceneUI)
     }
 
 }

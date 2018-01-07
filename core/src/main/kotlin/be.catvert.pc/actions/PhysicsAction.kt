@@ -1,6 +1,7 @@
 package be.catvert.pc.actions
 
 import be.catvert.pc.GameObject
+import be.catvert.pc.components.RequiredComponent
 import be.catvert.pc.components.logics.PhysicsComponent
 import be.catvert.pc.utility.ExposeEditor
 import com.fasterxml.jackson.annotation.JsonCreator
@@ -9,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
  * Action permettant d'appliquer une action physique sur un gameObject ayant le component PhysicsComponent
  * @see PhysicsComponent
  */
+@RequiredComponent(PhysicsComponent::class)
 class PhysicsAction(@ExposeEditor var physicsAction: PhysicsActions) : Action {
     @JsonCreator private constructor() : this(PhysicsActions.GO_LEFT)
 

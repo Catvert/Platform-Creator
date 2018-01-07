@@ -8,6 +8,7 @@ import be.catvert.pc.actions.Action
 import be.catvert.pc.components.Component
 import be.catvert.pc.containers.Level
 import be.catvert.pc.factories.TweenFactory
+import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.CustomEditorImpl
 import be.catvert.pc.utility.ImguiHelper
 import com.fasterxml.jackson.annotation.JsonCreator
@@ -66,7 +67,7 @@ class TweenComponent(var tweens: ArrayList<TweenData>) : Component(), CustomEdit
         }
 
 
-        override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
+        override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
             with(ImGui) {
                 if (treeNode(label)) {
                     val index = intArrayOf(GameObjectTweenAccessor.GameObjectTween.values().indexOf(type))
@@ -82,13 +83,11 @@ class TweenComponent(var tweens: ArrayList<TweenData>) : Component(), CustomEdit
                         functionalProgramming.withItemWidth(150f) {
                             if (combo("", index, PCGame.componentsClasses.map { it.simpleName ?: "Nom inconnu" })) {
                                 keepComponents[keepComponents.indexOf(it.obj)] = PCGame.componentsClasses[index[0]].java
-                                return@addImguiWidgetsArray true
                             }
                         }
-                        false
-                    })
+                    }, editorSceneUI)
 
-                    ImguiHelper.action("end action", ::endAction, gameObject, level)
+                    ImguiHelper.action("end action", ::endAction, gameObject, level, editorSceneUI)
                     ImGui.checkbox("last state on finish", ::setLastStateOnFinish)
 
                     treePop()
@@ -107,9 +106,9 @@ class TweenComponent(var tweens: ArrayList<TweenData>) : Component(), CustomEdit
 
     private val addTweenTitle = "Ajouter un tween"
     private var currentTweenIndex = 0
-    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         with(ImGui) {
-            ImguiHelper.addImguiWidgetsArray("tweens", tweens, { it.name }, { TweenFactory.EmptyTween() }, gameObject, level) {
+            ImguiHelper.addImguiWidgetsArray("tweens", tweens, { it.name }, { TweenFactory.EmptyTween() }, gameObject, level, editorSceneUI) {
                 if (button("Ajouter depuis..", Vec2(-1, 0)))
                     openPopup(addTweenTitle)
 

@@ -8,8 +8,9 @@ import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 import java.io.IOException
+import java.util.*
 
-data class GameConfig(val screenWidth: Int, val screenHeight: Int, val fullScreen: Boolean, val soundVolume: Float, val darkUI: Boolean) {
+data class GameConfig(val screenWidth: Int, val screenHeight: Int, val fullScreen: Boolean, val soundVolume: Float, val darkUI: Boolean, val locale: Locale) {
     companion object {
         /**
          * Charge le fichier de configuration du jeu
@@ -24,14 +25,15 @@ data class GameConfig(val screenWidth: Int, val screenHeight: Int, val fullScree
                     val fullscreen = root.getBoolean("fullScreen")
                     val soundVolume = root.getFloat("soundVolume")
                     val darkUI = root.getBoolean("darkUI")
+                    val locale = root.getString("locale")
 
-                    return GameConfig(screenWidth, screenHeight, fullscreen, soundVolume, darkUI)
+                    return GameConfig(screenWidth, screenHeight, fullscreen, soundVolume, darkUI, Locale.forLanguageTag(locale))
                 } catch (e: Exception) {
                     System.err.println("Erreur lors du chargement de la configuration du jeu ! Erreur : ${e.message}")
                 }
             }
 
-            return GameConfig(1280, 720, true, 1f, false)
+            return GameConfig(1280, 720, true, 1f, false, Locale.ROOT)
         }
 
         /**
@@ -49,6 +51,7 @@ data class GameConfig(val screenWidth: Int, val screenHeight: Int, val fullScree
                 writer.name("fullScreen").value(Gdx.graphics.isFullscreen)
                 writer.name("soundVolume").value(PCGame.soundVolume)
                 writer.name("darkUI").value(PCGame.darkUI)
+                writer.name("locale").value(PCGame.locale)
                 writer.pop()
 
                 writer.flush()

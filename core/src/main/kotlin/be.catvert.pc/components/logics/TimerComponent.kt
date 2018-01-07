@@ -5,6 +5,7 @@ import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
 import be.catvert.pc.components.Component
 import be.catvert.pc.containers.Level
+import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.CustomEditorImpl
 import be.catvert.pc.utility.ExposeEditor
 import be.catvert.pc.utility.Timer
@@ -32,7 +33,7 @@ class TimerComponent(interval: Float, @ExposeEditor var timerAction: Action) : C
         timer.update()
     }
 
-    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         functionalProgramming.withItemWidth(100f) {
             ImGui.sliderFloat("interval", ::interval, 0f, 10f)
         }

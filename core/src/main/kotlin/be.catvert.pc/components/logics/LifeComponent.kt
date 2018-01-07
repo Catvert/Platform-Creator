@@ -8,6 +8,7 @@ import be.catvert.pc.actions.RemoveGOAction
 import be.catvert.pc.components.Component
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
+import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.CustomEditorImpl
 import be.catvert.pc.utility.ImguiHelper
 import com.fasterxml.jackson.annotation.JsonCreator
@@ -62,8 +63,8 @@ class LifeComponent(onDeathAction: Action, lifePointActions: ArrayList<Action> =
         this.gameObject = gameObject
     }
 
-    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
-        ImguiHelper.addImguiWidgetsArray("life actions", lpActions, { "vie ${lpActions.indexOf(it) + 1}" }, { EmptyAction() }, gameObject, level)
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+        ImguiHelper.addImguiWidgetsArray("life actions", lpActions, { "vie ${lpActions.indexOf(it) + 1}" }, { EmptyAction() }, gameObject, level, editorSceneUI)
     }
 
 }

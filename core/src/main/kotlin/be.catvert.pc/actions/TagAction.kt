@@ -4,6 +4,7 @@ import be.catvert.pc.GameObject
 import be.catvert.pc.GameObjectTag
 import be.catvert.pc.Tags
 import be.catvert.pc.containers.Level
+import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.*
 import com.fasterxml.jackson.annotation.JsonCreator
 
@@ -16,9 +17,9 @@ class TagAction(@ExposeEditor(customType = CustomType.TAG_STRING) val tag: GameO
                 }
     }
 
-    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         gameObject.container.cast<Level>()?.findGameObjectsByTag(tag)?.firstOrNull()?.apply {
-                    ImguiHelper.action("action", ::action, this, level)
+                    ImguiHelper.action("action", ::action, this, level, editorSceneUI)
                 }
     }
 }

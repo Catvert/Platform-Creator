@@ -29,8 +29,14 @@ object Constants {
 
     val bundlesDirPath = assetsDirPath.child("i18n_bundles")
 
-    val mainFontPath = assetsDirPath.child("fonts/mainFont.fnt")
-    val editorFontPath = assetsDirPath.child("fonts/editorFont.fnt")
+    val uiDirPath = assetsDirPath.child("ui/")
+
+    val fontDirPath = assetsDirPath.child("fonts/")
+    val imguiFontPath = fontDirPath.child("ui.ttf")
+    val kenneyFontPath = fontDirPath.child("kenvector_future.ttf")
+    val kenneyThinFontPath = fontDirPath.child("kenvector_future_thin.ttf")
+    val mainFontPath = fontDirPath.child("mainFont.fnt")
+    val editorFontPath = fontDirPath.child("editorFont.fnt")
 
     val keysConfigPath = assetsDirPath.child("keysConfig.json")
 

@@ -51,8 +51,6 @@ object ResourceManager : Disposable {
 
     fun getSound(file: FileHandle): Sound? = tryLoad(file)
 
-    fun getI18NBundle(file: FileHandle): I18NBundle? = tryLoad(file)
-
     private inline fun <reified T : Any> tryLoad(file: FileHandle): T? {
         try {
             return if (assetManager.isLoaded(file.path()))

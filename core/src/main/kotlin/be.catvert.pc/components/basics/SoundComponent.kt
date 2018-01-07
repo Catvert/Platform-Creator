@@ -4,6 +4,7 @@ import be.catvert.pc.GameObject
 import be.catvert.pc.PCGame
 import be.catvert.pc.components.Component
 import be.catvert.pc.containers.Level
+import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.audio.Sound
 import com.fasterxml.jackson.annotation.JsonCreator
@@ -32,7 +33,7 @@ class SoundComponent(var sounds: ArrayList<SoundData>) : Component(), ResourceLo
 
         override fun toString(): String = soundFile.get().nameWithoutExtension()
 
-        override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
+        override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
             with(ImGui) {
                 val soundsResources = if (levelResources) level.resourcesSounds() else PCGame.gameSounds
 
@@ -60,7 +61,7 @@ class SoundComponent(var sounds: ArrayList<SoundData>) : Component(), ResourceLo
         sounds.forEach { it.loadResources() }
     }
 
-    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
-        ImguiHelper.addImguiWidgetsArray("sons", sounds, { it.toString() }, { SoundData(Constants.defaultSoundPath.toFileWrapper()) }, gameObject, level)
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+        ImguiHelper.addImguiWidgetsArray("sons", sounds, { it.toString() }, { SoundData(Constants.defaultSoundPath.toFileWrapper()) }, gameObject, level, editorSceneUI)
     }
 }

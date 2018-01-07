@@ -6,6 +6,7 @@ import be.catvert.pc.actions.RemoveGOAction
 import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
+import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonIgnore
@@ -124,7 +125,7 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
         states.forEach { it.loadResources() }
     }
 
-    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         with(ImGui) {
             functionalProgramming.withItemWidth(100f) {
                 if (combo("State initial", ::initialState, getStates().map { it.name }))

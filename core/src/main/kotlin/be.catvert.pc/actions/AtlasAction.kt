@@ -3,8 +3,8 @@ package be.catvert.pc.actions
 import be.catvert.pc.GameObject
 import be.catvert.pc.components.RequiredComponent
 import be.catvert.pc.components.graphics.AtlasComponent
-import be.catvert.pc.components.logics.PhysicsComponent
 import be.catvert.pc.containers.Level
+import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.CustomEditorImpl
 import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
@@ -23,7 +23,7 @@ class AtlasAction(var atlasIndex: Int) : Action, CustomEditorImpl {
                 }
     }
 
-    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         with(ImGui) {
             val atlasData = gameObject.getCurrentState().getComponent<AtlasComponent>()?.data ?: arrayListOf()
 

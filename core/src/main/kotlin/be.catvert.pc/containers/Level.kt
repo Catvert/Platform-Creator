@@ -29,7 +29,7 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
     @JsonIgnore
     var exit: (success: Boolean) -> Unit = {
         ResourceManager.getSound(if (it) Constants.soundsDirPath.child("game-over-success.wav") else Constants.soundsDirPath.child("game-over-fail.wav"))?.play(PCGame.soundVolume)
-        PCGame.sceneManager.loadScene(EndLevelScene(levelPath))
+        PCGame.sceneManager.loadScene(EndLevelScene(this))
     }
 
     @JsonIgnore

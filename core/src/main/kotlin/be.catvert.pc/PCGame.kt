@@ -11,23 +11,54 @@ import be.catvert.pc.scenes.MainMenuScene
 import be.catvert.pc.scenes.Scene
 import be.catvert.pc.scenes.SceneManager
 import be.catvert.pc.scenes.SceneTweenAccessor
+import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics
 import com.badlogic.gdx.files.FileHandle
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g2d.TextureAtlas
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.math.Matrix4
+import com.badlogic.gdx.scenes.scene2d.ui.*
+import com.badlogic.gdx.utils.I18NBundle
 import imgui.DEBUG
+import imgui.Font
+import imgui.FontConfig
 import imgui.ImGui
 import imgui.impl.LwjglGL3
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner
 import ktx.app.KtxApplicationAdapter
+import ktx.assets.toAbsoluteFile
+import ktx.scene2d.Scene2DSkin
 import uno.glfw.GlfwWindow
+import java.util.*
 import kotlin.reflect.KClass
+import com.badlogic.gdx.scenes.scene2d.ui.CheckBox.CheckBoxStyle
+
 
 /** [com.badlogic.gdx.ApplicationListener, implementation shared by all platforms.  */
 class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
+    private fun initializeUI() {
+        val uiAtlas = TextureAtlas(Constants.uiDirPath.child("ui-blue.atlas"))
+        val skin = Scene2DSkin.defaultSkin
+
+        val font = FreeTypeFontGenerator(Constants.kenneyFontPath).generateFont(FreeTypeFontGenerator.FreeTypeFontParameter().apply { this.size = 24 })
+        val fontThin = FreeTypeFontGenerator(Constants.kenneyThinFontPath).generateFont(FreeTypeFontGenerator.FreeTypeFontParameter().apply { this.size = 24 })
+
+        skin.add("default-font", font, BitmapFont::class.java)
+        skin.add("default-font-thin", fontThin, BitmapFont::class.java)
+        skin.addRegions(uiAtlas)
+
+        skin.add("default", TextButton.TextButtonStyle(skin.getDrawable("button_03"), skin.getDrawable("button_02"), skin.getDrawable("button_03"), font))
+        skin.add("default", CheckBoxStyle(skin.getDrawable("checkbox_off"), skin.getDrawable("checkbox_on"), font, Color.BLACK))
+        skin.add("default", Window.WindowStyle(font, Color.BLACK, skin.getDrawable("window_03")))
+
+        LwjglGL3.init(GlfwWindow((Gdx.graphics as Lwjgl3Graphics).window.windowHandle), false)
+    }
+
     override fun create() {
         super.create()
         // Permet de supprimer les logs d'imgui
@@ -35,12 +66,16 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
 
         PCGame.soundVolume = initialConfig.soundVolume
         PCGame.darkUI = initialConfig.darkUI
+        PCGame.locale = initialConfig.locale
 
         Log.info { "Initialisation en cours.. \n Taille : ${Gdx.graphics.width}x${Gdx.graphics.height}" }
 
         ResourceManager.init()
 
-        Locales.load()
+        Utility.getFilesRecursivly(Locales.menusPath.parent(), "properties").forEach {
+                    if(it.name().startsWith("bundle_"))
+                        availableLocales.add(Locale.forLanguageTag(it.nameWithoutExtension().substringAfter('_')))
+                }
 
         GameKeys.loadKeysConfig()
 
@@ -78,7 +113,7 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         gameTextures = Utility.getFilesRecursivly(Constants.texturesDirPath, *Constants.levelTextureExtension)
         gameSounds = Utility.getFilesRecursivly(Constants.soundsDirPath, *Constants.levelSoundExtension)
 
-        LwjglGL3.init(GlfwWindow((Gdx.graphics as Lwjgl3Graphics).window.windowHandle), false)
+        initializeUI()
 
         sceneManager = SceneManager(MainMenuScene())
     }
@@ -135,7 +170,13 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
             private set
 
         lateinit var sceneManager: SceneManager
+            private set
 
+        var locale = Locale.FRENCH
+            set(value) {
+                field = value
+                Locales.load(value)
+            }
         /**
          * Le font principal du jeu
          */
@@ -186,6 +227,8 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
                 else
                     ImGui.styleColorsLight()
             }
+
+        val availableLocales = mutableListOf<Locale>(Locale.FRENCH)
 
         val tweenManager = TweenManager()
 

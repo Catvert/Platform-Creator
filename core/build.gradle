@@ -4,6 +4,8 @@ eclipse.project.name = appName + '-core'
 dependencies {
     compile "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
     compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+    compile "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+    compile "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
 
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
@@ -15,6 +17,7 @@ dependencies {
     compile "io.github.libktx:ktx-math:$ktxVersion"
     compile "io.github.libktx:ktx-i18n:$ktxVersion"
     compile "io.github.libktx:ktx-async:$ktxVersion"
+    compile "io.github.libktx:ktx-scene2d:$ktxVersion"
     compile "io.github.libktx:ktx-app:$ktxVersion"
 
     compile group: 'org.lwjgl', name: 'lwjgl-tinyfd', version: lwjglVersion

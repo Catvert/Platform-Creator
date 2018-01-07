@@ -4,6 +4,7 @@ import be.catvert.pc.GameObject
 import be.catvert.pc.PCGame
 import be.catvert.pc.components.Component
 import be.catvert.pc.containers.Level
+import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Animation
@@ -195,7 +196,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
     private var addAtlasName = "test"
     private var ressourcesCollapsing = false
 
-    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         with(ImGui) {
             functionalProgramming.withItemWidth(100f) {
                 combo("atlas initial", ::currentIndex, data.map { it.name })
@@ -326,8 +327,8 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                                         sliderFloat("Vitesse", ::frameDuration, 0f, 1f)
                                     }
                                     val playModeItem = ImguiHelper.Item(animationPlayMode)
-                                    if (ImguiHelper.enum("play mode", playModeItem.cast()))
-                                        animationPlayMode = playModeItem.obj
+                                    ImguiHelper.enum("play mode", playModeItem.cast())
+                                    animationPlayMode = playModeItem.obj
                                 }
 
                                 separator()

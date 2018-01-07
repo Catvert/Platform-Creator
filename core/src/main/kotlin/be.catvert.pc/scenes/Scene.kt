@@ -6,8 +6,10 @@ import be.catvert.pc.PCGame
 import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.utility.*
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.Disposable
 import imgui.ImGui
 import ktx.app.use
@@ -18,6 +20,8 @@ import ktx.app.use
  */
 abstract class Scene(protected var background: Background) : Renderable, Updeatable, Resizable, Disposable {
     protected open val camera = OrthographicCamera().apply { setToOrtho(false); }
+
+    protected val stage = Stage()
 
     val backgroundColors = Triple(0f, 0f, 0f)
 
@@ -35,6 +39,10 @@ abstract class Scene(protected var background: Background) : Renderable, Updeata
                                 }
                     }
         }
+
+    init {
+        Gdx.input.inputProcessor = stage
+    }
 
     protected open fun postBatchRender() {}
 
@@ -54,17 +62,23 @@ abstract class Scene(protected var background: Background) : Renderable, Updeata
         }
 
         postBatchRender()
+
+        stage.draw()
     }
 
     override fun update() {
         gameObjectContainer.update()
+
+        stage.act()
     }
 
     override fun resize(size: Size) {
         camera.setToOrtho(false, size.width.toFloat(), size.height.toFloat())
     }
 
-    override fun dispose() {}
+    override fun dispose() {
+        stage.dispose()
+    }
 }
 
 class SceneTweenAccessor : TweenAccessor<Scene> {

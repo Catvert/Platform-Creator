@@ -3,6 +3,7 @@ package be.catvert.pc.actions
 import be.catvert.pc.GameObject
 import be.catvert.pc.components.logics.MoverComponent
 import be.catvert.pc.containers.Level
+import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.CustomEditorImpl
 import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
@@ -22,7 +23,7 @@ class StateAction(var stateIndex: Int, var usePreviousMoverDirection: Boolean = 
         gameObject.setState(stateIndex)
     }
 
-    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         with(ImGui) {
             functionalProgramming.withItemWidth(100f) {
                 combo("state", ::stateIndex, gameObject.getStates().map { it.name })

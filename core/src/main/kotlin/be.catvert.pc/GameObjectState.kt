@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
+import kotlin.reflect.KClass
 
 /**
  * Représente un état d'un gameObject, cet état contient différents components.
@@ -51,6 +52,8 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
     inline fun <reified T : Component> getComponent(): T? = getComponents().firstOrNull { it is T }.cast()
 
     inline fun <reified T : Component> hasComponent(): Boolean = getComponent<T>() != null
+
+    fun hasComponent(klass: KClass<out Component>) = getComponents().any { klass.isInstance(it) }
 
     override fun render(batch: Batch) {
         components.filter { it is Renderable }.forEach {

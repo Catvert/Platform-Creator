@@ -8,18 +8,18 @@ import java.io.FileNotFoundException
 import java.util.*
 
 object Locales {
-    private val menusPath = Constants.bundlesDirPath.child("menus/bundle")
-    private val gamePath = Constants.bundlesDirPath.child("game/bundle")
-    private val editorPath = Constants.bundlesDirPath.child("editor/bundle")
+    val menusPath = Constants.bundlesDirPath.child("menus/bundle")
+    val gamePath = Constants.bundlesDirPath.child("game/bundle")
+    val editorPath = Constants.bundlesDirPath.child("editor/bundle")
 
     private lateinit var menusBundle: I18NBundle
     private lateinit var gameBundle: I18NBundle
     private lateinit var editorBundle: I18NBundle
 
-    fun load() {
-        menusBundle = ResourceManager.getI18NBundle(menusPath) ?: throw FileNotFoundException("Impossible de trouver le fichier de traduction -> ${menusPath.path()}")
-        gameBundle = ResourceManager.getI18NBundle(gamePath) ?: throw FileNotFoundException("Impossible de trouver le fichier de traduction -> ${gamePath.path()}")
-        editorBundle = ResourceManager.getI18NBundle(editorPath) ?: throw FileNotFoundException("Impossible de trouver le fichier de traduction -> ${editorPath.path()}")
+    fun load(locale: Locale) {
+        menusBundle = I18NBundle.createBundle(menusPath, locale)
+        gameBundle = I18NBundle.createBundle(gamePath, locale)
+        editorBundle = I18NBundle.createBundle(editorPath, locale)
     }
 
     fun get(key: MenusText, vararg args: Any): String {

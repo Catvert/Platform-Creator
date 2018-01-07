@@ -8,6 +8,7 @@ import be.catvert.pc.actions.TagAction
 import be.catvert.pc.components.Component
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
+import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonCreator
@@ -35,12 +36,12 @@ private data class JumpData(var isJumping: Boolean = false, var targetHeight: In
 data class CollisionListener(val gameObject: GameObject, val collideGameObject: GameObject, val side: BoxSide)
 
 data class SensorData(@ExposeEditor var isSensor: Boolean = false, var target: GameObjectTag = Tags.Player.tag, var sensorIn: Action = EmptyAction(), var sensorOut: Action = EmptyAction()) : CustomEditorImpl {
-    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         if (isSensor) {
             functionalProgramming.collapsingHeader("sensor props") {
                 ImguiHelper.gameObjectTag(::target, level, "sensor target")
-                ImguiHelper.action("in action", ::sensorIn, gameObject, level)
-                ImguiHelper.action("out action", ::sensorOut, gameObject, level)
+                ImguiHelper.action("in action", ::sensorIn, gameObject, level, editorSceneUI)
+                ImguiHelper.action("out action", ::sensorOut, gameObject, level, editorSceneUI)
             }
         }
     }
@@ -336,16 +337,16 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         return collideGameObjects
     }
 
-    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         functionalProgramming.collapsingHeader("move actions") {
-            ImguiHelper.action("on left", ::onLeftAction, gameObject, level)
-            ImguiHelper.action("on right", ::onRightAction, gameObject, level)
-            ImguiHelper.action("on jump", ::onLeftAction, gameObject, level)
-            ImguiHelper.action("on fall", ::onLeftAction, gameObject, level)
-            ImguiHelper.action("on nothing", ::onNothingAction, gameObject, level)
+            ImguiHelper.action("on left", ::onLeftAction, gameObject, level, editorSceneUI)
+            ImguiHelper.action("on right", ::onRightAction, gameObject, level, editorSceneUI)
+            ImguiHelper.action("on jump", ::onLeftAction, gameObject, level, editorSceneUI)
+            ImguiHelper.action("on fall", ::onLeftAction, gameObject, level, editorSceneUI)
+            ImguiHelper.action("on nothing", ::onNothingAction, gameObject, level, editorSceneUI)
         }
 
-        ImguiHelper.addImguiWidgetsArray("ignore tags", ignoreTags, { it }, { Tags.Player.tag }, gameObject, level, ExposeEditorFactory.createExposeEditor(customType = CustomType.TAG_STRING))
-        ImguiHelper.addImguiWidgetsArray("collisions actions", collisionsActions, { it.side.name }, { CollisionAction() }, gameObject, level)
+        ImguiHelper.addImguiWidgetsArray("ignore tags", ignoreTags, { it }, { Tags.Player.tag }, gameObject, level, editorSceneUI, ExposeEditorFactory.createExposeEditor(customType = CustomType.TAG_STRING))
+        ImguiHelper.addImguiWidgetsArray("collisions actions", collisionsActions, { it.side.name }, { CollisionAction() }, gameObject, level, editorSceneUI)
     }
 }

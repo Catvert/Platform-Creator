@@ -7,6 +7,7 @@ import be.catvert.pc.actions.EmptyAction
 import be.catvert.pc.actions.MoveAction
 import be.catvert.pc.actions.PhysicsAction
 import be.catvert.pc.components.Component
+import be.catvert.pc.components.RequiredComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.utility.BoxSide
 import be.catvert.pc.utility.ExposeEditor
@@ -17,7 +18,9 @@ import com.fasterxml.jackson.annotation.JsonCreator
  * Component permettant d'ajouter la possibilité à un gameObject de se déplacer automatiquement dans une direction.
  * Si le gameObject rencontre un obstacle, il ira dans la direction opposé
  * @param orientation L'orientation dans laquelle le gameObject se déplacer (verticalement/horizontalement)
+ * @see PhysicsComponent
  */
+@RequiredComponent(PhysicsComponent::class)
 class MoverComponent(orientation: SimpleMoverOrientation, @ExposeEditor var reverse: Boolean = false, @ExposeEditor var holdGameObjects: Boolean = false) : Component(), Updeatable {
     @JsonCreator private constructor() : this(SimpleMoverOrientation.HORIZONTAL)
 

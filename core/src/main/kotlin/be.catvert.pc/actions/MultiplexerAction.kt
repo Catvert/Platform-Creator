@@ -2,6 +2,7 @@ package be.catvert.pc.actions
 
 import be.catvert.pc.GameObject
 import be.catvert.pc.containers.Level
+import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.CustomEditorImpl
 import be.catvert.pc.utility.ImguiHelper
 import be.catvert.pc.utility.ReflectionUtility
@@ -20,7 +21,7 @@ class MultiplexerAction(var actions: ArrayList<Action>) : Action, CustomEditorIm
         }
     }
 
-    override fun insertImgui(label: String, gameObject: GameObject, level: Level) {
-        ImguiHelper.addImguiWidgetsArray(label, actions, { ReflectionUtility.simpleNameOf(it) }, { EmptyAction() }, gameObject, level)
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+        ImguiHelper.addImguiWidgetsArray(label, actions, { ReflectionUtility.simpleNameOf(it) }, { EmptyAction() }, gameObject, level, editorSceneUI)
     }
 }

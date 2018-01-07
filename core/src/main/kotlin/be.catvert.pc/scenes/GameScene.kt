@@ -37,17 +37,17 @@ class GameScene(private val level: Level) : Scene(level.background) {
 
         with(ImGui) {
             if (pause) {
-                ImguiHelper.withCenteredWindow("Pause", null, Vec2(200, 110), WindowFlags.NoResize.i or WindowFlags.NoCollapse.i) {
-                    if (button("Reprendre", Vec2(-1, 20))) {
+                ImguiHelper.withCenteredWindow("Pause", null, Vec2(200, 100), WindowFlags.NoResize.i or WindowFlags.NoCollapse.i) {
+                    if (button("Reprendre", Vec2(-1, 0))) {
                         pause = false
                         gameObjectContainer.allowUpdatingGO = true
                     }
-                    if (button("Recommencer", Vec2(-1, 20))) {
+                    if (button("Recommencer", Vec2(-1, 0))) {
                         val level = Level.loadFromFile(this@GameScene.level.levelPath.toLocalFile().parent())
                         if (level != null)
                             PCGame.sceneManager.loadScene(GameScene(level))
                     }
-                    if (button("Quitter le niveau", Vec2(-1, 20))) {
+                    if (button("Quitter le niveau", Vec2(-1, 0))) {
                         PCGame.sceneManager.loadScene(MainMenuScene())
                     }
                 }
