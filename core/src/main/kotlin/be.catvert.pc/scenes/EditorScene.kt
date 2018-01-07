@@ -132,8 +132,6 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
     override var gameObjectContainer: GameObjectContainer = level
 
-    override val camera: OrthographicCamera = OrthographicCamera(Constants.levelCameraRatio, Constants.levelCameraRatio * (Gdx.graphics.height.toFloat() / Gdx.graphics.width))
-
     private val shapeRenderer = ShapeRenderer().apply { setAutoShapeType(true) }
 
     private val editorFont = BitmapFont(Constants.editorFontPath)
@@ -1190,8 +1188,6 @@ class EditorScene(val level: Level) : Scene(level.background) {
                     openPopup(createPrefabTitle)
 
                 ImguiHelper.insertImguiExposeEditorField(gameObject, gameObject, level, editorSceneUI)
-
-                separator()
 
                 functionalProgramming.withItemWidth(100f) {
                     combo("state", editorSceneUI::gameObjectCurrentStateIndex, gameObject.getStates().map { it.name })

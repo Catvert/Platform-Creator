@@ -2,15 +2,9 @@ package be.catvert.pc.scenes
 
 import be.catvert.pc.PCGame
 import be.catvert.pc.containers.Level
-import be.catvert.pc.i18n.MenusText
-import be.catvert.pc.utility.ImguiHelper
+import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.Size
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton
-import glm_.vec2.Vec2
-import imgui.ImGui
-import imgui.WindowFlags
 import ktx.actors.centerPosition
 import ktx.actors.onClick
 import ktx.actors.plus

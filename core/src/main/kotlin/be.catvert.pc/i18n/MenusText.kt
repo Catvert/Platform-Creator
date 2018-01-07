@@ -30,5 +30,6 @@ enum class MenusText(val key: String) {
 
     MM_ERROR_LEVEL_POPUP("mm_errorLevel"),
     MM_ERROR_LEVEL_CLOSE("mm_errorLevelClose");
+
     operator fun invoke(vararg args: Any) = Locales.get(this, *args)
 }

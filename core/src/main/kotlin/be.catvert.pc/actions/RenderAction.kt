@@ -4,7 +4,6 @@ import be.catvert.pc.GameObject
 import be.catvert.pc.components.RequiredComponent
 import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.utility.ExposeEditor
-import be.catvert.pc.utility.cast
 import com.fasterxml.jackson.annotation.JsonCreator
 
 /**

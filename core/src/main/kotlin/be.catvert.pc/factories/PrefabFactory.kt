@@ -36,6 +36,11 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                 this += PhysicsComponent(true, ignoreTags = arrayListOf(Tags.Player.tag))
             }))
     ),
+    EndLevel(PrefabType.All,
+            Prefab("end level", GameObject(Tags.Special.tag, box = Rect(size = Size(20, 20)), initDefaultState = {
+                this += PhysicsComponent(true, sensor = SensorData(true, Tags.Player.tag, LevelAction(LevelAction.LevelActions.SUCCESS_EXIT)))
+            }))
+    ),
     //region Kenney
     Sprite_Kenney(PrefabType.Kenney, PrefabSetup.setupSprite(Constants.packsKenneyDirPath.child("grassSheet.atlas").toFileWrapper() to "slice01_01")),
     PhysicsSprite_Kenney(PrefabType.Kenney, PrefabSetup.setupPhysicsSprite(Constants.packsKenneyDirPath.child("grassSheet.atlas").toFileWrapper() to "slice01_01")),

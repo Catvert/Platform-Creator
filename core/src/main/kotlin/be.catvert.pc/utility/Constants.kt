@@ -17,7 +17,8 @@ object Constants {
     const val minMatrixSize = 10
     const val matrixCellSize = 200
 
-    const val levelCameraRatio = 2000f
+    const val viewportRatioWidth = 1920f
+    const val viewportRatioHeight = 1080f
 
     const val assetsDir = "assets/"
 

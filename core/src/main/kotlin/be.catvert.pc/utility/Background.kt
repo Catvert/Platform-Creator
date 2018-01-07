@@ -17,7 +17,9 @@ enum class BackgroundType {
 }
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
-sealed class Background(val type: BackgroundType) : Renderable
+sealed class Background(val type: BackgroundType) : Renderable, Resizable {
+    override fun resize(size: Size) {}
+}
 
 class StandardBackground(val backgroundFile: FileWrapper) : Background(BackgroundType.Standard) {
     private val background = ResourceManager.getTexture(backgroundFile.get())
@@ -34,8 +36,7 @@ class ParallaxBackground(val parallaxDataFile: FileWrapper) : Background(Backgro
 
     private var lastCameraPos: Vector3? = null
 
-    private var width = Gdx.graphics.width
-
+    private var xOffset = 0
     private var yOffset = 0f
 
     init {
@@ -53,12 +54,16 @@ class ParallaxBackground(val parallaxDataFile: FileWrapper) : Background(Backgro
         }
     }
 
-    fun updateWidth(width: Int) {
-        this.width = width
+    fun updateXOffset(plusX: Int) {
+        this.xOffset += plusX
 
         layers.forEach {
-            it.layer.regionWidth = width
+            it.layer.regionWidth = Gdx.graphics.width + xOffset
         }
+    }
+
+    override fun resize(size: Size) {
+        updateXOffset(0)
     }
 
     fun updateCamera(camera: OrthographicCamera) {
@@ -70,7 +75,7 @@ class ParallaxBackground(val parallaxDataFile: FileWrapper) : Background(Backgro
             layers.forEach {
                 val move = (deltaX * it.speed)
                 it.x -= move
-                updateWidth(width + move.roundToInt())
+                updateXOffset(move.roundToInt())
             }
         }
         lastCameraPos = camera.position.cpy()
@@ -78,7 +83,7 @@ class ParallaxBackground(val parallaxDataFile: FileWrapper) : Background(Backgro
 
     override fun render(batch: Batch) {
         layers.forEach {
-            batch.draw(it.layer, it.x, if (it.applyYOffset) yOffset else 0f, width.toFloat(), Gdx.graphics.height.toFloat())
+            batch.draw(it.layer, it.x, if (it.applyYOffset) yOffset else 0f, Gdx.graphics.width.toFloat() + xOffset, Gdx.graphics.height.toFloat())
         }
     }
 }

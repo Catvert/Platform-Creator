@@ -11,7 +11,9 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.Disposable
+import com.badlogic.gdx.utils.viewport.FitViewport
 import imgui.ImGui
+import ktx.actors.alpha
 import ktx.app.use
 
 
@@ -19,9 +21,11 @@ import ktx.app.use
  * Classe abstraite permettant l'implémentation d'une scène
  */
 abstract class Scene(protected var background: Background) : Renderable, Updeatable, Resizable, Disposable {
-    protected open val camera = OrthographicCamera().apply { setToOrtho(false); }
+    protected val camera = OrthographicCamera()
 
-    protected val stage = Stage()
+    private val viewport = FitViewport(Constants.viewportRatioWidth, Constants.viewportRatioHeight, camera)
+
+    protected val stage = Stage(viewport)
 
     val backgroundColors = Triple(0f, 0f, 0f)
 
@@ -63,6 +67,7 @@ abstract class Scene(protected var background: Background) : Renderable, Updeata
 
         postBatchRender()
 
+        stage.alpha = alpha
         stage.draw()
     }
 
@@ -73,7 +78,8 @@ abstract class Scene(protected var background: Background) : Renderable, Updeata
     }
 
     override fun resize(size: Size) {
-        camera.setToOrtho(false, size.width.toFloat(), size.height.toFloat())
+        viewport.update(size.width, size.height)
+        background.resize(size)
     }
 
     override fun dispose() {

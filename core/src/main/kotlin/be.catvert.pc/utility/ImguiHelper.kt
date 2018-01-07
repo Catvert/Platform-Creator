@@ -18,7 +18,6 @@ import imgui.ItemFlags
 import imgui.functionalProgramming
 import kotlin.reflect.KMutableProperty0
 import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.jvm.kotlinProperty
 
 object ImguiHelper {
     class Item<T>(var obj: T) {
@@ -27,7 +26,7 @@ object ImguiHelper {
 
     fun <T : Any> addImguiWidgetsArray(label: String, array: ArrayList<T>, itemLabel: (item: T) -> String, createItem: () -> T, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI, itemExposeEditor: ExposeEditor = ExposeEditorFactory.empty, endBlock: () -> Unit = {}) {
         addImguiWidgetsArray(label, array, itemLabel, createItem, {
-            addImguiWidget(itemLabel(it.obj), it,  gameObject, level, itemExposeEditor, editorSceneUI)
+            addImguiWidget(itemLabel(it.obj), it, gameObject, level, itemExposeEditor, editorSceneUI)
         }, editorSceneUI, endBlock)
     }
 
@@ -118,7 +117,7 @@ object ImguiHelper {
                                 }
                             }
                             CustomType.TAG_STRING -> {
-                               gameObjectTag(item.cast(), level)
+                                gameObjectTag(item.cast(), level)
                             }
                             else -> {
                             }
@@ -148,7 +147,7 @@ object ImguiHelper {
         action.set(item.obj)
     }
 
-    fun action(label: String, action: Item<Action>, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI)  {
+    fun action(label: String, action: Item<Action>, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         with(ImGui) {
             val index = intArrayOf(PCGame.actionsClasses.indexOfFirst { it.isInstance(action.obj) })
 
@@ -162,7 +161,7 @@ object ImguiHelper {
                 val requiredComponent = PCGame.actionsClasses[index[0]].findAnnotation<RequiredComponent>()
                 val incorrectAction = let {
                     requiredComponent?.component?.forEach {
-                        if(gameObject.getStates().elementAtOrNull(editorSceneUI.gameObjectCurrentStateIndex)?.hasComponent(it) == false)
+                        if (gameObject.getStates().elementAtOrNull(editorSceneUI.gameObjectCurrentStateIndex)?.hasComponent(it) == false)
                             return@let true
                     }
                     false
@@ -210,7 +209,7 @@ object ImguiHelper {
     }
 
     fun point(point: KMutableProperty0<Point>, minPoint: Point, maxPoint: Point, editorSceneUI: EditorScene.EditorSceneUI) {
-        functionalProgramming.withItemWidth(150f) {
+        functionalProgramming.withItemWidth(100f) {
             val pos = intArrayOf(point.get().x, point.get().y)
             if (ImGui.inputInt2("position", pos, 0)) {
                 val x = pos[0]
@@ -220,7 +219,7 @@ object ImguiHelper {
                     point.set(Point(x, y))
             }
             ImGui.sameLine()
-            if(ImGui.button("Sélect.")) {
+            if (ImGui.button("Sélect.")) {
                 editorSceneUI.editorMode = EditorScene.EditorSceneUI.EditorMode.SELECT_POINT
                 editorSceneUI.onSelectPoint.register(true) {
                     point.set(it)
@@ -237,7 +236,7 @@ object ImguiHelper {
 
     fun size(size: Item<Size>, minSize: Size, maxSize: Size) {
         val sizeArr = intArrayOf(size.obj.width, size.obj.height)
-        functionalProgramming.withItemWidth(150f) {
+        functionalProgramming.withItemWidth(100f) {
             if (ImGui.inputInt2("taille", sizeArr, 0)) {
                 val width = sizeArr[0]
                 val height = sizeArr[1]

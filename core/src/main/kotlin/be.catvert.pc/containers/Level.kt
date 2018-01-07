@@ -64,7 +64,7 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
         }
 
         if (background is ParallaxBackground)
-            background.cast<ParallaxBackground>()?.updateWidth(matrixRect.width)
+            background.cast<ParallaxBackground>()?.updateXOffset(0)
     }
 
     fun resourcesTextures() = levelTextures.second.toList()

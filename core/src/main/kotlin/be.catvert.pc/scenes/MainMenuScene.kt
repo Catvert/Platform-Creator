@@ -15,6 +15,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputMultiplexer
 import com.badlogic.gdx.InputProcessor
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
@@ -29,24 +30,16 @@ import ktx.actors.centerPosition
 import ktx.actors.onClick
 import ktx.actors.plus
 import ktx.app.use
-import ktx.scene2d.*
+import ktx.scene2d.Scene2DSkin
+import ktx.scene2d.table
 import java.io.IOException
-import kotlin.collections.associate
-import kotlin.collections.forEach
-import kotlin.collections.indices
-import kotlin.collections.isNotEmpty
-import kotlin.collections.map
 import kotlin.collections.set
-import kotlin.collections.toMutableList
-import kotlin.collections.toMutableMap
 
 
 /**
  * Scène du menu principal
  */
 class MainMenuScene : Scene(PCGame.mainBackground) {
-    private val glyphCreatedBy = GlyphLayout(PCGame.mainFont, "par Catvert - ${Constants.gameVersion}")
-
     private val logo = PCGame.generateLogo(gameObjectContainer)
 
     private val settingsKeyProcessor = object : InputProcessor {
@@ -69,13 +62,6 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
     init {
         Gdx.input.inputProcessor = InputMultiplexer(settingsKeyProcessor, stage)
         showMainMenu()
-    }
-
-    override fun postBatchRender() {
-        super.postBatchRender()
-        PCGame.hudBatch.use {
-            PCGame.mainFont.draw(it, glyphCreatedBy, Gdx.graphics.width - glyphCreatedBy.width, glyphCreatedBy.height)
-        }
     }
 
     override fun resize(size: Size) {
@@ -124,7 +110,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
                 drawSelectLevelWindow()
             if (showSettingsWindow)
                 drawSettingsWindow()
-            stage.actors.forEach { it.touchable = if(showSelectLevelWindow || showSettingsWindow) Touchable.disabled else Touchable.enabled }
+            stage.actors.forEach { it.touchable = if (showSelectLevelWindow || showSettingsWindow) Touchable.disabled else Touchable.enabled }
         }
     }
 
@@ -233,7 +219,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
         }
     }
 
-    private var settingsWindowSize = intArrayOf(Gdx.graphics.width, Gdx.graphics.height)
+    private var settingsWindowCurrentDisplayMode = intArrayOf(Gdx.graphics.displayModes.indexOf(Gdx.graphics.displayMode))
     private val settingsFullscreen = booleanArrayOf(Gdx.graphics.isFullscreen)
     private val settingsKeys = GameKeys.values().associate { it to false }.toMutableMap()
     private val settingsCurrentLocaleIndex = intArrayOf(PCGame.availableLocales.indexOf(PCGame.locale))
@@ -242,16 +228,17 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
             ImguiHelper.withCenteredWindow(MenusText.MM_SETTINGS_WINDOW_TITLE(), ::showSettingsWindow, Vec2(375f, 400f), WindowFlags.NoResize.i) {
                 functionalProgramming.withGroup {
                     checkbox(MenusText.MM_SETTINGS_FULLSCREEN(), settingsFullscreen)
-                    if (!settingsFullscreen[0]) {
-                        functionalProgramming.withItemWidth(100f) {
-                            inputInt2(MenusText.MM_SETTINGS_SCREEN_SIZE(), settingsWindowSize)
-                        }
+                    functionalProgramming.withItemWidth(100f) {
+                        combo("résolution", settingsWindowCurrentDisplayMode, Lwjgl3ApplicationConfiguration.getDisplayModes().map { "${it.width}x${it.height}x${it.refreshRate}" })
                     }
                     if (button(MenusText.MM_SETTINGS_APPLY(), Vec2(100f, 0))) {
-                        if (settingsFullscreen[0])
-                            Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
-                        else
-                            Gdx.graphics.setWindowedMode(settingsWindowSize[0], settingsWindowSize[1])
+                        val mode = Gdx.graphics.displayModes.elementAtOrNull(settingsWindowCurrentDisplayMode[0])
+                        if(mode != null) {
+                            if (settingsFullscreen[0])
+                                Gdx.graphics.setFullscreenMode(mode)
+                            else
+                                Gdx.graphics.setWindowedMode(mode.width, mode.height)
+                        }
                     }
                     functionalProgramming.withItemWidth(100f) {
                         sliderFloat(MenusText.MM_SETTINGS_SOUND(), ::soundVolume, 0f, 1f, "%.1f")

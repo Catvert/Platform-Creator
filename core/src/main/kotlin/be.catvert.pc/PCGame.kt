@@ -14,6 +14,7 @@ import be.catvert.pc.scenes.SceneTweenAccessor
 import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Graphics
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
@@ -37,6 +38,8 @@ import uno.glfw.GlfwWindow
 import java.util.*
 import kotlin.reflect.KClass
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox.CheckBoxStyle
+import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const
+import kotlin.math.roundToInt
 
 
 /** [com.badlogic.gdx.ApplicationListener, implementation shared by all platforms.  */
@@ -63,7 +66,6 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         super.create()
         // Permet de supprimer les logs d'imgui
         DEBUG = false
-
         PCGame.soundVolume = initialConfig.soundVolume
         PCGame.darkUI = initialConfig.darkUI
         PCGame.locale = initialConfig.locale
@@ -247,11 +249,11 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         /**
          * Permet de retourner la taille du logo au cas où la taille de l'écran changerait.
          */
-        private fun getLogoSize() = Size(Gdx.graphics.width / 3, Gdx.graphics.height / 10)
+        private fun getLogoSize() = Size(425, 75)
 
         fun getLogoRect(): Rect {
             val size = getLogoSize()
-            return Rect(Point(Gdx.graphics.width / 2 - size.width / 2, Gdx.graphics.height - size.height * 3 / 2), size)
+            return Rect(Point(Constants.viewportRatioWidth.roundToInt() / 2 - size.width / 2, Constants.viewportRatioHeight.roundToInt() - size.height * 3 / 2), size)
         }
     }
 }

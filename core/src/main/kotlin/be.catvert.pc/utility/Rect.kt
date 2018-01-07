@@ -5,7 +5,6 @@ import be.catvert.pc.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import com.fasterxml.jackson.annotation.JsonIgnore
 import imgui.ImGui
-import imgui.findBestPopupWindowPos
 import imgui.functionalProgramming
 
 class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {

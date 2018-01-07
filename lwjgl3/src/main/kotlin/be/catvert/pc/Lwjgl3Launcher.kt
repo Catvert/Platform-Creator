@@ -1,6 +1,5 @@
 package be.catvert.pc
 
-import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.GameConfig
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application
@@ -17,14 +16,16 @@ object Lwjgl3Launcher {
             val config = GameConfig.loadGameConfig()
 
             if(config.fullScreen) {
-                val primaryMode = Lwjgl3ApplicationConfiguration.getDisplayMode()
-                configuration.setFullscreenMode(primaryMode)
+                val mode = Lwjgl3ApplicationConfiguration.getDisplayModes().firstOrNull { it.width == config.screenWidth && it.height == config.screenHeight && it.refreshRate == config.refreshRate } ?:
+                Lwjgl3ApplicationConfiguration.getDisplayMode()
+                configuration.setFullscreenMode(mode)
             }
             else
                 configuration.setWindowedMode(config.screenWidth, config.screenHeight)
 
             configuration.setResizable(true)
             configuration.useVsync(true)
+            configuration.setWindowIcon("assets/icon.png")
 
             return config to configuration
         }

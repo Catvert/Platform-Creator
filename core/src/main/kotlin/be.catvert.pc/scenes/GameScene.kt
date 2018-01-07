@@ -6,6 +6,7 @@ import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.ImguiHelper
+import be.catvert.pc.utility.Size
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.OrthographicCamera
@@ -22,7 +23,6 @@ import ktx.assets.toLocalFile
  */
 class GameScene(private val level: Level) : Scene(level.background) {
     override var gameObjectContainer: GameObjectContainer = level
-    override val camera: OrthographicCamera = OrthographicCamera(Constants.levelCameraRatio, Constants.levelCameraRatio * (Gdx.graphics.height.toFloat() / Gdx.graphics.width))
 
     private val cameraMoveSpeed = 10f
 

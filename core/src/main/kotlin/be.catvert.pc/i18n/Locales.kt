@@ -2,9 +2,7 @@ package be.catvert.pc.i18n
 
 import be.catvert.pc.Log
 import be.catvert.pc.utility.Constants
-import be.catvert.pc.utility.ResourceManager
 import com.badlogic.gdx.utils.I18NBundle
-import java.io.FileNotFoundException
 import java.util.*
 
 object Locales {
