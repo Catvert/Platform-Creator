@@ -39,6 +39,9 @@ import java.util.*
 import kotlin.reflect.KClass
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox.CheckBoxStyle
 import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const
+import ktx.scene2d.Scene2dDsl
+import ktx.style.color
+import ktx.style.set
 import kotlin.math.roundToInt
 
 

@@ -40,8 +40,12 @@ data class SensorData(@ExposeEditor var isSensor: Boolean = false, var target: G
         if (isSensor) {
             functionalProgramming.collapsingHeader("sensor props") {
                 ImguiHelper.gameObjectTag(::target, level, "sensor target")
-                ImguiHelper.action("in action", ::sensorIn, gameObject, level, editorSceneUI)
-                ImguiHelper.action("out action", ::sensorOut, gameObject, level, editorSceneUI)
+                functionalProgramming.withId("in action") {
+                    ImguiHelper.action("in action", ::sensorIn, gameObject, level, editorSceneUI)
+                }
+                functionalProgramming.withId("out action") {
+                    ImguiHelper.action("out action", ::sensorOut, gameObject, level, editorSceneUI)
+                }
             }
         }
     }
@@ -64,13 +68,13 @@ data class CollisionAction(@ExposeEditor var side: BoxSide = BoxSide.Left, @Expo
  * @param onNothingAction Action appelée quand le gameObject ne subit aucune action physique
  */
 class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
-                       @ExposeEditor(max = 100) var moveSpeed: Int = 0,
+                       @ExposeEditor(max = 100f) var moveSpeed: Int = 0,
                        @ExposeEditor var movementType: MovementType = MovementType.LINEAR,
                        @ExposeEditor var gravity: Boolean = !isStatic,
                        @ExposeEditor val sensor: SensorData = SensorData(false),
                        val ignoreTags: ArrayList<GameObjectTag> = arrayListOf(),
                        val collisionsActions: ArrayList<CollisionAction> = arrayListOf(),
-                       @ExposeEditor(max = 1000) var jumpHeight: Int = 0,
+                       @ExposeEditor(max = 1000f) var jumpHeight: Int = 0,
                        var onLeftAction: Action = EmptyAction(),
                        var onRightAction: Action = EmptyAction(),
                        var onJumpAction: Action = EmptyAction(),
@@ -255,7 +259,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         val newRect = Rect(gameObject.box)
         newRect.position = Point(newRect.x + moveX, newRect.y + moveY)
 
-        if (level?.matrixRect?.contains(newRect) == false)
+        if (level?.matrixRect?.contains(newRect) == false && newRect.y > 0)
             return true
 
         level?.apply {

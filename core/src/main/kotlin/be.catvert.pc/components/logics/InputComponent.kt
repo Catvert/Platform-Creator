@@ -19,7 +19,11 @@ class InputComponent(var inputs: ArrayList<InputData>) : Component(), Updeatable
     constructor(vararg inputs: InputData) : this(arrayListOf(*inputs))
     @JsonCreator private constructor() : this(arrayListOf())
 
-    data class InputData(@ExposeEditor(customType = CustomType.KEY_INT) var key: Int = Input.Keys.UNKNOWN, @ExposeEditor var justPressed: Boolean = false, @ExposeEditor var action: Action = EmptyAction())
+    data class InputData(var key: Int = Input.Keys.UNKNOWN, @ExposeEditor var justPressed: Boolean = false, @ExposeEditor var action: Action = EmptyAction()) : CustomEditorImpl {
+        override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+            ImguiHelper.gdxKey(::key)
+        }
+    }
 
     override fun update() {
         inputs.forEach {

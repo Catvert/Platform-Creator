@@ -8,6 +8,7 @@ import be.catvert.pc.actions.Action
 import be.catvert.pc.components.RequiredComponent
 import be.catvert.pc.containers.Level
 import be.catvert.pc.factories.PrefabFactory
+import be.catvert.pc.i18n.MenusText
 import be.catvert.pc.scenes.EditorScene
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
@@ -16,6 +17,7 @@ import imgui.Cond
 import imgui.ImGui
 import imgui.ItemFlags
 import imgui.functionalProgramming
+import kotlin.math.roundToInt
 import kotlin.reflect.KMutableProperty0
 import kotlin.reflect.full.findAnnotation
 
@@ -88,24 +90,18 @@ object ImguiHelper {
                         checkbox(label, item.cast<Boolean>()::obj)
                     }
                     is Int -> {
-                        when (exposeEditor.customType) {
-                            CustomType.DEFAULT -> {
-                                functionalProgramming.withItemWidth(100f) {
-                                    sliderInt(label, item.cast<Int>()::obj, exposeEditor.min, exposeEditor.max)
-                                }
-                            }
-                            CustomType.KEY_INT -> {
-                                gdxKey(item.cast())
-                            }
-                            else -> {
-                            }
+                        functionalProgramming.withItemWidth(100f) {
+                            sliderInt(label, item.cast<Int>()::obj, exposeEditor.min.roundToInt(), exposeEditor.max.roundToInt())
                         }
+                    }
+                    is Float -> {
+                        sliderFloat(label, item.cast<Float>()::obj, exposeEditor.min, exposeEditor.max, "%.1f")
                     }
                     is Prefab -> {
                         prefab(item.cast(), level, label)
                     }
                     is Size -> {
-                        size(item.cast(), Size(exposeEditor.min, exposeEditor.min), Size(exposeEditor.min, exposeEditor.min))
+                        size(item.cast(), Size(exposeEditor.min.roundToInt(), exposeEditor.min.roundToInt()), Size(exposeEditor.min.roundToInt(), exposeEditor.min.roundToInt()))
                     }
                     is String -> {
                         when (exposeEditor.customType) {
@@ -247,11 +243,24 @@ object ImguiHelper {
         }
     }
 
-    fun gdxKey(key: Item<Int>) {
-        val value = Input.Keys.toString(key.obj).toCharArray()
-        functionalProgramming.withItemWidth(100f) {
-            if (ImGui.inputText("touche", value)) {
-                key.obj = Input.Keys.valueOf(String(value))
+    private val keys = mutableMapOf<Int, Boolean>()
+    fun gdxKey(key: KMutableProperty0<Int>) {
+        val keyInt = key.get()
+        with(ImGui) {
+            if (button(if (keys[keyInt] == true) MenusText.MM_SETTINGS_PRESSKEY() else Input.Keys.toString(keyInt), Vec2(-1, 0))) {
+                if (!keys.containsKey(keyInt) || keys[keyInt] == false) {
+                    keys.forEach {
+                        keys[it.key] = false
+                        KeyDownSignalProcessor.keyDownSignal.clear()
+                    }
+
+                    keys[keyInt] = true
+
+                    KeyDownSignalProcessor.keyDownSignal.register(true) {
+                        key.set(it)
+                        keys[keyInt] = false
+                    }
+                }
             }
         }
     }
@@ -282,6 +291,10 @@ object ImguiHelper {
     }
 
     fun insertImguiExposeEditorField(instance: Any, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+        if (instance is CustomEditorImpl) {
+            instance.insertImgui(ReflectionUtility.simpleNameOf(instance), gameObject, level, editorSceneUI)
+        }
+
         ReflectionUtility.getAllFieldsOf(instance.javaClass).filter { it.isAnnotationPresent(ExposeEditor::class.java) }.forEach { field ->
                     field.isAccessible = true
 
@@ -290,9 +303,5 @@ object ImguiHelper {
                     addImguiWidget(if (exposeField.customName.isBlank()) field.name else exposeField.customName, item, gameObject, level, exposeField, editorSceneUI)
                     field.set(instance, item.obj)
                 }
-
-        if (instance is CustomEditorImpl) {
-            instance.insertImgui(ReflectionUtility.simpleNameOf(instance), gameObject, level, editorSceneUI)
-        }
     }
 }

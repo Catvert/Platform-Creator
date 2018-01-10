@@ -21,14 +21,14 @@ import ktx.assets.toLocalFile
 import ktx.collections.gdxArrayOf
 import ktx.collections.isEmpty
 
-        /**
-         * Component permettant d'ajouter des textures et animations au gameObject
-         * @param currentIndex L'atlas actuel à dessiner
-         * @param data Les atlas disponibles pour le gameObject
-         */
 
 typealias AtlasRegion = Pair<FileWrapper, String>
 
+/**
+ * Component permettant d'ajouter des textures et animations au gameObject
+ * @param currentIndex L'atlas actuel à dessiner
+ * @param data Les atlas disponibles pour le gameObject
+ */
 class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) : Component(), Renderable, ResourceLoader, CustomEditorImpl {
     enum class Rotation(val degree: Float) {
         Zero(0f), Quarter(90f), Half(180f), ThreeQuarter(270f)
@@ -158,14 +158,16 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
         }
 
         companion object {
+            val emptyRegionIdentifier = "\$EMPTY"
             /**
              * Permet de charger une région depuis un pack ou une texture.
              */
             fun loadRegion(region: AtlasRegion): TextureAtlas.AtlasRegion {
-                return if (region.second == AtlasComponent.textureIdentifier)
-                    ResourceManager.getTexture(region.first.get()).toAtlasRegion()
-                else
-                    ResourceManager.getPackRegion(region.first.get(), region.second)
+                return when {
+                    region.second == emptyRegionIdentifier -> ResourceManager.defaultPackRegion
+                    region.second == AtlasComponent.textureIdentifier -> ResourceManager.getTexture(region.first.get()).toAtlasRegion()
+                    else -> ResourceManager.getPackRegion(region.first.get(), region.second)
+                }
             }
         }
     }
@@ -272,7 +274,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
 
                                 fun addPlusBtn(): Boolean {
                                     if (button("+", Vec2(20f, regionBtnSize.y + 8f))) {
-                                        this.regions.add("\$EMPTY".toLocalFile().toFileWrapper() to "\$EMPTY")
+                                        this.regions.add(AtlasData.emptyRegionIdentifier.toLocalFile().toFileWrapper() to AtlasData.emptyRegionIdentifier)
                                         updateAtlas()
                                         return true
                                     }

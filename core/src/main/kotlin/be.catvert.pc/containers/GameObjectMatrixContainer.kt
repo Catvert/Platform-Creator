@@ -8,6 +8,7 @@ import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.fasterxml.jackson.annotation.JsonIgnore
+import kotlin.math.roundToInt
 
 abstract class GameObjectMatrixContainer : GameObjectContainer() {
     private val shapeRenderer = ShapeRenderer()
@@ -78,7 +79,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     var followGameObject: GameObject? = null
 
     init {
-        activeRect.size = Size(Gdx.graphics.width * 2, Gdx.graphics.height * 2)
+        activeRect.size = Size(Constants.viewportRatioWidth.roundToInt(), Constants.viewportRatioHeight.roundToInt())
     }
 
     override fun update() {
@@ -96,7 +97,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
                 it.update()
 
                 if (it.getCurrentState().hasComponent<PhysicsComponent>()) {
-                    if (it.position().y <= 1) {
+                    if (it.position().y < 0) {
                         it.onOutOfMapAction(it)
                     }
                 }

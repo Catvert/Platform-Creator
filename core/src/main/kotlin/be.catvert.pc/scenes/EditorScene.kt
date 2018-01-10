@@ -23,6 +23,7 @@ import com.badlogic.gdx.math.Circle
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
+import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const
 import glm_.vec2.Vec2
 import imgui.*
 import imgui.functionalProgramming.mainMenuBar
@@ -169,6 +170,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
     private val selectRectangleData = SelectRectangleData(Point(), Point())
 
     private var backupTryModeCameraPos = Vector3()
+    private var backupTryModeCameraZoom = 1f
 
     private val editorSceneUI = EditorSceneUI(level.background)
 
@@ -345,7 +347,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
         updateCamera()
 
         if (!isUIHover && editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL) {
-            level.activeRect.set(Size((camera.viewportWidth * camera.zoom).toInt(), (camera.viewportHeight * camera.zoom).toInt()), Point(camera.position.x.toInt() - (camera.viewportWidth * camera.zoom).toInt() / 2, camera.position.y.toInt() - (camera.viewportHeight * camera.zoom).toInt() / 2))
+            level.activeRect.set(Size((Constants.viewportRatioWidth * camera.zoom).roundToInt(), (camera.viewportHeight * camera.zoom).roundToInt()), Point(camera.position.x.roundToInt() - ((Constants.viewportRatioWidth * camera.zoom) / 2f).roundToInt(), camera.position.y.roundToInt() - ((Constants.viewportRatioHeight * camera.zoom) / 2f).roundToInt()))
 
             if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_UP_LAYER.key)) {
                 selectLayer += 1
@@ -773,7 +775,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
         var moveCameraY = 0f
 
         if (editorSceneUI.editorMode == EditorSceneUI.EditorMode.TRY_LEVEL) {
-            gameObjectContainer.cast<Level>()?.moveCameraToFollowGameObject(camera, true)
+            gameObjectContainer.cast<Level>()?.updateCamera(camera, true)
         } else {
             if (Gdx.input.isKeyPressed(GameKeys.EDITOR_CAMERA_LEFT.key))
                 moveCameraX -= cameraMoveSpeed
@@ -784,7 +786,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
             if (Gdx.input.isKeyPressed(GameKeys.EDITOR_CAMERA_DOWN.key))
                 moveCameraY -= cameraMoveSpeed
             if (Gdx.input.isKeyPressed(GameKeys.CAMERA_ZOOM_UP.key)) {
-                if (camera.zoom > 1f)
+                if (camera.zoom > 0.5f)
                     camera.zoom -= 0.02f
             }
             if (Gdx.input.isKeyPressed(GameKeys.CAMERA_ZOOM_DOWN.key)) {
@@ -871,6 +873,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
         gameObjectContainer = SerializationFactory.copy(level).apply { exit = { finishTryLevel() } }
 
         backupTryModeCameraPos = camera.position.cpy()
+        backupTryModeCameraZoom = camera.zoom
     }
 
     private fun finishTryLevel() {
@@ -879,6 +882,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
         gameObjectContainer = level
         camera.position.set(backupTryModeCameraPos)
+        camera.zoom = backupTryModeCameraZoom
     }
 
     private fun saveLevelToFile() {
@@ -1040,6 +1044,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
                             inputInt("largeur", level::matrixWidth)
                             inputInt("hauteur", level::matrixHeight)
+                            sliderFloat("zoom initial", level::initialZoom, 0.1f, 2f, "%.1f")
                         }
                     }
                     menu("Créer un gameObject") {

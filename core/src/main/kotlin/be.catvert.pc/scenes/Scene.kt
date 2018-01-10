@@ -7,6 +7,7 @@ import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.InputMultiplexer
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.Stage
@@ -45,7 +46,7 @@ abstract class Scene(protected var background: Background) : Renderable, Updeata
         }
 
     init {
-        Gdx.input.inputProcessor = stage
+        Gdx.input.inputProcessor = InputMultiplexer(stage, KeyDownSignalProcessor)
     }
 
     protected open fun postBatchRender() {}

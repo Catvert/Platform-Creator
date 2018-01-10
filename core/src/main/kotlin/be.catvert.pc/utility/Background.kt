@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.utils.JsonReader
 import com.fasterxml.jackson.annotation.JsonTypeInfo
@@ -55,7 +56,7 @@ class ParallaxBackground(val parallaxDataFile: FileWrapper) : Background(Backgro
     }
 
     fun updateXOffset(plusX: Int) {
-        this.xOffset += plusX
+        xOffset = Math.max(0, xOffset + plusX)
 
         layers.forEach {
             it.layer.regionWidth = Gdx.graphics.width + xOffset

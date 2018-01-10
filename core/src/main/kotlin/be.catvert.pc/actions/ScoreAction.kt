@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 /**
  * Action permettant d'ajouter des points de score au joueur
  */
-class ScoreAction(@ExposeEditor(max = 100) var points: Int) : Action {
+class ScoreAction(@ExposeEditor(max = 100f) var points: Int) : Action {
     @JsonCreator private constructor() : this(0)
 
     override fun invoke(gameObject: GameObject) {

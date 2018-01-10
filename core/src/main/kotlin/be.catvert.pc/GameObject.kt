@@ -28,7 +28,7 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
                  initDefaultState: GameObjectState.() -> Unit = {},
                  vararg otherStates: GameObjectState = arrayOf()) : Updeatable, Renderable, ResourceLoader, CustomEditorImpl {
 
-    @ExposeEditor(min = -100, max = 100)
+    @ExposeEditor(min = -100f, max = 100f)
     var layer: Int = 0
         set(value) {
             if (value in Constants.minLayerIndex until Constants.maxLayerIndex) field = value

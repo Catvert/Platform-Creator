@@ -45,10 +45,6 @@ enum class GameKeys(var key: Int, val description: String) {
 
     GAME_SWITCH_GRAVITY(Input.Keys.G, "Switch gravity on/off"),
     GAME_FOLLOW_CAMERA_PLAYER(Input.Keys.F, "Follow camera on player on/off"),
-    GAME_CAMERA_LEFT(Input.Keys.LEFT, "Game camera left move"),
-    GAME_CAMERA_RIGHT(Input.Keys.RIGHT, "Game camera right move"),
-    GAME_CAMERA_UP(Input.Keys.UP, "Game camera up move"),
-    GAME_CAMERA_DOWN(Input.Keys.DOWN, "Game camera down move"),
 
     GAME_PLAYER_LEFT(Input.Keys.Q, "Move player left"),
     GAME_PLAYER_RIGHT(Input.Keys.D, "Move player right"),

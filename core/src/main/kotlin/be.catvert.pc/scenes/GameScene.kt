@@ -29,7 +29,7 @@ class GameScene(private val level: Level) : Scene(level.background) {
     private var pause = false
 
     init {
-        level.moveCameraToFollowGameObject(camera, false)
+        level.updateCamera(camera, false)
     }
 
     override fun render(batch: Batch) {
@@ -92,20 +92,7 @@ class GameScene(private val level: Level) : Scene(level.background) {
         if (Gdx.input.isKeyPressed(GameKeys.CAMERA_ZOOM_RESET.key))
             camera.zoom = 1f
 
-        if (!level.moveCameraToFollowGameObject(camera, lerp)) {
-            if (Gdx.input.isKeyPressed(GameKeys.GAME_CAMERA_LEFT.key)) {
-                camera.position.x -= cameraMoveSpeed
-            }
-            if (Gdx.input.isKeyPressed(GameKeys.GAME_CAMERA_RIGHT.key)) {
-                camera.position.x += cameraMoveSpeed
-            }
-            if (Gdx.input.isKeyPressed(GameKeys.GAME_CAMERA_DOWN.key)) {
-                camera.position.y -= cameraMoveSpeed
-            }
-            if (Gdx.input.isKeyPressed(GameKeys.GAME_CAMERA_UP.key)) {
-                camera.position.y += cameraMoveSpeed
-            }
-        }
+        level.updateCamera(camera, lerp)
 
         camera.update()
     }

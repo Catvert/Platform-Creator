@@ -6,6 +6,7 @@ import be.catvert.pc.Prefab
 import be.catvert.pc.Tags
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.scenes.EndLevelScene
+import be.catvert.pc.serialization.PostDeserialization
 import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.files.FileHandle
@@ -38,6 +39,9 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
     private val timer = Timer(1f)
 
     var followGameObjectTag = Tags.Player.tag
+
+    var initialZoom = 1f
+    @JsonIgnore var zoom = 1f
 
     init {
         if (!levelTextures.first.exists())
@@ -97,12 +101,19 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
         SerializationFactory.serializeToFile(prefab, levelPrefabs.first.child("${prefab.name}.${Constants.prefabExtension}"))
     }
 
-    fun moveCameraToFollowGameObject(camera: OrthographicCamera, lerp: Boolean): Boolean {
+    fun updateCamera(camera: OrthographicCamera, lerp: Boolean) {
+        camera.zoom = MathUtils.lerp(camera.zoom, zoom, 0.1f)
+
+        val viewportWidth = Constants.viewportRatioWidth * camera.zoom
+        val viewportHeight = Constants.viewportRatioHeight * camera.zoom
+
+        activeRect.size = Size((viewportWidth * 1f).roundToInt(), (viewportHeight * 1f).roundToInt())
+
         if (followGameObject != null) {
             val go = followGameObject!!
 
-            val posX = Math.min(matrixRect.width.toFloat() - camera.viewportWidth / 2f, Math.max(0f + camera.viewportWidth / 2f, go.position().x + go.size().width / 2f))
-            val posY = Math.min(matrixRect.height.toFloat() - camera.viewportHeight / 2f, Math.max(0f + camera.viewportHeight / 2f, go.position().y + go.size().height / 2f))
+            val posX = MathUtils.clamp(go.position().x + go.size().width / 2f, viewportWidth / 2f, matrixRect.width - viewportWidth / 2f)
+            val posY = MathUtils.clamp(go.position().y + go.size().height / 2f, viewportHeight / 2f, matrixRect.height - viewportHeight / 2f)
 
             val lerpX = MathUtils.lerp(camera.position.x, posX, 0.1f)
             val lerpY = MathUtils.lerp(camera.position.y, posY, 0.1f)
@@ -114,8 +125,6 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
 
         if (background is ParallaxBackground)
             background.cast<ParallaxBackground>()?.updateCamera(camera)
-
-        return followGameObject != null
     }
 
     @JsonIgnore
@@ -130,6 +139,7 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
     override fun onPostDeserialization() {
         super.onPostDeserialization()
         followGameObject = findGameObjectsByTag(followGameObjectTag).firstOrNull()
+        zoom = initialZoom
     }
 
     override fun update() {

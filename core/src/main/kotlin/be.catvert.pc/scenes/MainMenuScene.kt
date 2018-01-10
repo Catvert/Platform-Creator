@@ -7,10 +7,7 @@ import be.catvert.pc.PCGame.Companion.darkUI
 import be.catvert.pc.PCGame.Companion.soundVolume
 import be.catvert.pc.containers.Level
 import be.catvert.pc.i18n.MenusText
-import be.catvert.pc.utility.Constants
-import be.catvert.pc.utility.ImguiHelper
-import be.catvert.pc.utility.Signal
-import be.catvert.pc.utility.Size
+import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputMultiplexer
@@ -32,6 +29,7 @@ import ktx.actors.plus
 import ktx.app.use
 import ktx.scene2d.Scene2DSkin
 import ktx.scene2d.table
+import java.awt.DisplayMode
 import java.io.IOException
 import kotlin.collections.set
 
@@ -42,25 +40,7 @@ import kotlin.collections.set
 class MainMenuScene : Scene(PCGame.mainBackground) {
     private val logo = PCGame.generateLogo(gameObjectContainer)
 
-    private val settingsKeyProcessor = object : InputProcessor {
-        val keyDownSignal = Signal<Int>()
-
-        override fun mouseMoved(screenX: Int, screenY: Int) = false
-        override fun keyTyped(character: Char) = false
-        override fun scrolled(amount: Int) = false
-        override fun keyUp(keycode: Int) = false
-        override fun touchDragged(screenX: Int, screenY: Int, pointer: Int) = false
-        override fun keyDown(keycode: Int): Boolean {
-            keyDownSignal(keycode)
-            return false
-        }
-
-        override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int) = false
-        override fun touchUp(screenX: Int, screenY: Int, pointer: Int, button: Int) = false
-    }
-
     init {
-        Gdx.input.inputProcessor = InputMultiplexer(settingsKeyProcessor, stage)
         showMainMenu()
     }
 
@@ -88,7 +68,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
                 onClick {
                     settingsKeys.forEach {
                         settingsKeys[it.key] = false
-                        settingsKeyProcessor.keyDownSignal.clear()
+                        KeyDownSignalProcessor.keyDownSignal.clear()
                     }
                     showSettingsWindow = true
                 }
@@ -219,13 +199,13 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
         }
     }
 
-    private var settingsWindowCurrentDisplayMode = intArrayOf(Gdx.graphics.displayModes.indexOf(Gdx.graphics.displayMode))
+    private var settingsWindowCurrentDisplayMode = intArrayOf(Gdx.graphics.displayModes.indexOfFirst { it.width == Gdx.graphics.displayMode.width && it.height == Gdx.graphics.displayMode.height && it.refreshRate == Gdx.graphics.displayMode.refreshRate })
     private val settingsFullscreen = booleanArrayOf(Gdx.graphics.isFullscreen)
     private val settingsKeys = GameKeys.values().associate { it to false }.toMutableMap()
     private val settingsCurrentLocaleIndex = intArrayOf(PCGame.availableLocales.indexOf(PCGame.locale))
     private fun drawSettingsWindow() {
         with(ImGui) {
-            ImguiHelper.withCenteredWindow(MenusText.MM_SETTINGS_WINDOW_TITLE(), ::showSettingsWindow, Vec2(375f, 400f), WindowFlags.NoResize.i) {
+            ImguiHelper.withCenteredWindow(MenusText.MM_SETTINGS_WINDOW_TITLE(), ::showSettingsWindow, Vec2(370f, 375f), WindowFlags.NoResize.i) {
                 functionalProgramming.withGroup {
                     checkbox(MenusText.MM_SETTINGS_FULLSCREEN(), settingsFullscreen)
                     functionalProgramming.withItemWidth(100f) {
@@ -260,12 +240,12 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
                                 if (!keyValue.value) {
                                     settingsKeys.forEach {
                                         settingsKeys[it.key] = false
-                                        settingsKeyProcessor.keyDownSignal.clear()
+                                        KeyDownSignalProcessor.keyDownSignal.clear()
                                     }
 
                                     settingsKeys[keyValue.key] = true
 
-                                    settingsKeyProcessor.keyDownSignal.register(true) {
+                                    KeyDownSignalProcessor.keyDownSignal.register(true) {
                                         keyValue.key.key = it
                                         settingsKeys[keyValue.key] = false
                                     }
