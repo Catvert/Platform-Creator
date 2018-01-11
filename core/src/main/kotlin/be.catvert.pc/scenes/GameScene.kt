@@ -24,8 +24,6 @@ import ktx.assets.toLocalFile
 class GameScene(private val level: Level) : Scene(level.background) {
     override var gameObjectContainer: GameObjectContainer = level
 
-    private val cameraMoveSpeed = 10f
-
     private var pause = false
 
     init {

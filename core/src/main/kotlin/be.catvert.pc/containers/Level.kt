@@ -107,7 +107,7 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
         val viewportWidth = Constants.viewportRatioWidth * camera.zoom
         val viewportHeight = Constants.viewportRatioHeight * camera.zoom
 
-        activeRect.size = Size((viewportWidth * 1f).roundToInt(), (viewportHeight * 1f).roundToInt())
+        activeRect.size = Size((viewportWidth * 1.5f).roundToInt(), (viewportHeight * 1.5f).roundToInt())
 
         if (followGameObject != null) {
             val go = followGameObject!!
