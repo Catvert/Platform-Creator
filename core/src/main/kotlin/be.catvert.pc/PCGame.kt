@@ -38,6 +38,7 @@ import uno.glfw.GlfwWindow
 import java.util.*
 import kotlin.reflect.KClass
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox.CheckBoxStyle
+import com.kotcrab.vis.ui.VisUI
 import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const
 import ktx.scene2d.Scene2dDsl
 import ktx.style.color
@@ -48,19 +49,7 @@ import kotlin.math.roundToInt
 /** [com.badlogic.gdx.ApplicationListener, implementation shared by all platforms.  */
 class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
     private fun initializeUI() {
-        val uiAtlas = TextureAtlas(Constants.uiDirPath.child("ui-blue.atlas"))
-        val skin = Scene2DSkin.defaultSkin
-
-        val font = FreeTypeFontGenerator(Constants.kenneyFontPath).generateFont(FreeTypeFontGenerator.FreeTypeFontParameter().apply { this.size = 24 })
-        val fontThin = FreeTypeFontGenerator(Constants.kenneyThinFontPath).generateFont(FreeTypeFontGenerator.FreeTypeFontParameter().apply { this.size = 24 })
-
-        skin.add("default-font", font, BitmapFont::class.java)
-        skin.add("default-font-thin", fontThin, BitmapFont::class.java)
-        skin.addRegions(uiAtlas)
-
-        skin.add("default", TextButton.TextButtonStyle(skin.getDrawable("button_03"), skin.getDrawable("button_02"), skin.getDrawable("button_03"), font))
-        skin.add("default", CheckBoxStyle(skin.getDrawable("checkbox_off"), skin.getDrawable("checkbox_on"), font, Color.BLACK))
-        skin.add("default", Window.WindowStyle(font, Color.BLACK, skin.getDrawable("window_03")))
+        VisUI.load(Constants.uiDirPath.child("tinted/x1/tinted.json"))
 
         LwjglGL3.init(GlfwWindow((Gdx.graphics as Lwjgl3Graphics).window.windowHandle), false)
     }
@@ -156,6 +145,8 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         sceneManager.dispose()
 
         mainFont.dispose()
+
+        VisUI.dispose(true)
 
         ResourceManager.dispose()
 

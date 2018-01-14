@@ -158,7 +158,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
         }
 
         companion object {
-            val emptyRegionIdentifier = "\$EMPTY"
+            const val emptyRegionIdentifier = "\$EMPTY"
             /**
              * Permet de charger une région depuis un pack ou une texture.
              */

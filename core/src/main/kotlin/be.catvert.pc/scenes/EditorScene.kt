@@ -787,11 +787,11 @@ class EditorScene(val level: Level) : Scene(level.background) {
                 moveCameraY -= cameraMoveSpeed
             if (Gdx.input.isKeyPressed(GameKeys.CAMERA_ZOOM_UP.key)) {
                 if (camera.zoom > 0.5f)
-                    camera.zoom -= 0.02f
+                    camera.zoom -= 0.01f
             }
             if (Gdx.input.isKeyPressed(GameKeys.CAMERA_ZOOM_DOWN.key)) {
                 if (level.matrixRect.width > camera.zoom * (camera.viewportWidth))
-                    camera.zoom += 0.02f
+                    camera.zoom += 0.01f
             }
             if (Gdx.input.isKeyPressed(GameKeys.CAMERA_ZOOM_RESET.key))
                 camera.zoom = 1f

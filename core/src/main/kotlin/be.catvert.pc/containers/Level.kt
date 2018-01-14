@@ -13,6 +13,7 @@ import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonIgnore
+import glm_.func.common.clamp
 import ktx.assets.toLocalFile
 import kotlin.math.roundToInt
 
@@ -115,12 +116,12 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
             val posX = MathUtils.clamp(go.position().x + go.size().width / 2f, viewportWidth / 2f, matrixRect.width - viewportWidth / 2f)
             val posY = MathUtils.clamp(go.position().y + go.size().height / 2f, viewportHeight / 2f, matrixRect.height - viewportHeight / 2f)
 
-            val lerpX = MathUtils.lerp(camera.position.x, posX, 0.1f)
-            val lerpY = MathUtils.lerp(camera.position.y, posY, 0.1f)
+            val lerpX = MathUtils.lerp(camera.position.x, posX, 0.1f).clamp(viewportWidth / 2f, matrixRect.width - viewportWidth / 2f)
+            val lerpY = MathUtils.lerp(camera.position.y, posY, 0.1f).clamp(viewportHeight / 2f, matrixRect.height - viewportHeight / 2f)
 
             camera.position.set(
-                    if (lerp) lerpX.roundToInt().toFloat() else posX.roundToInt().toFloat(),
-                    if (lerp) lerpY.roundToInt().toFloat() else posY.roundToInt().toFloat(), 0f)
+                    if (lerp) lerpX else posX,
+                    if (lerp) lerpY else posY, 0f)
         }
 
         if (background is ParallaxBackground)

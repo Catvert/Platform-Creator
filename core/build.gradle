@@ -7,6 +7,8 @@ dependencies {
     compile "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
     compile "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
 
+    compile "com.kotcrab.vis:vis-ui:$visuiVersion"
+
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     compile "net.dermetfan.libgdx-utils:libgdx-utils:$utilsVersion"
@@ -19,6 +21,7 @@ dependencies {
     compile "io.github.libktx:ktx-async:$ktxVersion"
     compile "io.github.libktx:ktx-scene2d:$ktxVersion"
     compile "io.github.libktx:ktx-app:$ktxVersion"
+    compile "io.github.libktx:ktx-vis:$ktxVersion"
 
     compile group: 'org.lwjgl', name: 'lwjgl-tinyfd', version: lwjglVersion
     compile "org.lwjgl:lwjgl-tinyfd:$lwjglVersion:natives-windows"
