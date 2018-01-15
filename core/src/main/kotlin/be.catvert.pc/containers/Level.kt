@@ -161,7 +161,10 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
             val level = Level(levelDir.child(Constants.levelDataFile).path(), Constants.gameVersion, PCGame.parallaxBackgrounds().elementAtOrNull(0)
                     ?: PCGame.standardBackgrounds().elementAtOrNull(0) ?: StandardBackground(FileWrapper("")))
 
-            PrefabFactory.Player_Kenney.prefab.create(Point(100, 100), level)
+            for(i in 0..5)
+                PrefabFactory.PhysicsSprite_Kenney.prefab.create(Point(i * 50, 0), level)
+
+            PrefabFactory.Player_Kenney.prefab.create(Point(100, 50), level)
 
             level.loadResources()
 

@@ -8,6 +8,7 @@ import be.catvert.pc.containers.Level
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.factories.PrefabSetup
 import be.catvert.pc.factories.PrefabType
+import be.catvert.pc.i18n.MenusText
 import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
@@ -29,9 +30,13 @@ import imgui.*
 import imgui.functionalProgramming.mainMenuBar
 import imgui.functionalProgramming.menu
 import imgui.functionalProgramming.menuItem
+import ktx.actors.centerPosition
+import ktx.actors.onClick
+import ktx.actors.plus
 import ktx.app.use
 import ktx.assets.toAbsoluteFile
 import ktx.assets.toLocalFile
+import ktx.vis.window
 import org.lwjgl.system.MemoryStack.stackPush
 import org.lwjgl.util.tinyfd.TinyFileDialogs.tinyfd_openFileDialog
 import kotlin.math.roundToInt
@@ -91,7 +96,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
     class EditorSceneUI(background: Background) {
         enum class EditorMode {
-            NO_MODE, SELECT, COPY, SELECT_POINT, SELECT_GO, TRY_LEVEL
+            NO_MODE, SELECT, COPY, SELECT_POINT, TRY_LEVEL
         }
 
         var editorMode = EditorMode.NO_MODE
@@ -99,7 +104,6 @@ class EditorScene(val level: Level) : Scene(level.background) {
         var gameObjectAddComponentComboIndex = 0
 
         val onSelectPoint = Signal<Point>()
-        val onSelectGO = Signal<GameObject>()
 
         var gameObjectCurrentStateIndex = 0
 
@@ -110,7 +114,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
         val settingsLevelBackgroundType: ImguiHelper.Item<Enum<*>> = ImguiHelper.Item(background.type)
 
-        var showExitWindow = false
+        var exitWindowOpen = false
 
         var showInfoGameObjectWindow = false
 
@@ -163,6 +167,8 @@ class EditorScene(val level: Level) : Scene(level.background) {
      * Position de la souris au dernier frame
      */
     private var latestMousePos = Point()
+
+    private var latestCameraPos = camera.position.cpy()
 
     /**
      * La position du début et de la fin du box
@@ -312,14 +318,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                 PCGame.mainBatch.projectionMatrix = PCGame.defaultProjection
                 PCGame.mainBatch.use {
                     val layout = GlyphLayout(editorFont, "Sélectionner un point")
-                    editorFont.draw(it, layout, Gdx.graphics.width / 2f - layout.width / 2, Gdx.graphics.height - editorFont.lineHeight * 2)
-                }
-            }
-            EditorSceneUI.EditorMode.SELECT_GO -> {
-                PCGame.mainBatch.projectionMatrix = PCGame.defaultProjection
-                PCGame.mainBatch.use {
-                    val layout = GlyphLayout(editorFont, "Sélectionner un gameObject")
-                    editorFont.draw(it, layout, Gdx.graphics.width / 2f - layout.width / 2, Gdx.graphics.height - editorFont.lineHeight * 2)
+                    editorFont.draw(it, layout, Gdx.graphics.width / 2f - layout.width / 2, Gdx.graphics.height - editorFont.lineHeight * 3)
                 }
             }
         }
@@ -329,10 +328,10 @@ class EditorScene(val level: Level) : Scene(level.background) {
             it.projectionMatrix = PCGame.defaultProjection
             with(editorFont) {
                 if (editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL) {
-                    draw(it, "Layer sélectionné : $selectLayer", 10f, Gdx.graphics.height - editorFont.lineHeight * 2)
-                    draw(it, "Nombre d'entités : ${level.getGameObjectsData().size}", 10f, Gdx.graphics.height - editorFont.lineHeight * 3)
-                    draw(it, "Resize mode : ${resizeGameObjectMode.name}", 10f, Gdx.graphics.height - editorFont.lineHeight * 4)
-                    draw(it, "Mode de l'éditeur : ${editorSceneUI.editorMode.name}", 10f, Gdx.graphics.height - editorFont.lineHeight * 5)
+                    draw(it, "Layer sélectionné : $selectLayer", 10f, Gdx.graphics.height - lineHeight * 4)
+                    draw(it, "Nombre d'entités : ${level.getGameObjectsData().size}", 10f, Gdx.graphics.height - lineHeight * 5)
+                    draw(it, "Resize mode : ${resizeGameObjectMode.name}", 10f, Gdx.graphics.height - lineHeight * 6)
+                    draw(it, "Mode de l'éditeur : ${editorSceneUI.editorMode.name}", 10f, Gdx.graphics.height - lineHeight * 7)
                 } else {
                     draw(it, "Test du niveau..", 10f, Gdx.graphics.height - lineHeight * 2)
                 }
@@ -532,8 +531,8 @@ class EditorScene(val level: Level) : Scene(level.background) {
                                     }
                                 }
                                 SelectGOMode.MOVE -> {
-                                    val moveX = mousePosInWorld.x - latestMousePosInWorld.x
-                                    val moveY = mousePosInWorld.y - latestMousePosInWorld.y
+                                    val moveX = (mousePosInWorld.x - latestMousePosInWorld.x) + (camera.position.x - latestCameraPos.x).roundToInt()
+                                    val moveY = (mousePosInWorld.y - latestMousePosInWorld.y) + (camera.position.y - latestCameraPos.y).roundToInt()
 
                                     moveGameObjects(moveX, moveY)
                                 }
@@ -697,15 +696,6 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
                     }
                 }
-                EditorSceneUI.EditorMode.SELECT_GO -> {
-                    if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-                        val gameObject = findGameObjectUnderMouse(true)
-                        if (gameObject != null) {
-                            editorSceneUI.onSelectGO(gameObject)
-                            editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
-                        }
-                    }
-                }
                 EditorSceneUI.EditorMode.TRY_LEVEL -> {
                 }
             }
@@ -740,13 +730,14 @@ class EditorScene(val level: Level) : Scene(level.background) {
             latestLeftButtonClick = Gdx.input.isButtonPressed(Input.Buttons.LEFT)
             latestRightButtonClick = Gdx.input.isButtonPressed(Input.Buttons.RIGHT)
             latestMousePos = mousePos
+            latestCameraPos = camera.position.cpy()
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             if (editorSceneUI.editorMode == EditorSceneUI.EditorMode.TRY_LEVEL)
                 finishTryLevel()
             else
-                editorSceneUI.showExitWindow = true
+                showExitWindow()
         }
 
         if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_GRID_MODE.key) && editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL) {
@@ -841,7 +832,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
      * Permet de retourner l'entité sous le pointeur par rapport à son layer
      */
     private fun findGameObjectUnderMouse(replaceEditorLayer: Boolean): GameObject? {
-        val mousePosInWorld = camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)).toPoint()
+        val mousePosInWorld = viewport.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)).toPoint()
 
         val gameObjectsUnderMouse = level.getAllGameObjectsInCells(level.getActiveGridCells()).filter { it.box.contains(mousePosInWorld) }
 
@@ -916,41 +907,53 @@ class EditorScene(val level: Level) : Scene(level.background) {
             }
 
             if (editorSceneUI.showInfoGameObjectWindow && selectGameObject != null && selectGameObject?.container != null
-                    && editorSceneUI.editorMode != EditorSceneUI.EditorMode.SELECT_POINT && editorSceneUI.editorMode != EditorSceneUI.EditorMode.SELECT_GO && editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL) {
+                    && editorSceneUI.editorMode != EditorSceneUI.EditorMode.SELECT_POINT && editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL) {
                 drawInfoGameObjectWindow(selectGameObject!!)
-            }
-
-            if (editorSceneUI.showExitWindow) {
-                drawExitWindow()
             }
         }
     }
 
-    private fun drawExitWindow() {
-        val windowSize = Vec2(375f, 55f)
-        ImGui.setNextWindowSize(windowSize, Cond.Once)
-        ImGui.setNextWindowPos(Vec2(Gdx.graphics.width / 2f - windowSize.x / 2f, Gdx.graphics.height / 2f - windowSize.y / 2f), Cond.Once)
-        functionalProgramming.withWindow("Sauvegarder avant de quitter?", editorSceneUI::showExitWindow, WindowFlags.NoResize.i or WindowFlags.NoCollapse.i) {
-            fun showMainMenu() {
-                PCGame.sceneManager.loadScene(MainMenuScene())
-            }
-
-            if (ImGui.button("Sauvegarder")) {
-                saveLevelToFile()
-                showMainMenu()
-            }
-            ImGui.sameLine()
-            if (ImGui.button("Abandonner les modifications")) {
-                if (!level.levelPath.toLocalFile().exists()) {
-                    level.deleteFiles()
-                }
-                showMainMenu()
-            }
-            ImGui.sameLine()
-            if (ImGui.button("Annuler")) {
-                editorSceneUI.showExitWindow = false
-            }
+    private fun showExitWindow() {
+        fun showMainMenu() {
+            PCGame.sceneManager.loadScene(MainMenuScene())
         }
+
+        if(editorSceneUI.exitWindowOpen)
+            return
+
+        editorSceneUI.exitWindowOpen = true
+
+        stage + window("Sauvegarder le niveau ?") {
+            setSize(425f, 200f)
+            isModal = true
+            table {
+                textButton("Sauvegarder !") { cell ->
+                    cell.width(400f).space(10f)
+                    onClick {
+                        saveLevelToFile()
+                        showMainMenu()
+                    }
+                }
+                row()
+                textButton("Annuler les modifications") { cell ->
+                    cell.width(400f).space(10f)
+                    onClick {
+                        if (!level.levelPath.toLocalFile().exists()) {
+                            level.deleteFiles()
+                        }
+                        showMainMenu()
+                    }
+                }
+                row()
+                textButton("Annuler") { cell ->
+                    cell.width(400f).space(10f)
+                    onClick {
+                        editorSceneUI.exitWindowOpen = false
+                        this@window.remove()
+                    }
+                }
+            }
+        }.apply { centerPosition(this@EditorScene.stage.width, this@EditorScene.stage.height) }
     }
 
     private fun drawMainMenuBar() {
@@ -996,7 +999,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         }
                         separator()
                         menuItem("Quitter") {
-                            editorSceneUI.showExitWindow = true
+                            showExitWindow()
                         }
                     }
 

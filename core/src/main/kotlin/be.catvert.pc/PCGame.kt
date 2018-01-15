@@ -40,6 +40,8 @@ import kotlin.reflect.KClass
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox.CheckBoxStyle
 import com.kotcrab.vis.ui.VisUI
 import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const
+import ktx.async.enableKtxCoroutines
+import ktx.async.ktxAsync
 import ktx.scene2d.Scene2dDsl
 import ktx.style.color
 import ktx.style.set
@@ -58,6 +60,9 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         super.create()
         // Permet de supprimer les logs d'imgui
         DEBUG = false
+
+        enableKtxCoroutines(1)
+
         PCGame.soundVolume = initialConfig.soundVolume
         PCGame.darkUI = initialConfig.darkUI
         PCGame.locale = initialConfig.locale
@@ -243,11 +248,11 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         /**
          * Permet de retourner la taille du logo au cas où la taille de l'écran changerait.
          */
-        private fun getLogoSize() = Size(425, 75)
+        private fun getLogoSize() = Size(600, 125)
 
         fun getLogoRect(): Rect {
             val size = getLogoSize()
-            return Rect(Point(Constants.viewportRatioWidth.roundToInt() / 2 - size.width / 2, Constants.viewportRatioHeight.roundToInt() - size.height * 3 / 2), size)
+            return Rect(Point(Constants.viewportRatioWidth.roundToInt() / 2 - size.width / 2, Constants.viewportRatioHeight.roundToInt() - size.height * 2), size)
         }
     }
 }

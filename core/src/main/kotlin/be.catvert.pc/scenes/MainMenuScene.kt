@@ -12,18 +12,18 @@ import be.catvert.pc.utility.KeyDownSignalProcessor
 import be.catvert.pc.utility.Size
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.Touchable
-import com.badlogic.gdx.utils.Align
 import com.kotcrab.vis.ui.widget.VisList
 import com.kotcrab.vis.ui.widget.VisTextButton
 import glm_.vec2.Vec2
 import imgui.ImGui
 import imgui.WindowFlags
 import imgui.functionalProgramming
-import ktx.actors.*
+import ktx.actors.centerPosition
+import ktx.actors.onClick
+import ktx.actors.plus
 import ktx.collections.toGdxArray
 import ktx.vis.table
 import ktx.vis.window
@@ -62,25 +62,25 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
     private fun showMainMenu() {
         stage + table {
             textButton(MenusText.MM_PLAY_BUTTON()) { cell ->
-                cell.minWidth(250f).space(10f)
+                cell.width(250f).space(10f)
                 onClick {
                     showSelectLevelWindow()
                 }
             }
             row()
             textButton(MenusText.MM_SETTINGS_BUTTON()) { cell ->
-                cell.minWidth(250f).space(10f)
+                cell.width(250f).space(10f)
                 onClick {
                     settingsKeys.forEach {
                         settingsKeys[it.key] = false
                         KeyDownSignalProcessor.keyDownSignal.clear()
                     }
-                    showSettingsWindow()
+                    showSettingsWindow = true
                 }
             }
             row()
             textButton(MenusText.MM_EXIT_BUTTON()) { cell ->
-                cell.minWidth(250f).space(10f)
+                cell.width(250f).space(10f)
                 onClick {
                     Gdx.app.exit()
                 }
@@ -106,7 +106,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
                     addCloseButton()
                     table {
                         val newNameField = textField { cell ->
-                            cell.minWidth(250f).space(10f)
+                            cell.width(250f).space(10f)
                             messageText = "Nom du niveau"
                         }
                         row()
@@ -134,13 +134,13 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
                 table {
                     val list = VisList<LevelItem>().apply { setItems(levels.toGdxArray()) }
 
-                    scrollPane(list) { cell -> cell.minWidth(200f).height(300f).space(10f) }
+                    scrollPane(list) { cell -> cell.width(200f).height(300f).space(10f) }
 
                     table { cell ->
                         cell.size(200f)
 
                         textButton(MenusText.MM_SELECT_LEVEL_PLAY_BUTTON()) { cell ->
-                            cell.minWidth(200f).space(10f)
+                            cell.width(200f).space(10f)
 
                             onClick {
                                 if (list.selectedIndex in levels.indices) {
@@ -155,7 +155,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
 
                         row()
                         textButton(MenusText.MM_SELECT_LEVEL_EDIT_BUTTON()) { cell ->
-                            cell.minWidth(200f).space(10f)
+                            cell.width(200f).space(10f)
                             onClick {
                                 if (list.selectedIndex in levels.indices) {
                                     val level = Level.loadFromFile(levels[list.selectedIndex].dir)
@@ -169,7 +169,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
 
                         row()
                         textButton(MenusText.MM_SELECT_LEVEL_COPY_BUTTON()) { cell ->
-                            cell.minWidth(200f).space(10f)
+                            cell.width(200f).space(10f)
 
                             onClick {
                                 if (list.selectedIndex in levels.indices) {
@@ -210,7 +210,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
 
                         row()
                         textButton(MenusText.MM_SELECT_LEVEL_DELETE_BUTTON()) { cell ->
-                            cell.minWidth(200f).space(10f)
+                            cell.width(200f).space(10f)
 
                             onClick {
                                 if (list.selectedIndex in levels.indices) {
@@ -243,7 +243,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
                             }
                         }
                         row()
-                        add(newLevelButton).minWidth(200f).space(10f)
+                        add(newLevelButton).width(200f).space(10f)
                     }
                 }
             }.apply { centerPosition(this@MainMenuScene.stage.width, this@MainMenuScene.stage.height) }
@@ -253,76 +253,10 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
                 isModal = true
                 addCloseButton()
                 table {
-                    add(newLevelButton).minWidth(400f).space(10f)
+                    add(newLevelButton).width(400f).space(10f)
                 }
             }.apply { centerPosition(this@MainMenuScene.stage.width, this@MainMenuScene.stage.height) }
         }
-    }
-
-    private fun showSettingsWindow() {
-        stage + window("Paramètres du jeu") {
-            setSize(700f, 300f)
-            isModal = true
-            addCloseButton()
-
-            table {
-                table { cell ->
-                    cell.size(300f, 300f)
-                    checkBox(MenusText.MM_SETTINGS_FULLSCREEN()) { cell ->
-                        align(Align.left)
-                        cell.width(300f).padLeft(50f)
-                    }
-
-                    row()
-                    checkBox(MenusText.MM_SETTINGS_DARK_INTERFACE()) { cell ->
-                        align(Align.left)
-                        cell.width(300f).padLeft(50f)
-                        onChange {
-                            PCGame.darkUI = this.isChecked
-                        }
-                    }
-
-                    row()
-                    horizontalGroup {
-                        space(10f)
-                        label(MenusText.MM_SETTINGS_SOUND())
-                        slider(0f, 1f, 0.1f) {
-                            value = PCGame.soundVolume
-                            onChange {
-                                PCGame.soundVolume = value
-                            }
-                        }
-                    }
-
-                    row()
-                    selectBox<String> { cell ->
-                        cell.width(200f)
-                        items = PCGame.availableLocales.map { it.displayName }.toGdxArray()
-                        onChange {
-                            PCGame.locale = PCGame.availableLocales[this.selectedIndex]
-                        }
-                    }
-                }
-                scrollPane(table {
-                    settingsKeys.forEach {
-                        label(it.key.description).setFontScale(0.5f)
-
-                        textField(Input.Keys.toString(it.key.key)) { cell ->
-                            cell.width(100f).space(10f)
-                            onKeyUp {
-                                text = Input.Keys.toString(it)
-                            }
-
-                            isReadOnly = true
-                            setAlignment(Align.center)
-                        }
-                        row()
-                    }
-                }) { cell ->
-                    cell.spaceTop(50f).size(380f, 250f)
-                }
-            }
-        }.apply { centerPosition(this@MainMenuScene.stage.width, this@MainMenuScene.stage.height) }
     }
 
     private var showSettingsWindow = false
@@ -334,42 +268,52 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
         }
     }
 
-    private var settingsWindowCurrentDisplayMode = intArrayOf(Gdx.graphics.displayModes.indexOfFirst { it.width == Gdx.graphics.displayMode.width && it.height == Gdx.graphics.displayMode.height && it.refreshRate == Gdx.graphics.displayMode.refreshRate })
+    private val settingsWindowSize = intArrayOf(Gdx.graphics.width, Gdx.graphics.height)
     private val settingsFullscreen = booleanArrayOf(Gdx.graphics.isFullscreen)
     private val settingsKeys = GameKeys.values().associate { it to false }.toMutableMap()
     private val settingsCurrentLocaleIndex = intArrayOf(PCGame.availableLocales.indexOf(PCGame.locale))
     private fun drawSettingsWindow() {
         with(ImGui) {
-            ImguiHelper.withCenteredWindow(MenusText.MM_SETTINGS_WINDOW_TITLE(), ::showSettingsWindow, Vec2(370f, 375f), WindowFlags.NoResize.i) {
+            ImguiHelper.withCenteredWindow(MenusText.MM_SETTINGS_WINDOW_TITLE(), ::showSettingsWindow, Vec2(375f, 375f), WindowFlags.NoResize.i) {
                 functionalProgramming.withGroup {
-                    checkbox(MenusText.MM_SETTINGS_FULLSCREEN(), settingsFullscreen)
-                    functionalProgramming.withItemWidth(100f) {
-                        combo("résolution", settingsWindowCurrentDisplayMode, Lwjgl3ApplicationConfiguration.getDisplayModes().map { "${it.width}x${it.height}x${it.refreshRate}" })
-                    }
-                    if (button(MenusText.MM_SETTINGS_APPLY(), Vec2(100f, 0))) {
-                        val mode = Gdx.graphics.displayModes.elementAtOrNull(settingsWindowCurrentDisplayMode[0])
-                        if (mode != null) {
-                            if (settingsFullscreen[0])
-                                Gdx.graphics.setFullscreenMode(mode)
-                            else
-                                Gdx.graphics.setWindowedMode(mode.width, mode.height)
-                        }
-                    }
                     functionalProgramming.withItemWidth(100f) {
                         sliderFloat(MenusText.MM_SETTINGS_SOUND(), ::soundVolume, 0f, 1f, "%.1f")
-                    }
-                    checkbox(MenusText.MM_SETTINGS_DARK_INTERFACE(), PCGame.Companion::darkUI)
-                    functionalProgramming.withItemWidth(100f) {
+
                         if (combo(MenusText.MM_SETTINGS_LOCALE(), settingsCurrentLocaleIndex, PCGame.availableLocales.map { it.displayLanguage }))
                             PCGame.locale = PCGame.availableLocales[settingsCurrentLocaleIndex[0]]
+                        if (isMouseHoveringRect(itemRectMin, itemRectMax)) {
+                            functionalProgramming.withTooltip {
+                                text("Un redémarrage du jeu est requis\npour appliquer les changements !")
+                            }
+                        }
+
+                        checkbox(MenusText.MM_SETTINGS_DARK_INTERFACE(), PCGame.Companion::darkUI)
                     }
                 }
+                sameLine()
+                functionalProgramming.withGroup {
+                    functionalProgramming.withItemWidth(-1) {
+                        checkbox(MenusText.MM_SETTINGS_FULLSCREEN(), settingsFullscreen)
+                    }
+                    if(!settingsFullscreen[0]) {
+                        functionalProgramming.withItemWidth(75f) {
+                            inputInt2(MenusText.MM_SETTINGS_SCREEN_SIZE(), settingsWindowSize)
+                        }
+                    }
+                    if (button(MenusText.MM_SETTINGS_APPLY(), Vec2(-1, 0))) {
+                        if (settingsFullscreen[0])
+                            Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
+                        else
+                            Gdx.graphics.setWindowedMode(settingsWindowSize[0], settingsWindowSize[1])
+                    }
+                }
+
                 separator()
-                functionalProgramming.withChild("game keys", size = Vec2(350f, 200f)) {
+                functionalProgramming.withChild("game keys", size = Vec2(360f, 265f)) {
                     settingsKeys.forEach { keyValue ->
                         text(keyValue.key.description)
                         sameLine()
-                        cursorPosX = 250f
+                        cursorPosX = 260f
                         functionalProgramming.withId(keyValue.key.name) {
                             if (button(if (keyValue.value) MenusText.MM_SETTINGS_PRESSKEY() else Input.Keys.toString(keyValue.key.key), Vec2(75f, 0))) {
                                 if (!keyValue.value) {

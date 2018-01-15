@@ -17,6 +17,7 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
+import ktx.async.ktxAsync
 import java.io.IOException
 
 private class PostDeserializer(private val deserializer: JsonDeserializer<*>) : DelegatingDeserializer(deserializer) {
@@ -61,7 +62,6 @@ object SerializationFactory {
         SerializationFactory.MapperType.SMILE -> deserializeFromSmile(serializeToSmile(obj))
     }
 
-
     fun <T> serializeToFile(obj: T, file: FileHandle) = when (Constants.serializationType) {
         SerializationFactory.MapperType.JSON -> file.writeString(serializeToJson(obj), false)
         SerializationFactory.MapperType.SMILE -> file.writeBytes(serializeToSmile(obj), false)
@@ -71,5 +71,4 @@ object SerializationFactory {
         SerializationFactory.MapperType.JSON -> deserializeFromJson(file.readString())
         SerializationFactory.MapperType.SMILE -> deserializeFromSmile(file.readBytes())
     }
-
 }

@@ -42,8 +42,8 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
             }))
     ),
     //region Kenney
-    Sprite_Kenney(PrefabType.Kenney, PrefabSetup.setupSprite(Constants.packsKenneyDirPath.child("grassSheet.atlas").toFileWrapper() to "slice01_01")),
-    PhysicsSprite_Kenney(PrefabType.Kenney, PrefabSetup.setupPhysicsSprite(Constants.packsKenneyDirPath.child("grassSheet.atlas").toFileWrapper() to "slice01_01")),
+    Sprite_Kenney(PrefabType.Kenney, PrefabSetup.setupSprite(Constants.packsKenneyDirPath.child("grassSheet.atlas").toFileWrapper() to "slice03_03")),
+    PhysicsSprite_Kenney(PrefabType.Kenney, PrefabSetup.setupPhysicsSprite(Constants.packsKenneyDirPath.child("grassSheet.atlas").toFileWrapper() to "slice03_03")),
     Player_Kenney(PrefabType.Kenney,
             Prefab("player", GameObject("player", box = Rect(size = Size(48, 98)), initDefaultState = {
                 val jumpSoundIndex = 0

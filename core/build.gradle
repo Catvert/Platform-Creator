@@ -7,6 +7,8 @@ dependencies {
     compile "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
     compile "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
 
+    compile group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: coroutinesVersion
+
     compile "com.kotcrab.vis:vis-ui:$visuiVersion"
 
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
@@ -22,6 +24,7 @@ dependencies {
     compile "io.github.libktx:ktx-scene2d:$ktxVersion"
     compile "io.github.libktx:ktx-app:$ktxVersion"
     compile "io.github.libktx:ktx-vis:$ktxVersion"
+    compile "io.github.libktx:ktx-async:$ktxVersion"
 
     compile group: 'org.lwjgl', name: 'lwjgl-tinyfd', version: lwjglVersion
     compile "org.lwjgl:lwjgl-tinyfd:$lwjglVersion:natives-windows"
@@ -47,4 +50,10 @@ dependencies {
     compile "io.leangen.geantyref:geantyref:$geantyrefVersion"
 
     compile fileTree(dir: '../libs', include: '*.jar')
+}
+
+kotlin {
+    experimental {
+        coroutines 'enable'
+    }
 }
