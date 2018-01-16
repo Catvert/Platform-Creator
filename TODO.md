@@ -6,6 +6,8 @@
 - Ajouter la possibilité de supprimer une ressource importé
 - Écran de chargement d'un niveau
 - Enlever possibilité de créer un tag unknown
+- Utiliser un i18n pour les descriptions des props des components/actions (à la place de la description en str mettre : desc_physics_movementType par exemple)
+- Ajouter la possibilité du free mode en gridmode (clique droit drag)
 
 ## BUGS
 
@@ -13,6 +15,7 @@
 
 ## IDÉE
 
+- Les groupes, permettant de grouper des gameObjects entre-eux
 - Structure, permet de créer une structure prédéfinie ou créer. Un peu à la méthode des prefabs sauf que c'est plusieurs gameObjects placé a côté de l'autre
 - Ajout du pseudo de l'utilisateur au premier lancement
 - Ajouter la possibilité d'importer des atlas .xml

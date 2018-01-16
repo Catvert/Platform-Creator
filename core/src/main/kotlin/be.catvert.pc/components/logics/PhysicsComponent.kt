@@ -8,8 +8,10 @@ import be.catvert.pc.actions.TagAction
 import be.catvert.pc.components.Component
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
+import be.catvert.pc.i18n.MenusText
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.*
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
@@ -69,9 +71,10 @@ data class CollisionAction(@ExposeEditor var side: BoxSide = BoxSide.Left, @Expo
  */
 class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                        @ExposeEditor(max = 100f) var moveSpeed: Int = 0,
-                       @ExposeEditor var movementType: MovementType = MovementType.LINEAR,
+                       @ExposeEditor(description = "Défini si le mouvement doit être \"fluide\" ou non.") var movementType: MovementType = MovementType.SMOOTH,
                        @ExposeEditor var gravity: Boolean = !isStatic,
                        @ExposeEditor val sensor: SensorData = SensorData(false),
+                       @ExposeEditor var isPlatform: Boolean = false,
                        val ignoreTags: ArrayList<GameObjectTag> = arrayListOf(),
                        val collisionsActions: ArrayList<CollisionAction> = arrayListOf(),
                        @ExposeEditor(max = 1000f) var jumpHeight: Int = 0,
@@ -127,9 +130,6 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
             checkSensorOverlaps(gameObject)
         if (isStatic || sensor.isSensor) return
 
-        if (physicsActions.isEmpty())
-            onNothingAction(gameObject)
-
         var moveSpeedX = 0f
         var moveSpeedY = 0f
         var addJumpAfterClear = false
@@ -183,7 +183,12 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         actualMoveSpeedX = moveSpeedX
         actualMoveSpeedY = moveSpeedY
 
-        tryMove(moveSpeedX.roundToInt(), moveSpeedY.roundToInt(), gameObject)
+        val lastPos = Point(gameObject.position())
+
+        tryMove((moveSpeedX * Gdx.graphics.deltaTime * 60f).roundToInt(), (moveSpeedY * Gdx.graphics.deltaTime * 60f).roundToInt(), gameObject)
+
+        if(gameObject.position() == lastPos)
+            onNothingAction(gameObject)
 
         physicsActions.clear()
 
@@ -227,7 +232,6 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                     onLeftAction(gameObject)
                 else if (gameObject.box.x != level?.matrixRect?.width?.minus(gameObject.box.width) && moveX > 0)
                     onRightAction(gameObject)
-
                 newMoveX = 0
             }
             if (!collideOnMove(0, moveY, gameObject)) {
@@ -255,7 +259,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
     /**
      * Permet de tester si un déplacement physique est possible ou non
      */
-    fun collideOnMove(moveX: Int, moveY: Int, gameObject: GameObject): Boolean {
+    private fun collideOnMove(moveX: Int, moveY: Int, gameObject: GameObject): Boolean {
         val newRect = Rect(gameObject.box)
         newRect.position = Point(newRect.x + moveX, newRect.y + moveY)
 
@@ -265,9 +269,9 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         level?.apply {
             this.getAllGameObjectsInCells(newRect).filter { filter ->
                         filter !== gameObject && filter.getCurrentState().hasComponent<PhysicsComponent>() && let {
-                            // TODO refactoring
                             filter.getCurrentState().getComponent<PhysicsComponent>()?.apply {
                                         return@let !sensor.isSensor && ignoreTags.contains(gameObject.tag) == false
+                                                && if(isPlatform) { gameObject.position().y >= filter.position().y + filter.size().height }  else true
                                     }
                             true
                         }

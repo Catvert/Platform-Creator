@@ -295,7 +295,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
                     functionalProgramming.withItemWidth(-1) {
                         checkbox(MenusText.MM_SETTINGS_FULLSCREEN(), settingsFullscreen)
                     }
-                    if(!settingsFullscreen[0]) {
+                    if (!settingsFullscreen[0]) {
                         functionalProgramming.withItemWidth(75f) {
                             inputInt2(MenusText.MM_SETTINGS_SCREEN_SIZE(), settingsWindowSize)
                         }

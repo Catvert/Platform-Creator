@@ -34,7 +34,8 @@ abstract class Scene(protected var background: Background) : Renderable, Updeata
     protected val camera = OrthographicCamera()
 
     protected val viewport = StretchViewport(Constants.viewportRatioWidth, Constants.viewportRatioHeight, camera)
-    protected val stage = Stage(viewport, PCGame.hudBatch)
+
+    protected val stage = Stage(viewport)
 
     val backgroundColors = Triple(0f, 0f, 0f)
 
@@ -98,8 +99,7 @@ abstract class Scene(protected var background: Background) : Renderable, Updeata
 
     override fun resize(size: Size) {
         viewport.update(size.width, size.height)
-        background.resize(size)
-        stage.viewport.update(size.width, size.height, false)
+        (background as? ParallaxBackground)?.reset()
     }
 
     override fun dispose() {

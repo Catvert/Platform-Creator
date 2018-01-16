@@ -115,8 +115,6 @@ object ImguiHelper {
                             CustomType.TAG_STRING -> {
                                 gameObjectTag(item.cast(), level)
                             }
-                            else -> {
-                            }
                         }
                     }
                     is Enum<*> -> {
@@ -124,6 +122,12 @@ object ImguiHelper {
                     }
                     else -> {
                         insertImguiExposeEditorField(item.obj, gameObject, level, editorSceneUI)
+                    }
+                }
+
+                if(!exposeEditor.description.isBlank() && isMouseHoveringRect(itemRectMin, itemRectMax)) {
+                    functionalProgramming.withTooltip {
+                        text(exposeEditor.description)
                     }
                 }
             }
@@ -148,8 +152,10 @@ object ImguiHelper {
             val index = intArrayOf(PCGame.actionsClasses.indexOfFirst { it.isInstance(action.obj) })
 
             functionalProgramming.withItemWidth(150f) {
-                if (combo("action", index, PCGame.actionsClasses.map { it.simpleName ?: "Nom inconnu" })) {
-                    action.obj = ReflectionUtility.findNoArgConstructor(PCGame.actionsClasses[index[0]])!!.newInstance()
+                functionalProgramming.withId("select action $label") {
+                    if (combo("action", index, PCGame.actionsClasses.map { it.simpleName ?: "Nom inconnu" })) {
+                        action.obj = ReflectionUtility.findNoArgConstructor(PCGame.actionsClasses[index[0]])!!.newInstance()
+                    }
                 }
             }
 

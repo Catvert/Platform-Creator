@@ -25,6 +25,8 @@ import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const
+import glm_.func.common.max
+import glm_.func.common.min
 import glm_.vec2.Vec2
 import imgui.*
 import imgui.functionalProgramming.mainMenuBar
@@ -58,7 +60,8 @@ class EditorScene(val level: Level) : Scene(level.background) {
     private data class GridMode(var active: Boolean = false, var offsetX: Int = 0, var offsetY: Int = 0, var cellWidth: Int = 50, var cellHeight: Int = 50) {
         fun putGameObject(walkRect: Rect, point: Point, gameObject: GameObject) {
             getRectCellOf(walkRect, point)?.apply {
-                gameObject.box = this
+                if(this.x >= walkRect.x && this.x + this.width <= walkRect.x + walkRect.width && this.y >= walkRect.y && this.y + this.height <= walkRect.y + walkRect.height)
+                    gameObject.box = this
             }
         }
 
@@ -114,7 +117,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
         val settingsLevelBackgroundType: ImguiHelper.Item<Enum<*>> = ImguiHelper.Item(background.type)
 
-        var exitWindowOpen = false
+        var showExitWindow = false
 
         var showInfoGameObjectWindow = false
 
@@ -126,6 +129,8 @@ class EditorScene(val level: Level) : Scene(level.background) {
         var gameObjectsSpritePhysics = true
         var gameObjectsSpriteRealSize = false
         var gameObjectsSpriteCustomSize = Size(50, 50)
+
+        var godModeTryMode = false
 
         init {
             when (background.type) {
@@ -182,6 +187,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
     init {
         gameObjectContainer.allowUpdatingGO = false
+        level.updateCamera(camera, false)
     }
 
     override fun postBatchRender() {
@@ -279,7 +285,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                 val mousePosInWorld: Point = camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)).let { Point(it.x.roundToInt(), it.y.roundToInt()) }
 
                 selectGameObjects.forEach { go ->
-                    val rect: Rect? = if (gridMode.active) {
+                    val rect: Rect? = if (gridMode.active && selectGameObjects.size == 1) {
                         val pos = if (go === selectGameObject) Point(mousePosInWorld.x, mousePosInWorld.y) else Point(mousePosInWorld.x + (go.position().x - (selectGameObject?.position()?.x
                                 ?: 0)), mousePosInWorld.y + (go.position().y - (selectGameObject?.position()?.y ?: 0)))
                         gridMode.getRectCellOf(level.activeRect, pos)
@@ -289,8 +295,6 @@ class EditorScene(val level: Level) : Scene(level.background) {
                                 ?: 0)))
                         Rect(pos, go.box.size)
                     }
-
-                    // TODO BUG Grid quand plusieurs entités n'ayant pas le même y par exemple, ne donne pas le même résultat en prévisualisation
 
                     if (rect != null) {
                         go.getCurrentState().getComponent<AtlasComponent>()?.apply {
@@ -443,9 +447,8 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         if (selectGameObjects.let {
                                     var canMove = true
                                     it.forEach {
-                                        if (!level.matrixRect.contains(Rect(it.box.x + moveX, it.box.y + moveY, it.box.width, it.box.height))) {
+                                        if(!(it.box.x + moveX >= 0 && it.box.x + it.box.width + moveX <= level.matrixRect.width && it.box.y + moveY >= 0 && it.box.y + it.box.height + moveY <= level.matrixRect.height))
                                             canMove = false
-                                        }
                                     }
                                     canMove
                                 }) {
@@ -659,7 +662,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                                 moveToCopyGO = false
                         }
 
-                        if (gridMode.active && useMousePos) {
+                        if (gridMode.active && useMousePos && selectGameObjects.size == 1) {
                             gridMode.putGameObject(level.activeRect, Point(mousePosInWorld.x, mousePosInWorld.y), copySelectGO)
                         } else
                             copySelectGO.box.position = Point(posX, posY)
@@ -667,6 +670,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         level.addGameObject(copySelectGO)
 
                         val copyGameObjects = mutableListOf(copySelectGO)
+                        // TODO Refactoring
 
                         selectGameObjects.filter { it !== selectGameObject }.forEach {
                                     val deltaX = it.position().x - selectGameObject!!.position().x
@@ -675,7 +679,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                                     level.addGameObject(SerializationFactory.copy(it).apply {
                                         val pos = Point(copySelectGO.position().x + deltaX, copySelectGO.position().y + deltaY)
 
-                                        if (gridMode.active)
+                                        if (gridMode.active && selectGameObjects.size == 1)
                                             gridMode.putGameObject(level.activeRect, pos, this)
                                         else
                                             this.box.position = pos
@@ -737,7 +741,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
             if (editorSceneUI.editorMode == EditorSceneUI.EditorMode.TRY_LEVEL)
                 finishTryLevel()
             else
-                showExitWindow()
+                editorSceneUI.showExitWindow = true
         }
 
         if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_GRID_MODE.key) && editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL) {
@@ -834,7 +838,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
     private fun findGameObjectUnderMouse(replaceEditorLayer: Boolean): GameObject? {
         val mousePosInWorld = viewport.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)).toPoint()
 
-        val gameObjectsUnderMouse = level.getAllGameObjectsInCells(level.getActiveGridCells()).filter { it.box.contains(mousePosInWorld) }
+        val gameObjectsUnderMouse = (gameObjectContainer as Level).run { getAllGameObjectsInCells(getActiveGridCells()).filter { it.box.contains(mousePosInWorld) } }
 
         if (!gameObjectsUnderMouse.isEmpty()) {
             val goodLayerGameObject = gameObjectsUnderMouse.find { it.layer == selectLayer }
@@ -859,12 +863,12 @@ class EditorScene(val level: Level) : Scene(level.background) {
     }
 
     private fun launchTryLevel() {
-        editorSceneUI.editorMode = EditorSceneUI.EditorMode.TRY_LEVEL
-
-        gameObjectContainer = SerializationFactory.copy(level).apply { exit = { finishTryLevel() } }
-
         backupTryModeCameraPos = camera.position.cpy()
         backupTryModeCameraZoom = camera.zoom
+
+        editorSceneUI.editorMode = EditorSceneUI.EditorMode.TRY_LEVEL
+
+        gameObjectContainer = SerializationFactory.copy(level).apply { exit = { if(!editorSceneUI.godModeTryMode) finishTryLevel() } }
     }
 
     private fun finishTryLevel() {
@@ -910,50 +914,33 @@ class EditorScene(val level: Level) : Scene(level.background) {
                     && editorSceneUI.editorMode != EditorSceneUI.EditorMode.SELECT_POINT && editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL) {
                 drawInfoGameObjectWindow(selectGameObject!!)
             }
+
+            if (editorSceneUI.showExitWindow) {
+                drawExitWindow()
+            }
         }
     }
 
-    private fun showExitWindow() {
-        fun showMainMenu() {
-            PCGame.sceneManager.loadScene(MainMenuScene())
-        }
-
-        if(editorSceneUI.exitWindowOpen)
-            return
-
-        editorSceneUI.exitWindowOpen = true
-
-        stage + window("Sauvegarder le niveau ?") {
-            setSize(425f, 200f)
-            isModal = true
-            table {
-                textButton("Sauvegarder !") { cell ->
-                    cell.width(400f).space(10f)
-                    onClick {
-                        saveLevelToFile()
-                        showMainMenu()
-                    }
-                }
-                row()
-                textButton("Annuler les modifications") { cell ->
-                    cell.width(400f).space(10f)
-                    onClick {
-                        if (!level.levelPath.toLocalFile().exists()) {
-                            level.deleteFiles()
-                        }
-                        showMainMenu()
-                    }
-                }
-                row()
-                textButton("Annuler") { cell ->
-                    cell.width(400f).space(10f)
-                    onClick {
-                        editorSceneUI.exitWindowOpen = false
-                        this@window.remove()
-                    }
-                }
+    private fun drawExitWindow() {
+        ImguiHelper.withCenteredWindow("Sauvegarder le niveau ?", editorSceneUI::showExitWindow, Vec2(240f, 100f), WindowFlags.NoResize.i or WindowFlags.NoCollapse.i) {
+            fun showMainMenu() {
+                PCGame.sceneManager.loadScene(MainMenuScene())
             }
-        }.apply { centerPosition(this@EditorScene.stage.width, this@EditorScene.stage.height) }
+
+            if (ImGui.button("Sauvegarder", Vec2(225f, 0))) {
+                saveLevelToFile()
+                showMainMenu()
+            }
+            if (ImGui.button("Abandonner les modifications", Vec2(225f, 0))) {
+                if (!level.levelPath.toLocalFile().exists()) {
+                    level.deleteFiles()
+                }
+                showMainMenu()
+            }
+            if (ImGui.button("Annuler", Vec2(225f, 0))) {
+                editorSceneUI.showExitWindow = false
+            }
+        }
     }
 
     private fun drawMainMenuBar() {
@@ -999,7 +986,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         }
                         separator()
                         menuItem("Quitter") {
-                            showExitWindow()
+                            editorSceneUI.showExitWindow = true
                         }
                     }
 
@@ -1077,6 +1064,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                     menuItem("Arrêter l'essai") {
                         finishTryLevel()
                     }
+                    checkbox("God mode", editorSceneUI::godModeTryMode)
                 }
             }
         }
@@ -1089,12 +1077,13 @@ class EditorScene(val level: Level) : Scene(level.background) {
                 if (sliderInt2("taille", size, 1, Constants.maxGameObjectSize)) {
                     gridMode.cellWidth = size[0]
                     gridMode.cellHeight = size[1]
+                    gridMode.offsetX = gridMode.offsetX.min(gridMode.cellWidth)
+                    gridMode.offsetY = gridMode.offsetY.min(gridMode.cellHeight)
                 }
 
-                val offset = intArrayOf(gridMode.offsetX, gridMode.offsetY)
-                if (dragInt2("décalage", offset, 1f, 0)) {
-                    gridMode.offsetX = offset[0]
-                    gridMode.offsetY = offset[1]
+                functionalProgramming.withItemWidth(100f) {
+                    dragInt("décalage x", gridMode::offsetX, 1f, 0, gridMode.cellWidth)
+                    dragInt("décalage y", gridMode::offsetY, 1f, 0, gridMode.cellHeight)
                 }
             }
         }
@@ -1158,14 +1147,15 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         }
                     }
                     else -> {
-                        (PrefabFactory.values().map { it.prefab } + level.resourcesPrefabs()).filter { it.prefabGO.tag == tag }.forEachIndexed { index, it ->
+                        var index = 0
+                        (PrefabFactory.values().map { it.prefab } + level.resourcesPrefabs()).filter { it.prefabGO.tag == tag }.forEach {
                                     it.prefabGO.loadResources()
 
                                     it.prefabGO.getCurrentState().getComponent<AtlasComponent>()?.apply {
                                                 data.elementAtOrNull(currentIndex)?.apply {
                                                             addImageBtn(currentKeyFrame(), it, true)
 
-                                                            if ((index + 1) % 3 != 0)
+                                                            if ((++index) % 3 != 0)
                                                                 sameLine()
                                                         }
                                             }

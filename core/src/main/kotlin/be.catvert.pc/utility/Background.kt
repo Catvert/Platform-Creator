@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.utils.JsonReader
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import glm_.func.common.clamp
 import java.io.FileReader
 import kotlin.math.roundToInt
 
@@ -18,9 +19,7 @@ enum class BackgroundType {
 }
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
-sealed class Background(val type: BackgroundType) : Renderable, Resizable {
-    override fun resize(size: Size) {}
-}
+sealed class Background(val type: BackgroundType) : Renderable
 
 class StandardBackground(val backgroundFile: FileWrapper) : Background(BackgroundType.Standard) {
     private val background = ResourceManager.getTexture(backgroundFile.get())
@@ -63,8 +62,12 @@ class ParallaxBackground(val parallaxDataFile: FileWrapper) : Background(Backgro
         }
     }
 
-    override fun resize(size: Size) {
-        updateXOffset(0)
+    fun reset() {
+        xOffset = 0
+        yOffset = 0f
+        layers.forEach {
+            it.x = 0f
+        }
     }
 
     fun updateCamera(camera: OrthographicCamera) {
@@ -75,7 +78,7 @@ class ParallaxBackground(val parallaxDataFile: FileWrapper) : Background(Backgro
 
             layers.forEach {
                 val move = (deltaX * it.speed)
-                it.x -= move
+                it.x = Math.min(0f, it.x - move)
                 updateXOffset(move.roundToInt())
             }
         }

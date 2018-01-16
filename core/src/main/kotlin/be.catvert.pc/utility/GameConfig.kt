@@ -34,7 +34,7 @@ data class GameConfig(val screenWidth: Int, val screenHeight: Int, val refreshRa
                 }
             }
 
-            return GameConfig(1280, 720, 60, true, 1f, false, Locale.ROOT)
+            return GameConfig(1280, 720, 60, false, 1f, false, Locale.ROOT)
         }
 
         /**

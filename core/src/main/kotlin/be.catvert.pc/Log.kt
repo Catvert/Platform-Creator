@@ -22,10 +22,10 @@ object Log : Disposable {
     fun warn(warn: () -> String) = write("Attention", warn())
 
     private fun write(type: String, content: String) {
-        val str = suffix() + " -> $type : " + content
+        val str = "${suffix()}  -> $type : $content\n"
 
         writer.write(str)
-        println(str)
+        print(str)
     }
 
     override fun dispose() {
