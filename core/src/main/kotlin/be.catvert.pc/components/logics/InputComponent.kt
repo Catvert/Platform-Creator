@@ -41,4 +41,18 @@ class InputComponent(var inputs: ArrayList<InputData>) : Component(), Updeatable
         ImguiHelper.addImguiWidgetsArray("inputs", inputs, { item -> Input.Keys.toString(item.key) }, { InputData() }, gameObject, level, editorSceneUI)
     }
 
+    override fun toString(): String {
+        val stringBuilder =  StringBuilder()
+
+        inputs.forEach {
+            stringBuilder.appendln("<-->")
+            stringBuilder.appendln("key : ${Input.Keys.toString(it.key)}")
+            stringBuilder.appendln("action : ${it.action}")
+            stringBuilder.appendln("just pressed : ${it.justPressed}")
+            stringBuilder.appendln("pressed : ${if(it.justPressed) Gdx.input.isKeyJustPressed(it.key) else Gdx.input.isKeyPressed(it.key)}")
+            stringBuilder.appendln("<-->")
+        }
+
+        return stringBuilder.toString()
+    }
 }

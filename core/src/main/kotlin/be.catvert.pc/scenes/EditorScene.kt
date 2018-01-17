@@ -8,14 +8,12 @@ import be.catvert.pc.containers.Level
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.factories.PrefabSetup
 import be.catvert.pc.factories.PrefabType
-import be.catvert.pc.i18n.MenusText
 import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
-import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
@@ -24,21 +22,15 @@ import com.badlogic.gdx.math.Circle
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const
-import glm_.func.common.max
 import glm_.func.common.min
 import glm_.vec2.Vec2
 import imgui.*
 import imgui.functionalProgramming.mainMenuBar
 import imgui.functionalProgramming.menu
 import imgui.functionalProgramming.menuItem
-import ktx.actors.centerPosition
-import ktx.actors.onClick
-import ktx.actors.plus
 import ktx.app.use
 import ktx.assets.toAbsoluteFile
 import ktx.assets.toLocalFile
-import ktx.vis.window
 import org.lwjgl.system.MemoryStack.stackPush
 import org.lwjgl.util.tinyfd.TinyFileDialogs.tinyfd_openFileDialog
 import kotlin.math.roundToInt
@@ -120,6 +112,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
         var showExitWindow = false
 
         var showInfoGameObjectWindow = false
+        var showInfoGameObjectTryModeWindow = false
 
         var showGameObjectsWindow = true
         var gameObjectsTypeIndex = 0
@@ -134,8 +127,8 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
         init {
             when (background.type) {
-                BackgroundType.Standard -> settingsLevelStandardBackgroundIndex[0] = PCGame.standardBackgrounds().indexOfFirst { it.backgroundFile.get() == (background as StandardBackground).backgroundFile.get() }
-                BackgroundType.Parallax -> settingsLevelParallaxBackgroundIndex[0] = PCGame.parallaxBackgrounds().indexOfFirst { it.parallaxDataFile.get() == (background as ParallaxBackground).parallaxDataFile.get() }
+                BackgroundType.Standard -> settingsLevelStandardBackgroundIndex[0] = PCGame.standardBackgrounds().indexOfFirst { it.backgroundFile == (background as StandardBackground).backgroundFile }
+                BackgroundType.Parallax -> settingsLevelParallaxBackgroundIndex[0] = PCGame.parallaxBackgrounds().indexOfFirst { it.parallaxDataFile == (background as ParallaxBackground).parallaxDataFile }
             }
         }
     }
@@ -155,6 +148,8 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
     private val selectGameObjects = mutableSetOf<GameObject>()
     private var selectGameObject: GameObject? = null
+
+    private var selectGameObjectTryMode: GameObject? = null
 
     private var selectLayer = 0
 
@@ -348,6 +343,17 @@ class EditorScene(val level: Level) : Scene(level.background) {
         super.update()
 
         updateCamera()
+
+        // TODO Refactor
+        if(!isUIHover && editorSceneUI.editorMode == EditorSceneUI.EditorMode.TRY_LEVEL) {
+            if(Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !latestLeftButtonClick) {
+                val gameObject = findGameObjectUnderMouse(false)
+                if(gameObject != null) {
+                    selectGameObjectTryMode = gameObject
+                    editorSceneUI.showInfoGameObjectTryModeWindow = true
+                }
+            }
+        }
 
         if (!isUIHover && editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL) {
             level.activeRect.set(Size((Constants.viewportRatioWidth * camera.zoom).roundToInt(), (camera.viewportHeight * camera.zoom).roundToInt()), Point(camera.position.x.roundToInt() - ((Constants.viewportRatioWidth * camera.zoom) / 2f).roundToInt(), camera.position.y.roundToInt() - ((Constants.viewportRatioHeight * camera.zoom) / 2f).roundToInt()))
@@ -700,8 +706,6 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
                     }
                 }
-                EditorSceneUI.EditorMode.TRY_LEVEL -> {
-                }
             }
 
             if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_REMOVE_ENTITY.key)) {
@@ -802,9 +806,6 @@ class EditorScene(val level: Level) : Scene(level.background) {
                     Math.min(maxCameraY, Math.max(y, minCameraY)), 0f)
         }
         camera.update()
-
-        if (background is ParallaxBackground)
-            background.cast<ParallaxBackground>()?.updateCamera(camera)
     }
 
     private fun setCopyGameObject(gameObject: GameObject) {
@@ -878,6 +879,8 @@ class EditorScene(val level: Level) : Scene(level.background) {
         gameObjectContainer = level
         camera.position.set(backupTryModeCameraPos)
         camera.zoom = backupTryModeCameraZoom
+
+        selectGameObjectTryMode = null
     }
 
     private fun saveLevelToFile() {
@@ -908,6 +911,10 @@ class EditorScene(val level: Level) : Scene(level.background) {
                     text("x: %s y: %s", goUnderMouse.box.x, goUnderMouse.box.y)
                     text("w: %s h: %s", goUnderMouse.box.width, goUnderMouse.box.height)
                 }
+            }
+
+            if(editorSceneUI.showInfoGameObjectTryModeWindow && selectGameObjectTryMode != null && editorSceneUI.editorMode == EditorSceneUI.EditorMode.TRY_LEVEL) {
+                drawInfoGameObjectTryModeWindow(selectGameObjectTryMode!!)
             }
 
             if (editorSceneUI.showInfoGameObjectWindow && selectGameObject != null && selectGameObject?.container != null
@@ -1090,7 +1097,6 @@ class EditorScene(val level: Level) : Scene(level.background) {
     }
 
     private fun drawGameObjectsWindow() {
-
         with(ImGui) {
             val nextWindowSize = Vec2(225f, Gdx.graphics.height)
             setNextWindowSize(nextWindowSize, Cond.Once)
@@ -1185,7 +1191,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                 if (button("Créer un prefab", Vec2(-1, 0)))
                     openPopup(createPrefabTitle)
 
-                ImguiHelper.insertImguiExposeEditorField(gameObject, gameObject, level, editorSceneUI)
+                ImguiHelper.insertImguiExposeEditorFields(gameObject, gameObject, level, editorSceneUI)
 
                 functionalProgramming.withItemWidth(100f) {
                     combo("state", editorSceneUI::gameObjectCurrentStateIndex, gameObject.getStates().map { it.name })
@@ -1220,7 +1226,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                             false
                         }
                         if (!incorrectComponent)
-                            ImguiHelper.insertImguiExposeEditorField(component, gameObject, level, editorSceneUI)
+                            ImguiHelper.insertImguiExposeEditorFields(component, gameObject, level, editorSceneUI)
                         else {
                             text("Il manque le(s) component(s) :")
                             functionalProgramming.withIndent {
@@ -1291,6 +1297,42 @@ class EditorScene(val level: Level) : Scene(level.background) {
                     }
 
                     endPopup()
+                }
+            }
+        }
+    }
+
+    private fun drawInfoGameObjectTryModeWindow(gameObject: GameObject) {
+        with(ImGui) {
+            functionalProgramming.withWindow("Données du gameObject", editorSceneUI::showInfoGameObjectTryModeWindow, WindowFlags.AlwaysAutoResize.i) {
+                ImguiHelper.insertDataExposeEditorFields(gameObject)
+                separator()
+
+                val components = gameObject.getStates().elementAt(editorSceneUI.gameObjectCurrentStateIndex).getComponents()
+                functionalProgramming.withItemWidth(150f) {
+                    combo("component", editorSceneUI::gameObjectCurrentComponentIndex, components.map { ReflectionUtility.simpleNameOf(it).removeSuffix("Component") })
+                }
+
+                val component = components.elementAtOrNull(editorSceneUI.gameObjectCurrentComponentIndex)
+                if (component != null) {
+                    functionalProgramming.withIndent {
+                        val requiredComponent = component.javaClass.kotlin.findAnnotation<RequiredComponent>()
+                        val incorrectComponent = let {
+                            requiredComponent?.component?.forEach {
+                                if (gameObject.getStates().elementAtOrNull(editorSceneUI.gameObjectCurrentStateIndex)?.hasComponent(it) == false)
+                                    return@let true
+                            }
+                            false
+                        }
+                        if (!incorrectComponent)
+                            ImguiHelper.insertDataExposeEditorFields(component)
+                        else {
+                            text("Il manque le(s) component(s) :")
+                            functionalProgramming.withIndent {
+                                text("${requiredComponent!!.component.map { it.simpleName }}")
+                            }
+                        }
+                    }
                 }
             }
         }

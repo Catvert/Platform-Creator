@@ -13,6 +13,7 @@ import be.catvert.pc.scenes.EditorScene
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import glm_.vec2.Vec2
+import glm_.vec4.Vec4
 import imgui.Cond
 import imgui.ImGui
 import imgui.ItemFlags
@@ -84,7 +85,7 @@ object ImguiHelper {
                         action(label, item.cast(), gameObject, level, editorSceneUI)
                     }
                     is CustomEditorImpl -> {
-                        insertImguiExposeEditorField(value, gameObject, level, editorSceneUI)
+                        insertImguiExposeEditorFields(value, gameObject, level, editorSceneUI)
                     }
                     is Boolean -> {
                         checkbox(label, item.cast<Boolean>()::obj)
@@ -121,11 +122,11 @@ object ImguiHelper {
                         enum(label, item.cast())
                     }
                     else -> {
-                        insertImguiExposeEditorField(item.obj, gameObject, level, editorSceneUI)
+                        insertImguiExposeEditorFields(item.obj, gameObject, level, editorSceneUI)
                     }
                 }
 
-                if(!exposeEditor.description.isBlank() && isMouseHoveringRect(itemRectMin, itemRectMax)) {
+                if (!exposeEditor.description.isBlank() && isMouseHoveringRect(itemRectMin, itemRectMax)) {
                     functionalProgramming.withTooltip {
                         text(exposeEditor.description)
                     }
@@ -153,7 +154,7 @@ object ImguiHelper {
 
             functionalProgramming.withItemWidth(150f) {
                 functionalProgramming.withId("select action $label") {
-                    if (combo("action", index, PCGame.actionsClasses.map { it.simpleName ?: "Nom inconnu" })) {
+                    if (combo(label, index, PCGame.actionsClasses.map { it.simpleName ?: "Nom inconnu" })) {
                         action.obj = ReflectionUtility.findNoArgConstructor(PCGame.actionsClasses[index[0]])!!.newInstance()
                     }
                 }
@@ -170,7 +171,7 @@ object ImguiHelper {
                 }
                 pushItemFlag(ItemFlags.Disabled.i, incorrectAction)
                 if (treeNode("Propriétés")) {
-                    insertImguiExposeEditorField(action.obj, gameObject, level, editorSceneUI)
+                    insertImguiExposeEditorFields(action.obj, gameObject, level, editorSceneUI)
                     treePop()
                 }
                 popItemFlag()
@@ -296,18 +297,34 @@ object ImguiHelper {
         open?.set(bool!![0])
     }
 
-    fun insertImguiExposeEditorField(instance: Any, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+
+    fun insertImguiExposeEditorFields(instance: Any, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         if (instance is CustomEditorImpl) {
             instance.insertImgui(ReflectionUtility.simpleNameOf(instance), gameObject, level, editorSceneUI)
         }
 
         ReflectionUtility.getAllFieldsOf(instance.javaClass).filter { it.isAnnotationPresent(ExposeEditor::class.java) }.forEach { field ->
-                    field.isAccessible = true
+            field.isAccessible = true
 
-                    val exposeField = field.getAnnotation(ExposeEditor::class.java)
-                    val item = Item(field.get(instance))
-                    addImguiWidget(if (exposeField.customName.isBlank()) field.name else exposeField.customName, item, gameObject, level, exposeField, editorSceneUI)
-                    field.set(instance, item.obj)
-                }
+            val exposeField = field.getAnnotation(ExposeEditor::class.java)
+            val item = Item(field.get(instance))
+            addImguiWidget(if (exposeField.customName.isBlank()) field.name else exposeField.customName, item, gameObject, level, exposeField, editorSceneUI)
+            field.set(instance, item.obj)
+        }
+    }
+
+    fun insertDataExposeEditorFields(instance: Any) {
+        with(ImGui) {
+            if (instance.toString().isNotBlank())
+                ColorTextString.toImGui(instance.toString())
+            ReflectionUtility.getAllFieldsOf(instance.javaClass).filter { it.isAnnotationPresent(ExposeEditor::class.java) }.forEach { field ->
+                field.isAccessible = true
+
+                val exposeField = field.getAnnotation(ExposeEditor::class.java)
+                textColored(Vec4(0.96f, 0.78f, 0.48f, 1f), "${if (exposeField.customName.isBlank()) field.name else exposeField.customName} : ")
+                sameLine()
+                ColorTextString.toImGui(field.get(instance).toString())
+            }
+        }
     }
 }

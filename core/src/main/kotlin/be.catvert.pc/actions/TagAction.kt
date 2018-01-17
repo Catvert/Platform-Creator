@@ -8,7 +8,7 @@ import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.*
 import com.fasterxml.jackson.annotation.JsonCreator
 
-class TagAction(@ExposeEditor(customType = CustomType.TAG_STRING) val tag: GameObjectTag, var action: Action) : Action, CustomEditorImpl {
+class TagAction(@ExposeEditor(customType = CustomType.TAG_STRING) val tag: GameObjectTag, var action: Action) : Action(), CustomEditorImpl {
     @JsonCreator private constructor() : this(Tags.Player.tag, EmptyAction())
 
     override fun invoke(gameObject: GameObject) {
@@ -22,4 +22,6 @@ class TagAction(@ExposeEditor(customType = CustomType.TAG_STRING) val tag: GameO
                     ImguiHelper.action("action", ::action, this, level, editorSceneUI)
                 }
     }
+
+    override fun toString() = super.toString() + " - tag : $tag | action : $action"
 }

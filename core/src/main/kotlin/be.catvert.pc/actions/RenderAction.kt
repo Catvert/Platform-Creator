@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
  */
 
 @RequiredComponent(AtlasComponent::class)
-class RenderAction(@ExposeEditor var action: RenderActions) : Action {
+class RenderAction(@ExposeEditor var action: RenderActions) : Action() {
     @JsonCreator private constructor() : this(RenderActions.FLIP_X)
 
     enum class RenderActions {
@@ -29,4 +29,6 @@ class RenderAction(@ExposeEditor var action: RenderActions) : Action {
                     }
                 }
     }
+
+    override fun toString() = super.toString() + " - $action"
 }

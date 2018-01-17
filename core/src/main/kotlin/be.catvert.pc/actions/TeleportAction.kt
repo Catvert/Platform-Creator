@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 /**
  * Action permettant de téléporter un gameObject à un point précis
  */
-class TeleportAction(var teleportPoint: Point) : Action, CustomEditorImpl {
+class TeleportAction(var teleportPoint: Point) : Action(), CustomEditorImpl {
     @JsonCreator private constructor() : this(Point())
 
     override fun invoke(gameObject: GameObject) {
@@ -21,4 +21,6 @@ class TeleportAction(var teleportPoint: Point) : Action, CustomEditorImpl {
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         ImguiHelper.point(::teleportPoint, Point(), Point(level.matrixRect.width, level.matrixRect.height), editorSceneUI)
     }
+
+    override fun toString() = super.toString() + " - $teleportPoint"
 }

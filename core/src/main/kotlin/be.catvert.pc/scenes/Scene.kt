@@ -94,12 +94,13 @@ abstract class Scene(protected var background: Background) : Renderable, Updeata
     override fun update() {
         gameObjectContainer.update()
 
+        (background as? ParallaxBackground)?.updateOffsets(camera)
+
         stage.act()
     }
 
     override fun resize(size: Size) {
         viewport.update(size.width, size.height)
-        (background as? ParallaxBackground)?.reset()
     }
 
     override fun dispose() {

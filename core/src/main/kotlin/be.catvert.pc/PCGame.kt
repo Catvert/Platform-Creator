@@ -61,8 +61,6 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         // Permet de supprimer les logs d'imgui
         DEBUG = false
 
-        enableKtxCoroutines(1)
-
         PCGame.soundVolume = initialConfig.soundVolume
         PCGame.darkUI = initialConfig.darkUI
         PCGame.locale = initialConfig.locale
@@ -198,7 +196,7 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
 
         val actionsClasses = let {
             val list = mutableListOf<KClass<out Action>>()
-            FastClasspathScanner(Action::class.java.`package`.name).matchClassesImplementing(Action::class.java, { list.add(it.kotlin); }).scan()
+            FastClasspathScanner(Action::class.java.`package`.name).matchSubclassesOf(Action::class.java, { list.add(it.kotlin); }).scan()
 
             list.removeAll { it.isAbstract || !ReflectionUtility.hasNoArgConstructor(it) }
 

@@ -5,6 +5,6 @@ import be.catvert.pc.GameObject
 /**
  * Une action qui ne fait rien
  */
-class EmptyAction : Action {
+class EmptyAction : Action() {
     override fun invoke(gameObject: GameObject) {}
 }

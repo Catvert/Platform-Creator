@@ -357,4 +357,6 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         ImguiHelper.addImguiWidgetsArray("ignore tags", ignoreTags, { it }, { Tags.Player.tag }, gameObject, level, editorSceneUI, ExposeEditorFactory.createExposeEditor(customType = CustomType.TAG_STRING))
         ImguiHelper.addImguiWidgetsArray("collisions actions", collisionsActions, { it.side.name }, { CollisionAction() }, gameObject, level, editorSceneUI)
     }
+
+    override fun toString(): String = "jump data : $jumpData"
 }

@@ -14,7 +14,7 @@ import imgui.functionalProgramming
  * Action permettant de changer l'atlas en cour d'un gameObject
  */
 @RequiredComponent(AtlasComponent::class)
-class AtlasAction(var atlasIndex: Int) : Action, CustomEditorImpl {
+class AtlasAction(var atlasIndex: Int) : Action(), CustomEditorImpl {
     @JsonCreator private constructor() : this(-1)
 
     override fun invoke(gameObject: GameObject) {
@@ -32,4 +32,6 @@ class AtlasAction(var atlasIndex: Int) : Action, CustomEditorImpl {
             }
         }
     }
+
+    override fun toString(): String = super.toString() + " - index : $atlasIndex"
 }

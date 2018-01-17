@@ -8,7 +8,7 @@ import be.catvert.pc.utility.ExposeEditor
 import be.catvert.pc.utility.Point
 import com.fasterxml.jackson.annotation.JsonCreator
 
-class SpawnAction(@ExposeEditor var prefab: Prefab, @ExposeEditor var spawnSide: BoxSide) : Action {
+class SpawnAction(@ExposeEditor var prefab: Prefab, @ExposeEditor var spawnSide: BoxSide) : Action() {
     @JsonCreator private constructor() : this(PrefabFactory.MushroomRed_SMC.prefab, BoxSide.Left)
 
     override fun invoke(gameObject: GameObject) {
@@ -26,4 +26,6 @@ class SpawnAction(@ExposeEditor var prefab: Prefab, @ExposeEditor var spawnSide:
             prefab.create(Point(x, y), this)
         }
     }
+
+    override fun toString() = super.toString() + " - { prefab : $prefab ; side : $spawnSide }"
 }

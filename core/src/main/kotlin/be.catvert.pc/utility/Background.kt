@@ -2,6 +2,7 @@ package be.catvert.pc.utility
 
 import be.catvert.pc.Log
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -34,7 +35,7 @@ class ParallaxBackground(val parallaxDataFile: FileWrapper) : Background(Backgro
 
     private val layers = mutableListOf<Layer>()
 
-    private var lastCameraPos: Vector3? = null
+    private var lastCameraPos = Vector3(2000f / 2, 2000f / 2, 0f)
 
     private var xOffset = 0
     private var yOffset = 0f
@@ -54,7 +55,7 @@ class ParallaxBackground(val parallaxDataFile: FileWrapper) : Background(Backgro
         }
     }
 
-    fun updateXOffset(plusX: Int) {
+    private fun updateXOffset(plusX: Int) {
         xOffset = Math.max(0, xOffset + plusX)
 
         layers.forEach {
@@ -62,18 +63,10 @@ class ParallaxBackground(val parallaxDataFile: FileWrapper) : Background(Backgro
         }
     }
 
-    fun reset() {
-        xOffset = 0
-        yOffset = 0f
-        layers.forEach {
-            it.x = 0f
-        }
-    }
-
-    fun updateCamera(camera: OrthographicCamera) {
-        if (lastCameraPos != null && lastCameraPos != camera.position) {
-            val deltaX = camera.position.x - lastCameraPos!!.x
-            val deltaY = (camera.position.y - lastCameraPos!!.y) / 2f
+    fun updateOffsets(camera: OrthographicCamera) {
+        if (lastCameraPos != camera.position) {
+            val deltaX = camera.position.x - lastCameraPos.x
+            val deltaY = (camera.position.y - lastCameraPos.y) / 2
             yOffset = Math.min(0f, yOffset - deltaY)
 
             layers.forEach {

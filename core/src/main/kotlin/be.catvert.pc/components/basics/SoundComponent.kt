@@ -64,4 +64,16 @@ class SoundComponent(var sounds: ArrayList<SoundData>) : Component(), ResourceLo
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         ImguiHelper.addImguiWidgetsArray("sons", sounds, { it.toString() }, { SoundData(Constants.defaultSoundPath.toFileWrapper()) }, gameObject, level, editorSceneUI)
     }
+
+    override fun toString(): String {
+        val stringBuilder = StringBuilder()
+
+        stringBuilder.appendln("<-->")
+        sounds.forEach {
+            stringBuilder.appendln("sound : ${it.soundFile.get().nameWithoutExtension()}")
+        }
+        stringBuilder.appendln("<-->")
+
+        return stringBuilder.toString()
+    }
 }

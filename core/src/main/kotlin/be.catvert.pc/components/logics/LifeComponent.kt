@@ -67,4 +67,18 @@ class LifeComponent(onDeathAction: Action, lifePointActions: ArrayList<Action> =
         ImguiHelper.addImguiWidgetsArray("life actions", lpActions, { "vie ${lpActions.indexOf(it) + 1}" }, { EmptyAction() }, gameObject, level, editorSceneUI)
     }
 
+    override fun toString(): String {
+        val stringBuilder = StringBuilder()
+
+        stringBuilder.appendln("point de vie actuel : $lifePoint")
+
+        lpActions.forEachIndexed { index, it ->
+            stringBuilder.appendln("<-->")
+            stringBuilder.appendln("point de vie : ${index + 1}")
+            stringBuilder.appendln("action : $it")
+            stringBuilder.appendln("<-->")
+        }
+
+        return stringBuilder.toString()
+    }
 }

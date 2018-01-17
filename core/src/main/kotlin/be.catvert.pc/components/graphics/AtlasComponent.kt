@@ -483,4 +483,21 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
             return animationRegionNames
         }
     }
+
+    override fun toString(): String {
+        val stringBuilder = StringBuilder()
+
+        data.forEach {
+            stringBuilder.appendln("<-->")
+            stringBuilder.appendln("nom : ${it.name}")
+            if(it.regions.size > 1)
+                stringBuilder.appendln("anim mode : ${it.animationPlayMode}")
+            it.regions.forEach {
+                stringBuilder.appendln(" - ${it.first.get().nameWithoutExtension()} -> ${it.second}")
+            }
+            stringBuilder.appendln("<-->")
+        }
+
+        return stringBuilder.toString()
+    }
 }

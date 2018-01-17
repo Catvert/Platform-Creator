@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
  * @see LifeComponent
  */
 @RequiredComponent(LifeComponent::class)
-class LifeAction(@ExposeEditor var action: LifeActions) : Action {
+class LifeAction(@ExposeEditor var action: LifeActions) : Action() {
     @JsonCreator private constructor() : this(LifeActions.REMOVE_LP)
 
     enum class LifeActions {
@@ -27,4 +27,6 @@ class LifeAction(@ExposeEditor var action: LifeActions) : Action {
             LifeActions.ONE_SHOT -> lifeComponent?.kill()
         }
     }
+
+    override fun toString(): String = super.toString() + " - $action"
 }

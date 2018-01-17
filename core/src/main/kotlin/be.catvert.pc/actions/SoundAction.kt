@@ -15,7 +15,7 @@ import imgui.functionalProgramming
  * @see SoundComponent
  */
 @RequiredComponent(SoundComponent::class)
-class SoundAction(var soundIndex: Int) : Action, CustomEditorImpl {
+class SoundAction(var soundIndex: Int) : Action(), CustomEditorImpl {
     @JsonCreator private constructor() : this(-1)
 
     override fun invoke(gameObject: GameObject) {
@@ -40,4 +40,6 @@ class SoundAction(var soundIndex: Int) : Action, CustomEditorImpl {
             }
         }
     }
+
+    override fun toString() = super.toString() + " - index : $soundIndex"
 }

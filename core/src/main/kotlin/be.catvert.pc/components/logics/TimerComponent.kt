@@ -38,4 +38,6 @@ class TimerComponent(interval: Float, @ExposeEditor var timerAction: Action) : C
             ImGui.sliderFloat("interval", ::interval, 0f, 10f)
         }
     }
+
+    override fun toString() = "interval : $interval"
 }

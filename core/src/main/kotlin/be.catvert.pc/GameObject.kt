@@ -8,9 +8,11 @@ import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.*
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
+import imgui.IMGUI_HAS_NAV
 import imgui.ImGui
 import imgui.functionalProgramming
 import kotlin.math.roundToInt
@@ -133,6 +135,8 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
             }
         }
     }
+
+    override fun toString() = ColorTextString.toString(Color.ORANGE, name)
 }
 
 class GameObjectTweenAccessor : TweenAccessor<GameObject> {

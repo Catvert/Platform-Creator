@@ -67,9 +67,6 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
                         levelPrefabs.second.add(SerializationFactory.deserializeFromFile(it))
                     }
         }
-
-        if (background is ParallaxBackground)
-            background.cast<ParallaxBackground>()?.updateXOffset(0)
     }
 
     fun resourcesTextures() = levelTextures.second.toList()
@@ -123,9 +120,6 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
                     if (lerp) lerpX else posX,
                     if (lerp) lerpY else posY, 0f)
         }
-
-        if (background is ParallaxBackground)
-            background.cast<ParallaxBackground>()?.updateCamera(camera)
     }
 
     @JsonIgnore

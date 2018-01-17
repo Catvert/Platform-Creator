@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
  * @see PhysicsComponent
  */
 @RequiredComponent(PhysicsComponent::class)
-class PhysicsAction(@ExposeEditor var physicsAction: PhysicsActions) : Action {
+class PhysicsAction(@ExposeEditor var physicsAction: PhysicsActions) : Action() {
     @JsonCreator private constructor() : this(PhysicsActions.GO_LEFT)
 
     enum class PhysicsActions {
@@ -21,4 +21,6 @@ class PhysicsAction(@ExposeEditor var physicsAction: PhysicsActions) : Action {
     override fun invoke(gameObject: GameObject) {
         gameObject.getCurrentState().getComponent<PhysicsComponent>()?.physicsActions?.add(physicsAction)
     }
+
+    override fun toString() = super.toString() + " - $physicsAction"
 }

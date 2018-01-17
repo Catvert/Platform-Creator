@@ -12,8 +12,10 @@ import imgui.functionalProgramming
 /**
  * Action permettant de changer l'état d'un gameObject
  */
-class StateAction(var stateIndex: Int, var usePreviousMoverDirection: Boolean = false) : Action, CustomEditorImpl {
+class StateAction(var stateIndex: Int, var usePreviousMoverDirection: Boolean = false) : Action(), CustomEditorImpl {
     @JsonCreator private constructor() : this(0)
+
+    private fun checkHasMover(gameObject: GameObject) = gameObject.getCurrentState().hasComponent<MoverComponent>() && gameObject.getStates().elementAtOrNull(stateIndex)?.hasComponent<MoverComponent>() == true
 
     override fun invoke(gameObject: GameObject) {
         if (usePreviousMoverDirection && checkHasMover(gameObject)) {
@@ -35,5 +37,7 @@ class StateAction(var stateIndex: Int, var usePreviousMoverDirection: Boolean = 
         }
     }
 
-    private fun checkHasMover(gameObject: GameObject) = gameObject.getCurrentState().hasComponent<MoverComponent>() && gameObject.getStates().elementAtOrNull(stateIndex)?.hasComponent<MoverComponent>() == true
+    override fun toString() = super.toString() + " - { index : $stateIndex ; use previous mover : $usePreviousMoverDirection }"
+
+
 }

@@ -6,10 +6,7 @@ import be.catvert.pc.PCGame
 import be.catvert.pc.PCGame.Companion.soundVolume
 import be.catvert.pc.containers.Level
 import be.catvert.pc.i18n.MenusText
-import be.catvert.pc.utility.Constants
-import be.catvert.pc.utility.ImguiHelper
-import be.catvert.pc.utility.KeyDownSignalProcessor
-import be.catvert.pc.utility.Size
+import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.files.FileHandle
@@ -27,6 +24,7 @@ import ktx.actors.plus
 import ktx.collections.toGdxArray
 import ktx.vis.table
 import ktx.vis.window
+import net.dermetfan.utils.StringUtils
 import java.io.IOException
 import kotlin.collections.set
 
@@ -93,6 +91,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
             stage + window("Erreur !") {
                 isModal = true
                 setSize(600f, 100f)
+                addCloseButton()
 
                 label("Le niveau $level est invalide ! :(")
             }.apply { centerPosition(this@MainMenuScene.stage.width, this@MainMenuScene.stage.height) }

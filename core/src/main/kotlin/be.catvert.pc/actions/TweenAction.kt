@@ -15,7 +15,7 @@ import imgui.functionalProgramming
  * @see TweenComponent
  */
 @RequiredComponent(TweenComponent::class)
-class TweenAction(var tweenIndex: Int) : Action, CustomEditorImpl {
+class TweenAction(var tweenIndex: Int) : Action(), CustomEditorImpl {
     @JsonCreator private constructor() : this(-1)
 
     override fun invoke(gameObject: GameObject) {
@@ -30,4 +30,6 @@ class TweenAction(var tweenIndex: Int) : Action, CustomEditorImpl {
             }
         }
     }
+
+    override fun toString() = super.toString() + " - index : $tweenIndex"
 }

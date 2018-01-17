@@ -9,10 +9,12 @@ import com.fasterxml.jackson.annotation.JsonCreator
 /**
  * Action permettant de redimensionner un gameObject
  */
-class ResizeAction(@ExposeEditor(min = 1f, max = Constants.maxGameObjectSize.toFloat()) var newSize: Size) : Action {
+class ResizeAction(@ExposeEditor(min = 1f, max = Constants.maxGameObjectSize.toFloat()) var newSize: Size) : Action() {
     @JsonCreator private constructor() : this(Size(1, 1))
 
     override fun invoke(gameObject: GameObject) {
         gameObject.box.size = newSize
     }
+
+    override fun toString() = super.toString() + " - $newSize"
 }

@@ -17,4 +17,6 @@ abstract class Component {
 
     @JsonIgnore
     protected lateinit var gameObject: GameObject
+
+    override fun toString() = ""
 }
