@@ -141,7 +141,6 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                 }
             }
         }
-
         /**
          * Permet de charger l'animation responsable d'animer les différentes régions si il y en a plusieurs.
          */

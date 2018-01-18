@@ -1,10 +1,4 @@
-20:29:37  -> Info. : Initialisation en cours.. 
+21:05:51  -> Info. : Initialisation en cours.. 
  Taille : 1440x760
-20:29:42  -> Info. : Chargement de la scène : EditorScene
-20:47:35  -> Info. : Chargement de la scène : MainMenuScene
-20:47:37  -> Info. : Chargement de la scène : GameScene
-20:47:39  -> Info. : Chargement de la scène : EndLevelScene
-20:47:40  -> Info. : Chargement de la scène : GameScene
-20:47:41  -> Info. : Chargement de la scène : EndLevelScene
-20:47:42  -> Info. : Chargement de la scène : GameScene
-20:47:42  -> Info. : Chargement de la scène : EditorScene
+21:05:54  -> Info. : Chargement de la scène : EditorScene
+21:06:47  -> Info. : Chargement de la scène : MainMenuScene

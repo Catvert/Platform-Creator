@@ -11,6 +11,9 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.I18NBundle
+import com.badlogic.gdx.graphics.g2d.TextureRegion
+
+
 
 object ResourceManager : Disposable {
     private val assetManager = AssetManager()
@@ -56,8 +59,12 @@ object ResourceManager : Disposable {
             return if (assetManager.isLoaded(file.path()))
                 assetManager.get(file.path())
             else {
-                if (file.exists() || T::class == I18NBundle::class)
-                    assetManager.loadOnDemand<T>(file).asset
+                if (file.exists() || T::class == I18NBundle::class) {
+                    val res = assetManager.loadOnDemand<T>(file).asset
+                    if(res is TextureAtlas)
+                        fixPackBleeding(res)
+                    res
+                }
                 else {
                     Log.warn { "Ressource non trouvée : ${file.path()}" }
                     null
@@ -68,6 +75,23 @@ object ResourceManager : Disposable {
         }
         Log.warn { "Ressource non trouvée : ${file.path()}" }
         return null
+    }
+
+    /**
+     * Fix by grimrader22 : https://stackoverflow.com/questions/27391911/white-vertical-lines-and-jittery-horizontal-lines-in-tile-map-movement
+     */
+    private fun fixPackBleeding(pack: TextureAtlas) {
+        pack.regions.forEach { region ->
+            val fix = 0.01f
+
+            val x = region.regionX.toFloat()
+            val y = region.regionY.toFloat()
+            val width = region.regionWidth.toFloat()
+            val height = region.regionHeight.toFloat()
+            val invTexWidth = 1f / region.texture.width
+            val invTexHeight = 1f / region.texture.height
+            region.setRegion((x + fix) * invTexWidth, (y + fix) * invTexHeight, (x + width - fix) * invTexWidth, (y + height - fix) * invTexHeight)
+        }
     }
 
     override fun dispose() {
