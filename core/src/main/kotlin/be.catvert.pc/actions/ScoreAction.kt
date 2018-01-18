@@ -14,8 +14,8 @@ class ScoreAction(@ExposeEditor(max = 100f) var points: Int) : Action() {
 
     override fun invoke(gameObject: GameObject) {
         gameObject.container.cast<Level>()?.apply {
-                    scorePoints += points
-                }
+            scorePoints += points
+        }
     }
 
     override fun toString() = super.toString() + " - +$points"

@@ -52,7 +52,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
     private data class GridMode(var active: Boolean = false, var offsetX: Int = 0, var offsetY: Int = 0, var cellWidth: Int = 50, var cellHeight: Int = 50) {
         fun putGameObject(walkRect: Rect, point: Point, gameObject: GameObject) {
             getRectCellOf(walkRect, point)?.apply {
-                if(this.x >= walkRect.x && this.x + this.width <= walkRect.x + walkRect.width && this.y >= walkRect.y && this.y + this.height <= walkRect.y + walkRect.height)
+                if (this.x >= walkRect.x && this.x + this.width <= walkRect.x + walkRect.width && this.y >= walkRect.y && this.y + this.height <= walkRect.y + walkRect.height)
                     gameObject.box = this
             }
         }
@@ -112,7 +112,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
         var showExitWindow = false
 
         var showInfoGameObjectWindow = false
-        var showInfoGameObjectTryModeWindow = false
+        var showInfoGameObjectTextWindow = false
 
         var showGameObjectsWindow = true
         var gameObjectsTypeIndex = 0
@@ -215,20 +215,20 @@ class EditorScene(val level: Level) : Scene(level.background) {
          * Dessine les gameObjects qui n'ont pas de renderableComponent avec un box noir
          */
         gameObjectContainer.cast<Level>()?.apply {
-                    getAllGameObjectsInCells(getActiveGridCells()).forEach {
-                        if (it.getCurrentState().getComponent<AtlasComponent>()?.data?.isEmpty() != false) {
-                            shapeRenderer.withColor(Color.GRAY) {
-                                rect(it.box)
-                            }
-                        }
-
-                        if (it.layer == selectLayer || editorSceneUI.editorMode == EditorSceneUI.EditorMode.TRY_LEVEL) {
-                            it.getCurrentState().getComponent<AtlasComponent>()?.alpha = 1f
-                        } else {
-                            it.getCurrentState().getComponent<AtlasComponent>()?.alpha = 0.5f
-                        }
+            getAllGameObjectsInCells(getActiveGridCells()).forEach {
+                if (it.getCurrentState().getComponent<AtlasComponent>()?.data?.isEmpty() != false) {
+                    shapeRenderer.withColor(Color.GRAY) {
+                        rect(it.box)
                     }
                 }
+
+                if (it.layer == selectLayer || editorSceneUI.editorMode == EditorSceneUI.EditorMode.TRY_LEVEL) {
+                    it.getCurrentState().getComponent<AtlasComponent>()?.alpha = 1f
+                } else {
+                    it.getCurrentState().getComponent<AtlasComponent>()?.alpha = 0.5f
+                }
+            }
+        }
 
         when (editorSceneUI.editorMode) {
             EditorSceneUI.EditorMode.NO_MODE -> {
@@ -293,15 +293,15 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
                     if (rect != null) {
                         go.getCurrentState().getComponent<AtlasComponent>()?.apply {
-                                    if (this.currentIndex in data.indices) {
-                                        val data = this.data[currentIndex]
-                                        PCGame.mainBatch.use {
-                                            it.withColor(Color.WHITE.apply { a = 0.5f }) {
-                                                it.draw(data.currentKeyFrame(), rect)
-                                            }
-                                        }
+                            if (this.currentIndex in data.indices) {
+                                val data = this.data[currentIndex]
+                                PCGame.mainBatch.use {
+                                    it.withColor(Color.WHITE.apply { a = 0.5f }) {
+                                        it.draw(data.currentKeyFrame(), rect)
                                     }
-                                } ?: shapeRenderer.withColor(Color.GRAY) { rect(rect) }
+                                }
+                            }
+                        } ?: shapeRenderer.withColor(Color.GRAY) { rect(rect) }
                     }
 
                     if (go.container != null) {
@@ -345,12 +345,12 @@ class EditorScene(val level: Level) : Scene(level.background) {
         updateCamera()
 
         // TODO Refactor
-        if(!isUIHover && editorSceneUI.editorMode == EditorSceneUI.EditorMode.TRY_LEVEL) {
-            if(Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !latestLeftButtonClick) {
+        if (!isUIHover && editorSceneUI.editorMode == EditorSceneUI.EditorMode.TRY_LEVEL) {
+            if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !latestLeftButtonClick) {
                 val gameObject = findGameObjectUnderMouse(false)
-                if(gameObject != null) {
+                if (gameObject != null) {
                     selectGameObjectTryMode = gameObject
-                    editorSceneUI.showInfoGameObjectTryModeWindow = true
+                    editorSceneUI.showInfoGameObjectTextWindow = true
                 }
             }
         }
@@ -394,11 +394,11 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         selectRectangleData.rectangleStarted = false
 
                         level.getAllGameObjectsInCells(selectRectangleData.getRect()).forEach {
-                                    if (selectRectangleData.getRect().contains(it.box)) {
-                                        addSelectGameObject(it)
-                                        editorSceneUI.editorMode = EditorSceneUI.EditorMode.SELECT
-                                    }
-                                }
+                            if (selectRectangleData.getRect().contains(it.box)) {
+                                addSelectGameObject(it)
+                                editorSceneUI.editorMode = EditorSceneUI.EditorMode.SELECT
+                            }
+                        }
                     }
 
                     if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_COPY_MODE.key)) {
@@ -411,21 +411,21 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
                     if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_FLIPX.key)) {
                         findGameObjectUnderMouse(true)?.getCurrentState()?.getComponent<AtlasComponent>()?.apply {
-                                    flipX = !flipX
-                                }
+                            flipX = !flipX
+                        }
                     }
                     if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_FLIPY.key)) {
                         findGameObjectUnderMouse(true)?.getCurrentState()?.getComponent<AtlasComponent>()?.apply {
-                                    flipY = !flipY
-                                }
+                            flipY = !flipY
+                        }
                     }
                     if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_ATLAS_PREVIOUS_FRAME.key)) {
                         findGameObjectUnderMouse(true)?.apply {
                             if (getStates().size == 1) {
                                 getCurrentState().getComponent<AtlasComponent>()?.apply {
-                                            if (data.size == 1)
-                                                data.elementAt(0).previousFrameRegion(0)
-                                        }
+                                    if (data.size == 1)
+                                        data.elementAt(0).previousFrameRegion(0)
+                                }
                             }
                         }
                     }
@@ -433,9 +433,9 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         findGameObjectUnderMouse(true)?.apply {
                             if (getStates().size == 1) {
                                 getCurrentState().getComponent<AtlasComponent>()?.apply {
-                                            if (data.size == 1)
-                                                data.elementAt(0).nextFrameRegion(0)
-                                        }
+                                    if (data.size == 1)
+                                        data.elementAt(0).nextFrameRegion(0)
+                                }
                             }
                         }
                     }
@@ -453,7 +453,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         if (selectGameObjects.let {
                                     var canMove = true
                                     it.forEach {
-                                        if(!(it.box.x + moveX >= 0 && it.box.x + it.box.width + moveX <= level.matrixRect.width && it.box.y + moveY >= 0 && it.box.y + it.box.height + moveY <= level.matrixRect.height))
+                                        if (!(it.box.x + moveX >= 0 && it.box.x + it.box.width + moveX <= level.matrixRect.width && it.box.y + moveY >= 0 && it.box.y + it.box.height + moveY <= level.matrixRect.height))
                                             canMove = false
                                     }
                                     canMove
@@ -679,20 +679,20 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         // TODO Refactoring
 
                         selectGameObjects.filter { it !== selectGameObject }.forEach {
-                                    val deltaX = it.position().x - selectGameObject!!.position().x
-                                    val deltaY = it.position().y - selectGameObject!!.position().y
+                            val deltaX = it.position().x - selectGameObject!!.position().x
+                            val deltaY = it.position().y - selectGameObject!!.position().y
 
-                                    level.addGameObject(SerializationFactory.copy(it).apply {
-                                        val pos = Point(copySelectGO.position().x + deltaX, copySelectGO.position().y + deltaY)
+                            level.addGameObject(SerializationFactory.copy(it).apply {
+                                val pos = Point(copySelectGO.position().x + deltaX, copySelectGO.position().y + deltaY)
 
-                                        if (gridMode.active && selectGameObjects.size == 1)
-                                            gridMode.putGameObject(level.activeRect, pos, this)
-                                        else
-                                            this.box.position = pos
+                                if (gridMode.active && selectGameObjects.size == 1)
+                                    gridMode.putGameObject(level.activeRect, pos, this)
+                                else
+                                    this.box.position = pos
 
-                                        copyGameObjects += this
-                                    })
-                                }
+                                copyGameObjects += this
+                            })
+                        }
 
                         if (moveToCopyGO) {
                             clearSelectGameObjects()
@@ -869,7 +869,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
         editorSceneUI.editorMode = EditorSceneUI.EditorMode.TRY_LEVEL
 
-        gameObjectContainer = SerializationFactory.copy(level).apply { exit = { if(!editorSceneUI.godModeTryMode) finishTryLevel() } }
+        gameObjectContainer = SerializationFactory.copy(level).apply { exit = { if (!editorSceneUI.godModeTryMode) finishTryLevel() } }
     }
 
     private fun finishTryLevel() {
@@ -913,8 +913,8 @@ class EditorScene(val level: Level) : Scene(level.background) {
                 }
             }
 
-            if(editorSceneUI.showInfoGameObjectTryModeWindow && selectGameObjectTryMode != null && editorSceneUI.editorMode == EditorSceneUI.EditorMode.TRY_LEVEL) {
-                drawInfoGameObjectTryModeWindow(selectGameObjectTryMode!!)
+            if (editorSceneUI.showInfoGameObjectTextWindow && selectGameObjectTryMode != null && editorSceneUI.editorMode == EditorSceneUI.EditorMode.TRY_LEVEL) {
+                drawInfoGameObjectTextWindow(selectGameObjectTryMode!!)
             }
 
             if (editorSceneUI.showInfoGameObjectWindow && selectGameObject != null && selectGameObject?.container != null
@@ -1051,21 +1051,21 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         }
 
                         PrefabType.values().forEach { type ->
-                                    menu(type.name) {
-                                        if (type == PrefabType.All) {
-                                            level.resourcesPrefabs().forEach {
-                                                        menuItem(it.name) {
-                                                            createGO(it)
-                                                        }
-                                                    }
+                            menu(type.name) {
+                                if (type == PrefabType.All) {
+                                    level.resourcesPrefabs().forEach {
+                                        menuItem(it.name) {
+                                            createGO(it)
                                         }
-                                        PrefabFactory.values().filter { it.type == type }.forEach {
-                                                    menuItem(it.name.removeSuffix("_${type.name}")) {
-                                                        createGO(it.prefab)
-                                                    }
-                                                }
                                     }
                                 }
+                                PrefabFactory.values().filter { it.type == type }.forEach {
+                                    menuItem(it.name.removeSuffix("_${type.name}")) {
+                                        createGO(it.prefab)
+                                    }
+                                }
+                            }
+                        }
                     }
                 } else {
                     menuItem("Arrêter l'essai") {
@@ -1142,30 +1142,30 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         (if (editorSceneUI.gameObjectsSpriteShowImportedPack) level.resourcesAtlas().getOrNull(editorSceneUI.gameObjectsSpritePackIndex) else PCGame.gameAtlas.entries.elementAtOrNull(editorSceneUI.gameObjectsSpritePackTypeIndex)?.value?.getOrNull(editorSceneUI.gameObjectsSpritePackIndex))?.also { atlasPath ->
                             val atlas = ResourceManager.getPack(atlasPath)
                             atlas.regions.sortedBy { it.name }.forEachIndexed { index, region ->
-                                        val atlasRegion = atlasPath.toFileWrapper() to region.name
-                                        val size = if (editorSceneUI.gameObjectsSpriteRealSize) region.let { Size(it.regionWidth, it.regionHeight) } else Size(50, 50)
-                                        val prefab = if (editorSceneUI.gameObjectsSpritePhysics) PrefabSetup.setupPhysicsSprite(atlasRegion, size) else PrefabSetup.setupSprite(atlasRegion, size)
-                                        addImageBtn(region, prefab, false)
+                                val atlasRegion = atlasPath.toFileWrapper() to region.name
+                                val size = if (editorSceneUI.gameObjectsSpriteRealSize) region.let { Size(it.regionWidth, it.regionHeight) } else Size(50, 50)
+                                val prefab = if (editorSceneUI.gameObjectsSpritePhysics) PrefabSetup.setupPhysicsSprite(atlasRegion, size) else PrefabSetup.setupSprite(atlasRegion, size)
+                                addImageBtn(region, prefab, false)
 
-                                        if ((index + 1) % 3 != 0)
-                                            sameLine()
-                                    }
+                                if ((index + 1) % 3 != 0)
+                                    sameLine()
+                            }
                         }
                     }
                     else -> {
                         var index = 0
                         (PrefabFactory.values().map { it.prefab } + level.resourcesPrefabs()).filter { it.prefabGO.tag == tag }.forEach {
-                                    it.prefabGO.loadResources()
+                            it.prefabGO.loadResources()
 
-                                    it.prefabGO.getCurrentState().getComponent<AtlasComponent>()?.apply {
-                                                data.elementAtOrNull(currentIndex)?.apply {
-                                                            addImageBtn(currentKeyFrame(), it, true)
+                            it.prefabGO.getCurrentState().getComponent<AtlasComponent>()?.apply {
+                                data.elementAtOrNull(currentIndex)?.apply {
+                                    addImageBtn(currentKeyFrame(), it, true)
 
-                                                            if ((++index) % 3 != 0)
-                                                                sameLine()
-                                                        }
-                                            }
+                                    if ((++index) % 3 != 0)
+                                        sameLine()
                                 }
+                            }
+                        }
                     }
                 }
             }
@@ -1302,13 +1302,13 @@ class EditorScene(val level: Level) : Scene(level.background) {
         }
     }
 
-    private fun drawInfoGameObjectTryModeWindow(gameObject: GameObject) {
+    private fun drawInfoGameObjectTextWindow(gameObject: GameObject) {
         with(ImGui) {
-            functionalProgramming.withWindow("Données du gameObject", editorSceneUI::showInfoGameObjectTryModeWindow, WindowFlags.AlwaysAutoResize.i) {
-                ImguiHelper.insertDataExposeEditorFields(gameObject)
+            functionalProgramming.withWindow("Données du gameObject", editorSceneUI::showInfoGameObjectTextWindow, WindowFlags.AlwaysAutoResize.i) {
+                ImguiHelper.insertImguiTextExposeEditorFields(gameObject)
                 separator()
 
-                val components = gameObject.getStates().elementAt(editorSceneUI.gameObjectCurrentStateIndex).getComponents()
+                val components = gameObject.getCurrentState().getComponents()
                 functionalProgramming.withItemWidth(150f) {
                     combo("component", editorSceneUI::gameObjectCurrentComponentIndex, components.map { ReflectionUtility.simpleNameOf(it).removeSuffix("Component") })
                 }
@@ -1325,7 +1325,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                             false
                         }
                         if (!incorrectComponent)
-                            ImguiHelper.insertDataExposeEditorFields(component)
+                            ImguiHelper.insertImguiTextExposeEditorFields(component)
                         else {
                             text("Il manque le(s) component(s) :")
                             functionalProgramming.withIndent {

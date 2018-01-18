@@ -2,16 +2,13 @@ package be.catvert.pc.utility
 
 import be.catvert.pc.Log
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.utils.JsonReader
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import glm_.func.common.clamp
 import java.io.FileReader
 import kotlin.math.roundToInt
 

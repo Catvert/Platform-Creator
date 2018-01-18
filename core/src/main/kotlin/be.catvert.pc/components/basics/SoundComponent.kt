@@ -7,6 +7,7 @@ import be.catvert.pc.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.audio.Sound
+import com.badlogic.gdx.graphics.Color
 import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
 import imgui.functionalProgramming
@@ -14,7 +15,7 @@ import imgui.functionalProgramming
 /**
  * Component permettant d'ajouter des sons à un gameObject
  */
-class SoundComponent(var sounds: ArrayList<SoundData>) : Component(), ResourceLoader, CustomEditorImpl {
+class SoundComponent(var sounds: ArrayList<SoundData>) : Component(), ResourceLoader, CustomEditorImpl, CustomEditorTextImpl {
     constructor(vararg sounds: SoundData) : this(arrayListOf(*sounds))
     @JsonCreator private constructor() : this(arrayListOf())
 
@@ -65,15 +66,11 @@ class SoundComponent(var sounds: ArrayList<SoundData>) : Component(), ResourceLo
         ImguiHelper.addImguiWidgetsArray("sons", sounds, { it.toString() }, { SoundData(Constants.defaultSoundPath.toFileWrapper()) }, gameObject, level, editorSceneUI)
     }
 
-    override fun toString(): String {
-        val stringBuilder = StringBuilder()
-
-        stringBuilder.appendln("<-->")
+    override fun insertText() {
+        ImguiHelper.textColored(Color.RED, "<-->")
         sounds.forEach {
-            stringBuilder.appendln("sound : ${it.soundFile.get().nameWithoutExtension()}")
+            ImguiHelper.textPropertyColored(Color.ORANGE, "sound :", it.soundFile.get().nameWithoutExtension())
         }
-        stringBuilder.appendln("<-->")
-
-        return stringBuilder.toString()
+        ImguiHelper.textColored(Color.RED, "<-->")
     }
 }

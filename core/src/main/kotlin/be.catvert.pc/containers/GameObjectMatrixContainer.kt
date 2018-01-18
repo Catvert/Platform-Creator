@@ -129,8 +129,8 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     private fun addLineWidth() {
         val width = mutableListOf<MutableList<GameObject>>()
         matrixGrid.last().forEach {
-                    width.add(mutableListOf())
-                }
+            width.add(mutableListOf())
+        }
 
         matrixGrid.add(width)
 
@@ -168,8 +168,8 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
         matrixGrid.forEach {
             val last = it.last().apply {
                 it.last().forEach {
-                            removeGameObject(it)
-                        }
+                    removeGameObject(it)
+                }
             }
             it.remove(last)
         }

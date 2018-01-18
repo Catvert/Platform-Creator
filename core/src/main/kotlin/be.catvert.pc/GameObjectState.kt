@@ -57,20 +57,20 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
 
     override fun render(batch: Batch) {
         components.filter { it is Renderable }.forEach {
-                    (it as Renderable).render(batch)
-                }
+            (it as Renderable).render(batch)
+        }
     }
 
     override fun update() {
         components.filter { it is Updeatable }.forEach {
-                    (it as Updeatable).update()
-                }
+            (it as Updeatable).update()
+        }
     }
 
     override fun loadResources() {
         components.filter { it is ResourceLoader }.forEach {
-                    (it as ResourceLoader).loadResources()
-                }
+            (it as ResourceLoader).loadResources()
+        }
     }
 
     override fun toString(): String = name

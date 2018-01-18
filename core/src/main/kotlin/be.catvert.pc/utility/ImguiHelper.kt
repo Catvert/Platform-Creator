@@ -12,6 +12,7 @@ import be.catvert.pc.i18n.MenusText
 import be.catvert.pc.scenes.EditorScene
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
+import com.badlogic.gdx.graphics.Color
 import glm_.vec2.Vec2
 import glm_.vec4.Vec4
 import imgui.Cond
@@ -291,12 +292,15 @@ object ImguiHelper {
         }
     }
 
-    fun popupModal(name: String, open: KMutableProperty0<Boolean>? = null, extraFlags: Int = 0, block: () -> Unit) {
-        val bool = if (open != null) booleanArrayOf(open()) else null
-        functionalProgramming.popupModal(name, bool, extraFlags, block)
-        open?.set(bool!![0])
+    fun textColored(color: Color, content: String) {
+        ImGui.textColored(Vec4(color.r, color.g, color.b, 1f), content)
     }
 
+    fun textPropertyColored(color: Color, propertyName: String, value: Any) {
+        textColored(color, propertyName)
+        ImGui.sameLine()
+        (value as? CustomEditorTextImpl)?.insertText() ?: ImGui.text(value.toString())
+    }
 
     fun insertImguiExposeEditorFields(instance: Any, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         if (instance is CustomEditorImpl) {
@@ -313,17 +317,17 @@ object ImguiHelper {
         }
     }
 
-    fun insertDataExposeEditorFields(instance: Any) {
+    fun insertImguiTextExposeEditorFields(instance: Any) {
         with(ImGui) {
-            if (instance.toString().isNotBlank())
-                ColorTextString.toImGui(instance.toString())
+            (instance as? CustomEditorTextImpl)?.insertText()
+                    ?: if (instance.toString().isNotBlank()) text(instance.toString())
             ReflectionUtility.getAllFieldsOf(instance.javaClass).filter { it.isAnnotationPresent(ExposeEditor::class.java) }.forEach { field ->
                 field.isAccessible = true
 
                 val exposeField = field.getAnnotation(ExposeEditor::class.java)
-                textColored(Vec4(0.96f, 0.78f, 0.48f, 1f), "${if (exposeField.customName.isBlank()) field.name else exposeField.customName} : ")
-                sameLine()
-                ColorTextString.toImGui(field.get(instance).toString())
+                val value = field.get(instance)
+
+                textPropertyColored(Color.ORANGE, "${if (exposeField.customName.isBlank()) field.name else exposeField.customName} :", value)
             }
         }
     }

@@ -69,8 +69,9 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                     onRightAction = walkAction
                     onLeftAction = walkAction
                     onNothingAction = AtlasAction(0)
-                    onJumpAction = MultiplexerAction(SoundAction(jumpSoundIndex), AtlasAction(2))
-                    onFallAction = AtlasAction(3)
+                    onJumpAction = SoundAction(jumpSoundIndex)
+                    onUpAction = AtlasAction(2)
+                    onDownAction = AtlasAction(3)
                 }
 
                 this += SoundComponent(SoundComponent.SoundData(Constants.soundsDirPath.child("player/jump.ogg").toFileWrapper()))
@@ -152,8 +153,9 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                     onRightAction = walkAction
                     onLeftAction = walkAction
                     onNothingAction = AtlasAction(0)
-                    onJumpAction = MultiplexerAction(SoundAction(jumpSoundIndex), AtlasAction(2))
-                    onFallAction = AtlasAction(3)
+                    onJumpAction = SoundAction(jumpSoundIndex)
+                    onUpAction = AtlasAction(2)
+                    onDownAction = AtlasAction(3)
                     collisionsActions.add(CollisionAction())
                 }
 
@@ -184,8 +186,9 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                     onRightAction = walkAction
                     onLeftAction = walkAction
                     onNothingAction = AtlasAction(0)
-                    onJumpAction = MultiplexerAction(SoundAction(jumpSoundIndex), AtlasAction(2))
-                    onFallAction = AtlasAction(3)
+                    onJumpAction = SoundAction(jumpSoundIndex)
+                    onUpAction = AtlasAction(2)
+                    onDownAction = AtlasAction(3)
                 }
 
                 this += SoundComponent(SoundComponent.SoundData(Constants.soundsDirPath.child("player/jump.ogg").toFileWrapper()))

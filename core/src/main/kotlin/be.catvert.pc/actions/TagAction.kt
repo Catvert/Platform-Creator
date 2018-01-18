@@ -13,14 +13,14 @@ class TagAction(@ExposeEditor(customType = CustomType.TAG_STRING) val tag: GameO
 
     override fun invoke(gameObject: GameObject) {
         gameObject.container.cast<Level>()?.findGameObjectsByTag(tag)?.forEach {
-                    action(it)
-                }
+            action(it)
+        }
     }
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         gameObject.container.cast<Level>()?.findGameObjectsByTag(tag)?.firstOrNull()?.apply {
-                    ImguiHelper.action("action", ::action, this, level, editorSceneUI)
-                }
+            ImguiHelper.action("action", ::action, this, level, editorSceneUI)
+        }
     }
 
     override fun toString() = super.toString() + " - tag : $tag | action : $action"

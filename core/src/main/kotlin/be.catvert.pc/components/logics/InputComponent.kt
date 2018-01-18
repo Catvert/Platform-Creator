@@ -9,13 +9,14 @@ import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
+import com.badlogic.gdx.graphics.Color
 import com.fasterxml.jackson.annotation.JsonCreator
 
 
 /**
  * Component permettant d'effectuer une action quand l'utilisateur appuie sur une touche
  */
-class InputComponent(var inputs: ArrayList<InputData>) : Component(), Updeatable, CustomEditorImpl {
+class InputComponent(var inputs: ArrayList<InputData>) : Component(), Updeatable, CustomEditorImpl, CustomEditorTextImpl {
     constructor(vararg inputs: InputData) : this(arrayListOf(*inputs))
     @JsonCreator private constructor() : this(arrayListOf())
 
@@ -41,18 +42,14 @@ class InputComponent(var inputs: ArrayList<InputData>) : Component(), Updeatable
         ImguiHelper.addImguiWidgetsArray("inputs", inputs, { item -> Input.Keys.toString(item.key) }, { InputData() }, gameObject, level, editorSceneUI)
     }
 
-    override fun toString(): String {
-        val stringBuilder =  StringBuilder()
-
+    override fun insertText() {
         inputs.forEach {
-            stringBuilder.appendln("<-->")
-            stringBuilder.appendln("key : ${Input.Keys.toString(it.key)}")
-            stringBuilder.appendln("action : ${it.action}")
-            stringBuilder.appendln("just pressed : ${it.justPressed}")
-            stringBuilder.appendln("pressed : ${if(it.justPressed) Gdx.input.isKeyJustPressed(it.key) else Gdx.input.isKeyPressed(it.key)}")
-            stringBuilder.appendln("<-->")
+            ImguiHelper.textColored(Color.RED, "<-->")
+            ImguiHelper.textPropertyColored(Color.ORANGE, "key :", Input.Keys.toString(it.key))
+            ImguiHelper.textPropertyColored(Color.ORANGE, "action :", it.action)
+            ImguiHelper.textPropertyColored(Color.ORANGE, "just pressed :", it.justPressed)
+            ImguiHelper.textPropertyColored(Color.ORANGE, "pressed :", if (it.justPressed) Gdx.input.isKeyJustPressed(it.key) else Gdx.input.isKeyPressed(it.key))
+            ImguiHelper.textColored(Color.RED, "<-->")
         }
-
-        return stringBuilder.toString()
     }
 }

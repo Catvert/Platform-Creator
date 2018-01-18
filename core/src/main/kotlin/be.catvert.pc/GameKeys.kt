@@ -87,16 +87,16 @@ enum class GameKeys(var key: Int, val description: String) {
                 writer.array("keys")
 
                 GameKeys.values().forEach {
-                            writer.`object`()
+                    writer.`object`()
 
-                            writer.name("name")
-                            writer.value(it.name)
+                    writer.name("name")
+                    writer.value(it.name)
 
-                            writer.name("key")
-                            writer.value(it.key)
+                    writer.name("key")
+                    writer.value(it.key)
 
-                            writer.pop()
-                        }
+                    writer.pop()
+                }
 
                 writer.pop()
                 writer.pop()

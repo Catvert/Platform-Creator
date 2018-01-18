@@ -46,9 +46,9 @@ class TweenComponent(var tweens: ArrayList<TweenData>) : Component(), CustomEdit
 
             val tweenState = gameObject.addState("tween-state") {
                 gameObject.getCurrentState().getComponents().forEach {
-                            if (keepComponents.contains(it.javaClass))
-                                addComponent(it)
-                        }
+                    if (keepComponents.contains(it.javaClass))
+                        addComponent(it)
+                }
             }
 
             val lastState = gameObject.getCurrentStateIndex()

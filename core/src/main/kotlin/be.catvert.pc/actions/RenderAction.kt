@@ -21,13 +21,13 @@ class RenderAction(@ExposeEditor var action: RenderActions) : Action() {
 
     override fun invoke(gameObject: GameObject) {
         gameObject.getCurrentState().getComponent<AtlasComponent>()?.apply {
-                    when (action) {
-                        RenderAction.RenderActions.FLIP_X -> flipX = true
-                        RenderAction.RenderActions.FLIP_Y -> flipY = true
-                        RenderAction.RenderActions.UNFLIP_X -> flipX = false
-                        RenderAction.RenderActions.UNFLIP_Y -> flipY = false
-                    }
-                }
+            when (action) {
+                RenderAction.RenderActions.FLIP_X -> flipX = true
+                RenderAction.RenderActions.FLIP_Y -> flipY = true
+                RenderAction.RenderActions.UNFLIP_X -> flipX = false
+                RenderAction.RenderActions.UNFLIP_Y -> flipY = false
+            }
+        }
     }
 
     override fun toString() = super.toString() + " - $action"

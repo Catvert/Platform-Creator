@@ -40,19 +40,19 @@ class SceneManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Dis
             Timeline.createSequence()
                     .beginParallel()
                     .push(Tween.to(currentScene, SceneTweenAccessor.SceneTween.ALPHA.tweenType, 0.5f).target(0f).setCallback { _, _ ->
-                                setScene(scene, disposeCurrentScene)
-                            })
+                        setScene(scene, disposeCurrentScene)
+                    })
                     .push(Tween.to(scene, SceneTweenAccessor.SceneTween.ALPHA.tweenType, 0.5f).target(1f).setCallback { _, _ ->
-                                nextScene = null
-                                isTransitionRunning = false
+                        nextScene = null
+                        isTransitionRunning = false
 
-                                if (waitingScene.isNotEmpty()) {
-                                    val scene = waitingScene.entries.elementAt(0)
-                                    waitingScene.remove(scene.key)
-                                    val (nextScene, applyTransition, disposeCurrentScene) = scene.value
-                                    loadScene(nextScene, applyTransition, disposeCurrentScene)
-                                }
-                            })
+                        if (waitingScene.isNotEmpty()) {
+                            val scene = waitingScene.entries.elementAt(0)
+                            waitingScene.remove(scene.key)
+                            val (nextScene, applyTransition, disposeCurrentScene) = scene.value
+                            loadScene(nextScene, applyTransition, disposeCurrentScene)
+                        }
+                    })
                     .end()
                     .start(PCGame.tweenManager)
         } else {

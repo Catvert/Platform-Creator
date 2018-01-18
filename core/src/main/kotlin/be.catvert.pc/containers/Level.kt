@@ -6,7 +6,6 @@ import be.catvert.pc.Prefab
 import be.catvert.pc.Tags
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.scenes.EndLevelScene
-import be.catvert.pc.serialization.PostDeserialization
 import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.files.FileHandle
@@ -42,7 +41,8 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
     var followGameObjectTag = Tags.Player.tag
 
     var initialZoom = 1f
-    @JsonIgnore var zoom = 1f
+    @JsonIgnore
+    var zoom = 1f
 
     init {
         if (!levelTextures.first.exists())
@@ -64,8 +64,8 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
             levelPrefabs.first.mkdirs()
         else {
             Utility.getFilesRecursivly(levelPrefabs.first, Constants.prefabExtension).forEach {
-                        levelPrefabs.second.add(SerializationFactory.deserializeFromFile(it))
-                    }
+                levelPrefabs.second.add(SerializationFactory.deserializeFromFile(it))
+            }
         }
     }
 
@@ -155,7 +155,7 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
             val level = Level(levelDir.child(Constants.levelDataFile).path(), Constants.gameVersion, PCGame.parallaxBackgrounds().elementAtOrNull(0)
                     ?: PCGame.standardBackgrounds().elementAtOrNull(0) ?: StandardBackground(FileWrapper("")))
 
-            for(i in 0..5)
+            for (i in 0..5)
                 PrefabFactory.PhysicsSprite_Kenney.prefab.create(Point(i * 50, 0), level)
 
             PrefabFactory.Player_Kenney.prefab.create(Point(100, 50), level)

@@ -8,19 +8,12 @@ import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.InputMultiplexer
-import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.utils.Disposable
-import com.badlogic.gdx.utils.Scaling
-import com.badlogic.gdx.utils.viewport.FillViewport
-import com.badlogic.gdx.utils.viewport.FitViewport
-import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.badlogic.gdx.utils.viewport.StretchViewport
 import imgui.ImGui
 import ktx.actors.alpha
@@ -50,10 +43,10 @@ abstract class Scene(protected var background: Background) : Renderable, Updeata
         set(value) {
             field = value
             gameObjectContainer.getGameObjectsData().forEach {
-                        it.getStates().forEach {
-                                    it.getComponent<AtlasComponent>()?.alpha = value
-                                }
-                    }
+                it.getStates().forEach {
+                    it.getComponent<AtlasComponent>()?.alpha = value
+                }
+            }
         }
 
     init {

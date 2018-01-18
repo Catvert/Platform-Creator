@@ -8,7 +8,6 @@ import be.catvert.pc.actions.TagAction
 import be.catvert.pc.components.Component
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
-import be.catvert.pc.i18n.MenusText
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
@@ -66,7 +65,7 @@ data class CollisionAction(@ExposeEditor var side: BoxSide = BoxSide.Left, @Expo
  * @param gravity : Permet de spécifier si la gravité est appliquée à l'entité
  * @param onLeftAction Action appelée quand le gameObject se déplace vers la gauche
  * @param onRightAction Action appelée quand le gameObject se déplace vers la droite
- * @param onFallAction Action appelée quand le gameObject est en chute libre
+ * @param onDownAction Action appelée quand le gameObject est en chute libre
  * @param onNothingAction Action appelée quand le gameObject ne subit aucune action physique
  */
 class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
@@ -80,8 +79,9 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                        @ExposeEditor(max = 1000f) var jumpHeight: Int = 0,
                        var onLeftAction: Action = EmptyAction(),
                        var onRightAction: Action = EmptyAction(),
+                       var onUpAction: Action = EmptyAction(),
+                       var onDownAction: Action = EmptyAction(),
                        var onJumpAction: Action = EmptyAction(),
-                       var onFallAction: Action = EmptyAction(),
                        var onNothingAction: Action = EmptyAction()) : Component(), Updeatable, CustomEditorImpl {
     @JsonCreator private constructor() : this(true)
 
@@ -187,7 +187,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
 
         tryMove((moveSpeedX * Gdx.graphics.deltaTime * 60f).roundToInt(), (moveSpeedY * Gdx.graphics.deltaTime * 60f).roundToInt(), gameObject)
 
-        if(gameObject.position() == lastPos)
+        if (gameObject.position() == lastPos)
             onNothingAction(gameObject)
 
         physicsActions.clear()
@@ -201,18 +201,18 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
 
         sensor.apply {
             level?.getAllGameObjectsInCells(gameObject.box)?.filter { it !== gameObject && it.tag == sensor.target && gameObject.box.overlaps(it.box) }?.forEach {
-                        if (!sensorOverlaps.contains(it)) {
-                            sensorIn(gameObject)
-                            sensorOverlaps += it
-                        }
+                if (!sensorOverlaps.contains(it)) {
+                    sensorIn(gameObject)
+                    sensorOverlaps += it
+                }
 
-                        checkedGameObject += it
-                    }
+                checkedGameObject += it
+            }
 
             sensorOverlaps.filter { !checkedGameObject.contains(it) }.forEach {
-                        sensorOut(gameObject)
-                        sensorOverlaps.remove(it)
-                    }
+                sensorOut(gameObject)
+                sensorOverlaps.remove(it)
+            }
         }
     }
 
@@ -238,7 +238,9 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                 gameObject.box.y += moveY
 
                 if (moveY < 0)
-                    onFallAction(gameObject)
+                    onDownAction(gameObject)
+                else if (moveY > 0)
+                    onUpAction(gameObject)
 
                 newMoveY = 0
             }
@@ -268,14 +270,16 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
 
         level?.apply {
             this.getAllGameObjectsInCells(newRect).filter { filter ->
-                        filter !== gameObject && filter.getCurrentState().hasComponent<PhysicsComponent>() && let {
-                            filter.getCurrentState().getComponent<PhysicsComponent>()?.apply {
-                                        return@let !sensor.isSensor && ignoreTags.contains(gameObject.tag) == false
-                                                && if(isPlatform) { gameObject.position().y >= filter.position().y + filter.size().height }  else true
-                                    }
-                            true
-                        }
-                    }.forEach {
+                filter !== gameObject && filter.getCurrentState().hasComponent<PhysicsComponent>() && let {
+                    filter.getCurrentState().getComponent<PhysicsComponent>()?.apply {
+                        return@let !sensor.isSensor && ignoreTags.contains(gameObject.tag) == false
+                                && if (isPlatform) {
+                            gameObject.position().y >= filter.position().y + filter.size().height
+                        } else true
+                    }
+                    true
+                }
+            }.forEach {
                         if (newRect.overlaps(it.box)) {
                             val side = when {
                                 moveX > 0 -> BoxSide.Right
@@ -289,20 +293,20 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                             }
 
                             gameObject.getCurrentState().getComponent<PhysicsComponent>()?.apply {
-                                        collisionsActions.firstOrNull { collisionAction -> (collisionAction.side == side || collisionAction.side == BoxSide.All) && collisionAction.target == it.tag }?.apply {
-                                                    action(gameObject)
-                                                    tagAction(it)
-                                                }
-                                        onCollisionWith.invoke(CollisionListener(gameObject, it, side))
-                                    }
+                                collisionsActions.firstOrNull { collisionAction -> (collisionAction.side == side || collisionAction.side == BoxSide.All) && collisionAction.target == it.tag }?.apply {
+                                    action(gameObject)
+                                    tagAction(it)
+                                }
+                                onCollisionWith.invoke(CollisionListener(gameObject, it, side))
+                            }
 
                             it.getCurrentState().getComponent<PhysicsComponent>()?.apply {
-                                        collisionsActions.firstOrNull { collisionAction -> (collisionAction.side == -side || collisionAction.side == BoxSide.All) && collisionAction.target == gameObject.tag }?.apply {
-                                                    action(it)
-                                                    tagAction(gameObject)
-                                                }
-                                        onCollisionWith.invoke(CollisionListener(it, gameObject, -side))
-                                    }
+                                collisionsActions.firstOrNull { collisionAction -> (collisionAction.side == -side || collisionAction.side == BoxSide.All) && collisionAction.target == gameObject.tag }?.apply {
+                                    action(it)
+                                    tagAction(gameObject)
+                                }
+                                onCollisionWith.invoke(CollisionListener(it, gameObject, -side))
+                            }
 
                             return true
                         }
@@ -315,32 +319,32 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         val collideGameObjects = mutableSetOf<GameObject>()
 
         level?.getAllGameObjectsInCells(gameObject.box)?.filter { it !== gameObject }?.forEach {
-                    when (boxSide) {
-                        BoxSide.Left -> {
-                            if (it.box.x + it.box.width == gameObject.box.x) {
-                                collideGameObjects += it
-                            }
-                        }
-                        BoxSide.Right -> {
-                            if (it.box.x == gameObject.box.x + gameObject.box.width) {
-                                collideGameObjects += it
-                            }
-                        }
-                        BoxSide.Up -> {
-                            if (it.box.y == gameObject.box.y + gameObject.box.height) {
-                                collideGameObjects += it
-                            }
-                        }
-                        BoxSide.Down -> {
-                            if (it.box.y + it.box.height == gameObject.box.y) {
-                                collideGameObjects += it
-                            }
-                        }
-                        BoxSide.All -> {
-                            collideGameObjects += it
-                        }
+            when (boxSide) {
+                BoxSide.Left -> {
+                    if (it.box.x + it.box.width == gameObject.box.x) {
+                        collideGameObjects += it
                     }
                 }
+                BoxSide.Right -> {
+                    if (it.box.x == gameObject.box.x + gameObject.box.width) {
+                        collideGameObjects += it
+                    }
+                }
+                BoxSide.Up -> {
+                    if (it.box.y == gameObject.box.y + gameObject.box.height) {
+                        collideGameObjects += it
+                    }
+                }
+                BoxSide.Down -> {
+                    if (it.box.y + it.box.height == gameObject.box.y) {
+                        collideGameObjects += it
+                    }
+                }
+                BoxSide.All -> {
+                    collideGameObjects += it
+                }
+            }
+        }
 
         return collideGameObjects
     }

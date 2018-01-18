@@ -67,13 +67,13 @@ object Utility {
         val files = mutableListOf<FileHandle>()
 
         dir.list().forEach {
-                    if (it.isDirectory)
-                        files += getFilesRecursivly(it, *fileExt)
-                    else {
-                        if (fileExt.isEmpty() || fileExt.contains(it.extension()))
-                            files += it
-                    }
-                }
+            if (it.isDirectory)
+                files += getFilesRecursivly(it, *fileExt)
+            else {
+                if (fileExt.isEmpty() || fileExt.contains(it.extension()))
+                    files += it
+            }
+        }
         return files
     }
 }

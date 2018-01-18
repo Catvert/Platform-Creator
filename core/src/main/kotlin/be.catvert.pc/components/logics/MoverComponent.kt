@@ -76,41 +76,41 @@ class MoverComponent(orientation: SimpleMoverOrientation, @ExposeEditor var reve
         this.gameObject = gameObject
 
         state.getComponent<PhysicsComponent>()?.apply {
-                    onCollisionWith.register {
-                        when (orientation) {
-                            SimpleMoverOrientation.HORIZONTAL -> {
-                                if (it.side == BoxSide.Left)
-                                    reverse(true)
-                                else if (it.side == BoxSide.Right)
-                                    reverse(false)
-                            }
-                            SimpleMoverOrientation.VERTICAL -> {
-                                if (it.side == BoxSide.Up)
-                                    reverse(true)
-                                else if (it.side == BoxSide.Down)
-                                    reverse(false)
-                            }
-                        }
+            onCollisionWith.register {
+                when (orientation) {
+                    SimpleMoverOrientation.HORIZONTAL -> {
+                        if (it.side == BoxSide.Left)
+                            reverse(true)
+                        else if (it.side == BoxSide.Right)
+                            reverse(false)
+                    }
+                    SimpleMoverOrientation.VERTICAL -> {
+                        if (it.side == BoxSide.Up)
+                            reverse(true)
+                        else if (it.side == BoxSide.Down)
+                            reverse(false)
                     }
                 }
+            }
+        }
     }
 
     override fun update() {
         if (holdGameObjects) {
             gameObject.getCurrentState().getComponent<PhysicsComponent>()?.apply {
-                        val moveX = when (orientation) {
-                            SimpleMoverOrientation.HORIZONTAL -> if (reverse) moveSpeed else -moveSpeed
-                            SimpleMoverOrientation.VERTICAL -> 0
-                        }
-                        val moveY = when (orientation) {
-                            SimpleMoverOrientation.HORIZONTAL -> 0
-                            SimpleMoverOrientation.VERTICAL -> if (reverse) moveSpeed else -moveSpeed
-                        }
+                val moveX = when (orientation) {
+                    SimpleMoverOrientation.HORIZONTAL -> if (reverse) moveSpeed else -moveSpeed
+                    SimpleMoverOrientation.VERTICAL -> 0
+                }
+                val moveY = when (orientation) {
+                    SimpleMoverOrientation.HORIZONTAL -> 0
+                    SimpleMoverOrientation.VERTICAL -> if (reverse) moveSpeed else -moveSpeed
+                }
 
-                        getCollisionsGameObjectOnSide(gameObject, BoxSide.Up).forEach {
-                            MoveAction(moveX, moveY, true).invoke(it)
-                        }
-                    }
+                getCollisionsGameObjectOnSide(gameObject, BoxSide.Up).forEach {
+                    MoveAction(moveX, moveY, true).invoke(it)
+                }
+            }
         }
 
         if (!reverse)

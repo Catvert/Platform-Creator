@@ -11,41 +11,31 @@ import be.catvert.pc.scenes.MainMenuScene
 import be.catvert.pc.scenes.Scene
 import be.catvert.pc.scenes.SceneManager
 import be.catvert.pc.scenes.SceneTweenAccessor
-import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Graphics
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics
 import com.badlogic.gdx.files.FileHandle
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.graphics.g2d.TextureAtlas
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.math.Matrix4
-import com.badlogic.gdx.scenes.scene2d.ui.*
-import com.badlogic.gdx.utils.I18NBundle
+import com.kotcrab.vis.ui.VisUI
 import imgui.DEBUG
-import imgui.Font
-import imgui.FontConfig
 import imgui.ImGui
 import imgui.impl.LwjglGL3
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner
 import ktx.app.KtxApplicationAdapter
-import ktx.assets.toAbsoluteFile
-import ktx.scene2d.Scene2DSkin
 import uno.glfw.GlfwWindow
 import java.util.*
-import kotlin.reflect.KClass
-import com.badlogic.gdx.scenes.scene2d.ui.CheckBox.CheckBoxStyle
-import com.kotcrab.vis.ui.VisUI
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const
-import ktx.async.enableKtxCoroutines
-import ktx.async.ktxAsync
-import ktx.scene2d.Scene2dDsl
-import ktx.style.color
-import ktx.style.set
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.forEach
+import kotlin.collections.mutableListOf
+import kotlin.collections.mutableMapOf
+import kotlin.collections.removeAll
+import kotlin.collections.set
+import kotlin.collections.toList
 import kotlin.math.roundToInt
+import kotlin.reflect.KClass
 
 
 /** [com.badlogic.gdx.ApplicationListener, implementation shared by all platforms.  */
@@ -70,9 +60,9 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         ResourceManager.init()
 
         Utility.getFilesRecursivly(Locales.menusPath.parent(), "properties").forEach {
-                    if(it.name().startsWith("bundle_"))
-                        availableLocales.add(Locale.forLanguageTag(it.nameWithoutExtension().substringAfter('_')))
-                }
+            if (it.name().startsWith("bundle_"))
+                availableLocales.add(Locale.forLanguageTag(it.nameWithoutExtension().substringAfter('_')))
+        }
 
         GameKeys.loadKeysConfig()
 
@@ -87,12 +77,12 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         Tween.registerAccessor(Scene::class.java, SceneTweenAccessor())
 
         Utility.getFilesRecursivly(Constants.backgroundsDirPath.child("standard"), *Constants.levelTextureExtension).forEach {
-                    standardBackgrounds.add(StandardBackground(it.toFileWrapper()))
-                }
+            standardBackgrounds.add(StandardBackground(it.toFileWrapper()))
+        }
 
         Utility.getFilesRecursivly(Constants.backgroundsDirPath.child("parallax"), "data").forEach {
-                    parallaxBackgrounds.add(ParallaxBackground(it.toFileWrapper()))
-                }
+            parallaxBackgrounds.add(ParallaxBackground(it.toFileWrapper()))
+        }
 
         mainBackground = StandardBackground(Constants.gameBackgroundMenuPath.toFileWrapper())
 
@@ -100,10 +90,10 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
             val atlas = mutableMapOf<FileHandle, List<FileHandle>>()
 
             Constants.packsDirPath.list().forEach {
-                        if (it.isDirectory) {
-                            atlas[it] = Utility.getFilesRecursivly(it, *Constants.levelAtlasExtension)
-                        }
-                    }
+                if (it.isDirectory) {
+                    atlas[it] = Utility.getFilesRecursivly(it, *Constants.levelAtlasExtension)
+                }
+            }
 
             atlas
         }

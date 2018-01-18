@@ -49,8 +49,8 @@ data class GameConfig(val screenWidth: Int, val screenHeight: Int, val refreshRa
 
                 val mode = Gdx.graphics.displayMode
 
-                writer.name("width").value(if(Gdx.graphics.isFullscreen) mode.width else Gdx.graphics.width)
-                writer.name("height").value(if(Gdx.graphics.isFullscreen) mode.height else Gdx.graphics.height)
+                writer.name("width").value(if (Gdx.graphics.isFullscreen) mode.width else Gdx.graphics.width)
+                writer.name("height").value(if (Gdx.graphics.isFullscreen) mode.height else Gdx.graphics.height)
                 writer.name("refreshRate").value(mode.refreshRate)
 
                 writer.name("fullScreen").value(Gdx.graphics.isFullscreen)

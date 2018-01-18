@@ -10,10 +10,10 @@ import be.catvert.pc.utility.Point
  */
 class Prefab(val name: String, val prefabGO: GameObject) {
     fun create(position: Point, container: GameObjectContainer? = null) = SerializationFactory.copy(prefabGO).apply {
-                this.box.position = position
-                this.name = this@Prefab.name
-                container?.addGameObject(this)
-            }
+        this.box.position = position
+        this.name = this@Prefab.name
+        container?.addGameObject(this)
+    }
 
     override fun toString(): String = this.name
 }

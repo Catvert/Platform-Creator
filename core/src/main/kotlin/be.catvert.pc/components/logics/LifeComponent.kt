@@ -10,7 +10,9 @@ import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.CustomEditorImpl
+import be.catvert.pc.utility.CustomEditorTextImpl
 import be.catvert.pc.utility.ImguiHelper
+import com.badlogic.gdx.graphics.Color
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 
@@ -18,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
  * Component permettant d'ajouter des points de vie à un gameObject
  * Chaque point de vie à une action quand celui-ci devient actif et inactif
  */
-class LifeComponent(onDeathAction: Action, lifePointActions: ArrayList<Action> = arrayListOf()) : Component(), CustomEditorImpl {
+class LifeComponent(onDeathAction: Action, lifePointActions: ArrayList<Action> = arrayListOf()) : Component(), CustomEditorImpl, CustomEditorTextImpl {
     @JsonCreator private constructor() : this(RemoveGOAction(), arrayListOf())
 
     @JsonProperty("lpActions")
@@ -67,18 +69,14 @@ class LifeComponent(onDeathAction: Action, lifePointActions: ArrayList<Action> =
         ImguiHelper.addImguiWidgetsArray("life actions", lpActions, { "vie ${lpActions.indexOf(it) + 1}" }, { EmptyAction() }, gameObject, level, editorSceneUI)
     }
 
-    override fun toString(): String {
-        val stringBuilder = StringBuilder()
-
-        stringBuilder.appendln("point de vie actuel : $lifePoint")
+    override fun insertText() {
+        ImguiHelper.textPropertyColored(Color.ORANGE, "point de vie actuel :", lifePoint.toString())
 
         lpActions.forEachIndexed { index, it ->
-            stringBuilder.appendln("<-->")
-            stringBuilder.appendln("point de vie : ${index + 1}")
-            stringBuilder.appendln("action : $it")
-            stringBuilder.appendln("<-->")
+            ImguiHelper.textColored(Color.RED, "<-->")
+            ImguiHelper.textPropertyColored(Color.ORANGE, "point de vie :", index + 1)
+            ImguiHelper.textPropertyColored(Color.ORANGE, "action :", it)
+            ImguiHelper.textColored(Color.RED, "<-->")
         }
-
-        return stringBuilder.toString()
     }
 }

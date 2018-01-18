@@ -12,7 +12,6 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
-import imgui.IMGUI_HAS_NAV
 import imgui.ImGui
 import imgui.functionalProgramming
 import kotlin.math.roundToInt
@@ -28,7 +27,7 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
                  @ExposeEditor var box: Rect = Rect(size = Size(1, 1)),
                  container: GameObjectContainer? = null,
                  initDefaultState: GameObjectState.() -> Unit = {},
-                 vararg otherStates: GameObjectState = arrayOf()) : Updeatable, Renderable, ResourceLoader, CustomEditorImpl {
+                 vararg otherStates: GameObjectState = arrayOf()) : Updeatable, Renderable, ResourceLoader, CustomEditorImpl, CustomEditorTextImpl {
 
     @ExposeEditor(min = -100f, max = 100f)
     var layer: Int = 0
@@ -136,7 +135,10 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
         }
     }
 
-    override fun toString() = ColorTextString.toString(Color.ORANGE, name)
+    override fun insertText() {
+        ImguiHelper.textColored(Color.ORANGE, name)
+        ImguiHelper.textPropertyColored(Color.CORAL, "state actuel :", getCurrentState().name)
+    }
 }
 
 class GameObjectTweenAccessor : TweenAccessor<GameObject> {

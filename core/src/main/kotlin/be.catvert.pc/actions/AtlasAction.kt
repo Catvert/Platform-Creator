@@ -19,8 +19,8 @@ class AtlasAction(var atlasIndex: Int) : Action(), CustomEditorImpl {
 
     override fun invoke(gameObject: GameObject) {
         gameObject.getCurrentState().getComponent<AtlasComponent>()?.also {
-                    it.currentIndex = atlasIndex
-                }
+            it.currentIndex = atlasIndex
+        }
     }
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
