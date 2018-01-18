@@ -265,7 +265,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         val newRect = Rect(gameObject.box)
         newRect.position = Point(newRect.x + moveX, newRect.y + moveY)
 
-        if (level?.matrixRect?.contains(newRect) == false && newRect.y > 0)
+        if(level?.matrixRect?.let { newRect.x >= 0 && newRect.x + newRect.width <= it.width && newRect.y >= 0 && newRect.y + newRect.height <= it.height } == false && newRect.y > 0)
             return true
 
         level?.apply {

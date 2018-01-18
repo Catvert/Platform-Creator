@@ -9,6 +9,8 @@ import be.catvert.pc.actions.PhysicsAction
 import be.catvert.pc.components.Component
 import be.catvert.pc.components.RequiredComponent
 import be.catvert.pc.containers.GameObjectContainer
+import be.catvert.pc.containers.GameObjectMatrixContainer
+import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.BoxSide
 import be.catvert.pc.utility.ExposeEditor
 import be.catvert.pc.utility.Updeatable
@@ -109,6 +111,21 @@ class MoverComponent(orientation: SimpleMoverOrientation, @ExposeEditor var reve
 
                 getCollisionsGameObjectOnSide(gameObject, BoxSide.Up).forEach {
                     MoveAction(moveX, moveY, true).invoke(it)
+                }
+            }
+        }
+
+        (gameObject.container as? GameObjectMatrixContainer)?.matrixRect?.also {
+            when(orientation) {
+                MoverComponent.SimpleMoverOrientation.HORIZONTAL -> {
+                    if(gameObject.position().x == 0)
+                        reverse(true)
+                    else if(gameObject.position().x + gameObject.size().width == it.width)
+                        reverse(false)
+                }
+                MoverComponent.SimpleMoverOrientation.VERTICAL -> {
+                    if(gameObject.position().y + gameObject.size().height == it.height)
+                        reverse(true)
                 }
             }
         }
