@@ -299,7 +299,8 @@ object ImguiHelper {
     fun textPropertyColored(color: Color, propertyName: String, value: Any) {
         textColored(color, propertyName)
         ImGui.sameLine()
-        (value as? CustomEditorTextImpl)?.insertText() ?: ImGui.text(value.toString())
+
+        value.cast<CustomEditorTextImpl>()?.insertText() ?: ImGui.text(value.toString())
     }
 
     fun insertImguiExposeEditorFields(instance: Any, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
@@ -319,7 +320,7 @@ object ImguiHelper {
 
     fun insertImguiTextExposeEditorFields(instance: Any) {
         with(ImGui) {
-            (instance as? CustomEditorTextImpl)?.insertText()
+            instance.cast<CustomEditorTextImpl>()?.insertText()
                     ?: if (instance.toString().isNotBlank()) text(instance.toString())
             ReflectionUtility.getAllFieldsOf(instance.javaClass).filter { it.isAnnotationPresent(ExposeEditor::class.java) }.forEach { field ->
                 field.isAccessible = true

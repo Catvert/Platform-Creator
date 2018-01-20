@@ -17,6 +17,9 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
     @JsonProperty("objects")
     protected val gameObjects: MutableSet<GameObject> = mutableSetOf()
 
+    protected open val processGameObjects: Set<GameObject>
+        get() = gameObjects
+
     @JsonIgnore
     var allowRenderingGO = true
     @JsonIgnore
@@ -60,11 +63,11 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
 
     override fun render(batch: Batch) {
         if (allowRenderingGO)
-            gameObjects.sortedBy { it.layer }.forEach { it.render(batch) }
+            processGameObjects.sortedBy { it.layer }.forEach { it.render(batch) }
     }
 
     override fun update() {
-        gameObjects.forEach {
+        processGameObjects.forEach {
             if (allowUpdatingGO)
                 it.update()
 
@@ -76,7 +79,7 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
         removeGameObjects()
     }
 
-    protected fun removeGameObjects() {
+    private fun removeGameObjects() {
         if (removeGameObjects.isNotEmpty()) {
             removeGameObjects.forEach {
                 onRemoveGameObject(it)

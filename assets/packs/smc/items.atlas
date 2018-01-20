@@ -6,14 +6,14 @@ filter: Nearest,Nearest
 repeat: none
 fireplant
   rotate: false
-  xy: 260, 132
+  xy: 776, 648
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 fireplant_left
   rotate: false
-  xy: 518, 648
+  xy: 260, 390
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
@@ -41,21 +41,21 @@ moon_2
   index: -1
 mushroom_blue
   rotate: false
-  xy: 260, 390
+  xy: 518, 648
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 mushroom_ghost
   rotate: false
-  xy: 776, 648
+  xy: 518, 390
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 mushroom_green
   rotate: false
-  xy: 518, 390
+  xy: 260, 132
   size: 256, 256
   orig: 256, 256
   offset: 0, 0

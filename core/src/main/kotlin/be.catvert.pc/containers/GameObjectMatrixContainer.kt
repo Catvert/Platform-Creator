@@ -3,9 +3,9 @@ package be.catvert.pc.containers
 import be.catvert.pc.GameKeys
 import be.catvert.pc.GameObject
 import be.catvert.pc.PCGame
-import be.catvert.pc.components.logics.PhysicsComponent
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.fasterxml.jackson.annotation.JsonIgnore
 import kotlin.math.roundToInt
@@ -62,7 +62,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
      * Le box illustrant la zone où les cellules sont actives
      */
     @JsonIgnore
-    val activeRect = Rect()
+    val activeRect = Rect(size = Size(Constants.viewportRatioWidth.roundToInt(), Constants.viewportRatioHeight.roundToInt()))
 
     /**
      * Les cellules actives
@@ -78,9 +78,8 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     @JsonIgnore
     var followGameObject: GameObject? = null
 
-    init {
-        activeRect.size = Size(Constants.viewportRatioWidth.roundToInt(), Constants.viewportRatioHeight.roundToInt())
-    }
+    override val processGameObjects: Set<GameObject>
+        get() = getAllGameObjectsInCells(activeGridCells)
 
     override fun update() {
         updateActiveCells()
@@ -92,19 +91,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
             activeRect.position = Point(Math.max(0, followGameObject!!.position().x - activeRect.width / 2 + followGameObject!!.size().width / 2), Math.max(0, followGameObject!!.position().y - activeRect.height / 2 + followGameObject!!.size().height / 2))
         }
 
-        getAllGameObjectsInCells(activeGridCells).forEach {
-            if (allowUpdatingGO) {
-                it.update()
-
-                if (it.getCurrentState().hasComponent<PhysicsComponent>()) {
-                    if (it.position().y < 0) {
-                        it.onOutOfMapAction(it)
-                    }
-                }
-            }
-        }
-
-        removeGameObjects()
+        super.update()
     }
 
     private fun updateActiveCells() {

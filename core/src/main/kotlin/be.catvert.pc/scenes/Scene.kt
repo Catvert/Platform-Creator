@@ -7,6 +7,7 @@ import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputMultiplexer
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -18,6 +19,7 @@ import com.badlogic.gdx.utils.viewport.StretchViewport
 import imgui.ImGui
 import ktx.actors.alpha
 import ktx.app.use
+import javax.rmi.CORBA.Util
 
 
 /**
@@ -87,7 +89,7 @@ abstract class Scene(protected var background: Background) : Renderable, Updeata
     override fun update() {
         gameObjectContainer.update()
 
-        (background as? ParallaxBackground)?.updateOffsets(camera)
+        background.cast<ParallaxBackground>()?.updateOffsets(camera)
 
         stage.act()
     }

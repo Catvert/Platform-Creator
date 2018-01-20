@@ -42,7 +42,6 @@ import kotlin.reflect.KClass
 class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
     private fun initializeUI() {
         VisUI.load(Constants.uiDirPath.child("tinted/x1/tinted.json"))
-
         LwjglGL3.init(GlfwWindow((Gdx.graphics as Lwjgl3Graphics).window.windowHandle), false)
     }
 

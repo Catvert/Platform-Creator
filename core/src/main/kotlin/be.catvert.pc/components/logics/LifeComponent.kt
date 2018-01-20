@@ -15,6 +15,8 @@ import be.catvert.pc.utility.ImguiHelper
 import com.badlogic.gdx.graphics.Color
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
+import glm_.func.common.max
+import glm_.func.common.min
 
 /**
  * Component permettant d'ajouter des points de vie à un gameObject
@@ -33,12 +35,9 @@ class LifeComponent(onDeathAction: Action, lifePointActions: ArrayList<Action> =
      * Permet de retirer un point de vie à un gameObject
      */
     fun removeLifePoint() {
-        if (lifePoint > 1) {
+        if (lifePoint >= 1) {
             lpActions.elementAt(lifePoint - 1).invoke(gameObject)
-            --lifePoint
-        } else if (lifePoint != -1) {
-            lpActions.elementAt(0).invoke(gameObject)
-            lifePoint = -1
+            lifePoint = (lifePoint - 1).max(1)
         }
     }
 
@@ -47,7 +46,7 @@ class LifeComponent(onDeathAction: Action, lifePointActions: ArrayList<Action> =
      */
     fun kill() {
         lpActions.elementAt(0).invoke(gameObject)
-        lifePoint = -1
+        lifePoint = 1
     }
 
     /**

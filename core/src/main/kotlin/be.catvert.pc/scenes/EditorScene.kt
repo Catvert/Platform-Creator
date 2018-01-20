@@ -327,13 +327,13 @@ class EditorScene(val level: Level) : Scene(level.background) {
             it.projectionMatrix = PCGame.defaultProjection
             with(editorFont) {
                 if (editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL) {
-                    draw(it, "Layer sélectionné : $selectLayer", 10f, Gdx.graphics.height - lineHeight * 4)
-                    draw(it, "Nombre d'entités : ${level.getGameObjectsData().size}", 10f, Gdx.graphics.height - lineHeight * 5)
-                    draw(it, "Resize mode : ${resizeGameObjectMode.name}", 10f, Gdx.graphics.height - lineHeight * 6)
-                    draw(it, "Mode de l'éditeur : ${editorSceneUI.editorMode.name}", 10f, Gdx.graphics.height - lineHeight * 7)
+                    draw(it, "Layer sélectionné : $selectLayer", 10f, Gdx.graphics.height - lineHeight * 2)
+                    draw(it, "Resize mode : ${resizeGameObjectMode.name}", 10f, Gdx.graphics.height - lineHeight * 4)
+                    draw(it, "Mode de l'éditeur : ${editorSceneUI.editorMode.name}", 10f, Gdx.graphics.height - lineHeight * 5)
                 } else {
                     draw(it, "Test du niveau..", 10f, Gdx.graphics.height - lineHeight * 2)
                 }
+                draw(it, "Nombre d'entités : ${gameObjectContainer.getGameObjectsData().size}", 10f, Gdx.graphics.height - lineHeight * 3)
             }
             it.projectionMatrix = camera.combined
         }
@@ -1202,47 +1202,53 @@ class EditorScene(val level: Level) : Scene(level.background) {
                 }
 
                 sameLine()
+
+                pushItemFlag(ItemFlags.Disabled.i, gameObject.getStates().size == 1)
                 if (button("Suppr. ce state")) {
                     if (gameObject.getStates().size > 1)
                         gameObject.removeState(editorSceneUI.gameObjectAddStateComboIndex - 1)
                 }
+                popItemFlag()
 
                 separator()
 
-                val components = gameObject.getStates().elementAt(editorSceneUI.gameObjectCurrentStateIndex).getComponents()
-                functionalProgramming.withItemWidth(150f) {
-                    combo("component", editorSceneUI::gameObjectCurrentComponentIndex, components.map { ReflectionUtility.simpleNameOf(it).removeSuffix("Component") })
-                }
+                val components = gameObject.getStates().elementAtOrNull(editorSceneUI.gameObjectCurrentStateIndex)?.getComponents()
 
-                val component = components.elementAtOrNull(editorSceneUI.gameObjectCurrentComponentIndex)
-                if (component != null) {
-                    functionalProgramming.withIndent {
-                        val requiredComponent = component.javaClass.kotlin.findAnnotation<RequiredComponent>()
-                        val incorrectComponent = let {
-                            requiredComponent?.component?.forEach {
-                                if (gameObject.getStates().elementAtOrNull(editorSceneUI.gameObjectCurrentStateIndex)?.hasComponent(it) == false)
-                                    return@let true
+                if (components != null) {
+                    functionalProgramming.withItemWidth(150f) {
+                        combo("component", editorSceneUI::gameObjectCurrentComponentIndex, components.map { ReflectionUtility.simpleNameOf(it).removeSuffix("Component") })
+                    }
+
+                    val component = components.elementAtOrNull(editorSceneUI.gameObjectCurrentComponentIndex)
+                    if (component != null) {
+                        functionalProgramming.withIndent {
+                            val requiredComponent = component.javaClass.kotlin.findAnnotation<RequiredComponent>()
+                            val incorrectComponent = let {
+                                requiredComponent?.component?.forEach {
+                                    if (gameObject.getStates().elementAtOrNull(editorSceneUI.gameObjectCurrentStateIndex)?.hasComponent(it) == false)
+                                        return@let true
+                                }
+                                false
                             }
-                            false
-                        }
-                        if (!incorrectComponent)
-                            ImguiHelper.insertImguiExposeEditorFields(component, gameObject, level, editorSceneUI)
-                        else {
-                            text("Il manque le(s) component(s) :")
-                            functionalProgramming.withIndent {
-                                text("${requiredComponent!!.component.map { it.simpleName }}")
+                            if (!incorrectComponent)
+                                ImguiHelper.insertImguiExposeEditorFields(component, gameObject, level, editorSceneUI)
+                            else {
+                                text("Il manque le(s) component(s) :")
+                                functionalProgramming.withIndent {
+                                    text("${requiredComponent!!.component.map { it.simpleName }}")
+                                }
                             }
-                        }
-                        if (button("Supprimer ce comp.", Vec2(-1, 0))) {
-                            gameObject.getStates().elementAtOrNull(editorSceneUI.gameObjectCurrentStateIndex)?.removeComponent(component)
+                            if (button("Supprimer ce comp.", Vec2(-1, 0))) {
+                                gameObject.getStates().elementAtOrNull(editorSceneUI.gameObjectCurrentStateIndex)?.removeComponent(component)
+                            }
                         }
                     }
+                    separator()
+                    pushItemFlag(ItemFlags.Disabled.i, gameObject.getStates().elementAtOrNull(editorSceneUI.gameObjectCurrentStateIndex)?.getComponents()?.size == PCGame.componentsClasses.size)
+                    if (button("Ajouter un component", Vec2(-1, 0)))
+                        openPopup(addComponentTitle)
+                    popItemFlag()
                 }
-                separator()
-                pushItemFlag(ItemFlags.Disabled.i, gameObject.getStates().elementAtOrNull(editorSceneUI.gameObjectCurrentStateIndex)?.getComponents()?.size == PCGame.componentsClasses.size)
-                if (button("Ajouter un component", Vec2(-1, 0)))
-                    openPopup(addComponentTitle)
-                popItemFlag()
 
                 if (beginPopup(createPrefabTitle)) {
                     val name = "test".toCharArray() // TODO inputtext
@@ -1291,7 +1297,13 @@ class EditorScene(val level: Level) : Scene(level.background) {
                     }
                     if (button("Ajouter", Vec2(-1, 0))) {
                         if (editorSceneUI.gameObjectAddComponentComboIndex in components.indices) {
-                            gameObject.getStates().elementAt(editorSceneUI.gameObjectCurrentStateIndex).addComponent(ReflectionUtility.findNoArgConstructor(components[editorSceneUI.gameObjectAddComponentComboIndex])!!.newInstance())
+                            val newComp = ReflectionUtility.findNoArgConstructor(components[editorSceneUI.gameObjectAddComponentComboIndex])!!.newInstance()
+                            val state = gameObject.getStates().elementAt(editorSceneUI.gameObjectCurrentStateIndex)
+
+                            if (gameObject.getCurrentState() === state)
+                                newComp.onStateActive(gameObject, state, level)
+
+                            state.addComponent(newComp)
                             closeCurrentPopup()
                         }
                     }

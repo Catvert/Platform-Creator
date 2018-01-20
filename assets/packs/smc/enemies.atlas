@@ -4,44 +4,37 @@ size: 2048,2048
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-eato/brown/eato_0
-  rotate: false
-  xy: 1546, 360
-  size: 256, 182
-  orig: 256, 182
-  offset: 0, 0
-  index: -1
 furball/blue/dead
-  rotate: false
-  xy: 1544, 980
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-furball/blue/turn
-  rotate: false
-  xy: 2, 2
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-furball/blue/walk_0
-  rotate: false
-  xy: 776, 31
-  size: 256, 256
-  orig: 256, 256
-  offset: 0, 0
-  index: -1
-furball/blue/walk_1
   rotate: false
   xy: 1288, 468
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
+furball/blue/turn
+  rotate: false
+  xy: 776, 31
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+furball/blue/walk_0
+  rotate: false
+  xy: 2, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+furball/blue/walk_1
+  rotate: false
+  xy: 1030, 468
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
 furball/blue/walk_2
   rotate: false
-  xy: 1544, 1754
+  xy: 518, 31
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
@@ -55,7 +48,7 @@ furball/blue/walk_3
   index: -1
 furball/blue/walk_4
   rotate: false
-  xy: 1030, 468
+  xy: 1544, 1754
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
@@ -69,14 +62,14 @@ furball/blue/walk_5
   index: -1
 furball/blue/walk_6
   rotate: false
-  xy: 518, 31
+  xy: 1544, 1238
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
   index: -1
 furball/blue/walk_7
   rotate: false
-  xy: 1544, 1238
+  xy: 1544, 980
   size: 256, 256
   orig: 256, 256
   offset: 0, 0
@@ -158,44 +151,37 @@ furball/boss/walk_7
   orig: 512, 433
   offset: 0, 0
   index: -1
-furball/brown/dead
-  rotate: false
-  xy: 1732, 101
-  size: 256, 213
-  orig: 256, 213
-  offset: 0, 0
-  index: -1
-furball/brown/walk_0
-  rotate: false
-  xy: 1546, 544
-  size: 256, 216
-  orig: 256, 216
-  offset: 0, 0
-  index: -1
-furball/brown/walk_2
-  rotate: false
-  xy: 1544, 762
-  size: 256, 216
-  orig: 256, 216
-  offset: 0, 0
-  index: -1
-furball/brown/walk_3
+furball/brown/walk_1
   rotate: false
   xy: 1034, 250
   size: 256, 216
   orig: 256, 216
   offset: 0, 0
   index: -1
-furball/brown/walk_4
+furball/brown/walk_2
+  rotate: false
+  xy: 1546, 544
+  size: 256, 216
+  orig: 256, 216
+  offset: 0, 0
+  index: -1
+furball/brown/walk_3
   rotate: false
   xy: 1034, 32
   size: 256, 216
   orig: 256, 216
   offset: 0, 0
   index: -1
-furball/brown/walk_5
+furball/brown/walk_4
   rotate: false
   xy: 1292, 32
+  size: 256, 216
+  orig: 256, 216
+  offset: 0, 0
+  index: -1
+furball/brown/walk_5
+  rotate: false
+  xy: 1732, 97
   size: 256, 216
   orig: 256, 216
   offset: 0, 0
@@ -207,23 +193,37 @@ furball/brown/walk_6
   orig: 250, 216
   offset: 0, 0
   index: -1
+furball/brown/walk_7
+  rotate: false
+  xy: 1544, 762
+  size: 256, 216
+  orig: 256, 216
+  offset: 0, 0
+  index: -1
+turtle/green/shell_front
+  rotate: false
+  xy: 1546, 342
+  size: 256, 200
+  orig: 256, 200
+  offset: 0, 0
+  index: -1
 turtle/green/walk_0
   rotate: false
-  xy: 1550, 102
+  xy: 1802, 1239
   size: 180, 256
   orig: 180, 256
   offset: 0, 0
   index: -1
 turtle/green/walk_1
   rotate: false
-  xy: 1802, 981
+  xy: 1804, 315
   size: 180, 256
   orig: 180, 256
   offset: 0, 0
   index: -1
 turtle/green/walk_2
   rotate: false
-  xy: 1802, 1239
+  xy: 1802, 981
   size: 180, 256
   orig: 180, 256
   offset: 0, 0
@@ -258,7 +258,7 @@ turtle/red/walk_1
   index: -1
 turtle/red/walk_2
   rotate: false
-  xy: 1804, 316
+  xy: 1550, 85
   size: 180, 255
   orig: 180, 255
   offset: 0, 0
@@ -269,100 +269,100 @@ size: 2048,512
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
+eato/brown/eato_0
+  rotate: false
+  xy: 1290, 57
+  size: 256, 182
+  orig: 256, 182
+  offset: 0, 0
+  index: -1
 eato/brown/eato_1
   rotate: false
-  xy: 1548, 245
+  xy: 1032, 242
   size: 256, 191
   orig: 256, 191
   offset: 0, 0
   index: -1
 eato/brown/eato_2
   rotate: false
-  xy: 1032, 42
+  xy: 1547, 241
   size: 255, 192
   orig: 255, 192
   offset: 0, 0
   index: -1
 eato/green/eato_0
   rotate: false
-  xy: 1290, 61
+  xy: 1548, 57
   size: 256, 182
   orig: 256, 182
   offset: 0, 0
   index: -1
 eato/green/eato_1
   rotate: false
-  xy: 1290, 245
+  xy: 1032, 49
   size: 256, 191
   orig: 256, 191
   offset: 0, 0
   index: -1
 eato/green/eato_2
   rotate: false
-  xy: 1548, 51
+  xy: 1290, 241
   size: 255, 192
   orig: 255, 192
   offset: 0, 0
   index: -1
-furball/brown/turn
+furball/brown/dead
   rotate: false
-  xy: 260, 223
+  xy: 2, 2
   size: 256, 213
   orig: 256, 213
   offset: 0, 0
   index: -1
-furball/brown/walk_1
+furball/brown/turn
   rotate: false
-  xy: 2, 2
-  size: 256, 216
-  orig: 256, 216
+  xy: 260, 220
+  size: 256, 213
+  orig: 256, 213
   offset: 0, 0
   index: -1
-furball/brown/walk_7
+furball/brown/walk_0
   rotate: false
-  xy: 2, 220
+  xy: 2, 217
   size: 256, 216
   orig: 256, 216
-  offset: 0, 0
-  index: -1
-turtle/green/shell_front
-  rotate: false
-  xy: 260, 21
-  size: 256, 200
-  orig: 256, 200
   offset: 0, 0
   index: -1
 turtle/green/shell_move
   rotate: false
-  xy: 776, 236
+  xy: 260, 18
   size: 256, 200
   orig: 256, 200
   offset: 0, 0
   index: -1
 turtle/green/shell_move_0
   rotate: false
-  xy: 518, 236
+  xy: 518, 31
   size: 256, 200
   orig: 256, 200
   offset: 0, 0
   index: -1
 turtle/green/shell_move_1
   rotate: false
-  xy: 518, 34
+  xy: 518, 233
   size: 256, 200
   orig: 256, 200
   offset: 0, 0
   index: -1
 turtle/red/shell_move_0
   rotate: false
-  xy: 776, 35
+  xy: 776, 234
   size: 254, 199
   orig: 254, 199
   offset: 0, 0
   index: -1
 turtle/red/shell_move_1
   rotate: false
-  xy: 1034, 237
+  xy: 776, 33
   size: 254, 199
   orig: 254, 199
   offset: 0, 0

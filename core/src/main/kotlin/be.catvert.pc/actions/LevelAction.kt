@@ -3,6 +3,7 @@ package be.catvert.pc.actions
 import be.catvert.pc.GameObject
 import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.ExposeEditor
+import be.catvert.pc.utility.cast
 import com.fasterxml.jackson.annotation.JsonCreator
 
 /**
@@ -17,7 +18,7 @@ class LevelAction(@ExposeEditor var action: LevelActions) : Action() {
     }
 
     override fun invoke(gameObject: GameObject) {
-        (gameObject.container as? Level)?.apply {
+        gameObject.container?.cast<Level>()?.apply {
             when (action) {
                 LevelAction.LevelActions.SUCCESS_EXIT -> exit(true)
                 LevelAction.LevelActions.FAIL_EXIT -> exit(false)

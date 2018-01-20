@@ -221,7 +221,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         CollisionAction(BoxSide.Down).apply { tagAction.action = LifeAction(LifeAction.LifeActions.REMOVE_LP) },
                         CollisionAction(BoxSide.Up).apply { action = LifeAction(LifeAction.LifeActions.REMOVE_LP) }
                 ))
-                this += LifeComponent(MultiplexerAction(StateAction(1), ResizeAction(Size(45, 45))))
+                this += LifeComponent(MultiplexerAction(StateAction(1, true), ResizeAction(Size(45, 45))))
                 this += MoverComponent(MoverComponent.SimpleMoverOrientation.HORIZONTAL, false).apply { onReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X) }
             }, otherStates = *arrayOf(GameObjectState("shell") {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("walk", Constants.packsSMCDirPath.child("enemies.atlas").toFileWrapper(), "turtle/green/shell_move", 0.33f))

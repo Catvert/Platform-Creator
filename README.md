@@ -7,8 +7,6 @@ Platform creator est un jeu de plateforme utilisant les ressources de Kenney et 
 
 ![Editeur de niveau](FAQ/editor.png)
 
-![Editeur de niveau 2](FAQ/editor_1.png)
-
 ## Licence
 
 Ce programme est un logiciel libre: il peut être partagé et/ou modifié sous les termes de la Licence Publique Generale ( GNU ), publiée par la Foundation des logiciels libres, sous version 3 comme sous toutes autres futures versions.

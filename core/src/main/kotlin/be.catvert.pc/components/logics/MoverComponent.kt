@@ -14,6 +14,7 @@ import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.BoxSide
 import be.catvert.pc.utility.ExposeEditor
 import be.catvert.pc.utility.Updeatable
+import be.catvert.pc.utility.cast
 import com.fasterxml.jackson.annotation.JsonCreator
 
 /**
@@ -115,7 +116,7 @@ class MoverComponent(orientation: SimpleMoverOrientation, @ExposeEditor var reve
             }
         }
 
-        (gameObject.container as? GameObjectMatrixContainer)?.matrixRect?.also {
+        gameObject.container.cast<GameObjectMatrixContainer>()?.matrixRect?.also {
             when(orientation) {
                 MoverComponent.SimpleMoverOrientation.HORIZONTAL -> {
                     if(gameObject.position().x == 0)
