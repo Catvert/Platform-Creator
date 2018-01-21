@@ -178,7 +178,7 @@ object ImguiHelper {
                 popItemFlag()
                 if (incorrectAction && isMouseHoveringRect(itemRectMin, itemRectMax)) {
                     functionalProgramming.withTooltip {
-                        text("Il manque le(s) component(s) : ${requiredComponent!!.component.map { it.simpleName }}")
+                        textPropertyColored(Color.RED,"Il manque le(s) component(s) :", requiredComponent!!.component.map { it.simpleName })
                     }
                 }
             }
@@ -199,6 +199,27 @@ object ImguiHelper {
         val item = Item(tag.get())
         gameObjectTag(item, level, label)
         tag.set(item.obj)
+    }
+
+    fun gameObject(gameObject: KMutableProperty0<GameObject?>, editorSceneUI: EditorScene.EditorSceneUI, label: String = "game object") {
+        with(ImGui) {
+            if(button("Sélect. $label", Vec2(150f, 0))) {
+                editorSceneUI.editorMode = EditorScene.EditorSceneUI.EditorMode.SELECT_GO
+                editorSceneUI.onSelectGO.register(true) {
+                    gameObject.set(it)
+                }
+            }
+
+            if(isMouseHoveringRect(itemRectMin, itemRectMax)) {
+                functionalProgramming.withTooltip {
+                    val go = gameObject.get()
+                    if(go == null)
+                        textColored(Color.RED, "aucun game object sélectionner")
+                    else
+                        textPropertyColored(Color.ORANGE, "game object actuel :", go.name)
+                }
+            }
+        }
     }
 
     fun prefab(prefab: Item<Prefab>, level: Level, label: String = "prefab") {

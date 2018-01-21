@@ -75,7 +75,6 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     @JsonIgnore
     private var drawDebugCells = false
 
-    @JsonIgnore
     var followGameObject: GameObject? = null
 
     override val processGameObjects: Set<GameObject>

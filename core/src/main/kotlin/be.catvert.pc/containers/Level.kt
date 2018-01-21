@@ -1,9 +1,6 @@
 package be.catvert.pc.containers
 
-import be.catvert.pc.Log
-import be.catvert.pc.PCGame
-import be.catvert.pc.Prefab
-import be.catvert.pc.Tags
+import be.catvert.pc.*
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.scenes.EndLevelScene
 import be.catvert.pc.serialization.SerializationFactory
@@ -37,8 +34,6 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
     var scorePoints = 0
 
     private val timer = Timer(1f)
-
-    var followGameObjectTag = Tags.Player.tag
 
     var initialZoom = 1f
     @JsonIgnore
@@ -133,7 +128,6 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
 
     override fun onPostDeserialization() {
         super.onPostDeserialization()
-        followGameObject = findGameObjectsByTag(followGameObjectTag).firstOrNull()
         zoom = initialZoom
     }
 
@@ -158,7 +152,9 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
             for (i in 0..5)
                 PrefabFactory.PhysicsSprite_Kenney.prefab.create(Point(i * 50, 0), level)
 
-            PrefabFactory.Player_Kenney.prefab.create(Point(100, 50), level)
+            val player = PrefabFactory.Player_Kenney.prefab.create(Point(100, 50), level)
+
+            level.followGameObject = player 
 
             level.loadResources()
 

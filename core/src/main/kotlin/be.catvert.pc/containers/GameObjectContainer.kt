@@ -12,7 +12,6 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 
-
 abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization, ResourceLoader {
     @JsonProperty("objects")
     protected val gameObjects: MutableSet<GameObject> = mutableSetOf()

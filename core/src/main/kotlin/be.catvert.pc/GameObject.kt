@@ -10,8 +10,7 @@ import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
-import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.*
 import imgui.ImGui
 import imgui.functionalProgramming
 import kotlin.math.roundToInt
@@ -22,6 +21,7 @@ import kotlin.math.roundToInt
  * @param box Représente le box de l'objet dans l'espace (position + taille)
  * @param container Item dans lequel l'objet va être implémenté
  */
+@JsonIdentityInfo(property = "id", generator = ObjectIdGenerators.IntSequenceGenerator::class)
 class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: GameObjectTag,
                  @ExposeEditor var name: String = tag,
                  @ExposeEditor var box: Rect = Rect(size = Size(1, 1)),
