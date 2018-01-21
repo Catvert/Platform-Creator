@@ -11,9 +11,11 @@ import be.catvert.pc.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
+import imgui.ImGui
 import imgui.functionalProgramming
 import kotlin.math.roundToInt
 
@@ -37,6 +39,8 @@ private data class JumpData(var isJumping: Boolean = false, var targetHeight: In
 data class CollisionListener(val gameObject: GameObject, val collideGameObject: GameObject, val side: BoxSide)
 
 data class SensorData(@ExposeEditor var isSensor: Boolean = false, var target: GameObjectTag = Tags.Player.tag, var sensorIn: Action = EmptyAction(), var sensorOut: Action = EmptyAction()) : CustomEditorImpl {
+    val sensorOverlaps: MutableSet<GameObject> = mutableSetOf()
+
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         if (isSensor) {
             functionalProgramming.collapsingHeader("sensor props") {
@@ -51,10 +55,10 @@ data class SensorData(@ExposeEditor var isSensor: Boolean = false, var target: G
         }
     }
 
-    val sensorOverlaps: MutableSet<GameObject> = mutableSetOf()
+    override fun toString(): String = ""
 }
 
-data class CollisionAction(@ExposeEditor var side: BoxSide = BoxSide.Left, @ExposeEditor(customType = CustomType.TAG_STRING) var target: GameObjectTag = Tags.Player.tag, @ExposeEditor var action: Action = EmptyAction(), @ExposeEditor var tagAction: TagAction = TagAction(Tags.Player.tag, EmptyAction()))
+data class CollisionAction(@ExposeEditor var side: BoxSide = BoxSide.Left, @ExposeEditor(customType = CustomType.TAG_STRING) var target: GameObjectTag = Tags.Player.tag, @ExposeEditor var action: Action = EmptyAction(), @ExposeEditor(customType = CustomType.NO_CHECK_COMPS_GO) var collideAction: Action = EmptyAction())
 
 /**
  * Ce component permet d'ajouter à l'entité des propriétés physique tel que la gravité, vitesse de déplacement ...
@@ -82,7 +86,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                        var onUpAction: Action = EmptyAction(),
                        var onDownAction: Action = EmptyAction(),
                        var onJumpAction: Action = EmptyAction(),
-                       var onNothingAction: Action = EmptyAction()) : Component(), Updeatable, CustomEditorImpl {
+                       var onNothingAction: Action = EmptyAction()) : Component(), Updeatable, CustomEditorImpl, CustomEditorTextImpl {
     @JsonCreator private constructor() : this(true)
 
     /**
@@ -174,6 +178,8 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
             }
         }
 
+        physicsActions.clear()
+
         // Si le déplacement est de type "fluide", on applique une interpolation linéaire à la vitesse à appliquer au gameObject
         if (movementType == MovementType.SMOOTH) {
             moveSpeedX = MathUtils.lerp(actualMoveSpeedX, moveSpeedX, 0.2f)
@@ -189,8 +195,6 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
 
         if (gameObject.position() == lastPos)
             onNothingAction(gameObject)
-
-        physicsActions.clear()
 
         if (addJumpAfterClear)
             physicsActions += PhysicsActions.JUMP
@@ -293,17 +297,17 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                             }
 
                             gameObject.getCurrentState().getComponent<PhysicsComponent>()?.apply {
-                                collisionsActions.firstOrNull { collisionAction -> (collisionAction.side == side || collisionAction.side == BoxSide.All) && collisionAction.target == it.tag }?.apply {
+                                this.collisionsActions.firstOrNull { collisionAction -> (collisionAction.side == side || collisionAction.side == BoxSide.All) && collisionAction.target == it.tag }?.apply {
                                     action(gameObject)
-                                    tagAction(it)
+                                    collideAction(it)
                                 }
                                 onCollisionWith.invoke(CollisionListener(gameObject, it, side))
                             }
 
                             it.getCurrentState().getComponent<PhysicsComponent>()?.apply {
-                                collisionsActions.firstOrNull { collisionAction -> (collisionAction.side == -side || collisionAction.side == BoxSide.All) && collisionAction.target == gameObject.tag }?.apply {
+                                this.collisionsActions.firstOrNull { collisionAction -> (collisionAction.side == -side || collisionAction.side == BoxSide.All) && collisionAction.target == gameObject.tag }?.apply {
                                     action(it)
-                                    tagAction(gameObject)
+                                    collideAction(gameObject)
                                 }
                                 onCollisionWith.invoke(CollisionListener(it, gameObject, -side))
                             }
@@ -362,5 +366,17 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         ImguiHelper.addImguiWidgetsArray("collisions actions", collisionsActions, { it.side.name }, { CollisionAction() }, gameObject, level, editorSceneUI)
     }
 
-    override fun toString(): String = "jump data : $jumpData"
+    override fun insertText() {
+        ImguiHelper.textColored(Color.ORANGE, "collisions actions")
+        collisionsActions.forEach {
+            functionalProgramming.withIndent {
+                ImguiHelper.textColored(Color.RED, "<-->")
+                ImguiHelper.textPropertyColored(Color.ORANGE, "target :", it.target)
+                ImguiHelper.textPropertyColored(Color.ORANGE, "side :", it.side)
+                ImguiHelper.textPropertyColored(Color.ORANGE, "action :", it.action)
+                ImguiHelper.textPropertyColored(Color.ORANGE, "collide action :", it.collideAction)
+                ImguiHelper.textColored(Color.RED, "<-->")
+            }
+        }
+    }
 }

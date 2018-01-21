@@ -3,7 +3,7 @@ package be.catvert.pc.utility
 import io.leangen.geantyref.TypeFactory
 
 enum class CustomType {
-    DEFAULT, TAG_STRING
+    DEFAULT, TAG_STRING, NO_CHECK_COMPS_GO
 }
 
 @Target(AnnotationTarget.FIELD)
