@@ -1,3 +1,5 @@
-19:05:49  -> Info. : Initialisation en cours.. 
+19:12:29  -> Info. : Initialisation en cours.. 
  Taille : 1920x1026
-19:05:52  -> Info. : Chargement de la scène : EditorScene
+19:12:32  -> Info. : Chargement de la scène : GameScene
+19:12:40  -> Info. : Chargement de la scène : MainMenuScene
+19:12:41  -> Info. : Chargement de la scène : EditorScene
