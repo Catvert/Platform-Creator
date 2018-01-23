@@ -1,35 +1,12 @@
 package be.catvert.pc.actions
 
 import be.catvert.pc.GameObject
-import be.catvert.pc.components.RequiredComponent
-import be.catvert.pc.components.basics.TweenComponent
-import be.catvert.pc.containers.Level
-import be.catvert.pc.scenes.EditorScene
-import be.catvert.pc.utility.CustomEditorImpl
+import be.catvert.pc.systems.TweenSystem2
 import com.fasterxml.jackson.annotation.JsonCreator
-import imgui.ImGui
-import imgui.functionalProgramming
 
-/**
- * Action permettant d'appliquer un tween sur un gameObject
- * @see TweenComponent
- */
-@RequiredComponent(TweenComponent::class)
-class TweenAction(var tweenIndex: Int) : Action(), CustomEditorImpl {
-    @JsonCreator private constructor() : this(-1)
-
+class TweenAction2(var tween: TweenSystem2.Tween): Action() {
+    @JsonCreator private constructor(): this(TweenSystem2.MoveTween(1f, 100, 0))
     override fun invoke(gameObject: GameObject) {
-        gameObject.getCurrentState().getComponent<TweenComponent>()?.startTween(gameObject, tweenIndex)
+        TweenSystem2.start(tween, gameObject)
     }
-
-    override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        with(ImGui) {
-            val tweens = gameObject.getCurrentState().getComponent<TweenComponent>()?.tweens ?: arrayListOf()
-            functionalProgramming.withItemWidth(100f) {
-                combo("tween", ::tweenIndex, tweens.map { it.name })
-            }
-        }
-    }
-
-    override fun toString() = super.toString() + " - index : $tweenIndex"
 }

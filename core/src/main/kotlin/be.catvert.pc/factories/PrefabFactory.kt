@@ -3,7 +3,6 @@ package be.catvert.pc.factories
 import be.catvert.pc.*
 import be.catvert.pc.actions.*
 import be.catvert.pc.components.basics.SoundComponent
-import be.catvert.pc.components.basics.TweenComponent
 import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.components.graphics.AtlasRegion
 import be.catvert.pc.components.logics.*
@@ -90,8 +89,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         CollisionAction(BoxSide.Down, collideAction = LifeAction(LifeAction.LifeActions.REMOVE_LP)),
                         CollisionAction(BoxSide.Up, action = LifeAction(LifeAction.LifeActions.REMOVE_LP))
                 ))
-                this += TweenComponent(TweenFactory.RemoveGOTween())
-                this += LifeComponent(TweenAction(0))
+                this += LifeComponent(TweenAction(TweenFactory.RemoveGOTween()))
                 this += MoverComponent(MoverComponent.SimpleMoverOrientation.HORIZONTAL, false).apply { onReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X) }
             }))
     ),
@@ -101,7 +99,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                 this += PhysicsComponent(true, collisionsActions = arrayListOf(
                         CollisionAction(BoxSide.All, collideAction = LifeAction(LifeAction.LifeActions.REMOVE_LP))
                 ))
-                this += LifeComponent(RemoveGOAction())
+                this += LifeComponent(TweenAction(TweenFactory.RemoveGOTween()))
             }))
     ),
     Bee_Kenney(PrefabType.Kenney,
@@ -113,7 +111,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         CollisionAction(BoxSide.Down, collideAction = LifeAction(LifeAction.LifeActions.REMOVE_LP)),
                         CollisionAction(BoxSide.Up, action = LifeAction(LifeAction.LifeActions.REMOVE_LP))
                 ))
-                this += LifeComponent(RemoveGOAction())
+                this += LifeComponent(TweenAction(TweenFactory.RemoveGOTween()))
                 this += MoverComponent(MoverComponent.SimpleMoverOrientation.HORIZONTAL, false).apply { onReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X) }
             }))
     ),
@@ -121,7 +119,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
             Prefab("gold coin", GameObject(Tags.Special.tag, box = Rect(size = Size(35, 35)), initDefaultState = {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.packsKenneyDirPath.child("jumper.atlas").toFileWrapper() to "coin_gold"))
                 this += SoundComponent(SoundComponent.SoundData(Constants.soundsDirPath.child("coin.wav").toFileWrapper()))
-                this += PhysicsComponent(true, sensor = SensorData(true, sensorIn = MultiplexerAction(SoundAction(0), ScoreAction(1), RemoveGOAction())))
+                this += PhysicsComponent(true, sensor = SensorData(true, sensorIn = MultiplexerAction(SoundAction(0), ScoreAction(1), TweenAction(TweenFactory.RemoveGOTween()))))
             }))
     ),
     //endregion
@@ -206,8 +204,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         CollisionAction(BoxSide.Down, collideAction = LifeAction(LifeAction.LifeActions.REMOVE_LP)),
                         CollisionAction(BoxSide.Up, action = LifeAction(LifeAction.LifeActions.REMOVE_LP))
                 ))
-                this += TweenComponent(TweenFactory.RemoveGOTween())
-                this += LifeComponent(TweenAction(0))
+                this += LifeComponent(TweenAction(TweenFactory.RemoveGOTween()))
                 this += MoverComponent(MoverComponent.SimpleMoverOrientation.HORIZONTAL, false).apply { onReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X) }
             }))
     ),
@@ -240,14 +237,14 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                 this += PhysicsComponent(true, collisionsActions = arrayListOf(
                         CollisionAction(BoxSide.All, collideAction = LifeAction(LifeAction.LifeActions.REMOVE_LP))
                 ))
-                this += LifeComponent(RemoveGOAction())
+                this += LifeComponent(TweenAction(TweenFactory.RemoveGOTween()))
             }))
     ),
     MushroomRed_SMC(PrefabType.SMC,
             Prefab("mushroom red", GameObject(Tags.Special.tag, box = Rect(size = Size(45, 45)), initDefaultState = {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.packsSMCDirPath.child("items.atlas").toFileWrapper() to "mushroom_red"))
                 this += PhysicsComponent(false, 5, collisionsActions = arrayListOf(
-                        CollisionAction(BoxSide.All, action = RemoveGOAction())
+                        CollisionAction(BoxSide.All, action = TweenAction(TweenFactory.RemoveGOTween()))
                 ))
                 this += MoverComponent(MoverComponent.SimpleMoverOrientation.HORIZONTAL, false).apply { onReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X) }
             }))

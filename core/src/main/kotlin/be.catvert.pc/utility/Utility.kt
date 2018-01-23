@@ -48,7 +48,6 @@ fun Vector3.toPoint() = Point(this.x.roundToInt(), this.y.roundToInt())
 
 fun Shape2D.contains(point: Point) = this.contains(point.x.toFloat(), point.y.toFloat())
 
-inline fun <reified T : Any> AssetManager.loadOnDemand(file: FileWrapper): Asset<T> = this.loadOnDemand(file.get())
 inline fun <reified T : Any> AssetManager.loadOnDemand(file: FileHandle): Asset<T> = this.loadOnDemand(file.path())
 
 fun FileHandle.toFileWrapper() = FileWrapper(this)

@@ -1,11 +1,11 @@
 package be.catvert.pc.scenes
 
-import aurelienribon.tweenengine.Timeline
-import aurelienribon.tweenengine.Tween
 import be.catvert.pc.Log
 import be.catvert.pc.PCGame
 import be.catvert.pc.utility.*
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.utils.Disposable
 import imgui.ImGui
 import imgui.impl.LwjglGL3
@@ -13,7 +13,7 @@ import ktx.app.clearScreen
 
 class SceneManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Disposable {
     private var currentScene: Scene = initialScene
-    private var nextScene: Scene? = null
+    private var nextScene: NextWaitingScene? = null
 
     fun currentScene() = currentScene
 
@@ -23,6 +23,10 @@ class SceneManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Dis
 
     private var waitingScene = mutableMapOf<Class<Scene>, NextWaitingScene>()
 
+    private val interpolation = Interpolation.linear
+
+    private var elapsedTime = 0f
+
     fun loadScene(scene: Scene, applyTransition: Boolean = true, disposeCurrentScene: Boolean = true) {
         if (applyTransition) {
             if (isTransitionRunning) {
@@ -30,36 +34,19 @@ class SceneManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Dis
                 return
             }
 
-            nextScene = scene
-
-            nextScene?.alpha = 0f
+            scene.alpha = 0f
             currentScene.alpha = 1f
 
+            elapsedTime = 0f
+
+            nextScene = NextWaitingScene(scene, applyTransition, disposeCurrentScene)
+
             isTransitionRunning = true
-
-            Timeline.createSequence()
-                    .beginParallel()
-                    .push(Tween.to(currentScene, SceneTweenAccessor.SceneTween.ALPHA.tweenType, 0.5f).target(0f).setCallback { _, _ ->
-                        setScene(scene, disposeCurrentScene)
-                    })
-                    .push(Tween.to(scene, SceneTweenAccessor.SceneTween.ALPHA.tweenType, 0.5f).target(1f).setCallback { _, _ ->
-                        nextScene = null
-                        isTransitionRunning = false
-
-                        if (waitingScene.isNotEmpty()) {
-                            val scene = waitingScene.entries.elementAt(0)
-                            waitingScene.remove(scene.key)
-                            val (nextScene, applyTransition, disposeCurrentScene) = scene.value
-                            loadScene(nextScene, applyTransition, disposeCurrentScene)
-                        }
-                    })
-                    .end()
-                    .start(PCGame.tweenManager)
         } else {
             if (isTransitionRunning)
                 waitingScene[scene.javaClass] = NextWaitingScene(scene, applyTransition, disposeCurrentScene)
             else
-                setScene(scene, disposeCurrentScene)
+                setScene(scene, false)
         }
     }
 
@@ -72,8 +59,32 @@ class SceneManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Dis
     }
 
     override fun update() {
-        nextScene?.update()
-        if (nextScene == null)
+        if(nextScene != null && isTransitionRunning) {
+            val (nextScene, _, disposeCurrentScene) = nextScene!!
+
+            elapsedTime += Gdx.graphics.deltaTime
+            val progress = Math.min(1f, elapsedTime / 1f)
+
+            currentScene.alpha = interpolation.apply(1f, 0f, progress)
+            nextScene.alpha = interpolation.apply(0f, 1f, progress)
+
+            nextScene.update()
+
+            if(progress == 1f) {
+                setScene(nextScene, disposeCurrentScene)
+
+                this@SceneManager.nextScene = null
+                isTransitionRunning = false
+
+                if (waitingScene.isNotEmpty()) {
+                    val scene = waitingScene.entries.elementAt(0)
+                    waitingScene.remove(scene.key)
+                    val (nextScene, applyTransition, disposeCurrentScene) = scene.value
+                    loadScene(nextScene, applyTransition, disposeCurrentScene)
+                }
+            }
+        }
+        else
             currentScene.update()
     }
 
@@ -88,12 +99,12 @@ class SceneManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Dis
 
         ImGui.render()
 
-        nextScene?.apply {
+       nextScene?.apply {
             ImGui.newFrame()
 
-            ImGui.style.alpha = alpha
-            batch.setColor(1f, 1f, 1f, alpha)
-            render(batch)
+            ImGui.style.alpha = scene.alpha
+            batch.setColor(1f, 1f, 1f, scene.alpha)
+            scene.render(batch)
 
             ImGui.render()
         }

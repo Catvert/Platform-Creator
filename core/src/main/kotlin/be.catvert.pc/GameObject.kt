@@ -1,6 +1,5 @@
 package be.catvert.pc
 
-import aurelienribon.tweenengine.TweenAccessor
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.RemoveGOAction
 import be.catvert.pc.components.graphics.AtlasComponent
@@ -138,83 +137,5 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
     override fun insertText() {
         ImguiHelper.textColored(Color.ORANGE, name)
         ImguiHelper.textPropertyColored(Color.CORAL, "state actuel :", getCurrentState().name)
-    }
-}
-
-class GameObjectTweenAccessor : TweenAccessor<GameObject> {
-    enum class GameObjectTween(val tweenType: Int) {
-        NOTHING(-1),
-        POS_X(0),
-        POS_Y(1),
-        POS_XY(2),
-        SIZE_X(3),
-        SIZE_Y(4),
-        SIZE_XY(5),
-        ATLAS_ALPHA(6);
-
-        companion object {
-            fun fromType(tweenType: Int) = values().firstOrNull { it.tweenType == tweenType }
-        }
-    }
-
-    override fun setValues(gameObject: GameObject, tweenType: Int, newValues: FloatArray) {
-        when (GameObjectTween.fromType(tweenType)) {
-            GameObjectTween.NOTHING -> {
-            }
-            GameObjectTween.POS_X -> {
-                gameObject.box.x = newValues[0].roundToInt()
-            }
-            GameObjectTween.POS_Y -> {
-                gameObject.box.y = newValues[0].roundToInt()
-            }
-            GameObjectTween.POS_XY -> {
-                gameObject.box.position = Point(newValues[0].roundToInt(), newValues[1].roundToInt())
-            }
-            GameObjectTween.SIZE_X -> {
-                gameObject.box.width = newValues[0].roundToInt()
-            }
-            GameObjectTween.SIZE_Y -> {
-                gameObject.box.height = newValues[0].roundToInt()
-            }
-            GameObjectTween.SIZE_XY -> {
-                gameObject.box.size = Size(newValues[0].roundToInt(), newValues[1].roundToInt())
-            }
-            GameObjectTween.ATLAS_ALPHA -> {
-                gameObject.getCurrentState().getComponent<AtlasComponent>()?.alpha = newValues[0]
-            }
-            else -> Log.error { "Tween inconnu : $tweenType" }
-        }
-    }
-
-    override fun getValues(gameObject: GameObject, tweenType: Int, returnValues: FloatArray): Int {
-        when (GameObjectTween.fromType(tweenType)) {
-            GameObjectTween.NOTHING -> {
-                return -1
-            }
-            GameObjectTween.POS_X -> {
-                returnValues[0] = gameObject.box.x.toFloat(); return 1
-            }
-            GameObjectTween.POS_Y -> {
-                returnValues[0] = gameObject.box.y.toFloat(); return 1
-            }
-            GameObjectTween.POS_XY -> {
-                returnValues[0] = gameObject.box.x.toFloat(); returnValues[1] = gameObject.box.y.toFloat(); return 2
-            }
-            GameObjectTween.SIZE_X -> {
-                returnValues[0] = gameObject.box.width.toFloat(); return 1
-            }
-            GameObjectTween.SIZE_Y -> {
-                returnValues[0] = gameObject.box.height.toFloat(); return 1
-            }
-            GameObjectTween.SIZE_XY -> {
-                returnValues[0] = gameObject.box.width.toFloat(); returnValues[1] = gameObject.box.height.toFloat(); return 2
-            }
-            GameObjectTween.ATLAS_ALPHA -> {
-                returnValues[0] = gameObject.getCurrentState().getComponent<AtlasComponent>()?.alpha ?: 0f; return 1
-            }
-            else -> Log.error { "Tween inconnu : $tweenType" }
-        }
-
-        return -1
     }
 }

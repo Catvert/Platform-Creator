@@ -269,7 +269,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         val newRect = Rect(gameObject.box)
         newRect.position = Point(newRect.x + moveX, newRect.y + moveY)
 
-        if(level?.matrixRect?.let { newRect.x >= 0 && newRect.x + newRect.width <= it.width && newRect.y >= 0 && newRect.y + newRect.height <= it.height } == false && newRect.y > 0)
+        if(level?.matrixRect?.contains(newRect, true) == false && newRect.y > 0)
             return true
 
         level?.apply {
@@ -325,22 +325,22 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         level?.getAllGameObjectsInCells(gameObject.box)?.filter { it !== gameObject }?.forEach {
             when (boxSide) {
                 BoxSide.Left -> {
-                    if (it.box.x + it.box.width == gameObject.box.x) {
+                    if (it.box.right() == gameObject.box.x) {
                         collideGameObjects += it
                     }
                 }
                 BoxSide.Right -> {
-                    if (it.box.x == gameObject.box.x + gameObject.box.width) {
+                    if (it.box.x == gameObject.box.right()) {
                         collideGameObjects += it
                     }
                 }
                 BoxSide.Up -> {
-                    if (it.box.y == gameObject.box.y + gameObject.box.height) {
+                    if (it.box.y == gameObject.box.top()) {
                         collideGameObjects += it
                     }
                 }
                 BoxSide.Down -> {
-                    if (it.box.y + it.box.height == gameObject.box.y) {
+                    if (it.box.top() == gameObject.box.y) {
                         collideGameObjects += it
                     }
                 }

@@ -1,13 +1,10 @@
 package be.catvert.pc.scenes
 
-import aurelienribon.tweenengine.TweenAccessor
-import be.catvert.pc.Log
 import be.catvert.pc.PCGame
 import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputMultiplexer
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -19,8 +16,6 @@ import com.badlogic.gdx.utils.viewport.StretchViewport
 import imgui.ImGui
 import ktx.actors.alpha
 import ktx.app.use
-import javax.rmi.CORBA.Util
-
 
 /**
  * Classe abstraite permettant l'implémentation d'une scène
@@ -45,9 +40,7 @@ abstract class Scene(protected var background: Background) : Renderable, Updeata
         set(value) {
             field = value
             gameObjectContainer.getGameObjectsData().forEach {
-                it.getStates().forEach {
-                    it.getComponent<AtlasComponent>()?.alpha = value
-                }
+                it.getCurrentState().getComponent<AtlasComponent>()?.alpha = value
             }
         }
 
@@ -100,35 +93,5 @@ abstract class Scene(protected var background: Background) : Renderable, Updeata
 
     override fun dispose() {
         stage.dispose()
-    }
-}
-
-class SceneTweenAccessor : TweenAccessor<Scene> {
-    enum class SceneTween(val tweenType: Int) {
-        ALPHA(0);
-
-        companion object {
-            fun fromType(tweenType: Int) = values().firstOrNull { it.tweenType == tweenType }
-        }
-    }
-
-    override fun setValues(scene: Scene, tweenType: Int, newValues: FloatArray) {
-        when (SceneTween.fromType(tweenType)) {
-            SceneTween.ALPHA -> {
-                scene.alpha = newValues[0]
-            }
-            else -> Log.error { "Tween inconnu : $tweenType" }
-        }
-    }
-
-    override fun getValues(scene: Scene, tweenType: Int, returnValues: FloatArray): Int {
-        when (SceneTween.fromType(tweenType)) {
-            SceneTween.ALPHA -> {
-                returnValues[0] = scene.alpha; return 1
-            }
-            else -> Log.error { "Tween inconnu : $tweenType" }
-        }
-
-        return -1
     }
 }

@@ -52,7 +52,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
     private data class GridMode(var active: Boolean = false, var offsetX: Int = 0, var offsetY: Int = 0, var cellWidth: Int = 50, var cellHeight: Int = 50) {
         fun putGameObject(walkRect: Rect, point: Point, gameObject: GameObject) {
             getRectCellOf(walkRect, point)?.apply {
-                if (this.x >= walkRect.x && this.x + this.width <= walkRect.x + walkRect.width && this.y >= walkRect.y && this.y + this.height <= walkRect.y + walkRect.height)
+                if (walkRect.contains(this, true))
                     gameObject.box = this
             }
         }
@@ -221,12 +221,6 @@ class EditorScene(val level: Level) : Scene(level.background) {
                     shapeRenderer.withColor(Color.GRAY) {
                         rect(it.box)
                     }
-                }
-
-                if (it.layer == selectLayer || editorSceneUI.editorMode == EditorSceneUI.EditorMode.TRY_LEVEL) {
-                    it.getCurrentState().getComponent<AtlasComponent>()?.alpha = 1f
-                } else {
-                    it.getCurrentState().getComponent<AtlasComponent>()?.alpha = 0.5f
                 }
             }
         }
@@ -402,7 +396,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         selectRectangleData.rectangleStarted = false
 
                         level.getAllGameObjectsInCells(selectRectangleData.getRect()).forEach {
-                            if (selectRectangleData.getRect().contains(it.box)) {
+                            if (selectRectangleData.getRect().contains(it.box, true)) {
                                 addSelectGameObject(it)
                                 editorSceneUI.editorMode = EditorSceneUI.EditorMode.SELECT
                             }
@@ -527,7 +521,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                                     if (selectGameObjects.let {
                                                 var canResize = true
                                                 it.forEach {
-                                                    if (!level.matrixRect.contains(Rect(it.box.x, it.box.y, it.box.width - resizeX, it.box.height - resizeY))) {
+                                                    if (!level.matrixRect.contains(Rect(it.box.x, it.box.y, it.box.width - resizeX, it.box.height - resizeY), true)) {
                                                         canResize = false
                                                     }
                                                 }

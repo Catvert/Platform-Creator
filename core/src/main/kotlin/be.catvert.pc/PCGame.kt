@@ -1,7 +1,5 @@
 package be.catvert.pc
 
-import aurelienribon.tweenengine.Tween
-import aurelienribon.tweenengine.TweenManager
 import be.catvert.pc.actions.Action
 import be.catvert.pc.components.Component
 import be.catvert.pc.components.graphics.AtlasComponent
@@ -10,7 +8,7 @@ import be.catvert.pc.i18n.Locales
 import be.catvert.pc.scenes.MainMenuScene
 import be.catvert.pc.scenes.Scene
 import be.catvert.pc.scenes.SceneManager
-import be.catvert.pc.scenes.SceneTweenAccessor
+import be.catvert.pc.tweens.TweenSystem
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics
@@ -72,9 +70,6 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
 
         PCGame.mainFont = BitmapFont(Constants.mainFontPath)
 
-        Tween.registerAccessor(GameObject::class.java, GameObjectTweenAccessor())
-        Tween.registerAccessor(Scene::class.java, SceneTweenAccessor())
-
         Utility.getFilesRecursivly(Constants.backgroundsDirPath.child("standard"), *Constants.levelTextureExtension).forEach {
             standardBackgrounds.add(StandardBackground(it.toFileWrapper()))
         }
@@ -111,7 +106,7 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
 
         sceneManager.update()
 
-        tweenManager.update(Gdx.graphics.deltaTime)
+        TweenSystem.update()
 
         sceneManager.render(mainBatch)
 
@@ -217,8 +212,6 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
             }
 
         val availableLocales = mutableListOf<Locale>(Locale.FRENCH)
-
-        val tweenManager = TweenManager()
 
         fun standardBackgrounds() = standardBackgrounds.toList()
         fun parallaxBackgrounds() = parallaxBackgrounds.toList()

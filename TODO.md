@@ -11,7 +11,7 @@
 
 ## BUGS
 
-- Gridmode + copie de plusieurs gameObject d'un coup
+- Bug de scene2D texte non blanc mais gris après changement éditeur -> menu principal
 
 ## IDÉE
 

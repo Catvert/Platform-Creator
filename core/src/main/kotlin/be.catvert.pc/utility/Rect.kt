@@ -50,7 +50,12 @@ class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
             size = Size(width, value)
         }
 
-    fun center() = Point(x + width / 2, y + height / 2)
+    fun left() = x
+    fun right() = x + width
+    fun bottom() = y
+    fun top() = y + height
+
+    fun center() = Point(right() / 2, top() / 2)
 
     fun set(size: Size, position: Point) {
         this.size = size
@@ -64,19 +69,16 @@ class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
 
     fun set(rect: Rect) = this.set(rect.size, rect.position)
 
-    fun contains(rect: Rect): Boolean {
-        val xmin = rect.x
-        val xmax = xmin + rect.width
+    fun contains(rect: Rect, borderless: Boolean) =
+            if (borderless)
+                rect.left() >= this.left() && rect.right() <= this.right() && rect.bottom() >= this.bottom() && rect.top() <= this.top()
+            else
+                rect.left() > this.left() && rect.right() < this.right() && rect.bottom() > this.bottom() && rect.top() <= this.top()
 
-        val ymin = rect.y
-        val ymax = ymin + rect.height
 
-        return xmin > x && xmin < x + width && xmax > x && xmax < x + width && ymin > y && ymin < y + height && ymax > y && ymax < y + height
-    }
+    fun contains(point: Point) = this.x <= point.x && this.right() >= point.x && this.y <= point.y && this.top() >= point.y
 
-    fun contains(point: Point) = this.x <= point.x && this.x + this.width >= point.x && this.y <= point.y && this.y + this.height >= point.y
-
-    fun overlaps(rect: Rect) = this.x < rect.x + rect.width && this.x + this.width > rect.x && this.y < rect.y + rect.height && this.y + this.height > rect.y
+    fun overlaps(rect: Rect) = this.x < rect.right() && this.right() > rect.x && this.y < rect.top() && this.top() > rect.y
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         with(ImGui) {

@@ -87,6 +87,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
              */
             if (regions.size > 1)
                 stateTime += Gdx.graphics.deltaTime
+
             batch.draw(currentKeyFrame(), gameObject.box, flipX, flipY, rotation.degree)
         }
 
@@ -486,6 +487,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
 
     override fun insertText() {
         ImguiHelper.textPropertyColored(Color.ORANGE, "atlas actuel :", data.elementAtOrNull(currentIndex)?.name ?: "/")
+        ImguiHelper.textPropertyColored(Color.OLIVE, "alpha :", alpha)
         data.forEach {
             ImguiHelper.textColored(Color.RED, "<-->")
             ImguiHelper.textPropertyColored(Color.ORANGE, "nom :", it.name)
