@@ -8,7 +8,7 @@ import be.catvert.pc.containers.Level
 import be.catvert.pc.i18n.MenusText
 import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.ImguiHelper
-import be.catvert.pc.utility.KeyDownSignalProcessor
+import be.catvert.pc.utility.PCInputProcessor
 import be.catvert.pc.utility.Size
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
@@ -73,7 +73,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
                 onClick {
                     settingsKeys.forEach {
                         settingsKeys[it.key] = false
-                        KeyDownSignalProcessor.keyDownSignal.clear()
+                        PCInputProcessor.keyDownSignal.clear()
                     }
                     showSettingsWindow = true
                 }
@@ -320,12 +320,12 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
                                 if (!keyValue.value) {
                                     settingsKeys.forEach {
                                         settingsKeys[it.key] = false
-                                        KeyDownSignalProcessor.keyDownSignal.clear()
+                                        PCInputProcessor.keyDownSignal.clear()
                                     }
 
                                     settingsKeys[keyValue.key] = true
 
-                                    KeyDownSignalProcessor.keyDownSignal.register(true) {
+                                    PCInputProcessor.keyDownSignal.register(true) {
                                         keyValue.key.key = it
                                         settingsKeys[keyValue.key] = false
                                     }

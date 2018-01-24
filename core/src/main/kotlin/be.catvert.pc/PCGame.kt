@@ -22,6 +22,9 @@ import imgui.ImGui
 import imgui.impl.LwjglGL3
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner
 import ktx.app.KtxApplicationAdapter
+import org.lwjgl.glfw.GLFW
+import org.lwjgl.glfw.GLFWCharCallback
+import org.lwjgl.glfw.GLFWKeyCallback
 import uno.glfw.GlfwWindow
 import java.util.*
 import kotlin.collections.List
@@ -40,7 +43,10 @@ import kotlin.reflect.KClass
 class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
     private fun initializeUI() {
         VisUI.load(Constants.uiDirPath.child("tinted/x1/tinted.json"))
-        LwjglGL3.init(GlfwWindow((Gdx.graphics as Lwjgl3Graphics).window.windowHandle), false)
+
+        val windowHandle = (Gdx.graphics as Lwjgl3Graphics).window.windowHandle
+
+        LwjglGL3.init(GlfwWindow(windowHandle), false)
     }
 
     override fun create() {

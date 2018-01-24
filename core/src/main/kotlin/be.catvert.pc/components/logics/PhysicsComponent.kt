@@ -44,12 +44,14 @@ data class SensorData(@ExposeEditor var isSensor: Boolean = false, var target: G
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         if (isSensor) {
             functionalProgramming.collapsingHeader("sensor props") {
-                ImguiHelper.gameObjectTag(::target, level, "sensor target")
-                functionalProgramming.withId("in action") {
-                    ImguiHelper.action("in action", ::sensorIn, gameObject, level, editorSceneUI)
-                }
-                functionalProgramming.withId("out action") {
-                    ImguiHelper.action("out action", ::sensorOut, gameObject, level, editorSceneUI)
+                functionalProgramming.withIndent {
+                    ImguiHelper.gameObjectTag(::target, level, "sensor target")
+                    functionalProgramming.withId("in action") {
+                        ImguiHelper.action("in action", ::sensorIn, gameObject, level, editorSceneUI)
+                    }
+                    functionalProgramming.withId("out action") {
+                        ImguiHelper.action("out action", ::sensorOut, gameObject, level, editorSceneUI)
+                    }
                 }
             }
         }
@@ -355,15 +357,26 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         functionalProgramming.collapsingHeader("move actions") {
-            ImguiHelper.action("on left", ::onLeftAction, gameObject, level, editorSceneUI)
-            ImguiHelper.action("on right", ::onRightAction, gameObject, level, editorSceneUI)
-            ImguiHelper.action("on jump", ::onLeftAction, gameObject, level, editorSceneUI)
-            ImguiHelper.action("on fall", ::onLeftAction, gameObject, level, editorSceneUI)
-            ImguiHelper.action("on nothing", ::onNothingAction, gameObject, level, editorSceneUI)
+            functionalProgramming.withIndent {
+                ImguiHelper.action("on left", ::onLeftAction, gameObject, level, editorSceneUI)
+                ImguiHelper.action("on right", ::onRightAction, gameObject, level, editorSceneUI)
+                ImguiHelper.action("on up", ::onUpAction, gameObject, level, editorSceneUI)
+                ImguiHelper.action("on down", ::onDownAction, gameObject, level, editorSceneUI)
+                ImguiHelper.action("on nothing", ::onNothingAction, gameObject, level, editorSceneUI)
+            }
         }
 
-        ImguiHelper.addImguiWidgetsArray("ignore tags", ignoreTags, { it }, { Tags.Player.tag }, gameObject, level, editorSceneUI, ExposeEditorFactory.createExposeEditor(customType = CustomType.TAG_STRING))
-        ImguiHelper.addImguiWidgetsArray("collisions actions", collisionsActions, { it.side.name }, { CollisionAction() }, gameObject, level, editorSceneUI)
+        functionalProgramming.collapsingHeader("ignore tags") {
+            functionalProgramming.withIndent {
+                ImguiHelper.addImguiWidgetsArray("ignore tags", ignoreTags, { it }, { Tags.Player.tag }, gameObject, level, editorSceneUI, ExposeEditorFactory.createExposeEditor(customType = CustomType.TAG_STRING))
+            }
+        }
+
+        functionalProgramming.collapsingHeader("collisions actions") {
+            functionalProgramming.withIndent {
+                ImguiHelper.addImguiWidgetsArray("collisions actions", collisionsActions, { it.side.name }, { CollisionAction() }, gameObject, level, editorSceneUI)
+            }
+        }
     }
 
     override fun insertText() {

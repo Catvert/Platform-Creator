@@ -1,5 +1,7 @@
 package be.catvert.pc
 
+import be.catvert.pc.actions.Action
+import be.catvert.pc.actions.EmptyAction
 import be.catvert.pc.components.Component
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.utility.Renderable
@@ -20,13 +22,14 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
     constructor(name: String, initState: GameObjectState.() -> Unit) : this(name) {
         initState()
     }
-
     @JsonCreator private constructor() : this("State")
 
     private lateinit var gameObject: GameObject
 
     @JsonProperty("comps")
     private val components: MutableSet<Component> = components
+
+    var startAction: Action = EmptyAction()
 
     @JsonIgnore
     fun getComponents() = components.toSet()
@@ -37,6 +40,7 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
 
     fun toggleActive(container: GameObjectContainer) {
         components.forEach { it.onStateActive(gameObject, this, container) }
+        startAction(gameObject)
     }
 
     fun addComponent(component: Component) {

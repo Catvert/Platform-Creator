@@ -19,6 +19,7 @@ import imgui.Cond
 import imgui.ImGui
 import imgui.ItemFlags
 import imgui.functionalProgramming
+import uno.kotlin.isPrintable
 import kotlin.math.roundToInt
 import kotlin.reflect.KMutableProperty0
 import kotlin.reflect.full.findAnnotation
@@ -28,6 +29,8 @@ object ImguiHelper {
         inline fun <reified T : Any> cast() = this as Item<T>
     }
 
+    private val settingsBtnIconHandle: Int = ResourceManager.getTexture(Constants.uiDirPath.child("settings.png")).textureObjectHandle
+
     fun <T : Any> addImguiWidgetsArray(label: String, array: ArrayList<T>, itemLabel: (item: T) -> String, createItem: () -> T, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI, itemExposeEditor: ExposeEditor = ExposeEditorFactory.empty, endBlock: () -> Unit = {}) {
         addImguiWidgetsArray(label, array, itemLabel, createItem, {
             addImguiWidget(itemLabel(it.obj), it, gameObject, level, itemExposeEditor, editorSceneUI)
@@ -36,36 +39,35 @@ object ImguiHelper {
 
     fun <T : Any> addImguiWidgetsArray(label: String, array: ArrayList<T>, itemLabel: (item: T) -> String, createItem: () -> T, itemBlock: (item: Item<T>) -> Unit, editorSceneUI: EditorScene.EditorSceneUI, endBlock: () -> Unit = {}) {
         with(ImGui) {
-            if (collapsingHeader(label)) {
-                functionalProgramming.withIndent {
-                    for (index in 0 until array.size) {
-                        pushId("remove $index")
-                        if (button("Suppr.")) {
-                            array.removeAt(index)
-                            break
-                        }
+            for (index in 0 until array.size) {
+                pushId("remove $index")
+                if (button("Suppr.")) {
+                    array.removeAt(index)
+                    break
+                }
 
-                        popId()
+                popId()
 
-                        sameLine()
+                sameLine()
 
-                        val item = Item(array[index])
-                        functionalProgramming.withId("collapse $index") {
-                            functionalProgramming.collapsingHeader(itemLabel(item.obj)) {
-                                functionalProgramming.withId("array item $index") {
-                                    itemBlock(item)
-                                }
+                val item = Item(array[index])
+                functionalProgramming.withId("collapse $index") {
+                    functionalProgramming.collapsingHeader(itemLabel(item.obj)) {
+                        functionalProgramming.withIndent {
+                            functionalProgramming.withId("array item $index") {
+                                itemBlock(item)
                             }
-                            array[index] = item.obj
                         }
                     }
+                    array[index] = item.obj
                 }
-                if (button("Ajouter", Vec2(-1, 0))) {
+            }
+            functionalProgramming.withId("$label add btn") {
+                if (button("Ajouter", Vec2(if (array.isEmpty()) 100f else -1f, 0))) {
                     array.add(createItem())
                 }
-
-                endBlock()
             }
+            endBlock()
         }
     }
 
@@ -108,11 +110,7 @@ object ImguiHelper {
                     is String -> {
                         when (exposeEditor.customType) {
                             CustomType.DEFAULT -> {
-                                functionalProgramming.withItemWidth(100f) {
-                                    if (inputText(label, value.toCharArray())) {
-                                        item.obj = value.toString() as T
-                                    }
-                                }
+                                ImguiHelper.inputText(label, item.cast())
                             }
                             CustomType.TAG_STRING -> {
                                 gameObjectTag(item.cast(), level)
@@ -136,11 +134,18 @@ object ImguiHelper {
         }
     }
 
-    fun inputText(label: String, value: KMutableProperty0<String>) {
-        val buf = value.get().toCharArray()
+    fun inputText(label: String, text: Item<String>) {
+        val buf = text.obj.toCharArray(CharArray(32))
+        functionalProgramming.withItemWidth(100f) {
+            if (ImGui.inputText(label, buf))
+                text.obj = String(buf.filter { it.isPrintable }.toCharArray())
+        }
+    }
 
-        if (ImGui.inputText(label, buf))
-            value.set(String(buf))
+    fun inputText(label: String, value: KMutableProperty0<String>) {
+        val item = Item(value())
+        inputText(label, item)
+        value.set(item.obj)
     }
 
     fun action(label: String, action: KMutableProperty0<Action>, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
@@ -153,14 +158,6 @@ object ImguiHelper {
         with(ImGui) {
             val index = intArrayOf(PCGame.actionsClasses.indexOfFirst { it.isInstance(action.obj) })
 
-            functionalProgramming.withItemWidth(150f) {
-                functionalProgramming.withId("select action $label") {
-                    if (combo(label, index, PCGame.actionsClasses.map { it.simpleName ?: "Nom inconnu" })) {
-                        action.obj = ReflectionUtility.findNoArgConstructor(PCGame.actionsClasses[index[0]])!!.newInstance()
-                    }
-                }
-            }
-
             functionalProgramming.withId("prop $label") {
                 val requiredComponent = PCGame.actionsClasses[index[0]].findAnnotation<RequiredComponent>()
                 val incorrectAction = let {
@@ -170,20 +167,56 @@ object ImguiHelper {
                     }
                     false
                 }
-                pushItemFlag(ItemFlags.Disabled.i, incorrectAction)
-                if (treeNode("Propriétés")) {
+
+                if(comboWithSettingsButton(label, index, PCGame.actionsClasses.map { it.simpleName?.removeSuffix("Action")?: "Nom inconnu" }, {
                     insertImguiExposeEditorFields(action.obj, gameObject, level, editorSceneUI)
-                    treePop()
-                }
-                popItemFlag()
-                if (incorrectAction && isMouseHoveringRect(itemRectMin, itemRectMax)) {
-                    functionalProgramming.withTooltip {
-                        textPropertyColored(Color.RED,"Il manque le(s) component(s) :", requiredComponent!!.component.map { it.simpleName })
+                }, incorrectAction, {
+                    if (isMouseHoveringRect(itemRectMin, itemRectMax)) {
+                        functionalProgramming.withTooltip {
+                            textPropertyColored(Color.RED, "Il manque le(s) component(s) :", requiredComponent!!.component.map { it.simpleName })
+                        }
                     }
+                })) {
+                    action.obj = ReflectionUtility.findNoArgConstructor(PCGame.actionsClasses[index[0]])!!.newInstance()
                 }
             }
-
         }
+    }
+
+    fun comboWithSettingsButton(label: String, currentItem: IntArray, items: List<String>, popupBlock: () -> Unit, settingsBtnDisabled: Boolean = false, onSettingsBtnDisabled: () -> Unit = {}): Boolean {
+        val popupTitle = "popup settings $label"
+
+        var comboChanged = false
+
+        with(ImGui) {
+            pushItemFlag(ItemFlags.Disabled.i, settingsBtnDisabled)
+            if (imageButton(settingsBtnIconHandle, Vec2(13f, 13f), uv1 = Vec2(1, 1))) {
+                openPopup(popupTitle)
+            }
+            popItemFlag()
+
+
+            if(settingsBtnDisabled)
+                onSettingsBtnDisabled()
+
+            sameLine()
+            functionalProgramming.withItemWidth(71f) {
+                if(combo(label, currentItem, items))
+                    comboChanged = true
+            }
+
+            functionalProgramming.popup(popupTitle) {
+                popupBlock()
+            }
+        }
+
+        return comboChanged
+    }
+
+    fun comboWithSettingsButton(label: String, currentItem: KMutableProperty0<Int>, items: List<String>, popupBlock: () -> Unit, settingsBtnDisabled: Boolean = false, onSettingsBtnDisabled: () -> Unit = {}) {
+        val item = intArrayOf(currentItem.get())
+        comboWithSettingsButton(label, item, items, popupBlock, settingsBtnDisabled, onSettingsBtnDisabled)
+        currentItem.set(item[0])
     }
 
     fun gameObjectTag(tag: Item<GameObjectTag>, level: Level, label: String = "tag") {
@@ -203,17 +236,17 @@ object ImguiHelper {
 
     fun gameObject(gameObject: KMutableProperty0<GameObject?>, editorSceneUI: EditorScene.EditorSceneUI, label: String = "game object") {
         with(ImGui) {
-            if(button("Sélect. $label", Vec2(150f, 0))) {
+            if (button("Sélect. $label", Vec2(100f, 0))) {
                 editorSceneUI.editorMode = EditorScene.EditorSceneUI.EditorMode.SELECT_GO
                 editorSceneUI.onSelectGO.register(true) {
                     gameObject.set(it)
                 }
             }
 
-            if(isMouseHoveringRect(itemRectMin, itemRectMax)) {
+            if (isMouseHoveringRect(itemRectMin, itemRectMax)) {
                 functionalProgramming.withTooltip {
                     val go = gameObject.get()
-                    if(go == null)
+                    if (go == null)
                         textColored(Color.RED, "aucun game object sélectionner")
                     else
                         textPropertyColored(Color.ORANGE, "game object actuel :", go.name)
@@ -280,12 +313,12 @@ object ImguiHelper {
                 if (!keys.containsKey(keyInt) || keys[keyInt] == false) {
                     keys.forEach {
                         keys[it.key] = false
-                        KeyDownSignalProcessor.keyDownSignal.clear()
+                        PCInputProcessor.keyDownSignal.clear()
                     }
 
                     keys[keyInt] = true
 
-                    KeyDownSignalProcessor.keyDownSignal.register(true) {
+                    PCInputProcessor.keyDownSignal.register(true) {
                         key.set(it)
                         keys[keyInt] = false
                     }

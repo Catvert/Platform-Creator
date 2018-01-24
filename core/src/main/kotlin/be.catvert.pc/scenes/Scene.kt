@@ -45,7 +45,7 @@ abstract class Scene(protected var background: Background) : Renderable, Updeata
         }
 
     init {
-        Gdx.input.inputProcessor = InputMultiplexer(stage, KeyDownSignalProcessor)
+        Gdx.input.inputProcessor = InputMultiplexer(stage, PCInputProcessor)
         stage.addListener(stageClickListener)
     }
 

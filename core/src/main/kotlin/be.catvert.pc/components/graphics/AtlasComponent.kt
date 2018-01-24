@@ -196,17 +196,17 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
     private var packFolderIndex = 0
     private var atlasIndex = 0
     private var regionIndex = 0
-    private var addAtlasName = "test"
+    private var addAtlasName = "Nouveau atlas"
     private var ressourcesCollapsing = false
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         with(ImGui) {
-            functionalProgramming.withItemWidth(100f) {
-                combo("atlas initial", ::currentIndex, data.map { it.name })
+            if (button("Éditer", Vec2(100f, 0))) {
+                showEditAtlasWindow = true
             }
 
-            if (button("Éditer", Vec2(-1, 0))) {
-                showEditAtlasWindow = true
+            functionalProgramming.withItemWidth(100f) {
+                combo("atlas initial", ::currentIndex, data.map { it.name })
             }
 
             if (showEditAtlasWindow)
@@ -226,11 +226,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                 val addAtlasTitle = "Ajouter un atlas"
 
                 functionalProgramming.popupModal(addAtlasTitle, extraFlags = WindowFlags.AlwaysAutoResize.i) {
-                    val atlasName = addAtlasName.toCharArray()
-                    functionalProgramming.withItemWidth(150f) {
-                        if (inputText("Nom", atlasName))
-                            addAtlasName = String(atlasName)
-                    }
+                    ImguiHelper.inputText("nom", ::addAtlasName)
                     if (button("Ajouter", Vec2(-1, 0))) {
                         data.add(AtlasData(addAtlasName).apply { updateAtlas() })
                         closeCurrentPopup()
@@ -326,7 +322,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                         }
 
                         if (this.regions.size > 1) {
-                            functionalProgramming.withItemWidth(calcItemWidth()) {
+                            functionalProgramming.withItemWidth(100f) {
                                 sliderFloat("Vitesse", ::frameDuration, 0f, 1f)
                             }
                             val playModeItem = ImguiHelper.Item(animationPlayMode)
