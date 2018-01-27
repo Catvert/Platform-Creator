@@ -3,10 +3,8 @@ package be.catvert.pc.utility
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
-import com.badlogic.gdx.graphics.g2d.Gdx2DPixmap
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
@@ -21,12 +19,6 @@ import kotlin.math.roundToInt
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaConstructor
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.PixmapIO
-import com.badlogic.gdx.utils.BufferUtils
-import gli_.copy
-import com.badlogic.gdx.utils.ScreenUtils
-
 
 
 fun Batch.draw(textureRegion: TextureRegion, rect: Rect, flipX: Boolean = false, flipY: Boolean = false, rotation: Float = 0f) {

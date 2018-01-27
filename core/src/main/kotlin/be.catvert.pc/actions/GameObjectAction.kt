@@ -8,8 +8,8 @@ import be.catvert.pc.utility.ExposeEditor
 import be.catvert.pc.utility.ImguiHelper
 import com.fasterxml.jackson.annotation.JsonCreator
 
-class GameObjectAction(var target: GameObject?, @ExposeEditor var action: Action) : Action(), CustomEditorImpl {
-    @JsonCreator private constructor(): this(null, EmptyAction())
+class GameObjectAction(var target: GameObject?, var action: Action) : Action(), CustomEditorImpl {
+    @JsonCreator private constructor() : this(null, EmptyAction())
 
     override fun invoke(gameObject: GameObject) {
         target?.apply {
@@ -19,5 +19,7 @@ class GameObjectAction(var target: GameObject?, @ExposeEditor var action: Action
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         ImguiHelper.gameObject(::target, editorSceneUI)
+        if(target != null)
+            ImguiHelper.action("target action", ::action, target!!, level, editorSceneUI)
     }
 }

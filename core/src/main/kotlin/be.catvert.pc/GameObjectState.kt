@@ -22,6 +22,7 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
     constructor(name: String, initState: GameObjectState.() -> Unit) : this(name) {
         initState()
     }
+
     @JsonCreator private constructor() : this("State")
 
     private lateinit var gameObject: GameObject

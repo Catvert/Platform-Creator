@@ -5,7 +5,6 @@ import be.catvert.pc.GameObject
 import be.catvert.pc.PCGame
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.fasterxml.jackson.annotation.JsonIgnore
 import kotlin.math.roundToInt
@@ -19,14 +18,33 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
                 if (value > field) {
                     for (i in 0 until value - field) {
                         ++field
-                        addLineWidth()
+
+                        val width = mutableListOf<MutableList<GameObject>>()
+                        matrixGrid.last().forEach {
+                            width.add(mutableListOf())
+                        }
+                        matrixGrid.add(width)
+
+                        matrixRect.width += Constants.matrixCellSize
                     }
                 } else {
                     for (i in 0 until Math.abs(field - value)) {
                         --field
-                        removeLineWidth()
+
+                        val last = matrixGrid.last().apply {
+                            forEach {
+                                it.forEach {
+                                    removeGameObject(it)
+                                }
+                            }
+                        }
+                        matrixGrid.remove(last)
+
+                        matrixRect.width -= Constants.matrixCellSize
                     }
                 }
+
+                updateActiveCells()
             }
         }
     var matrixHeight = Constants.minMatrixSize
@@ -35,15 +53,29 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
                 if (value > field) {
                     for (i in 0 until value - field) {
                         ++field
-                        addLineHeight()
+                        matrixGrid.forEach {
+                            it.add(mutableListOf())
+                        }
 
+                        matrixRect.height += Constants.matrixCellSize
                     }
                 } else {
                     for (i in 0 until Math.abs(field - value)) {
                         --field
-                        removeLineHeight()
+                        matrixGrid.forEach {
+                            val last = it.last().apply {
+                                it.last().forEach {
+                                    removeGameObject(it)
+                                }
+                            }
+                            it.remove(last)
+                        }
+
+                        matrixRect.height -= Constants.matrixCellSize
                     }
                 }
+
+                updateActiveCells()
             }
         }
     /**
@@ -67,7 +99,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     /**
      * Les cellules actives
      */
-    private val activeGridCells = mutableListOf<GridCell>()
+    private val activeGridCells = getCellsInRect(activeRect).toMutableList()
 
     @JsonIgnore
     fun getActiveGridCells() = activeGridCells.toList()
@@ -112,59 +144,6 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
         }
     }
 
-    private fun addLineWidth() {
-        val width = mutableListOf<MutableList<GameObject>>()
-        matrixGrid.last().forEach {
-            width.add(mutableListOf())
-        }
-
-        matrixGrid.add(width)
-
-        matrixRect.width += Constants.matrixCellSize
-
-        updateActiveCells()
-    }
-
-    private fun removeLineWidth() {
-        val last = matrixGrid.last().apply {
-            forEach {
-                it.forEach {
-                    removeGameObject(it)
-                }
-            }
-        }
-        matrixGrid.remove(last)
-
-        matrixRect.width -= Constants.matrixCellSize
-
-        updateActiveCells()
-    }
-
-    private fun addLineHeight() {
-        matrixGrid.forEach {
-            it.add(mutableListOf())
-        }
-
-        matrixRect.height += Constants.matrixCellSize
-
-        updateActiveCells()
-    }
-
-    private fun removeLineHeight() {
-        matrixGrid.forEach {
-            val last = it.last().apply {
-                it.last().forEach {
-                    removeGameObject(it)
-                }
-            }
-            it.remove(last)
-        }
-
-        matrixRect.height -= Constants.matrixCellSize
-
-        updateActiveCells()
-    }
-
     override fun addGameObject(gameObject: GameObject): GameObject {
         setGameObjectToGrid(gameObject)
 
@@ -197,7 +176,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
      * Permet de retourner les cellules présentes dans le box spécifié
      * @param rect Le box
      */
-    fun getCellsInRect(rect: Rect): List<GridCell> {
+    private fun getCellsInRect(rect: Rect): List<GridCell> {
         val cells = mutableListOf<GridCell>()
 
         fun rectContains(x: Int, y: Int): Boolean {

@@ -14,10 +14,10 @@ object TweenSystem : Updeatable {
         tweens[gameObject] = TweenData(tween, gameObject.getCurrentStateIndex())
         tween.init(gameObject)
 
-        if(tween.useTweenState) {
+        if (tween.useTweenState) {
             val atlas = gameObject.getCurrentState().getComponent<AtlasComponent>()
             val state = gameObject.addState("tween-state") {
-                if(atlas != null)
+                if (atlas != null)
                     addComponent(atlas)
             }
             gameObject.setState(state)
@@ -33,7 +33,7 @@ object TweenSystem : Updeatable {
             val (tween, backupStateIndex) = keyValue.value
 
             if (tween.update(gameObject)) {
-                if(tween.endAction !is RemoveGOAction) // TODO workaround?
+                if (tween.endAction !is RemoveGOAction) // TODO workaround?
                     gameObject.setState(backupStateIndex)
 
                 tween.endAction.invoke(gameObject)

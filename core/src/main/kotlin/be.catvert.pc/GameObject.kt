@@ -2,17 +2,18 @@ package be.catvert.pc
 
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.RemoveGOAction
-import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
-import com.fasterxml.jackson.annotation.*
+import com.fasterxml.jackson.annotation.JsonIdentityInfo
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.ObjectIdGenerators
 import imgui.ImGui
 import imgui.functionalProgramming
-import kotlin.math.roundToInt
 
 
 /**
@@ -113,6 +114,8 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
         }
     }
 
+    fun getStateOrDefault(stateIndex: Int) = getStates().elementAtOrNull(stateIndex) ?: getStates().elementAt(0)
+
     override fun update() {
         getCurrentState().update()
     }
@@ -127,7 +130,7 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         with(ImGui) {
-            functionalProgramming.withItemWidth(100f) {
+            functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                 if (combo("State initial", ::initialState, getStates().map { it.name }))
                     currentState = initialState
             }

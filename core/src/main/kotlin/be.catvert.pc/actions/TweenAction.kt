@@ -7,6 +7,7 @@ import be.catvert.pc.tweens.EmptyTween
 import be.catvert.pc.tweens.Tween
 import be.catvert.pc.tweens.TweenSystem
 import be.catvert.pc.tweens.Tweens
+import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.CustomEditorImpl
 import com.fasterxml.jackson.annotation.JsonCreator
 import glm_.vec2.Vec2
@@ -21,7 +22,6 @@ class TweenAction(var tween: Tween) : Action(), CustomEditorImpl {
         TweenSystem.startTween(tween, gameObject)
     }
 
-    private var showEditWindow = false
     private var addTweenTitle = "Ajouter un tween"
     private var addTweenCurrentTween: Tween? = null
     private var addTweenComboIndex = 0
@@ -68,13 +68,13 @@ class TweenAction(var tween: Tween) : Action(), CustomEditorImpl {
             }
 
             functionalProgramming.popup(addTweenTitle) {
-                functionalProgramming.withItemWidth(100f) {
+                functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                     combo("tween", ::addTweenComboIndex, Tweens.values().map {
-                        it.tween.simpleName ?: "Nom introuvable"
+                        it.tween.simpleName?.removeSuffix("Tween") ?: "Nom introuvable"
                     })
                 }
 
-                if (button("Ajouter", Vec2(100f, 0))) {
+                if (button("Ajouter", Vec2(Constants.defaultWidgetsWidth, 0))) {
                     val tween = Tweens.values()[addTweenComboIndex].tween.createInstance()
                     addTweenCurrentTween?.apply {
                         this.nextTween = tween
@@ -83,6 +83,5 @@ class TweenAction(var tween: Tween) : Action(), CustomEditorImpl {
                 }
             }
         }
-
     }
 }

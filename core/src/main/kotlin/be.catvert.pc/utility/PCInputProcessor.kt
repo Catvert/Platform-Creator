@@ -2,7 +2,6 @@ package be.catvert.pc.utility
 
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputAdapter
-import com.badlogic.gdx.InputProcessor
 import glm_.vec2.Vec2d
 import imgui.impl.LwjglGL3
 import org.lwjgl.glfw.GLFW
@@ -14,6 +13,7 @@ object PCInputProcessor : InputAdapter() {
         LwjglGL3.charCallback(character.toInt())
         return false
     }
+
     override fun scrolled(amount: Int): Boolean {
         LwjglGL3.scrollCallback(Vec2d(0, -amount))
         return false
@@ -29,7 +29,7 @@ object PCInputProcessor : InputAdapter() {
             LwjglGL3.keyCallback(key, 0, GLFW.GLFW_RELEASE, 0)
         }
 
-        when(keycode) {
+        when (keycode) {
             Input.Keys.BACKSPACE -> sendKeyRelease(GLFW.GLFW_KEY_BACKSPACE)
             Input.Keys.CONTROL_LEFT, Input.Keys.CONTROL_RIGHT -> sendKeyRelease(GLFW.GLFW_KEY_LEFT_CONTROL)
             Input.Keys.ALT_LEFT, Input.Keys.ALT_RIGHT -> sendKeyRelease(GLFW.GLFW_KEY_LEFT_ALT)
@@ -39,6 +39,7 @@ object PCInputProcessor : InputAdapter() {
             Input.Keys.RIGHT -> sendKeyRelease(GLFW.GLFW_KEY_RIGHT)
             Input.Keys.UP -> sendKeyRelease(GLFW.GLFW_KEY_UP)
             Input.Keys.DOWN -> sendKeyRelease(GLFW.GLFW_KEY_DOWN)
+            Input.Keys.TAB -> sendKeyRelease(GLFW.GLFW_KEY_TAB)
         }
         return false
     }
@@ -50,7 +51,7 @@ object PCInputProcessor : InputAdapter() {
             LwjglGL3.keyCallback(key, 0, GLFW.GLFW_PRESS, 0)
         }
 
-        when(keycode) {
+        when (keycode) {
             Input.Keys.BACKSPACE -> sendKeyPressed(GLFW.GLFW_KEY_BACKSPACE)
             Input.Keys.BACKSLASH -> sendKeyPressed(GLFW.GLFW_KEY_BACKSLASH)
             Input.Keys.CONTROL_LEFT, Input.Keys.CONTROL_RIGHT -> sendKeyPressed(GLFW.GLFW_KEY_LEFT_CONTROL)
@@ -60,6 +61,7 @@ object PCInputProcessor : InputAdapter() {
             Input.Keys.RIGHT -> sendKeyPressed(GLFW.GLFW_KEY_RIGHT)
             Input.Keys.UP -> sendKeyPressed(GLFW.GLFW_KEY_UP)
             Input.Keys.DOWN -> sendKeyPressed(GLFW.GLFW_KEY_DOWN)
+            Input.Keys.TAB -> sendKeyPressed(GLFW.GLFW_KEY_TAB)
         }
 
         return false

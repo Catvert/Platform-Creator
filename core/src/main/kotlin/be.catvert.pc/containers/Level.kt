@@ -1,6 +1,9 @@
 package be.catvert.pc.containers
 
-import be.catvert.pc.*
+import be.catvert.pc.Log
+import be.catvert.pc.PCGame
+import be.catvert.pc.Prefab
+import be.catvert.pc.Tags
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.scenes.EndLevelScene
 import be.catvert.pc.serialization.SerializationFactory
@@ -154,7 +157,7 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
 
             val player = PrefabFactory.Player_Kenney.prefab.create(Point(100, 50), level)
 
-            level.followGameObject = player 
+            level.followGameObject = player
 
             level.loadResources()
 

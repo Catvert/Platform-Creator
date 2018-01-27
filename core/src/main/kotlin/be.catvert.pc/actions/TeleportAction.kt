@@ -7,7 +7,6 @@ import be.catvert.pc.utility.CustomEditorImpl
 import be.catvert.pc.utility.ImguiHelper
 import be.catvert.pc.utility.Point
 import com.fasterxml.jackson.annotation.JsonCreator
-import glm_.func.common.clamp
 
 /**
  * Action permettant de téléporter un gameObject à un point précis

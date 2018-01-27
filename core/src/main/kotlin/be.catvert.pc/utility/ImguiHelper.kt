@@ -13,6 +13,7 @@ import be.catvert.pc.scenes.EditorScene
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Color
+import glm_.func.common.clamp
 import glm_.vec2.Vec2
 import glm_.vec4.Vec4
 import imgui.Cond
@@ -63,7 +64,7 @@ object ImguiHelper {
                 }
             }
             functionalProgramming.withId("$label add btn") {
-                if (button("Ajouter", Vec2(if (array.isEmpty()) 100f else -1f, 0))) {
+                if (button("Ajouter", Vec2(if (array.isEmpty()) Constants.defaultWidgetsWidth else -1f, 0))) {
                     array.add(createItem())
                 }
             }
@@ -94,7 +95,7 @@ object ImguiHelper {
                         checkbox(label, item.cast<Boolean>()::obj)
                     }
                     is Int -> {
-                        functionalProgramming.withItemWidth(100f) {
+                        functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                             sliderInt(label, item.cast<Int>()::obj, exposeEditor.min.roundToInt(), exposeEditor.max.roundToInt())
                         }
                     }
@@ -136,7 +137,7 @@ object ImguiHelper {
 
     fun inputText(label: String, text: Item<String>) {
         val buf = text.obj.toCharArray(CharArray(32))
-        functionalProgramming.withItemWidth(100f) {
+        functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
             if (ImGui.inputText(label, buf))
                 text.obj = String(buf.filter { it.isPrintable }.toCharArray())
         }
@@ -162,21 +163,23 @@ object ImguiHelper {
                 val requiredComponent = PCGame.actionsClasses[index[0]].findAnnotation<RequiredComponent>()
                 val incorrectAction = let {
                     requiredComponent?.component?.forEach {
-                        if (gameObject.getStates().elementAtOrNull(editorSceneUI.gameObjectCurrentStateIndex)?.hasComponent(it) == false)
+                        if (!gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex).hasComponent(it))
                             return@let !noCheckComps
                     }
                     false
                 }
 
-                if(comboWithSettingsButton(label, index, PCGame.actionsClasses.map { it.simpleName?.removeSuffix("Action")?: "Nom inconnu" }, {
-                    insertImguiExposeEditorFields(action.obj, gameObject, level, editorSceneUI)
-                }, incorrectAction, {
-                    if (isMouseHoveringRect(itemRectMin, itemRectMax)) {
-                        functionalProgramming.withTooltip {
-                            textPropertyColored(Color.RED, "Il manque le(s) component(s) :", requiredComponent!!.component.map { it.simpleName })
-                        }
-                    }
-                })) {
+                if (comboWithSettingsButton(label, index, PCGame.actionsClasses.map {
+                            it.simpleName?.removeSuffix("Action") ?: "Nom inconnu"
+                        }, {
+                            insertImguiExposeEditorFields(action.obj, gameObject, level, editorSceneUI)
+                        }, incorrectAction, {
+                            if (isMouseHoveringRect(itemRectMin, itemRectMax)) {
+                                functionalProgramming.withTooltip {
+                                    textPropertyColored(Color.RED, "Il manque le(s) component(s) :", requiredComponent!!.component.map { it.simpleName })
+                                }
+                            }
+                        })) {
                     action.obj = ReflectionUtility.findNoArgConstructor(PCGame.actionsClasses[index[0]])!!.newInstance()
                 }
             }
@@ -196,12 +199,12 @@ object ImguiHelper {
             popItemFlag()
 
 
-            if(settingsBtnDisabled)
+            if (settingsBtnDisabled)
                 onSettingsBtnDisabled()
 
             sameLine()
-            functionalProgramming.withItemWidth(71f) {
-                if(combo(label, currentItem, items))
+            functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth - 29f) {
+                if (combo(label, currentItem, items))
                     comboChanged = true
             }
 
@@ -221,7 +224,7 @@ object ImguiHelper {
 
     fun gameObjectTag(tag: Item<GameObjectTag>, level: Level, label: String = "tag") {
         val selectedIndex = intArrayOf(level.tags.indexOfFirst { it == tag.obj })
-        functionalProgramming.withItemWidth(100f) {
+        functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
             if (ImGui.combo(label, selectedIndex, level.tags)) {
                 tag.obj = level.tags[selectedIndex[0]]
             }
@@ -236,7 +239,7 @@ object ImguiHelper {
 
     fun gameObject(gameObject: KMutableProperty0<GameObject?>, editorSceneUI: EditorScene.EditorSceneUI, label: String = "game object") {
         with(ImGui) {
-            if (button("Sélect. $label", Vec2(100f, 0))) {
+            if (button("Sélect. $label", Vec2(Constants.defaultWidgetsWidth, 0))) {
                 editorSceneUI.editorMode = EditorScene.EditorSceneUI.EditorMode.SELECT_GO
                 editorSceneUI.onSelectGO.register(true) {
                     gameObject.set(it)
@@ -259,7 +262,7 @@ object ImguiHelper {
         val prefabs = level.resourcesPrefabs() + PrefabFactory.values().map { it.prefab }
 
         val selectedIndex = intArrayOf(prefabs.indexOfFirst { it.name == prefab.obj.name })
-        functionalProgramming.withItemWidth(100f) {
+        functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
             if (ImGui.combo(label, selectedIndex, prefabs.map { it.name })) {
                 prefab.obj = prefabs[selectedIndex[0]]
             }
@@ -267,7 +270,7 @@ object ImguiHelper {
     }
 
     fun point(point: KMutableProperty0<Point>, minPoint: Point, maxPoint: Point, editorSceneUI: EditorScene.EditorSceneUI) {
-        functionalProgramming.withItemWidth(100f) {
+        functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
             val pos = intArrayOf(point.get().x, point.get().y)
             if (ImGui.inputInt2("position", pos, 0)) {
                 val x = pos[0]
@@ -280,7 +283,7 @@ object ImguiHelper {
             if (ImGui.button("Sélect.")) {
                 editorSceneUI.editorMode = EditorScene.EditorSceneUI.EditorMode.SELECT_POINT
                 editorSceneUI.onSelectPoint.register(true) {
-                    point.set(it)
+                    point.set(Point(it.x.clamp(minPoint.x, maxPoint.x), it.y.clamp(minPoint.y, maxPoint.y)))
                 }
             }
         }
@@ -294,7 +297,7 @@ object ImguiHelper {
 
     fun size(size: Item<Size>, minSize: Size, maxSize: Size) {
         val sizeArr = intArrayOf(size.obj.width, size.obj.height)
-        functionalProgramming.withItemWidth(100f) {
+        functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
             if (ImGui.inputInt2("taille", sizeArr, 0)) {
                 val width = sizeArr[0]
                 val height = sizeArr[1]
@@ -331,7 +334,7 @@ object ImguiHelper {
         val enumConstants = enum.obj.javaClass.enumConstants
         val selectedIndex = intArrayOf(enumConstants.indexOfFirst { it == enum.obj })
 
-        functionalProgramming.withItemWidth(100f) {
+        functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
             if (ImGui.combo(label, selectedIndex, enumConstants.map { (it as Enum<*>).name })) {
                 enum.obj = enumConstants[selectedIndex[0]] as Enum<*>
             }

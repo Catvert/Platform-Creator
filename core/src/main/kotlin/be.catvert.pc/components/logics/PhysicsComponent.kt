@@ -4,7 +4,6 @@ import be.catvert.pc.*
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
 import be.catvert.pc.actions.PhysicsAction.PhysicsActions
-import be.catvert.pc.actions.TagAction
 import be.catvert.pc.components.Component
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
@@ -15,7 +14,6 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
-import imgui.ImGui
 import imgui.functionalProgramming
 import kotlin.math.roundToInt
 
@@ -271,7 +269,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         val newRect = Rect(gameObject.box)
         newRect.position = Point(newRect.x + moveX, newRect.y + moveY)
 
-        if(level?.matrixRect?.contains(newRect, true) == false && newRect.y > 0)
+        if (level?.matrixRect?.contains(newRect, true) == false && newRect.y > 0)
             return true
 
         level?.apply {

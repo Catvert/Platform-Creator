@@ -226,7 +226,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         CollisionAction(BoxSide.Right, collideAction = LifeAction(LifeAction.LifeActions.REMOVE_LP)),
                         CollisionAction(BoxSide.Up, collideAction = PhysicsAction(PhysicsAction.PhysicsActions.JUMP)),
                         CollisionAction(BoxSide.Right, Tags.Enemy.tag, collideAction = LifeAction(LifeAction.LifeActions.ONE_SHOT)),
-                        CollisionAction(BoxSide.Left, Tags.Enemy.tag,  collideAction = LifeAction(LifeAction.LifeActions.ONE_SHOT))
+                        CollisionAction(BoxSide.Left, Tags.Enemy.tag, collideAction = LifeAction(LifeAction.LifeActions.ONE_SHOT))
                 ))
                 this += MoverComponent(MoverComponent.SimpleMoverOrientation.HORIZONTAL, false)
             })))
@@ -254,12 +254,13 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                 this += AtlasComponent(0,
                         AtlasComponent.AtlasData("default", Constants.packsSMCDirPath.child("box.atlas").toFileWrapper() to "yellow/default"))
                 this += PhysicsComponent(true, collisionsActions = arrayListOf(
-                        CollisionAction(BoxSide.Down, action = MultiplexerAction(StateAction(1), SpawnAction(MushroomRed_SMC.prefab, BoxSide.Up)))
+                        CollisionAction(BoxSide.Down, action = StateAction(1))
                 ))
             }, otherStates = *arrayOf(GameObjectState("pop") {
+                this.startAction = SpawnAction(PrefabFactory.MushroomRed_SMC.prefab, BoxSide.Up, true)
                 this += AtlasComponent(0, AtlasComponent.AtlasData("pop", Constants.packsSMCDirPath.child("box.atlas").toFileWrapper() to "brown1_1"))
                 this += PhysicsComponent(true)
-            })))
+            })).apply { this.layer = 1 })
     ),
     //endregion
 }

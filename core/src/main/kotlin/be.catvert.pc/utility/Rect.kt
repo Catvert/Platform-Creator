@@ -55,7 +55,7 @@ class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
     fun bottom() = y
     fun top() = y + height
 
-    fun center() = Point(right() / 2, top() / 2)
+    fun center() = Point(x + width / 2, y + height / 2)
 
     fun set(size: Size, position: Point) {
         this.size = size
@@ -84,11 +84,17 @@ class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
         with(ImGui) {
             if (collapsingHeader(label)) {
                 functionalProgramming.withIndent {
-                    ImguiHelper.point(::position, Point(), Point(level.matrixRect.width, level.matrixRect.height), editorSceneUI)
+                    ImguiHelper.point(::position, Point(), Point(level.matrixRect.width - this@Rect.width, level.matrixRect.height - this@Rect.height), editorSceneUI)
                     ImguiHelper.addImguiWidget("taille", ::size, gameObject, level, ExposeEditorFactory.createExposeEditor(max = Constants.maxGameObjectSize.toFloat()), editorSceneUI)
                 }
             }
         }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other is Rect)
+            return other.position == this.position && other.size == this.size
+        return super.equals(other)
     }
 
     override fun toString(): String = "{ x: $x y: $y width: $width height: $height }"

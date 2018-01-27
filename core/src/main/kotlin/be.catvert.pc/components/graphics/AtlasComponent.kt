@@ -142,6 +142,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                 }
             }
         }
+
         /**
          * Permet de charger l'animation responsable d'animer les différentes régions si il y en a plusieurs.
          */
@@ -201,11 +202,11 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         with(ImGui) {
-            if (button("Éditer", Vec2(100f, 0))) {
+            if (button("Éditer", Vec2(Constants.defaultWidgetsWidth, 0))) {
                 showEditAtlasWindow = true
             }
 
-            functionalProgramming.withItemWidth(100f) {
+            functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                 combo("atlas initial", ::currentIndex, data.map { it.name })
             }
 
@@ -254,7 +255,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                         sameLine()
                     }
 
-                    functionalProgramming.withItemWidth(300f) {
+                    functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                         if (combo("atlas", ::atlasIndex, data.map { it.name } + "Ajouter un atlas")) {
                             selectedAtlasIndex = -1
 
@@ -322,7 +323,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                         }
 
                         if (this.regions.size > 1) {
-                            functionalProgramming.withItemWidth(100f) {
+                            functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                                 sliderFloat("Vitesse", ::frameDuration, 0f, 1f)
                             }
                             val playModeItem = ImguiHelper.Item(animationPlayMode)
@@ -363,7 +364,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                 val editAtlasType = editAtlasType.obj as EditAtlasType
                 if (editAtlasType != EditAtlasType.Textures) {
                     checkbox("pack importés", ::showLevelAtlas)
-                    functionalProgramming.withItemWidth(150f) {
+                    functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                         if (!showLevelAtlas) {
                             combo("dossier", ::packFolderIndex, PCGame.gameAtlas.map { it.key.name() })
                         }

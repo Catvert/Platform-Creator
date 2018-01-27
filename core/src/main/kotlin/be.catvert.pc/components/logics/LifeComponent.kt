@@ -16,7 +16,6 @@ import com.badlogic.gdx.graphics.Color
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 import glm_.func.common.max
-import glm_.func.common.min
 
 /**
  * Component permettant d'ajouter des points de vie à un gameObject

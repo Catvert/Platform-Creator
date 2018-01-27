@@ -1,7 +1,6 @@
 package be.catvert.pc.scenes
 
 import be.catvert.pc.Log
-import be.catvert.pc.PCGame
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -59,7 +58,7 @@ class SceneManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Dis
     }
 
     override fun update() {
-        if(nextScene != null && isTransitionRunning) {
+        if (nextScene != null && isTransitionRunning) {
             val (nextScene, _, disposeCurrentScene) = nextScene!!
 
             elapsedTime += Gdx.graphics.deltaTime
@@ -70,7 +69,7 @@ class SceneManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Dis
 
             nextScene.update()
 
-            if(progress == 1f) {
+            if (progress == 1f) {
                 setScene(nextScene, disposeCurrentScene)
 
                 this@SceneManager.nextScene = null
@@ -83,8 +82,7 @@ class SceneManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Dis
                     loadScene(nextScene, applyTransition, disposeCurrentScene)
                 }
             }
-        }
-        else
+        } else
             currentScene.update()
     }
 
@@ -99,7 +97,7 @@ class SceneManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Dis
 
         ImGui.render()
 
-       nextScene?.apply {
+        nextScene?.apply {
             ImGui.newFrame()
 
             ImGui.style.alpha = scene.alpha

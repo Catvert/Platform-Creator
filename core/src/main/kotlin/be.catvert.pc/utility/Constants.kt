@@ -20,6 +20,8 @@ object Constants {
     const val viewportRatioWidth = 1920f
     const val viewportRatioHeight = 1080f
 
+    const val defaultWidgetsWidth = 125f
+
     const val assetsDir = "assets/"
 
     val serializationType = SerializationFactory.MapperType.JSON

@@ -5,6 +5,7 @@ import be.catvert.pc.components.RequiredComponent
 import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.containers.Level
 import be.catvert.pc.scenes.EditorScene
+import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.CustomEditorImpl
 import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
@@ -27,7 +28,7 @@ class AtlasAction(var atlasIndex: Int) : Action(), CustomEditorImpl {
         with(ImGui) {
             val atlasData = gameObject.getCurrentState().getComponent<AtlasComponent>()?.data ?: arrayListOf()
 
-            functionalProgramming.withItemWidth(100f) {
+            functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                 combo("atlas", ::atlasIndex, atlasData.map { it.name })
             }
         }

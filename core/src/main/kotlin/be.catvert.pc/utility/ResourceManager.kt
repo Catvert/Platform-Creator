@@ -11,8 +11,6 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.I18NBundle
-import com.badlogic.gdx.graphics.g2d.TextureRegion
-
 
 
 object ResourceManager : Disposable {
@@ -61,11 +59,10 @@ object ResourceManager : Disposable {
             else {
                 if (file.exists() || T::class == I18NBundle::class) {
                     val res = assetManager.loadOnDemand<T>(file).asset
-                    if(res is TextureAtlas)
+                    if (res is TextureAtlas)
                         fixPackBleeding(res)
                     res
-                }
-                else {
+                } else {
                     Log.warn { "Ressource non trouvée : ${file.path()}" }
                     null
                 }

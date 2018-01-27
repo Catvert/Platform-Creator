@@ -21,5 +21,5 @@ class MoveAction(@ExposeEditor(min = -100f, max = 100f) var moveX: Int, @ExposeE
         }
     }
 
-    override fun toString() = super.toString() + " - { move x : $moveX ; move y : $moveY}"
+    override fun toString() = super.toString() + " - { move x : $moveX ; move y : $moveY }"
 }

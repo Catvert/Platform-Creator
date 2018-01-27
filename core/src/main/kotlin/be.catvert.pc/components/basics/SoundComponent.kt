@@ -39,7 +39,7 @@ class SoundComponent(var sounds: ArrayList<SoundData>) : Component(), ResourceLo
                 val soundsResources = if (levelResources) level.resourcesSounds() else PCGame.gameSounds
 
                 val index = intArrayOf(soundsResources.indexOf(soundFile.get()))
-                functionalProgramming.withItemWidth(100f) {
+                functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                     checkbox("Sons importés", ::levelResources)
 
                     if (combo("son", index, soundsResources.map { it.nameWithoutExtension() })) {

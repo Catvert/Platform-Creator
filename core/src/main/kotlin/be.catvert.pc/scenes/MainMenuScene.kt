@@ -277,7 +277,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
         with(ImGui) {
             ImguiHelper.withCenteredWindow(MenusText.MM_SETTINGS_WINDOW_TITLE(), ::showSettingsWindow, Vec2(375f, 375f), WindowFlags.NoResize.i) {
                 functionalProgramming.withGroup {
-                    functionalProgramming.withItemWidth(100f) {
+                    functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                         sliderFloat(MenusText.MM_SETTINGS_SOUND(), ::soundVolume, 0f, 1f, "%.1f")
 
                         if (combo(MenusText.MM_SETTINGS_LOCALE(), settingsCurrentLocaleIndex, PCGame.availableLocales.map { it.displayLanguage }))

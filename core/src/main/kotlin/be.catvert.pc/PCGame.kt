@@ -6,7 +6,6 @@ import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.i18n.Locales
 import be.catvert.pc.scenes.MainMenuScene
-import be.catvert.pc.scenes.Scene
 import be.catvert.pc.scenes.SceneManager
 import be.catvert.pc.tweens.TweenSystem
 import be.catvert.pc.utility.*
@@ -22,19 +21,9 @@ import imgui.ImGui
 import imgui.impl.LwjglGL3
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner
 import ktx.app.KtxApplicationAdapter
-import org.lwjgl.glfw.GLFW
-import org.lwjgl.glfw.GLFWCharCallback
-import org.lwjgl.glfw.GLFWKeyCallback
 import uno.glfw.GlfwWindow
 import java.util.*
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.forEach
-import kotlin.collections.mutableListOf
-import kotlin.collections.mutableMapOf
-import kotlin.collections.removeAll
 import kotlin.collections.set
-import kotlin.collections.toList
 import kotlin.math.roundToInt
 import kotlin.reflect.KClass
 
