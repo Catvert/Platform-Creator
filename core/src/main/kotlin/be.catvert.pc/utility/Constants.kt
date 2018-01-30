@@ -10,7 +10,7 @@ object Constants {
     const val gameTitle = "Platform-Creator"
     const val gameVersion = 2.0f
 
-    const val maxGameObjectSize = 500
+    const val maxGameObjectSize = 10000
     const val minLayerIndex = -100
     const val maxLayerIndex = 100
 

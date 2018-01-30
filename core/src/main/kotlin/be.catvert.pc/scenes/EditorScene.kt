@@ -1,6 +1,7 @@
 package be.catvert.pc.scenes
 
 import be.catvert.pc.*
+import be.catvert.pc.components.Components
 import be.catvert.pc.components.RequiredComponent
 import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.containers.GameObjectContainer
@@ -13,6 +14,7 @@ import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
@@ -47,7 +49,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
     }
 
     private enum class SelectGOMode {
-        NO_MODE, MOVE, RESIZE
+        NO_MODE, MOVE, HORIZONTAL_RESIZE_LEFT, HORIZONTAL_RESIZE_RIGHT, VERTICAL_RESIZE_BOTTOM, VERTICAL_RESIZE_TOP, DIAGONALE_RESIZE
     }
 
     private data class GridMode(var active: Boolean = false, var offsetX: Int = 0, var offsetY: Int = 0, var cellWidth: Int = 50, var cellHeight: Int = 50) {
@@ -152,7 +154,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
     private val gridMode = GridMode()
 
     private var selectGameObjectMode = SelectGOMode.NO_MODE
-    private var resizeGameObjectMode = ResizeMode.FREE
+    private var resizeGameObjectMode = ResizeMode.PROPORTIONAL
 
     private val selectGameObjects = mutableSetOf<GameObject>()
     private var selectGameObject: GameObject? = null
@@ -261,19 +263,8 @@ class EditorScene(val level: Level) : Scene(level.background) {
                 if (selectGameObject != null) {
                     val rect = selectGameObject!!.box
 
-                    when (selectGameObjectMode) {
-                        SelectGOMode.NO_MODE -> {
-                            shapeRenderer.withColor(Color.RED) {
-                                circle(rect.x + rect.width.toFloat(), rect.y + rect.height.toFloat(), 10f)
-                            }
-                        }
-                        SelectGOMode.RESIZE -> {
-                            shapeRenderer.withColor(Color.BLUE) {
-                                circle(rect.x + rect.width.toFloat(), rect.y + rect.height.toFloat(), 15f)
-                            }
-                        }
-                        SelectGOMode.MOVE -> {
-                        }
+                    shapeRenderer.withColor(Color.RED) {
+                        circle(rect.right().toFloat(), rect.top().toFloat(), if(selectGameObjectMode == SelectGOMode.DIAGONALE_RESIZE) 12f else 10f)
                     }
                 }
             }
@@ -477,24 +468,11 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         }
                     }
 
-                    /**
-                     * On vérifie si le pointeur est dans le cercle de redimensionnement
-                     */
-                    fun checkCircleResize(): Boolean {
-                        if (selectGameObject != null) {
-                            val rect = selectGameObject!!.box
-                            return Circle(rect.x + rect.width.toFloat(), rect.y + rect.height.toFloat(), 10f).contains(mousePosInWorld)
-                        }
-                        return false
-                    }
+                    val selectGORect = selectGameObject!!.box
 
                     if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !Gdx.input.isKeyPressed(GameKeys.EDITOR_APPEND_SELECT_ENTITIES.key)) {
                         if (!latestLeftButtonClick) {
-                            selectGameObjectMode = SelectGOMode.NO_MODE
-
-                            if (checkCircleResize()) {
-                                selectGameObjectMode = SelectGOMode.RESIZE
-                            } else {
+                            if (selectGameObjectMode == SelectGOMode.NO_MODE) {
                                 val gameObject = findGameObjectUnderMouse(true)
                                 when {
                                     gameObject == null -> { // Se produit lorsque le joueur clique dans le vide, dans ce cas on désélectionne les gameObjects sélectionnés
@@ -509,48 +487,43 @@ class EditorScene(val level: Level) : Scene(level.background) {
                                     }
                                 }
                             }
+
                         } else if (selectGameObject != null) { // Le joueur maintient le clique gauche durant plusieurs frames et a bougé la souris {
                             if (selectGameObjectMode == SelectGOMode.NO_MODE)
                                 selectGameObjectMode = SelectGOMode.MOVE
 
-                            val selectGORect = selectGameObject!!.box
-
                             when (selectGameObjectMode) {
                                 SelectGOMode.NO_MODE -> {
                                 }
-                                SelectGOMode.RESIZE -> {
-                                    var resizeX = selectGORect.x + selectGORect.width - mousePosInWorld.x
-                                    var resizeY = selectGORect.y + selectGORect.height - mousePosInWorld.y
+                                SelectGOMode.HORIZONTAL_RESIZE_RIGHT -> {
+                                    selectGORect.width = (selectGORect.width - (latestMousePosInWorld.x - mousePosInWorld.x)).clamp(1, Constants.maxGameObjectSize)
+                                }
+                                SelectGOMode.HORIZONTAL_RESIZE_LEFT -> {
+                                    val deltaMouse = latestMousePosInWorld.x - mousePosInWorld.x
+                                    selectGORect.width = (selectGORect.width + deltaMouse).clamp(1, Constants.maxGameObjectSize)
+                                    selectGORect.x = (selectGORect.x - deltaMouse).clamp(0, level.matrixRect.width - selectGORect.width)
+                                }
+                                SelectGOMode.VERTICAL_RESIZE_BOTTOM -> {
+                                    val deltaMouse = latestMousePosInWorld.y - mousePosInWorld.y
+                                    selectGORect.height = (selectGORect.height + deltaMouse).clamp(1, Constants.maxGameObjectSize)
+                                    selectGORect.y = (selectGORect.y - deltaMouse).clamp(0, level.matrixRect.height - selectGORect.height)
+                                }
+                                SelectGOMode.VERTICAL_RESIZE_TOP -> {
+                                    selectGORect.height = (selectGORect.height - (latestMousePosInWorld.y - mousePosInWorld.y)).clamp(1, Constants.maxGameObjectSize)
+                                }
+                                SelectGOMode.DIAGONALE_RESIZE -> {
+                                    var deltaX = latestMousePosInWorld.x - mousePosInWorld.x
+                                    var deltaY = latestMousePosInWorld.y - mousePosInWorld.y
 
-                                    if (resizeGameObjectMode == ResizeMode.PROPORTIONAL) {
-                                        if (Math.abs(resizeX) > Math.abs(resizeY))
-                                            resizeX = resizeY
+                                    if(resizeGameObjectMode == ResizeMode.PROPORTIONAL) {
+                                        if(Math.abs(deltaX) > Math.abs(deltaY))
+                                            deltaY = deltaX
                                         else
-                                            resizeY = resizeX
+                                            deltaX = deltaY
                                     }
 
-                                    if (selectGameObjects.let {
-                                                var canResize = true
-                                                it.forEach {
-                                                    if (!level.matrixRect.contains(Rect(it.box.x, it.box.y, it.box.width - resizeX, it.box.height - resizeY), true)) {
-                                                        canResize = false
-                                                    }
-                                                }
-                                                canResize
-                                            }) {
-                                        selectGameObjects.forEach {
-                                            // On vérifie si le gameObject à redimensionner a le même tag que le gameObject sélectionné et qu'il peut être redimensionné
-                                            if (it.tag == selectGameObject!!.tag) {
-                                                val newSizeX = it.box.width - resizeX
-                                                val newSizeY = it.box.height - resizeY
-
-                                                if (newSizeX in 1..Constants.maxGameObjectSize)
-                                                    it.box.width = newSizeX
-                                                if (newSizeY in 1..Constants.maxGameObjectSize)
-                                                    it.box.height = newSizeY
-                                            }
-                                        }
-                                    }
+                                    selectGORect.width = (selectGORect.width - deltaX).clamp(1, Constants.maxGameObjectSize)
+                                    selectGORect.height = (selectGORect.height - deltaY).clamp(1, Constants.maxGameObjectSize)
                                 }
                                 SelectGOMode.MOVE -> {
                                     val moveX = (mousePosInWorld.x - latestMousePosInWorld.x) + (camera.position.x - latestCameraPos.x).roundToInt()
@@ -562,7 +535,36 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         }
                         // Le bouton gauche n'est pas appuyé pendant cette frame
                     } else {
-                        selectGameObjectMode = SelectGOMode.NO_MODE
+                        when {
+                        // Diagonale resize
+                            Circle(selectGORect.right().toFloat(), selectGORect.top().toFloat(), 10f).contains(mousePosInWorld) -> {
+                                selectGameObjectMode = SelectGOMode.DIAGONALE_RESIZE
+                            }
+                        // Horizontal right resize
+                            selectGORect.right() == mousePosInWorld.x && mousePosInWorld.y in selectGORect.y..selectGORect.top() -> {
+                                selectGameObjectMode = SelectGOMode.HORIZONTAL_RESIZE_RIGHT
+                                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.HorizontalResize)
+                            }
+                        // Horizontal left resize
+                            selectGORect.left() == mousePosInWorld.x && mousePosInWorld.y in selectGORect.y..selectGORect.top() -> {
+                                selectGameObjectMode = SelectGOMode.HORIZONTAL_RESIZE_LEFT
+                                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.HorizontalResize)
+                            }
+                        // Vertical top resize
+                            selectGORect.top() == mousePosInWorld.y && mousePosInWorld.x in selectGORect.x..selectGORect.right() -> {
+                                selectGameObjectMode = SelectGOMode.VERTICAL_RESIZE_TOP
+                                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.VerticalResize)
+                            }
+                        // Vertical bottom resize
+                            selectGORect.bottom() == mousePosInWorld.y && mousePosInWorld.x in selectGORect.x..selectGORect.right() -> {
+                                selectGameObjectMode = SelectGOMode.VERTICAL_RESIZE_BOTTOM
+                                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.VerticalResize)
+                            }
+                            else -> {
+                                selectGameObjectMode = SelectGOMode.NO_MODE
+                                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow)
+                            }
+                        }
 
                         if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && !latestRightButtonClick) {
                             if (findGameObjectUnderMouse(false) == null) {
@@ -1297,7 +1299,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                     }
                 }
                 separator()
-                pushItemFlag(ItemFlags.Disabled.i, gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex).getComponents().size == PCGame.componentsClasses.size)
+                pushItemFlag(ItemFlags.Disabled.i, gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex).getComponents().size == Components.values().size)
                 if (button("Ajouter un component", Vec2(-1, 0)))
                     openPopup(addComponentTitle)
                 popItemFlag()
@@ -1312,15 +1314,13 @@ class EditorScene(val level: Level) : Scene(level.background) {
                 }
 
                 functionalProgramming.popup(addComponentTitle) {
-                    val components = PCGame.componentsClasses.filter { comp -> gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex).getComponents().none { comp.isInstance(it) } }
+                    val components = Components.values().filter { comp -> gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex).getComponents().none { comp.component.isInstance(it) } }
                     functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                        combo("component", editorSceneUI::gameObjectAddComponentComboIndex, components.map {
-                            it.simpleName ?: "Nom inconnu"
-                        })
+                        combo("component", editorSceneUI::gameObjectAddComponentComboIndex, components.map { it.name })
                     }
                     if (button("Ajouter", Vec2(-1, 0))) {
                         if (editorSceneUI.gameObjectAddComponentComboIndex in components.indices) {
-                            val newComp = ReflectionUtility.findNoArgConstructor(components[editorSceneUI.gameObjectAddComponentComboIndex])!!.newInstance()
+                            val newComp = ReflectionUtility.findNoArgConstructor(components[editorSceneUI.gameObjectAddComponentComboIndex].component)!!.newInstance()
                             val state = gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex)
 
                             if (gameObject.getCurrentState() === state)

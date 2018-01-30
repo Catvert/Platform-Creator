@@ -36,27 +36,7 @@ private data class JumpData(var isJumping: Boolean = false, var targetHeight: In
  */
 data class CollisionListener(val gameObject: GameObject, val collideGameObject: GameObject, val side: BoxSide)
 
-data class SensorData(@ExposeEditor var isSensor: Boolean = false, var target: GameObjectTag = Tags.Player.tag, var sensorIn: Action = EmptyAction(), var sensorOut: Action = EmptyAction()) : CustomEditorImpl {
-    val sensorOverlaps: MutableSet<GameObject> = mutableSetOf()
 
-    override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        if (isSensor) {
-            functionalProgramming.collapsingHeader("sensor props") {
-                functionalProgramming.withIndent {
-                    ImguiHelper.gameObjectTag(::target, level, "sensor target")
-                    functionalProgramming.withId("in action") {
-                        ImguiHelper.action("in action", ::sensorIn, gameObject, level, editorSceneUI)
-                    }
-                    functionalProgramming.withId("out action") {
-                        ImguiHelper.action("out action", ::sensorOut, gameObject, level, editorSceneUI)
-                    }
-                }
-            }
-        }
-    }
-
-    override fun toString(): String = ""
-}
 
 data class CollisionAction(@ExposeEditor var side: BoxSide = BoxSide.Left, @ExposeEditor(customType = CustomType.TAG_STRING) var target: GameObjectTag = Tags.Player.tag, @ExposeEditor var action: Action = EmptyAction(), @ExposeEditor(customType = CustomType.NO_CHECK_COMPS_GO) var collideAction: Action = EmptyAction())
 
@@ -76,7 +56,6 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                        @ExposeEditor(max = 100f) var moveSpeed: Int = 0,
                        @ExposeEditor(description = "Défini si le mouvement doit être \"fluide\" ou non.") var movementType: MovementType = MovementType.SMOOTH,
                        @ExposeEditor var gravity: Boolean = !isStatic,
-                       @ExposeEditor val sensor: SensorData = SensorData(false),
                        @ExposeEditor var isPlatform: Boolean = false,
                        val ignoreTags: ArrayList<GameObjectTag> = arrayListOf(),
                        val collisionsActions: ArrayList<CollisionAction> = arrayListOf(),
@@ -130,9 +109,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
     }
 
     override fun update() {
-        if (sensor.isSensor)
-            checkSensorOverlaps(gameObject)
-        if (isStatic || sensor.isSensor) return
+        if (isStatic) return
 
         var moveSpeedX = 0f
         var moveSpeedY = 0f
@@ -200,27 +177,6 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
             physicsActions += PhysicsActions.JUMP
     }
 
-    private fun checkSensorOverlaps(gameObject: GameObject) {
-        val checkedGameObject = mutableSetOf<GameObject>()
-
-        sensor.apply {
-            level?.getAllGameObjectsInCells(gameObject.box)?.filter { it !== gameObject && it.tag == sensor.target && gameObject.box.overlaps(it.box) }?.forEach {
-                if (!sensorOverlaps.contains(it)) {
-                    sensorIn(gameObject)
-                    sensorOverlaps += it
-                }
-
-                checkedGameObject += it
-            }
-
-            sensorOverlaps.filter { !checkedGameObject.contains(it) }.forEach {
-                sensorOut(gameObject)
-                sensorOverlaps.remove(it)
-            }
-        }
-    }
-
-
     /**
      * Permet d'essayer le déplacement physique d'un gameObject si il ne rencontre aucun obstacle
      */
@@ -276,7 +232,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
             this.getAllGameObjectsInCells(newRect).filter { filter ->
                 filter !== gameObject && filter.getCurrentState().hasComponent<PhysicsComponent>() && let {
                     filter.getCurrentState().getComponent<PhysicsComponent>()?.apply {
-                        return@let !sensor.isSensor && ignoreTags.contains(gameObject.tag) == false
+                        return@let ignoreTags.contains(gameObject.tag) == false
                                 && if (isPlatform) {
                             gameObject.position().y >= filter.position().y + filter.size().height
                         } else true

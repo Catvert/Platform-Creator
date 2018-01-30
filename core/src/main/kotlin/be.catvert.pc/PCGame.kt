@@ -1,7 +1,5 @@
 package be.catvert.pc
 
-import be.catvert.pc.actions.Action
-import be.catvert.pc.components.Component
 import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.i18n.Locales
@@ -19,13 +17,11 @@ import com.kotcrab.vis.ui.VisUI
 import imgui.DEBUG
 import imgui.ImGui
 import imgui.impl.LwjglGL3
-import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner
 import ktx.app.KtxApplicationAdapter
 import uno.glfw.GlfwWindow
 import java.util.*
 import kotlin.collections.set
 import kotlin.math.roundToInt
-import kotlin.reflect.KClass
 
 
 /** [com.badlogic.gdx.ApplicationListener, implementation shared by all platforms.  */
@@ -172,24 +168,6 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
             private set
         lateinit var mainBackground: Background
             private set
-
-        val actionsClasses = let {
-            val list = mutableListOf<KClass<out Action>>()
-            FastClasspathScanner(Action::class.java.`package`.name).matchSubclassesOf(Action::class.java, { list.add(it.kotlin); }).scan()
-
-            list.removeAll { it.isAbstract || !ReflectionUtility.hasNoArgConstructor(it) }
-
-            list.toList()
-        }
-
-        val componentsClasses = let {
-            val componentsList = mutableListOf<KClass<out Component>>()
-            FastClasspathScanner(Component::class.java.`package`.name).matchSubclassesOf(Component::class.java, { componentsList.add(it.kotlin) }).scan()
-
-            componentsList.removeAll { it.isAbstract || !ReflectionUtility.hasNoArgConstructor(it) }
-
-            componentsList.toList()
-        }
 
         var soundVolume = 1f
             set(value) {

@@ -3,6 +3,29 @@ package be.catvert.pc.actions
 import be.catvert.pc.GameObject
 import be.catvert.pc.utility.ReflectionUtility
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import kotlin.reflect.KClass
+
+enum class Actions(val action: KClass<out Action>) {
+    Atlas(AtlasAction::class),
+    Empty(EmptyAction::class),
+    GameObject(GameObjectAction::class),
+    Level(LevelAction::class),
+    Life(LifeAction::class),
+    Move(MoveAction::class),
+    Multiplexer(MultiplexerAction::class),
+    Physics(PhysicsAction::class),
+    RemoveGO(RemoveGOAction::class),
+    Render(RenderAction::class),
+    Resize(ResizeAction::class),
+    Score(ScoreAction::class),
+    Sound(SoundAction::class),
+    Spawn(SpawnAction::class),
+    State(StateAction::class),
+    Tag(TagAction::class),
+    Teleport(TeleportAction::class),
+    Tween(TweenAction::class),
+    Zoom(ZoomAction::class)
+}
 
 /**
  * Représente une "action" a appliquer sur un gameObject

@@ -5,6 +5,7 @@ import com.badlogic.gdx.InputAdapter
 import glm_.vec2.Vec2d
 import imgui.impl.LwjglGL3
 import org.lwjgl.glfw.GLFW
+import org.lwjgl.opengl.GL
 
 object PCInputProcessor : InputAdapter() {
     val keyDownSignal = Signal<Int>()
@@ -40,6 +41,9 @@ object PCInputProcessor : InputAdapter() {
             Input.Keys.UP -> sendKeyRelease(GLFW.GLFW_KEY_UP)
             Input.Keys.DOWN -> sendKeyRelease(GLFW.GLFW_KEY_DOWN)
             Input.Keys.TAB -> sendKeyRelease(GLFW.GLFW_KEY_TAB)
+            Input.Keys.X -> sendKeyRelease(GLFW.GLFW_KEY_X)
+            Input.Keys.C -> sendKeyRelease(GLFW.GLFW_KEY_C)
+            Input.Keys.V -> sendKeyRelease(GLFW.GLFW_KEY_V)
         }
         return false
     }
@@ -62,6 +66,9 @@ object PCInputProcessor : InputAdapter() {
             Input.Keys.UP -> sendKeyPressed(GLFW.GLFW_KEY_UP)
             Input.Keys.DOWN -> sendKeyPressed(GLFW.GLFW_KEY_DOWN)
             Input.Keys.TAB -> sendKeyPressed(GLFW.GLFW_KEY_TAB)
+            Input.Keys.X -> sendKeyPressed(GLFW.GLFW_KEY_X)
+            Input.Keys.C -> sendKeyPressed(GLFW.GLFW_KEY_C)
+            Input.Keys.V -> sendKeyPressed(GLFW.GLFW_KEY_V)
         }
 
         return false

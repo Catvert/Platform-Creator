@@ -8,10 +8,10 @@ import be.catvert.pc.utility.Updeatable
 object TweenSystem : Updeatable {
     private data class TweenData(val tween: Tween, val stateBackupIndex: Int)
 
-    private val tweens = mutableMapOf<GameObject, TweenData>()
+    private val tweens = mutableListOf<Pair<GameObject, TweenData>>()
 
     fun startTween(tween: Tween, gameObject: GameObject) {
-        tweens[gameObject] = TweenData(tween, gameObject.getCurrentStateIndex())
+        tweens.add(gameObject to TweenData(tween, gameObject.getCurrentStateIndex()))
         tween.init(gameObject)
 
         if (tween.useTweenState) {
@@ -29,8 +29,8 @@ object TweenSystem : Updeatable {
         while (it.hasNext()) {
             val keyValue = it.next()
 
-            val gameObject = keyValue.key
-            val (tween, backupStateIndex) = keyValue.value
+            val gameObject = keyValue.first
+            val (tween, backupStateIndex) = keyValue.second
 
             if (tween.update(gameObject)) {
                 if (tween.endAction !is RemoveGOAction) // TODO workaround?

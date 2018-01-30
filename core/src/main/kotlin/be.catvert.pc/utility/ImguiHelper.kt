@@ -5,6 +5,7 @@ import be.catvert.pc.GameObjectTag
 import be.catvert.pc.PCGame
 import be.catvert.pc.Prefab
 import be.catvert.pc.actions.Action
+import be.catvert.pc.actions.Actions
 import be.catvert.pc.components.RequiredComponent
 import be.catvert.pc.containers.Level
 import be.catvert.pc.factories.PrefabFactory
@@ -13,6 +14,7 @@ import be.catvert.pc.scenes.EditorScene
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import glm_.func.common.clamp
 import glm_.vec2.Vec2
 import glm_.vec4.Vec4
@@ -157,10 +159,10 @@ object ImguiHelper {
 
     fun action(label: String, action: Item<Action>, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI, noCheckComps: Boolean = false) {
         with(ImGui) {
-            val index = intArrayOf(PCGame.actionsClasses.indexOfFirst { it.isInstance(action.obj) })
+            val index = intArrayOf(Actions.values().indexOfFirst { it.action.isInstance(action.obj) })
 
             functionalProgramming.withId("prop $label") {
-                val requiredComponent = PCGame.actionsClasses[index[0]].findAnnotation<RequiredComponent>()
+                val requiredComponent = Actions.values()[index[0]].action.findAnnotation<RequiredComponent>()
                 val incorrectAction = let {
                     requiredComponent?.component?.forEach {
                         if (!gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex).hasComponent(it))
@@ -169,9 +171,7 @@ object ImguiHelper {
                     false
                 }
 
-                if (comboWithSettingsButton(label, index, PCGame.actionsClasses.map {
-                            it.simpleName?.removeSuffix("Action") ?: "Nom inconnu"
-                        }, {
+                if (comboWithSettingsButton(label, index, Actions.values().map {it.name }, {
                             insertImguiExposeEditorFields(action.obj, gameObject, level, editorSceneUI)
                         }, incorrectAction, {
                             if (isMouseHoveringRect(itemRectMin, itemRectMax)) {
@@ -180,7 +180,7 @@ object ImguiHelper {
                                 }
                             }
                         })) {
-                    action.obj = ReflectionUtility.findNoArgConstructor(PCGame.actionsClasses[index[0]])!!.newInstance()
+                    action.obj = ReflectionUtility.findNoArgConstructor(Actions.values()[index[0]].action)!!.newInstance()
                 }
             }
         }
