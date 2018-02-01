@@ -3,6 +3,7 @@ package be.catvert.pc.actions
 import be.catvert.pc.GameObject
 import be.catvert.pc.components.RequiredComponent
 import be.catvert.pc.components.graphics.AtlasComponent
+import be.catvert.pc.utility.Description
 import be.catvert.pc.utility.ExposeEditor
 import com.fasterxml.jackson.annotation.JsonCreator
 
@@ -12,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
  */
 
 @RequiredComponent(AtlasComponent::class)
+@Description("Permet de flip la texture d'une game object")
 class RenderAction(@ExposeEditor var action: RenderActions) : Action() {
     @JsonCreator private constructor() : this(RenderActions.FLIP_X)
 

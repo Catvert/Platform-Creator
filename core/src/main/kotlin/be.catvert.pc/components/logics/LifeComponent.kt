@@ -11,6 +11,7 @@ import be.catvert.pc.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.CustomEditorImpl
 import be.catvert.pc.utility.CustomEditorTextImpl
+import be.catvert.pc.utility.Description
 import be.catvert.pc.utility.ImguiHelper
 import com.badlogic.gdx.graphics.Color
 import com.fasterxml.jackson.annotation.JsonCreator
@@ -21,6 +22,7 @@ import glm_.func.common.max
  * Component permettant d'ajouter des points de vie à un gameObject
  * Chaque point de vie à une action quand celui-ci devient actif et inactif
  */
+@Description("Ajoute la possibilité d'ajouter des points de vie à un game object")
 class LifeComponent(onDeathAction: Action, lifePointActions: ArrayList<Action> = arrayListOf()) : Component(), CustomEditorImpl, CustomEditorTextImpl {
     @JsonCreator private constructor() : this(RemoveGOAction(), arrayListOf())
 

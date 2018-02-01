@@ -10,13 +10,11 @@ import be.catvert.pc.components.Component
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
 import be.catvert.pc.scenes.EditorScene
-import be.catvert.pc.utility.CustomEditorImpl
-import be.catvert.pc.utility.ImguiHelper
-import be.catvert.pc.utility.Updeatable
-import be.catvert.pc.utility.cast
+import be.catvert.pc.utility.*
 import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.functionalProgramming
 
+@Description("Permet d'effectuer une action quand un game object prévis est au-dessus d'une autre game object")
 class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeatable, CustomEditorImpl {
     constructor(vararg sensors: SensorData) : this(arrayListOf(*sensors))
     @JsonCreator private constructor() : this(arrayListOf())

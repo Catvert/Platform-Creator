@@ -9,12 +9,14 @@ import be.catvert.pc.tweens.TweenSystem
 import be.catvert.pc.tweens.Tweens
 import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.CustomEditorImpl
+import be.catvert.pc.utility.Description
 import com.fasterxml.jackson.annotation.JsonCreator
 import glm_.vec2.Vec2
 import imgui.ImGui
 import imgui.functionalProgramming
 import kotlin.reflect.full.createInstance
 
+@Description("Permet d'appliquer un/des tween(s) précis sur un game object")
 class TweenAction(var tween: Tween) : Action(), CustomEditorImpl {
     @JsonCreator private constructor() : this(EmptyTween())
 

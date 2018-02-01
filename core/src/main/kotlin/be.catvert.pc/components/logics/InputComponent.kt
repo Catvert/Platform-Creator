@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 /**
  * Component permettant d'effectuer une action quand l'utilisateur appuie sur une touche
  */
+@Description("Ajoute la possibilité d'effectuer une action sur un game object quand une touche est pressée")
 class InputComponent(var inputs: ArrayList<InputData>) : Component(), Updeatable, CustomEditorImpl, CustomEditorTextImpl {
     constructor(vararg inputs: InputData) : this(arrayListOf(*inputs))
     @JsonCreator private constructor() : this(arrayListOf())

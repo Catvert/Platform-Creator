@@ -15,6 +15,7 @@ import imgui.functionalProgramming
 /**
  * Component permettant d'ajouter des sons à un gameObject
  */
+@Description("Ajoute la possibilité d'ajouter des sons à un game object")
 class SoundComponent(var sounds: ArrayList<SoundData>) : Component(), ResourceLoader, CustomEditorImpl, CustomEditorTextImpl {
     constructor(vararg sounds: SoundData) : this(arrayListOf(*sounds))
     @JsonCreator private constructor() : this(arrayListOf())

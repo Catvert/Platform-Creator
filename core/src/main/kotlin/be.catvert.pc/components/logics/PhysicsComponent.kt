@@ -11,6 +11,7 @@ import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
@@ -52,6 +53,7 @@ data class CollisionAction(@ExposeEditor var side: BoxSide = BoxSide.Left, @Expo
  * @param onDownAction Action appelée quand le gameObject est en chute libre
  * @param onNothingAction Action appelée quand le gameObject ne subit aucune action physique
  */
+@Description("Ajoute des propriétés physique à un game object")
 class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                        @ExposeEditor(max = 100f) var moveSpeed: Int = 0,
                        @ExposeEditor(description = "Défini si le mouvement doit être \"fluide\" ou non.") var movementType: MovementType = MovementType.SMOOTH,
@@ -118,7 +120,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         if (gravity && gameObject.container.cast<Level>()?.applyGravity == true)
             moveSpeedY -= gravitySpeed
 
-        physicsActions.forEach action@ {
+        physicsActions.forEach actions@ {
             when (it) {
                 PhysicsActions.GO_LEFT -> moveSpeedX -= moveSpeed
                 PhysicsActions.GO_RIGHT -> moveSpeedX += moveSpeed
@@ -129,7 +131,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                         if (it != PhysicsActions.FORCE_JUMP) {
                             //  On vérifie si le gameObject est sur le sol
                             if (!collideOnMove(0, -1, gameObject)) {
-                                return@action
+                                return@actions
                             }
                         }
                         jumpData.isJumping = true
@@ -180,8 +182,8 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
     /**
      * Permet d'essayer le déplacement physique d'un gameObject si il ne rencontre aucun obstacle
      */
-    fun tryMove(moveX: Int, moveY: Int, gameObject: GameObject) {
-        if (moveX != 0 || moveY != 0) {
+        fun tryMove(moveX: Int, moveY: Int, gameObject: GameObject) {
+            if (moveX != 0 || moveY != 0) {
             var newMoveX = moveX
             var newMoveY = moveY
 

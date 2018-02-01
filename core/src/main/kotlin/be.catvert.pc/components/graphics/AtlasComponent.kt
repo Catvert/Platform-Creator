@@ -30,6 +30,7 @@ typealias AtlasRegion = Pair<FileWrapper, String>
  * @param currentIndex L'atlas actuel à dessiner
  * @param data Les atlas disponibles pour le gameObject
  */
+@Description("Permet d'ajouter une texture ou une animation à un game object")
 class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) : Component(), Renderable, ResourceLoader, CustomEditorImpl, CustomEditorTextImpl {
     enum class Rotation(val degree: Float) {
         Zero(0f), Quarter(90f), Half(180f), ThreeQuarter(270f)
@@ -91,7 +92,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
             batch.draw(currentKeyFrame(), gameObject.box, flipX, flipY, rotation.degree)
         }
 
-        fun currentKeyFrame() = animation.getKeyFrame(stateTime)
+        fun currentKeyFrame(): TextureAtlas.AtlasRegion = animation.getKeyFrame(stateTime)
 
         /**
          * Permet de mettre à jour l'atlas, si par exemple des régions sont modifiées.
@@ -268,7 +269,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                     separator()
 
                     data.elementAtOrNull(atlasIndex)?.apply data@ {
-                        val regionBtnSize = Vec2(Math.min(gameObject.box.width, 100), Math.min(gameObject.box.height, 100))
+                        val regionBtnSize = Vec2(50f, 50f)
 
                         fun addPlusBtn(): Boolean {
                             if (button("+", Vec2(20f, regionBtnSize.y + 8f))) {

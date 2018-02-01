@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
 import imgui.functionalProgramming
 
+@Description("Permet d'effectuer une action tout les x secondes")
 class TimerComponent(interval: Float, @ExposeEditor var timerAction: Action) : Component(), Updeatable, CustomEditorImpl {
     @JsonCreator private constructor() : this(1f, EmptyAction())
 

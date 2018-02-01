@@ -39,7 +39,6 @@ import org.lwjgl.util.tinyfd.TinyFileDialogs.tinyfd_openFileDialog
 import kotlin.math.roundToInt
 import kotlin.reflect.full.findAnnotation
 
-
 /**
  * Scène de l'éditeur de niveau
  */
@@ -260,7 +259,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                     }
                 }
 
-                if (selectGameObject != null) {
+                if (selectGameObject != null && selectGameObjectMode == SelectGOMode.NO_MODE || selectGameObjectMode == SelectGOMode.DIAGONALE_RESIZE) {
                     val rect = selectGameObject!!.box
 
                     shapeRenderer.withColor(Color.RED) {
@@ -541,22 +540,22 @@ class EditorScene(val level: Level) : Scene(level.background) {
                                 selectGameObjectMode = SelectGOMode.DIAGONALE_RESIZE
                             }
                         // Horizontal right resize
-                            selectGORect.right() == mousePosInWorld.x && mousePosInWorld.y in selectGORect.y..selectGORect.top() -> {
+                            mousePosInWorld.x in selectGORect.right() - 1 .. selectGORect.right() + 1 && mousePosInWorld.y in selectGORect.y..selectGORect.top() -> {
                                 selectGameObjectMode = SelectGOMode.HORIZONTAL_RESIZE_RIGHT
                                 Gdx.graphics.setSystemCursor(Cursor.SystemCursor.HorizontalResize)
                             }
                         // Horizontal left resize
-                            selectGORect.left() == mousePosInWorld.x && mousePosInWorld.y in selectGORect.y..selectGORect.top() -> {
+                            mousePosInWorld.x in selectGORect.left() - 1 .. selectGORect.left() + 1 && mousePosInWorld.y in selectGORect.y..selectGORect.top() -> {
                                 selectGameObjectMode = SelectGOMode.HORIZONTAL_RESIZE_LEFT
                                 Gdx.graphics.setSystemCursor(Cursor.SystemCursor.HorizontalResize)
                             }
                         // Vertical top resize
-                            selectGORect.top() == mousePosInWorld.y && mousePosInWorld.x in selectGORect.x..selectGORect.right() -> {
+                            mousePosInWorld.y in selectGORect.top() - 1 .. selectGORect.top() + 1 && mousePosInWorld.x in selectGORect.x..selectGORect.right() -> {
                                 selectGameObjectMode = SelectGOMode.VERTICAL_RESIZE_TOP
                                 Gdx.graphics.setSystemCursor(Cursor.SystemCursor.VerticalResize)
                             }
                         // Vertical bottom resize
-                            selectGORect.bottom() == mousePosInWorld.y && mousePosInWorld.x in selectGORect.x..selectGORect.right() -> {
+                            mousePosInWorld.y in selectGORect.bottom() - 1 .. selectGORect.bottom() + 1 && mousePosInWorld.x in selectGORect.x..selectGORect.right() -> {
                                 selectGameObjectMode = SelectGOMode.VERTICAL_RESIZE_BOTTOM
                                 Gdx.graphics.setSystemCursor(Cursor.SystemCursor.VerticalResize)
                             }
@@ -1318,6 +1317,21 @@ class EditorScene(val level: Level) : Scene(level.background) {
                     functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                         combo("component", editorSceneUI::gameObjectAddComponentComboIndex, components.map { it.name })
                     }
+
+                    val componentClass = Components.values()[editorSceneUI.gameObjectAddComponentComboIndex].component
+
+                    val description = componentClass.findAnnotation<Description>()
+                    if(description != null) {
+                        sameLine()
+                        text("(?)")
+
+                        if(isMouseHoveringRect(itemRectMin, itemRectMax)) {
+                            functionalProgramming.withTooltip {
+                                text(description.description)
+                            }
+                        }
+                    }
+
                     if (button("Ajouter", Vec2(-1, 0))) {
                         if (editorSceneUI.gameObjectAddComponentComboIndex in components.indices) {
                             val newComp = ReflectionUtility.findNoArgConstructor(components[editorSceneUI.gameObjectAddComponentComboIndex].component)!!.newInstance()

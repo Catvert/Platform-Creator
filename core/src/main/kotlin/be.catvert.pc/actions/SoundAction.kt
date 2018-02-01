@@ -7,6 +7,7 @@ import be.catvert.pc.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.CustomEditorImpl
+import be.catvert.pc.utility.Description
 import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
 import imgui.functionalProgramming
@@ -16,6 +17,7 @@ import imgui.functionalProgramming
  * @see SoundComponent
  */
 @RequiredComponent(SoundComponent::class)
+@Description("Permet de jouer un son spécifique")
 class SoundAction(var soundIndex: Int) : Action(), CustomEditorImpl {
     @JsonCreator private constructor() : this(-1)
 

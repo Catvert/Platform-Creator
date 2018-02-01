@@ -3,6 +3,7 @@ package be.catvert.pc.actions
 import be.catvert.pc.GameObject
 import be.catvert.pc.components.RequiredComponent
 import be.catvert.pc.components.logics.LifeComponent
+import be.catvert.pc.utility.Description
 import be.catvert.pc.utility.ExposeEditor
 import com.fasterxml.jackson.annotation.JsonCreator
 
@@ -12,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
  * @see LifeComponent
  */
 @RequiredComponent(LifeComponent::class)
+@Description("Permet d'ajouter/supprimer des points de vie à un game object")
 class LifeAction(@ExposeEditor var action: LifeActions) : Action() {
     @JsonCreator private constructor() : this(LifeActions.REMOVE_LP)
 

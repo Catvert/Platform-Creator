@@ -10,11 +10,10 @@ import be.catvert.pc.components.Component
 import be.catvert.pc.components.RequiredComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.GameObjectMatrixContainer
-import be.catvert.pc.utility.BoxSide
-import be.catvert.pc.utility.ExposeEditor
-import be.catvert.pc.utility.Updeatable
-import be.catvert.pc.utility.cast
+import be.catvert.pc.utility.*
+import com.badlogic.gdx.Gdx
 import com.fasterxml.jackson.annotation.JsonCreator
+import kotlin.math.roundToInt
 
 /**
  * Component permettant d'ajouter la possibilité à un gameObject de se déplacer automatiquement dans une direction.
@@ -23,50 +22,17 @@ import com.fasterxml.jackson.annotation.JsonCreator
  * @see PhysicsComponent
  */
 @RequiredComponent(PhysicsComponent::class)
-class MoverComponent(orientation: SimpleMoverOrientation, @ExposeEditor var reverse: Boolean = false, @ExposeEditor var holdGameObjects: Boolean = false) : Component(), Updeatable {
-    @JsonCreator private constructor() : this(SimpleMoverOrientation.HORIZONTAL)
-
-    enum class SimpleMoverOrientation {
-        HORIZONTAL, VERTICAL
-    }
-
-    private var firstAction = PhysicsAction(PhysicsAction.PhysicsActions.GO_LEFT)
-    private var secondAction = PhysicsAction(PhysicsAction.PhysicsActions.GO_RIGHT)
+@Description("Permet de déplacer automatiquement un game object sur un axe")
+class MoverComponent(@ExposeEditor(max = 100f) var moveSpeedX: Int, @ExposeEditor(max = 100f) var moveSpeedY: Int, @ExposeEditor var reverse: Boolean = false, @ExposeEditor var holdGameObjects: Boolean = false) : Component(), Updeatable {
+    @JsonCreator private constructor() : this(0, 0)
 
     @ExposeEditor
     var onUnReverseAction: Action = EmptyAction()
     @ExposeEditor
     var onReverseAction: Action = EmptyAction()
 
-    @ExposeEditor
-    var orientation = orientation
-        set(value) {
-            field = value
-            updateOrientation()
-        }
-
-    init {
-        updateOrientation()
-    }
-
-    /**
-     * Permet de mettre à jour les actions physiques selon l'orientation voulue
-     */
-    private fun updateOrientation() {
-        when (orientation) {
-            SimpleMoverOrientation.HORIZONTAL -> {
-                firstAction.physicsAction = PhysicsAction.PhysicsActions.GO_LEFT
-                secondAction.physicsAction = PhysicsAction.PhysicsActions.GO_RIGHT
-            }
-            SimpleMoverOrientation.VERTICAL -> {
-                firstAction.physicsAction = PhysicsAction.PhysicsActions.GO_UP
-                secondAction.physicsAction = PhysicsAction.PhysicsActions.GO_DOWN
-            }
-        }
-    }
-
-    private fun reverse(value: Boolean) {
-        reverse = value
+    private fun reverse() {
+        reverse = !reverse
         if (reverse)
             onReverseAction(gameObject)
         else
@@ -79,61 +45,28 @@ class MoverComponent(orientation: SimpleMoverOrientation, @ExposeEditor var reve
 
         state.getComponent<PhysicsComponent>()?.apply {
             onCollisionWith.register {
-                when (orientation) {
-                    SimpleMoverOrientation.HORIZONTAL -> {
-                        if (it.side == BoxSide.Left)
-                            reverse(true)
-                        else if (it.side == BoxSide.Right)
-                            reverse(false)
-                    }
-                    SimpleMoverOrientation.VERTICAL -> {
-                        if (it.side == BoxSide.Up)
-                            reverse(true)
-                        else if (it.side == BoxSide.Down)
-                            reverse(false)
-                    }
-                }
+                if(it.side != BoxSide.Up || !holdGameObjects)
+                    reverse()
             }
         }
     }
 
     override fun update() {
-        if (holdGameObjects) {
-            gameObject.getCurrentState().getComponent<PhysicsComponent>()?.apply {
-                val moveX = when (orientation) {
-                    SimpleMoverOrientation.HORIZONTAL -> if (reverse) moveSpeed else -moveSpeed
-                    SimpleMoverOrientation.VERTICAL -> 0
-                }
-                val moveY = when (orientation) {
-                    SimpleMoverOrientation.HORIZONTAL -> 0
-                    SimpleMoverOrientation.VERTICAL -> if (reverse) moveSpeed else -moveSpeed
-                }
+        val physicsComp = gameObject.getCurrentState().getComponent<PhysicsComponent>()
 
+        physicsComp?.tryMove(if(reverse) (-moveSpeedX * Gdx.graphics.deltaTime * 60f).roundToInt() else (moveSpeedX * Gdx.graphics.deltaTime * 60f).roundToInt(), if(reverse) (-moveSpeedY * Gdx.graphics.deltaTime * 60f).roundToInt() else (-moveSpeedY * Gdx.graphics.deltaTime * 60f).roundToInt(), gameObject)
+
+        if (holdGameObjects) {
+            physicsComp?.apply {
                 getCollisionsGameObjectOnSide(gameObject, BoxSide.Up).forEach {
-                    MoveAction(moveX, moveY, true).invoke(it)
+                    MoveAction(if(reverse) -moveSpeedX else moveSpeedX, if(reverse) -moveSpeedY else moveSpeedY, true).invoke(it)
                 }
             }
         }
 
         gameObject.container.cast<GameObjectMatrixContainer>()?.matrixRect?.also {
-            when (orientation) {
-                MoverComponent.SimpleMoverOrientation.HORIZONTAL -> {
-                    if (gameObject.position().x == 0)
-                        reverse(true)
-                    else if (gameObject.position().x + gameObject.size().width == it.width)
-                        reverse(false)
-                }
-                MoverComponent.SimpleMoverOrientation.VERTICAL -> {
-                    if (gameObject.position().y + gameObject.size().height == it.height)
-                        reverse(true)
-                }
-            }
+            if(gameObject.position().x == 0 || gameObject.box.right() == it.right() || gameObject.box.top() == it.top())
+                reverse()
         }
-
-        if (!reverse)
-            firstAction(gameObject)
-        else
-            secondAction(gameObject)
-
     }
 }

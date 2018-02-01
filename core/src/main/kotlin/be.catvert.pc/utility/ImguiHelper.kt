@@ -162,7 +162,10 @@ object ImguiHelper {
             val index = intArrayOf(Actions.values().indexOfFirst { it.action.isInstance(action.obj) })
 
             functionalProgramming.withId("prop $label") {
-                val requiredComponent = Actions.values()[index[0]].action.findAnnotation<RequiredComponent>()
+
+                val actionClass = Actions.values()[index[0]].action
+
+                val requiredComponent = actionClass.findAnnotation<RequiredComponent>()
                 val incorrectAction = let {
                     requiredComponent?.component?.forEach {
                         if (!gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex).hasComponent(it))
@@ -182,6 +185,18 @@ object ImguiHelper {
                         })) {
                     action.obj = ReflectionUtility.findNoArgConstructor(Actions.values()[index[0]].action)!!.newInstance()
                 }
+
+                val description = actionClass.findAnnotation<Description>()
+                if(description != null) {
+                    sameLine()
+                    text("(?)")
+
+                    if(isMouseHoveringRect(itemRectMin, itemRectMax)) {
+                        functionalProgramming.withTooltip {
+                            text(description.description)
+                        }
+                    }
+                }
             }
         }
     }
@@ -197,7 +212,6 @@ object ImguiHelper {
                 openPopup(popupTitle)
             }
             popItemFlag()
-
 
             if (settingsBtnDisabled)
                 onSettingsBtnDisabled()

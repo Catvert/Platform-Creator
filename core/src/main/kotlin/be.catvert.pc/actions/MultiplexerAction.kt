@@ -5,6 +5,7 @@ import be.catvert.pc.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.CustomEditorImpl
 import be.catvert.pc.utility.CustomEditorTextImpl
+import be.catvert.pc.utility.Description
 import be.catvert.pc.utility.ImguiHelper
 import com.badlogic.gdx.graphics.Color
 import com.fasterxml.jackson.annotation.JsonCreator
@@ -14,6 +15,7 @@ import imgui.functionalProgramming
 /**
  * Action permettant d'utiliser d'appliquer plusieurs actions sur un gameObject à la place d'une seule.
  */
+@Description("Permet d'effectuer plusieurs actions sur un game object")
 class MultiplexerAction(var actions: ArrayList<Action>) : Action(), CustomEditorImpl, CustomEditorTextImpl {
     constructor(vararg actions: Action) : this(arrayListOf(*actions))
     @JsonCreator private constructor() : this(arrayListOf())

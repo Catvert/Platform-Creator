@@ -92,7 +92,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         CollisionAction(BoxSide.Up, action = LifeAction(LifeAction.LifeActions.REMOVE_LP))
                 ))
                 this += LifeComponent(PrefabSetup.killActionTween)
-                this += MoverComponent(MoverComponent.SimpleMoverOrientation.HORIZONTAL, false).apply { onReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X) }
+                this += MoverComponent(5, 0).apply { onReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X) }
             }))
     ),
     SnakeSlime_Kenney(PrefabType.Kenney,
@@ -114,7 +114,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         CollisionAction(BoxSide.Up, action = LifeAction(LifeAction.LifeActions.REMOVE_LP))
                 ))
                 this += LifeComponent(PrefabSetup.killActionTween)
-                this += MoverComponent(MoverComponent.SimpleMoverOrientation.HORIZONTAL, false).apply { onReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X) }
+                this += MoverComponent(5, 0).apply { onReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X) }
             }))
     ),
     GoldCoin_Kenney(PrefabType.Kenney,
@@ -207,7 +207,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         CollisionAction(BoxSide.Up, action = LifeAction(LifeAction.LifeActions.REMOVE_LP))
                 ))
                 this += LifeComponent(PrefabSetup.killActionTween)
-                this += MoverComponent(MoverComponent.SimpleMoverOrientation.HORIZONTAL, false).apply { onReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X) }
+                this += MoverComponent(5, 0).apply { onReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X) }
             }))
     ),
     Turtle_SMC(PrefabType.SMC,
@@ -220,7 +220,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         CollisionAction(BoxSide.Up, action = LifeAction(LifeAction.LifeActions.REMOVE_LP), collideAction = PhysicsAction(PhysicsAction.PhysicsActions.FORCE_JUMP))
                 ))
                 this += LifeComponent(MultiplexerAction(StateAction(1, true), ResizeAction(Size(45, 45))))
-                this += MoverComponent(MoverComponent.SimpleMoverOrientation.HORIZONTAL, false).apply { onReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X) }
+                this += MoverComponent(5, 0).apply { onReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X) }
             }, otherStates = *arrayOf(GameObjectState("shell") {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("walk", Constants.packsSMCDirPath.child("enemies.atlas").toFileWrapper(), "turtle/green/shell_move", 0.33f))
                 this += PhysicsComponent(false, 10, collisionsActions = arrayListOf(
@@ -230,7 +230,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         CollisionAction(BoxSide.Right, Tags.Enemy.tag, collideAction = LifeAction(LifeAction.LifeActions.ONE_SHOT)),
                         CollisionAction(BoxSide.Left, Tags.Enemy.tag, collideAction = LifeAction(LifeAction.LifeActions.ONE_SHOT))
                 ))
-                this += MoverComponent(MoverComponent.SimpleMoverOrientation.HORIZONTAL, false)
+                this += MoverComponent(10, 0)
             })))
     ),
     Eato_SMC(PrefabType.SMC,
@@ -248,7 +248,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                 this += PhysicsComponent(false, 5, collisionsActions = arrayListOf(
                         CollisionAction(BoxSide.All, action = TweenAction(TweenFactory.RemoveGO()))
                 ))
-                this += MoverComponent(MoverComponent.SimpleMoverOrientation.HORIZONTAL, false).apply { onReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X) }
+                this += MoverComponent(5, 0).apply { onReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X) }
             }))
     ),
     BoxSpawner_SMC(PrefabType.SMC,
