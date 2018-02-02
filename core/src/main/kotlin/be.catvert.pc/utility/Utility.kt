@@ -29,22 +29,24 @@ fun Batch.draw(textureRegion: TextureRegion, rect: Rect, flipX: Boolean = false,
         textureRegion.flip(false, true)
     }
 
-    this.draw(textureRegion, rect.x.toFloat(), rect.y.toFloat(), rect.width / 2f, rect.height / 2f, rect.width.toFloat(), rect.height.toFloat(), 1f, 1f, rotation)
+    this.draw(textureRegion, rect.x, rect.y, rect.width / 2f, rect.height / 2f, rect.width.toFloat(), rect.height.toFloat(), 1f, 1f, rotation)
 }
 
-fun ShapeRenderer.rect(rect: Rect) = this.rect(rect.x.toFloat(), rect.y.toFloat(), rect.width.toFloat(), rect.height.toFloat())
+fun ShapeRenderer.rect(rect: Rect) = this.rect(rect.x, rect.y, rect.width.toFloat(), rect.height.toFloat())
 
-fun Vector2.toPoint() = Point(this.x.roundToInt(), this.y.roundToInt())
+fun Vector2.toPoint() = Point(this.x, this.y)
 
-fun Vector3.toPoint() = Point(this.x.roundToInt(), this.y.roundToInt())
+fun Vector3.toPoint() = Point(this.x, this.y)
 
-fun Shape2D.contains(point: Point) = this.contains(point.x.toFloat(), point.y.toFloat())
+fun Shape2D.contains(point: Point) = this.contains(point.x, point.y)
 
 inline fun <reified T : Any> AssetManager.loadOnDemand(file: FileHandle): Asset<T> = this.loadOnDemand(file.path())
 
 fun FileHandle.toFileWrapper() = FileWrapper(this)
 
 fun Texture.toAtlasRegion() = TextureAtlas.AtlasRegion(this, 0, 0, width, height)
+
+fun Float.equalsEpsilon(v: Float, epsilon: Float) = Math.abs(this - v) < epsilon
 
 fun Batch.withColor(color: Color, block: Batch.() -> Unit) {
     val oldColor = this.color.cpy()

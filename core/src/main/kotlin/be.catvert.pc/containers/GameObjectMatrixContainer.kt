@@ -6,7 +6,9 @@ import be.catvert.pc.PCGame
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonIgnore
+import glm_.func.common.clamp
 import kotlin.math.roundToInt
 
 abstract class GameObjectMatrixContainer : GameObjectContainer() {
@@ -87,7 +89,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
      */
 
     @JsonIgnore
-    var matrixRect = Rect(0, 0, Constants.matrixCellSize * matrixWidth, Constants.matrixCellSize * matrixHeight)
+    var matrixRect = Rect(0f, 0f, Constants.matrixCellSize * matrixWidth, Constants.matrixCellSize * matrixHeight)
         private set
 
     /**
@@ -119,7 +121,9 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
             drawDebugCells = !drawDebugCells
 
         if (followGameObject != null && allowUpdatingGO) {
-            activeRect.position = Point(Math.max(0, followGameObject!!.position().x - activeRect.width / 2 + followGameObject!!.size().width / 2), Math.max(0, followGameObject!!.position().y - activeRect.height / 2 + followGameObject!!.size().height / 2))
+            activeRect.position = Point(
+                    Math.abs((followGameObject!!.box.center().x.roundToInt().toFloat() - activeRect.width / 2).clamp(matrixRect.left(), matrixRect.right() - activeRect.width)),
+                    Math.abs((followGameObject!!.box.center().y.roundToInt().toFloat() - activeRect.height / 2).clamp(matrixRect.bottom(), matrixRect.top() - activeRect.height)))
         }
 
         super.update()
@@ -165,7 +169,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
         setGameObjectsToMatrix(gameObjects)
     }
 
-    private fun getRectangleCell(x: Int, y: Int) = Rect(x * Constants.matrixCellSize, y * Constants.matrixCellSize, Constants.matrixCellSize, Constants.matrixCellSize)
+    private fun getRectangleCell(x: Int, y: Int) = Rect(x.toFloat() * Constants.matrixCellSize, y.toFloat() * Constants.matrixCellSize, Constants.matrixCellSize, Constants.matrixCellSize)
 
     private fun addRectListener(gameObject: GameObject) {
         gameObject.box.onPositionChange.register { setGameObjectToGrid(gameObject) }
@@ -188,8 +192,8 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
         }
 
         if (matrixRect.overlaps(rect)) {
-            var x = Math.max(0, rect.x / Constants.matrixCellSize)
-            var y = Math.max(0, rect.y / Constants.matrixCellSize)
+            var x = Math.max(0, rect.x.roundToInt() / Constants.matrixCellSize)
+            var y = Math.max(0, rect.y.roundToInt() / Constants.matrixCellSize)
             if (rectContains(x, y)) {
                 cells += GridCell(x, y)
                 val firstXCell = x

@@ -59,7 +59,7 @@ abstract class Scene(protected var background: Background) : Renderable, Updeata
 
         val mousePos = stage.screenToStageCoordinates(Vector2(mouseX, mouseY))
 
-        isUIHover = imgui.findHoveredWindow(ImGui.mousePos) != null || ImGui.isAnyItemHovered || stage.actors.any {
+        isUIHover = imgui.findHoveredWindow(ImGui.mousePos) != null || ImGui.isAnyItemActive || ImGui.isAnyItemHovered || stage.actors.any {
             (it.x <= mousePos.x && it.x + it.width >= mousePos.x) && (it.y <= mousePos.y && it.y + it.height >= mousePos.y)
         }
     }

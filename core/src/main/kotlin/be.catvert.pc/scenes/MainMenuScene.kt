@@ -276,7 +276,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
     private val settingsCurrentLocaleIndex = intArrayOf(PCGame.availableLocales.indexOf(PCGame.locale))
     private fun drawSettingsWindow() {
         with(ImGui) {
-            ImguiHelper.withCenteredWindow(MenusText.MM_SETTINGS_WINDOW_TITLE(), ::showSettingsWindow, Vec2(375f, 375f), WindowFlags.NoResize.i) {
+            ImguiHelper.withCenteredWindow(MenusText.MM_SETTINGS_WINDOW_TITLE(), ::showSettingsWindow, Vec2(385f, 395f), WindowFlags.NoResize.i) {
                 functionalProgramming.withGroup {
                     functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                         sliderFloat(MenusText.MM_SETTINGS_SOUND(), ::soundVolume, 0f, 1f, "%.1f")

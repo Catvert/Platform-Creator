@@ -153,9 +153,9 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
                     ?: PCGame.standardBackgrounds().elementAtOrNull(0) ?: StandardBackground(FileWrapper("")))
 
             for (i in 0..5)
-                PrefabFactory.PhysicsSprite_Kenney.prefab.create(Point(i * 50, 0), level)
+                PrefabFactory.PhysicsSprite_Kenney.prefab.create(Point(i * 50f, 0f), level)
 
-            val player = PrefabFactory.Player_Kenney.prefab.create(Point(100, 50), level)
+            val player = PrefabFactory.Player_Kenney.prefab.create(Point(100f, 50f), level)
 
             level.followGameObject = player
 

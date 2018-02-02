@@ -16,7 +16,9 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Matrix4
 import com.kotcrab.vis.ui.VisUI
+import glm_.c
 import imgui.DEBUG
+import imgui.FontConfig
 import imgui.ImGui
 import imgui.impl.LwjglGL3
 import ktx.app.KtxApplicationAdapter
@@ -31,9 +33,10 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
     private fun initializeUI() {
         VisUI.load(Constants.uiDirPath.child("tinted/x1/tinted.json"))
 
-        val windowHandle = (Gdx.graphics as Lwjgl3Graphics).window.windowHandle
+        LwjglGL3.init(GlfwWindow((Gdx.graphics as Lwjgl3Graphics).window.windowHandle), false)
 
-        LwjglGL3.init(GlfwWindow(windowHandle), false)
+        val fontBytes = Constants.imguiFontPath.readBytes()
+        imgui.IO.fonts.addFontFromMemoryTTF(CharArray(fontBytes.size, { fontBytes[it].c }), 19f, FontConfig(), glyphRanges = imgui.IO.fonts.glyphRangesDefault)
     }
 
     override fun create() {
@@ -207,7 +210,7 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
 
         fun getLogoRect(): Rect {
             val size = getLogoSize()
-            return Rect(Point(Constants.viewportRatioWidth.roundToInt() / 2 - size.width / 2, Constants.viewportRatioHeight.roundToInt() - size.height * 2), size)
+            return Rect(Point(Constants.viewportRatioWidth / 2 - size.width / 2, Constants.viewportRatioHeight - size.height * 2), size)
         }
     }
 }

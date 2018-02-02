@@ -24,6 +24,8 @@ object Constants {
 
     const val assetsDir = "assets/"
 
+    const val physicsEpsilon = 0.1f
+
     val serializationType = SerializationFactory.MapperType.JSON
 
     private val assetsDirPath = "assets/".toLocalFile()
@@ -35,9 +37,7 @@ object Constants {
     val uiDirPath = assetsDirPath.child("ui/")
 
     val fontDirPath = assetsDirPath.child("fonts/")
-    val imguiFontPath = fontDirPath.child("ui.ttf")
-    val kenneyFontPath = fontDirPath.child("kenvector_future.ttf")
-    val kenneyThinFontPath = fontDirPath.child("kenvector_future_thin.ttf")
+    val imguiFontPath = fontDirPath.child("imgui.ttf")
     val mainFontPath = fontDirPath.child("mainFont.fnt")
     val editorFontPath = fontDirPath.child("editorFont.fnt")
 

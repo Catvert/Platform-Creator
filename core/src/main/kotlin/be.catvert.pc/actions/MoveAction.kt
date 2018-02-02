@@ -13,11 +13,11 @@ class MoveAction(@ExposeEditor(min = -100f, max = 100f) var moveX: Int, @ExposeE
     @JsonCreator private constructor() : this(0, 0, true)
 
     override fun invoke(gameObject: GameObject) {
-        val moveX = (moveX * Gdx.graphics.deltaTime * 60f).roundToInt()
-        val moveY = (moveY * Gdx.graphics.deltaTime * 60f).roundToInt()
+        val moveX = (moveX * Gdx.graphics.deltaTime * 60f)
+        val moveY = (moveY * Gdx.graphics.deltaTime * 60f)
 
         if (physics) {
-            gameObject.getCurrentState().getComponent<PhysicsComponent>()?.tryMove(moveX, moveY, gameObject)
+            gameObject.getCurrentState().getComponent<PhysicsComponent>()?.move(moveX, moveY, gameObject)
         } else {
             gameObject.box.move(moveX, moveY)
         }

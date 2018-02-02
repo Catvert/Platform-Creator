@@ -8,7 +8,7 @@ import imgui.ImGui
 import imgui.functionalProgramming
 
 class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
-    constructor(x: Int, y: Int, width: Int, height: Int) : this(Point(x, y), Size(width, height))
+    constructor(x: Float, y: Float, width: Int, height: Int) : this(Point(x, y), Size(width, height))
     constructor(rect: Rect) : this(rect.x, rect.y, rect.width, rect.height)
 
     @JsonIgnore
@@ -29,12 +29,12 @@ class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
     @JsonIgnore
     val onSizeChange = Signal<Size>()
 
-    var x: Int
+    var x: Float
         get() = position.x
         set(value) {
             position = Point(value, y)
         }
-    var y: Int
+    var y: Float
         get() = position.y
         set(value) {
             position = Point(x, value)
@@ -62,7 +62,7 @@ class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
         this.position = position
     }
 
-    fun move(moveX: Int, moveY: Int) {
+    fun move(moveX: Float, moveY: Float) {
         x += moveX
         y += moveY
     }
@@ -84,7 +84,7 @@ class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
         with(ImGui) {
             if (collapsingHeader(label)) {
                 functionalProgramming.withIndent {
-                    ImguiHelper.point(::position, Point(), Point(level.matrixRect.width - this@Rect.width, level.matrixRect.height - this@Rect.height), editorSceneUI)
+                    ImguiHelper.point(::position, Point(), Point(level.matrixRect.width.toFloat() - this@Rect.width, level.matrixRect.height.toFloat() - this@Rect.height), editorSceneUI)
                     ImguiHelper.addImguiWidget("taille", ::size, gameObject, level, ExposeEditorFactory.createExposeEditor(max = Constants.maxGameObjectSize.toFloat()), editorSceneUI)
                 }
             }

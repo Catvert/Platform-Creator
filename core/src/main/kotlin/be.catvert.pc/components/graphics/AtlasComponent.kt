@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import glm_.vec2.Vec2
 import glm_.vec4.Vec4
 import imgui.ImGui
+import imgui.ItemFlags
 import imgui.WindowFlags
 import imgui.functionalProgramming
 import ktx.assets.toLocalFile
@@ -197,7 +198,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
     private var editAtlasType: ImguiHelper.Item<Enum<*>> = ImguiHelper.Item(EditAtlasType.Pack)
     private var packFolderIndex = 0
     private var atlasIndex = 0
-    private var regionIndex = 0
+    private var selectRegionIndex = 0
     private var addAtlasName = "Nouveau atlas"
     private var ressourcesCollapsing = false
 
@@ -212,7 +213,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
             }
 
             if (showEditAtlasWindow)
-                drawEditWindow(gameObject, level)
+                drawEditWindow(level)
         }
     }
 
@@ -220,30 +221,23 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
      * Permet de dessiner la fenêtre permettant d'éditer les différentes régions de l'atlas actuel.
      */
     private val imgBtnSize = Vec2(50, 50)
-    private val editWindowWidth = 500f
-    private fun drawEditWindow(gameObject: GameObject, level: Level) {
+    private val editWindowWidth = 460f
+    private fun drawEditWindow(level: Level) {
         with(ImGui) {
             setNextWindowSizeConstraints(Vec2(editWindowWidth, 200f), Vec2(editWindowWidth, 500f))
             functionalProgramming.withWindow("Éditer l'atlas", ::showEditAtlasWindow, flags = WindowFlags.AlwaysAutoResize.i) {
                 val addAtlasTitle = "Ajouter un atlas"
-
-                functionalProgramming.popupModal(addAtlasTitle, extraFlags = WindowFlags.AlwaysAutoResize.i) {
-                    ImguiHelper.inputText("nom", ::addAtlasName)
-                    if (button("Ajouter", Vec2(-1, 0))) {
-                        data.add(AtlasData(addAtlasName).apply { updateAtlas() })
-                        closeCurrentPopup()
-                    }
-                    if (button("Fermer", Vec2(-1, 0)))
-                        closeCurrentPopup()
-                }
 
                 if (data.isEmpty()) {
                     if (button("Ajouter un atlas", Vec2(-1))) {
                         openPopup(addAtlasTitle)
                     }
                 } else if (atlasIndex in data.indices) {
-                    if (data.isNotEmpty()) {
-                        if (button("Supprimer")) {
+                    var openAddAtlasPopup = false
+
+                    ImguiHelper.comboWithSettingsButton("atlas", ::atlasIndex, data.map { it.name }, {
+                        pushItemFlag(ItemFlags.Disabled.i, data.isEmpty())
+                        if(button("Supprimer ${data.elementAtOrNull(atlasIndex)?.name?: ""}", Vec2(Constants.defaultWidgetsWidth, 0f))) {
                             data.removeAt(atlasIndex)
                             atlasIndex = let {
                                 if (atlasIndex > 0)
@@ -251,72 +245,70 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                                 else
                                     atlasIndex
                             }
-                            return@withWindow
                         }
-                        sameLine()
-                    }
+                        popItemFlag()
 
-                    functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                        if (combo("atlas", ::atlasIndex, data.map { it.name } + "Ajouter un atlas")) {
-                            selectedAtlasIndex = -1
-
-                            if (atlasIndex == data.size) {
-                                openPopup(addAtlasTitle)
-                            }
+                        if(button("Nouveau atlas", Vec2(Constants.defaultWidgetsWidth, 0f))) {
+                            openAddAtlasPopup = true
                         }
-                    }
+                    })
+
+                    if(openAddAtlasPopup)
+                        openPopup(addAtlasTitle)
 
                     separator()
 
                     data.elementAtOrNull(atlasIndex)?.apply data@ {
                         val regionBtnSize = Vec2(50f, 50f)
 
-                        fun addPlusBtn(): Boolean {
-                            if (button("+", Vec2(20f, regionBtnSize.y + 8f))) {
-                                this.regions.add(AtlasData.emptyRegionIdentifier.toLocalFile().toFileWrapper() to AtlasData.emptyRegionIdentifier)
-                                updateAtlas()
-                                return true
-                            }
-                            return false
+                        val itRegions = this.regions.listIterator()
+                        var regionIndex = 0
+
+                        fun addPlusBtn() {
+                            if (button("+", Vec2(20f, regionBtnSize.y + style.framePadding.y * 2f)))
+                                itRegions.add(AtlasData.emptyRegionIdentifier.toLocalFile().toFileWrapper() to AtlasData.emptyRegionIdentifier)
                         }
 
-                        this.regions.forEachIndexed { index, it ->
+                        while(itRegions.hasNext()) {
+                            val it = itRegions.next()
+
                             val region = AtlasComponent.AtlasData.loadRegion(it)
-                            val tintCol = if (regionIndex != index) Vec4(1f, 1f, 1f, 0.3f) else Vec4(1f)
+                            val tintCol = if (selectRegionIndex != regionIndex) Vec4(1f, 1f, 1f, 0.3f) else Vec4(1f)
 
                             functionalProgramming.withGroup {
                                 functionalProgramming.withGroup {
-                                    if (button("<-", Vec2((regionBtnSize.x + 5f) / 2f, 0))) {
-                                        this.previousFrameRegion(index)
+                                    val btnSize = Vec2((regionBtnSize.x + style.itemInnerSpacing.x) / 2f)
+                                    if (button("<-", btnSize)) {
+                                        this.previousFrameRegion(regionIndex)
                                     }
-                                    sameLine()
-                                    if (button("->", Vec2((regionBtnSize.x + 5f) / 2f, 0))) {
-                                        this.nextFrameRegion(index)
+                                    sameLine(0f, style.itemInnerSpacing.x)
+                                    if (button("->", btnSize)) {
+                                        this.nextFrameRegion(regionIndex)
                                     }
                                 }
+
                                 if (imageButton(region.texture.textureObjectHandle, regionBtnSize, Vec2(region.u, region.v), Vec2(region.u2, region.v2), tintCol = tintCol)) {
-                                    regionIndex = index
+                                    selectRegionIndex = regionIndex
                                 }
 
-                                if (index == this.regions.size - 1) {
-                                    sameLine()
-                                    if (addPlusBtn())
-                                        return@data
+                                if (regionIndex == this.regions.size - 1) {
+                                    sameLine(0f, style.itemInnerSpacing.x)
+                                    addPlusBtn()
                                 }
 
-                                functionalProgramming.withId("suppr region $index") {
-                                    if (button("Suppr.", Vec2(regionBtnSize.x + 10f, 0))) {
-                                        data.elementAtOrNull(atlasIndex)?.apply {
-                                            this.regions.removeAt(index)
-                                            updateAtlas()
-                                        }
-                                        return@data
+                                functionalProgramming.withId("suppr region $regionIndex") {
+                                    if (button("Suppr.", Vec2(regionBtnSize.x + style.framePadding.x * 2f, 0))) {
+                                        itRegions.remove()
+                                        updateAtlas()
+                                        regionIndex -= 1
                                     }
                                 }
                             }
 
-                            if (index < this.regions.size - 1)
+                            if (regionIndex < this.regions.size - 1)
                                 sameLine()
+
+                            ++regionIndex
                         }
 
                         if (this.regions.isEmpty()) {
@@ -349,6 +341,16 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
 
                     drawRessources(level)
                 }
+
+                functionalProgramming.popupModal(addAtlasTitle, extraFlags = WindowFlags.AlwaysAutoResize.i) {
+                    ImguiHelper.inputText("nom", ::addAtlasName)
+                    if (button("Ajouter", Vec2(-1, 0))) {
+                        data.add(AtlasData(addAtlasName).apply { updateAtlas() })
+                        closeCurrentPopup()
+                    }
+                    if (button("Fermer", Vec2(-1, 0)))
+                        closeCurrentPopup()
+                }
             }
         }
     }
@@ -358,13 +360,14 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
             ressourcesCollapsing = false
             functionalProgramming.collapsingHeader("ressources") {
                 ressourcesCollapsing = true
-                ImguiHelper.enum("type", editAtlasType)
+                ImguiHelper.enumWithSettingsButton("type", editAtlasType, {
+                    checkbox("ressources importées", ::showLevelAtlas)
+                })
 
                 var sumImgsWidth = 0f
 
                 val editAtlasType = editAtlasType.obj as EditAtlasType
                 if (editAtlasType != EditAtlasType.Textures) {
-                    checkbox("pack importés", ::showLevelAtlas)
                     functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                         if (!showLevelAtlas) {
                             combo("dossier", ::packFolderIndex, PCGame.gameAtlas.map { it.key.name() })
@@ -381,17 +384,17 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                                         atlas.regions.sortedBy { it.name }.forEach { region ->
                                             if (imageButton(region.texture.textureObjectHandle, imgBtnSize, Vec2(region.u, region.v), Vec2(region.u2, region.v2))) {
                                                 data.elementAtOrNull(atlasIndex)?.apply {
-                                                    if (regionIndex in this.regions.indices) {
-                                                        this.regions[regionIndex] = atlasPath.toFileWrapper() to region.name
+                                                    if (selectRegionIndex in this.regions.indices) {
+                                                        this.regions[selectRegionIndex] = atlasPath.toFileWrapper() to region.name
                                                         updateAtlas()
                                                     }
                                                 }
                                             }
 
-                                            sumImgsWidth += imgBtnSize.x + 15f
+                                            sumImgsWidth += imgBtnSize.x + style.itemInnerSpacing.x * 2f
 
-                                            if (sumImgsWidth + imgBtnSize.x + 15f < editWindowWidth)
-                                                sameLine()
+                                            if (sumImgsWidth + imgBtnSize.x + style.itemInnerSpacing.x * 2f < editWindowWidth)
+                                                sameLine(0f, style.itemInnerSpacing.x)
                                             else
                                                 sumImgsWidth = 0f
                                         }
@@ -409,10 +412,10 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                                             }
                                         }
 
-                                        sumImgsWidth += imgBtnSize.x + 15f
+                                        sumImgsWidth += imgBtnSize.x + style.itemInnerSpacing.x * 2f
 
-                                        if (sumImgsWidth + imgBtnSize.x + 15f < editWindowWidth)
-                                            sameLine()
+                                        if (sumImgsWidth + imgBtnSize.x + style.itemInnerSpacing.x * 2f < editWindowWidth)
+                                            sameLine(0f, style.itemInnerSpacing.x)
                                         else
                                             sumImgsWidth = 0f
                                     }
@@ -428,17 +431,17 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
 
                         if (imageButton(texture.textureObjectHandle, imgBtnSize, uv1 = Vec2(1))) {
                             data.elementAtOrNull(atlasIndex)?.apply {
-                                if (regionIndex in this.regions.indices) {
-                                    this.regions[regionIndex] = it.toFileWrapper() to textureIdentifier
+                                if (selectRegionIndex in this.regions.indices) {
+                                    this.regions[selectRegionIndex] = it.toFileWrapper() to textureIdentifier
                                     updateAtlas()
                                 }
                             }
                         }
 
-                        sumImgsWidth += imgBtnSize.x + 15f
+                        sumImgsWidth += imgBtnSize.x + style.itemInnerSpacing.x * 2f
 
-                        if (sumImgsWidth + imgBtnSize.x + 15f < editWindowWidth)
-                            sameLine()
+                        if (sumImgsWidth + imgBtnSize.x + style.itemInnerSpacing.x * 2f < editWindowWidth)
+                            sameLine(0f, style.itemInnerSpacing.x)
                         else
                             sumImgsWidth = 0f
                     }

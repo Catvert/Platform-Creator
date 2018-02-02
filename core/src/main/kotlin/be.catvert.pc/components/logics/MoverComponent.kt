@@ -5,7 +5,6 @@ import be.catvert.pc.GameObjectState
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
 import be.catvert.pc.actions.MoveAction
-import be.catvert.pc.actions.PhysicsAction
 import be.catvert.pc.components.Component
 import be.catvert.pc.components.RequiredComponent
 import be.catvert.pc.containers.GameObjectContainer
@@ -13,8 +12,6 @@ import be.catvert.pc.containers.GameObjectMatrixContainer
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.fasterxml.jackson.annotation.JsonCreator
-import kotlin.math.roundToInt
-
 /**
  * Component permettant d'ajouter la possibilité à un gameObject de se déplacer automatiquement dans une direction.
  * Si le gameObject rencontre un obstacle, il ira dans la direction opposé
@@ -45,7 +42,10 @@ class MoverComponent(@ExposeEditor(max = 100f) var moveSpeedX: Int, @ExposeEdito
 
         state.getComponent<PhysicsComponent>()?.apply {
             onCollisionWith.register {
-                if(it.side != BoxSide.Up || !holdGameObjects)
+
+                if(moveSpeedX != 0 && (it.side == BoxSide.Left || it.side == BoxSide.Right))
+                    reverse()
+                else if(moveSpeedY != 0 && ((it.side == BoxSide.Up || !holdGameObjects) || it.side == BoxSide.Down))
                     reverse()
             }
         }
@@ -54,7 +54,7 @@ class MoverComponent(@ExposeEditor(max = 100f) var moveSpeedX: Int, @ExposeEdito
     override fun update() {
         val physicsComp = gameObject.getCurrentState().getComponent<PhysicsComponent>()
 
-        physicsComp?.tryMove(if(reverse) (-moveSpeedX * Gdx.graphics.deltaTime * 60f).roundToInt() else (moveSpeedX * Gdx.graphics.deltaTime * 60f).roundToInt(), if(reverse) (-moveSpeedY * Gdx.graphics.deltaTime * 60f).roundToInt() else (-moveSpeedY * Gdx.graphics.deltaTime * 60f).roundToInt(), gameObject)
+        physicsComp?.move(if(reverse) (-moveSpeedX * Gdx.graphics.deltaTime * 60f) else (moveSpeedX * Gdx.graphics.deltaTime * 60f), if(reverse) (-moveSpeedY * Gdx.graphics.deltaTime * 60f) else (-moveSpeedY * Gdx.graphics.deltaTime * 60f), gameObject)
 
         if (holdGameObjects) {
             physicsComp?.apply {
@@ -65,7 +65,7 @@ class MoverComponent(@ExposeEditor(max = 100f) var moveSpeedX: Int, @ExposeEdito
         }
 
         gameObject.container.cast<GameObjectMatrixContainer>()?.matrixRect?.also {
-            if(gameObject.position().x == 0 || gameObject.box.right() == it.right() || gameObject.box.top() == it.top())
+            if(gameObject.position().x == 0f || gameObject.box.right() == it.right() || gameObject.box.top() == it.top())
                 reverse()
         }
     }

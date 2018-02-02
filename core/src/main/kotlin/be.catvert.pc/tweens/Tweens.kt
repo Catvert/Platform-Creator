@@ -93,13 +93,13 @@ class MoveTween(duration: Float = 0f, var moveX: Int = 0, var moveY: Int = 0) : 
     override fun init(gameObject: GameObject) {
         super.init(gameObject)
 
-        initialPosX = gameObject.position().x.toFloat()
-        initialPosY = gameObject.position().y.toFloat()
+        initialPosX = gameObject.position().x
+        initialPosY = gameObject.position().y
     }
 
     override fun perform(gameObject: GameObject) {
-        gameObject.box.position = Point(interpolation.apply(initialPosX, initialPosX + moveX, progress).roundToInt(),
-                interpolation.apply(initialPosY, initialPosY + moveY, progress).roundToInt())
+        gameObject.box.position = Point(interpolation.apply(initialPosX, initialPosX + moveX, progress),
+                interpolation.apply(initialPosY, initialPosY + moveY, progress))
     }
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {

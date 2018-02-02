@@ -18,10 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import glm_.func.common.clamp
 import glm_.vec2.Vec2
 import glm_.vec4.Vec4
-import imgui.Cond
-import imgui.ImGui
-import imgui.ItemFlags
-import imgui.functionalProgramming
+import imgui.*
 import uno.kotlin.isPrintable
 import kotlin.math.roundToInt
 import kotlin.reflect.KMutableProperty0
@@ -37,10 +34,10 @@ object ImguiHelper {
     fun <T : Any> addImguiWidgetsArray(label: String, array: ArrayList<T>, itemLabel: (item: T) -> String, createItem: () -> T, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI, itemExposeEditor: ExposeEditor = ExposeEditorFactory.empty, endBlock: () -> Unit = {}) {
         addImguiWidgetsArray(label, array, itemLabel, createItem, {
             addImguiWidget(itemLabel(it.obj), it, gameObject, level, itemExposeEditor, editorSceneUI)
-        }, editorSceneUI, endBlock)
+        }, endBlock)
     }
 
-    fun <T : Any> addImguiWidgetsArray(label: String, array: ArrayList<T>, itemLabel: (item: T) -> String, createItem: () -> T, itemBlock: (item: Item<T>) -> Unit, editorSceneUI: EditorScene.EditorSceneUI, endBlock: () -> Unit = {}) {
+    fun <T : Any> addImguiWidgetsArray(label: String, array: ArrayList<T>, itemLabel: (item: T) -> String, createItem: () -> T, itemBlock: (item: Item<T>) -> Unit, endBlock: () -> Unit = {}) {
         with(ImGui) {
             for (index in 0 until array.size) {
                 pushId("remove $index")
@@ -207,8 +204,10 @@ object ImguiHelper {
         var comboChanged = false
 
         with(ImGui) {
+            val imgSize = Vec2(Context.fontSize)
+
             pushItemFlag(ItemFlags.Disabled.i, settingsBtnDisabled)
-            if (imageButton(settingsBtnIconHandle, Vec2(13f, 13f), uv1 = Vec2(1, 1))) {
+            if (imageButton(settingsBtnIconHandle, imgSize, uv1 = Vec2(1, 1))) {
                 openPopup(popupTitle)
             }
             popItemFlag()
@@ -216,8 +215,9 @@ object ImguiHelper {
             if (settingsBtnDisabled)
                 onSettingsBtnDisabled()
 
-            sameLine()
-            functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth - 29f) {
+            sameLine(0f, Context.style.itemInnerSpacing.x)
+
+            functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth - imgSize.x - Context.style.itemInnerSpacing.x * 3f) {
                 if (combo(label, currentItem, items))
                     comboChanged = true
             }
@@ -285,8 +285,8 @@ object ImguiHelper {
 
     fun point(point: KMutableProperty0<Point>, minPoint: Point, maxPoint: Point, editorSceneUI: EditorScene.EditorSceneUI) {
         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-            val pos = intArrayOf(point.get().x, point.get().y)
-            if (ImGui.inputInt2("position", pos, 0)) {
+            val pos = floatArrayOf(point.get().x, point.get().y)
+            if (ImGui.inputFloat2("position", pos, 0)) {
                 val x = pos[0]
                 val y = pos[1]
 
@@ -344,13 +344,21 @@ object ImguiHelper {
         }
     }
 
+    fun enumWithSettingsButton(label: String, enum: Item<Enum<*>>, popupBlock: () -> Unit, settingsBtnDisabled: Boolean = false, onSettingsBtnDisabled: () -> Unit = {}) {
+        val enumConstants = enum.obj.javaClass.enumConstants
+        val selectedIndex = intArrayOf(enumConstants.indexOfFirst { it == enum.obj })
+
+        if(ImguiHelper.comboWithSettingsButton(label, selectedIndex, enumConstants.map { (it as Enum<*>).name }, popupBlock, settingsBtnDisabled, onSettingsBtnDisabled))
+            enum.obj = enumConstants[selectedIndex[0]]
+    }
+
     fun enum(label: String, enum: Item<Enum<*>>) {
         val enumConstants = enum.obj.javaClass.enumConstants
         val selectedIndex = intArrayOf(enumConstants.indexOfFirst { it == enum.obj })
 
         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
             if (ImGui.combo(label, selectedIndex, enumConstants.map { (it as Enum<*>).name })) {
-                enum.obj = enumConstants[selectedIndex[0]] as Enum<*>
+                enum.obj = enumConstants[selectedIndex[0]]
             }
         }
     }

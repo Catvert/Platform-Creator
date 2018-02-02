@@ -21,7 +21,7 @@ class TeleportAction(var teleportPoint: Point) : Action(), CustomEditorImpl {
     }
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        ImguiHelper.point(::teleportPoint, Point(), Point(level.matrixRect.width, level.matrixRect.height), editorSceneUI)
+        ImguiHelper.point(::teleportPoint, Point(), Point(level.matrixRect.width.toFloat(), level.matrixRect.height.toFloat()), editorSceneUI)
     }
 
     override fun toString() = super.toString() + " - $teleportPoint"

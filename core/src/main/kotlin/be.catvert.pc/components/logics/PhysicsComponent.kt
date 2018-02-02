@@ -11,10 +11,11 @@ import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
+import glm_.func.common.clamp
+import glm_.min
 import imgui.functionalProgramming
 import kotlin.math.roundToInt
 
@@ -36,7 +37,6 @@ private data class JumpData(var isJumping: Boolean = false, var targetHeight: In
  * Listener lors d'une collision avec une autre entité pour le mask correspondant
  */
 data class CollisionListener(val gameObject: GameObject, val collideGameObject: GameObject, val side: BoxSide)
-
 
 
 data class CollisionAction(@ExposeEditor var side: BoxSide = BoxSide.Left, @ExposeEditor(customType = CustomType.TAG_STRING) var target: GameObjectTag = Tags.Player.tag, @ExposeEditor var action: Action = EmptyAction(), @ExposeEditor(customType = CustomType.NO_CHECK_COMPS_GO) var collideAction: Action = EmptyAction())
@@ -100,14 +100,14 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
     /**
      * Vitesse de la gravité, représente aussi la vitesse de saut (inversé)
      */
-    private val gravitySpeed = 15
+    private val gravitySpeed = 15f
 
-    private var level: Level? = null
+    private lateinit var level: Level
 
     override fun onStateActive(gameObject: GameObject, state: GameObjectState, container: GameObjectContainer) {
         super.onStateActive(gameObject, state, container)
 
-        level = container.cast()
+        level = container.cast()!!
     }
 
     override fun update() {
@@ -130,26 +130,26 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                     if (!jumpData.isJumping) {
                         if (it != PhysicsActions.FORCE_JUMP) {
                             //  On vérifie si le gameObject est sur le sol
-                            if (!collideOnMove(0, -1, gameObject)) {
+                            if (checkMove(0f, -1f, gameObject).none { it.second == BoxSide.Down }) {
                                 return@actions
                             }
                         }
                         jumpData.isJumping = true
-                        jumpData.targetHeight = gameObject.box.y + jumpHeight
+                        jumpData.targetHeight = gameObject.box.y.roundToInt() + jumpHeight
 
                         gravity = false
 
-                        moveSpeedY = gravitySpeed.toFloat()
+                        moveSpeedY = gravitySpeed
                         addJumpAfterClear = true
 
                         onJumpAction(gameObject)
                     } else {
                         // Vérifie si le go est arrivé à la bonne hauteur de saut ou s'il rencontre un obstacle au dessus de lui
-                        if (gameObject.box.y >= jumpData.targetHeight || collideOnMove(0, gravitySpeed, gameObject)) {
+                        if (gameObject.box.y >= jumpData.targetHeight || checkMove(0f, gravitySpeed, gameObject).any { it.second == BoxSide.Up } || gameObject.box.top() == level.matrixRect.top()) {
                             gravity = true
                             jumpData.isJumping = false
                         } else {
-                            moveSpeedY = gravitySpeed.toFloat()
+                            moveSpeedY = gravitySpeed
                             addJumpAfterClear = true
                         }
                     }
@@ -170,117 +170,113 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
 
         val lastPos = Point(gameObject.position())
 
-        tryMove((moveSpeedX * Gdx.graphics.deltaTime * 60f).roundToInt(), (moveSpeedY * Gdx.graphics.deltaTime * 60f).roundToInt(), gameObject)
+        move(moveSpeedX * Gdx.graphics.deltaTime * 60f, moveSpeedY * Gdx.graphics.deltaTime * 60f, gameObject)
 
-        if (gameObject.position() == lastPos)
+        if (gameObject.position().x.equalsEpsilon(lastPos.x, Constants.physicsEpsilon) && gameObject.position().y.equalsEpsilon(lastPos.y, Constants.physicsEpsilon))
             onNothingAction(gameObject)
 
         if (addJumpAfterClear)
             physicsActions += PhysicsActions.JUMP
     }
 
-    /**
-     * Permet d'essayer le déplacement physique d'un gameObject si il ne rencontre aucun obstacle
-     */
-        fun tryMove(moveX: Int, moveY: Int, gameObject: GameObject) {
-            if (moveX != 0 || moveY != 0) {
-            var newMoveX = moveX
-            var newMoveY = moveY
+    fun move(moveX: Float, moveY: Float, gameObject: GameObject) {
+        val moveXCollides = checkMove(moveX, 0f, gameObject)
+        val moveYCollides = checkMove(0f, moveY, gameObject)
 
-            if (!collideOnMove(moveX, 0, gameObject)) {
-                gameObject.box.x += moveX
+        val targetPos = Point((gameObject.position().x + moveX).clamp(level.matrixRect.left(), level.matrixRect.right() - gameObject.box.width), (gameObject.position().y + moveY).min(level.matrixRect.top() - gameObject.box.height))
 
-                if (gameObject.box.x != 0 && moveX < 0)
-                    onLeftAction(gameObject)
-                else if (gameObject.box.x != level?.matrixRect?.width?.minus(gameObject.box.width) && moveX > 0)
-                    onRightAction(gameObject)
-                newMoveX = 0
+        gameObject.box.position = targetPos
+
+        if(moveXCollides.isEmpty()) {
+            if(gameObject.box.left() != level.matrixRect.left() && moveX < Constants.physicsEpsilon)
+                onLeftAction(gameObject)
+            else if(gameObject.box.right() != level.matrixRect.right() && moveX > Constants.physicsEpsilon)
+                onRightAction(gameObject)
+        }
+
+        if(moveYCollides.isEmpty()) {
+            if(moveY < Constants.physicsEpsilon)
+                onDownAction(gameObject)
+            else if(moveY > Constants.physicsEpsilon)
+                onUpAction(gameObject)
+        }
+
+        moveXCollides.forEach {
+            when (it.second) {
+                BoxSide.Left -> gameObject.box.x = it.first.box.right()
+                BoxSide.Right -> gameObject.box.x = it.first.box.left() - gameObject.box.width
+                else -> {}
             }
-            if (!collideOnMove(0, moveY, gameObject)) {
-                gameObject.box.y += moveY
+            triggerCollisionEvent(gameObject, it.first, it.second)
+        }
 
-                if (moveY < 0)
-                    onDownAction(gameObject)
-                else if (moveY > 0)
-                    onUpAction(gameObject)
-
-                newMoveY = 0
+        moveYCollides.forEach {
+            when (it.second) {
+                BoxSide.Up -> gameObject.box.y = it.first.box.bottom() - gameObject.box.height
+                BoxSide.Down -> gameObject.box.y = it.first.box.top()
+                else -> {}
             }
-
-            if (newMoveX > 0)
-                newMoveX -= 1
-            else if (newMoveX < 0)
-                newMoveX += 1
-
-            if (newMoveY > 0)
-                newMoveY -= 1
-            else if (newMoveY < 0)
-                newMoveY += 1
-            tryMove(newMoveX, newMoveY, gameObject)
+            triggerCollisionEvent(gameObject, it.first, it.second)
         }
     }
 
-    /**
-     * Permet de tester si un déplacement physique est possible ou non
-     */
-    private fun collideOnMove(moveX: Int, moveY: Int, gameObject: GameObject): Boolean {
-        val newRect = Rect(gameObject.box)
-        newRect.position = Point(newRect.x + moveX, newRect.y + moveY)
-
-        if (level?.matrixRect?.contains(newRect, true) == false && newRect.y > 0)
-            return true
-
-        level?.apply {
-            this.getAllGameObjectsInCells(newRect).filter { filter ->
-                filter !== gameObject && filter.getCurrentState().hasComponent<PhysicsComponent>() && let {
-                    filter.getCurrentState().getComponent<PhysicsComponent>()?.apply {
-                        return@let ignoreTags.contains(gameObject.tag) == false
-                                && if (isPlatform) {
-                            gameObject.position().y >= filter.position().y + filter.size().height
-                        } else true
-                    }
-                    true
-                }
-            }.forEach {
-                        if (newRect.overlaps(it.box)) {
-                            val side = when {
-                                moveX > 0 -> BoxSide.Right
-                                moveX < 0 -> BoxSide.Left
-                                moveY > 0 -> BoxSide.Up
-                                moveY < 0 -> BoxSide.Down
-                                else -> {
-                                    Log.warn { "Collision invalide !" }
-                                    BoxSide.All
-                                }
-                            }
-
-                            gameObject.getCurrentState().getComponent<PhysicsComponent>()?.apply {
-                                this.collisionsActions.firstOrNull { collisionAction -> (collisionAction.side == side || collisionAction.side == BoxSide.All) && collisionAction.target == it.tag }?.apply {
-                                    action(gameObject)
-                                    collideAction(it)
-                                }
-                                onCollisionWith.invoke(CollisionListener(gameObject, it, side))
-                            }
-
-                            it.getCurrentState().getComponent<PhysicsComponent>()?.apply {
-                                this.collisionsActions.firstOrNull { collisionAction -> (collisionAction.side == -side || collisionAction.side == BoxSide.All) && collisionAction.target == gameObject.tag }?.apply {
-                                    action(it)
-                                    collideAction(gameObject)
-                                }
-                                onCollisionWith.invoke(CollisionListener(it, gameObject, -side))
-                            }
-
-                            return true
-                        }
-                    }
+    private fun triggerCollisionEvent(gameObject: GameObject, collideGameObject: GameObject, side: BoxSide) {
+        gameObject.getCurrentState().getComponent<PhysicsComponent>()?.apply {
+            this.collisionsActions.firstOrNull { collisionAction -> (collisionAction.side == side || collisionAction.side == BoxSide.All) && collisionAction.target == collideGameObject.tag }?.apply {
+                action(gameObject)
+                collideAction(collideGameObject)
+            }
+            onCollisionWith.invoke(CollisionListener(gameObject, collideGameObject, side))
         }
-        return false
+
+        collideGameObject.getCurrentState().getComponent<PhysicsComponent>()?.apply {
+            this.collisionsActions.firstOrNull { collisionAction -> (collisionAction.side == -side || collisionAction.side == BoxSide.All) && collisionAction.target == gameObject.tag }?.apply {
+                action(collideGameObject)
+                collideAction(gameObject)
+            }
+            onCollisionWith.invoke(CollisionListener(collideGameObject, gameObject, -side))
+        }
+    }
+
+    private fun checkMove(moveX: Float, moveY: Float, gameObject: GameObject): Set<Pair<GameObject, BoxSide>> {
+        val collideGameObjects = mutableSetOf<Pair<GameObject, BoxSide>>()
+
+        val newRect = Rect(gameObject.box).apply { move(moveX, moveY) }
+
+        level.getAllGameObjectsInCells(newRect).filter { filter ->
+            filter !== gameObject && filter.getCurrentState().hasComponent<PhysicsComponent>() && let {
+                filter.getCurrentState().getComponent<PhysicsComponent>()?.apply {
+                    return@let ignoreTags.contains(gameObject.tag) == false
+                            && if (isPlatform) {
+                        gameObject.position().y >= filter.position().y + filter.size().height
+                    } else true
+                }
+                true
+            }
+        }.forEach {
+                    if (newRect.overlaps(it.box)) {
+                        val side = when {
+                            moveX > 0 -> BoxSide.Right
+                            moveX < 0 -> BoxSide.Left
+                            moveY > 0 -> BoxSide.Up
+                            moveY < 0 -> BoxSide.Down
+                            else -> {
+                                BoxSide.All
+                            }
+                        }
+
+                        collideGameObjects += it to side
+                    }
+                }
+
+
+        return collideGameObjects
     }
 
     fun getCollisionsGameObjectOnSide(gameObject: GameObject, boxSide: BoxSide): Set<GameObject> {
         val collideGameObjects = mutableSetOf<GameObject>()
 
-        level?.getAllGameObjectsInCells(gameObject.box)?.filter { it !== gameObject }?.forEach {
+        level.getAllGameObjectsInCells(gameObject.box).filter { it !== gameObject }.forEach {
             when (boxSide) {
                 BoxSide.Left -> {
                     if (it.box.right() == gameObject.box.x) {
