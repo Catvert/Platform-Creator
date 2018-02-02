@@ -192,6 +192,10 @@ class EditorScene(val level: Level) : Scene(level.background) {
     init {
         gameObjectContainer.allowUpdatingGO = false
         level.updateCamera(camera, false)
+
+        // Permet de décaler le viewport vers le bas pour afficher la totalité du niveau avec la barre de menu.
+        viewport.screenHeight -= (Context.fontBaseSize + Context.style.framePadding.y * 2f).roundToInt()
+        viewport.apply()
     }
 
     override fun postBatchRender() {
@@ -369,8 +373,8 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
             val mousePosVec2 = Vector2(Gdx.input.x.toFloat(), Gdx.input.y.toFloat())
             val mousePos = mousePosVec2.toPoint()
-            val mousePosInWorld = camera.unproject(Vector3(mousePosVec2, 0f)).toPoint()
-            val latestMousePosInWorld = camera.unproject(Vector3(latestMousePos.x, latestMousePos.y, 0f)).toPoint()
+            val mousePosInWorld = viewport.unproject(Vector3(mousePosVec2, 0f)).toPoint()
+            val latestMousePosInWorld = viewport.unproject(Vector3(latestMousePos.x, latestMousePos.y, 0f)).toPoint()
 
             when (editorSceneUI.editorMode) {
                 EditorSceneUI.EditorMode.NO_MODE -> {

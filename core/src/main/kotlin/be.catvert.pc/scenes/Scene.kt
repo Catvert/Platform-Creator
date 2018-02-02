@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.viewport.StretchViewport
+import gli_.view
 import imgui.ImGui
 import ktx.actors.alpha
 import ktx.app.use
