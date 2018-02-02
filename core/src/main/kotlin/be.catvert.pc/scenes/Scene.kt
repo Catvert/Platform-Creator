@@ -24,7 +24,7 @@ import ktx.app.use
 abstract class Scene(protected var background: Background) : Renderable, Updeatable, Resizable, Disposable {
     protected val camera = OrthographicCamera()
 
-    protected val viewport = StretchViewport(Constants.viewportRatioWidth, Constants.viewportRatioHeight, camera)
+    public val viewport = StretchViewport(Constants.viewportRatioWidth, Constants.viewportRatioHeight, camera)
 
     protected val stage = Stage(viewport)
 

@@ -20,31 +20,31 @@ object TweenSystem : Updeatable {
                 if (atlas != null)
                     addComponent(atlas)
             }
-            gameObject.setState(state)
+            gameObject.setState(state, false)
         }
     }
 
     override fun update() {
-        val it = tweens.iterator()
-        while (it.hasNext()) {
-            val keyValue = it.next()
+        val list = mutableListOf(*tweens.toTypedArray())
 
-            val gameObject = keyValue.first
-            val (tween, backupStateIndex) = keyValue.second
+        list.forEach {
+            val gameObject = it.first
+            val (tween, backupStateIndex) = it.second
 
             if (tween.update(gameObject)) {
                 if (tween.endAction !is RemoveGOAction) // TODO workaround?
-                    gameObject.setState(backupStateIndex)
+                    gameObject.setState(backupStateIndex, false)
 
                 tween.endAction.invoke(gameObject)
 
                 val nextTween = tween.nextTween
 
+                tweens.remove(it)
+
                 if (nextTween != null) {
-                    gameObject.setState(backupStateIndex)
+                    gameObject.setState(backupStateIndex, false)
+
                     startTween(nextTween, gameObject)
-                } else {
-                    it.remove()
                 }
             }
         }

@@ -27,6 +27,7 @@ import com.badlogic.gdx.math.Vector3
 import glm_.func.common.clamp
 import glm_.func.common.min
 import glm_.vec2.Vec2
+import glm_.vec4.Vec4
 import imgui.*
 import imgui.functionalProgramming.mainMenuBar
 import imgui.functionalProgramming.menu
@@ -267,7 +268,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                     val rect = selectGameObject!!.box
 
                     shapeRenderer.withColor(Color.RED) {
-                        circle(rect.right(), rect.top(), if(selectGameObjectMode == SelectGOMode.DIAGONALE_RESIZE) 12f else 10f)
+                        circle(rect.right(), rect.top(), if (selectGameObjectMode == SelectGOMode.DIAGONALE_RESIZE) 12f else 10f)
                     }
                 }
             }
@@ -277,7 +278,8 @@ class EditorScene(val level: Level) : Scene(level.background) {
                 selectGameObjects.forEach { go ->
                     val rect: Rect? = if (gridMode.active && selectGameObjects.size == 1) {
                         val pos = if (go === selectGameObject) Point(mousePosInWorld.x, mousePosInWorld.y) else Point(mousePosInWorld.x + (go.position().x - (selectGameObject?.position()?.x
-                                ?: 0f)), mousePosInWorld.y + (go.position().y - (selectGameObject?.position()?.y ?: 0f)))
+                                ?: 0f)), mousePosInWorld.y + (go.position().y - (selectGameObject?.position()?.y
+                                ?: 0f)))
                         gridMode.getRectCellOf(level.activeRect, pos)
                     } else {
                         val pos = if (go === selectGameObject) Point(mousePosInWorld.x - go.size().width / 2, mousePosInWorld.y - go.size().height / 2) else Point(mousePosInWorld.x + (go.position().x - (selectGameObject?.let { it.position().x + it.size().width / 2 }
@@ -324,21 +326,6 @@ class EditorScene(val level: Level) : Scene(level.background) {
             }
         }
         shapeRenderer.end()
-
-        PCGame.mainBatch.use {
-            it.projectionMatrix = PCGame.defaultProjection
-            with(editorFont) {
-                if (editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL) {
-                    draw(it, "Layer sélectionné : $selectLayer", 10f, Gdx.graphics.height - lineHeight * 2)
-                    draw(it, "Resize mode : ${resizeGameObjectMode.name}", 10f, Gdx.graphics.height - lineHeight * 4)
-                    draw(it, "Mode de l'éditeur : ${editorSceneUI.editorMode.name}", 10f, Gdx.graphics.height - lineHeight * 5)
-                } else {
-                    draw(it, "Test du niveau..", 10f, Gdx.graphics.height - lineHeight * 2)
-                }
-                draw(it, "Nombre d'entités : ${gameObjectContainer.getGameObjectsData().size}", 10f, Gdx.graphics.height - lineHeight * 3)
-            }
-            it.projectionMatrix = camera.combined
-        }
     }
 
     override fun update() {
@@ -518,8 +505,8 @@ class EditorScene(val level: Level) : Scene(level.background) {
                                     var deltaX = latestMousePosInWorld.x - mousePosInWorld.x
                                     var deltaY = latestMousePosInWorld.y - mousePosInWorld.y
 
-                                    if(resizeGameObjectMode == ResizeMode.PROPORTIONAL) {
-                                        if(Math.abs(deltaX) > Math.abs(deltaY))
+                                    if (resizeGameObjectMode == ResizeMode.PROPORTIONAL) {
+                                        if (Math.abs(deltaX) > Math.abs(deltaY))
                                             deltaY = deltaX
                                         else
                                             deltaX = deltaY
@@ -544,22 +531,22 @@ class EditorScene(val level: Level) : Scene(level.background) {
                                 selectGameObjectMode = SelectGOMode.DIAGONALE_RESIZE
                             }
                         // Horizontal right resize
-                            mousePosInWorld.x in selectGORect.right() - 1 .. selectGORect.right() + 1 && mousePosInWorld.y in selectGORect.y..selectGORect.top() -> {
+                            mousePosInWorld.x in selectGORect.right() - 1..selectGORect.right() + 1 && mousePosInWorld.y in selectGORect.y..selectGORect.top() -> {
                                 selectGameObjectMode = SelectGOMode.HORIZONTAL_RESIZE_RIGHT
                                 Gdx.graphics.setSystemCursor(Cursor.SystemCursor.HorizontalResize)
                             }
                         // Horizontal left resize
-                            mousePosInWorld.x in selectGORect.left() - 1 .. selectGORect.left() + 1 && mousePosInWorld.y in selectGORect.y..selectGORect.top() -> {
+                            mousePosInWorld.x in selectGORect.left() - 1..selectGORect.left() + 1 && mousePosInWorld.y in selectGORect.y..selectGORect.top() -> {
                                 selectGameObjectMode = SelectGOMode.HORIZONTAL_RESIZE_LEFT
                                 Gdx.graphics.setSystemCursor(Cursor.SystemCursor.HorizontalResize)
                             }
                         // Vertical top resize
-                            mousePosInWorld.y in selectGORect.top() - 1 .. selectGORect.top() + 1 && mousePosInWorld.x in selectGORect.x..selectGORect.right() -> {
+                            mousePosInWorld.y in selectGORect.top() - 1..selectGORect.top() + 1 && mousePosInWorld.x in selectGORect.x..selectGORect.right() -> {
                                 selectGameObjectMode = SelectGOMode.VERTICAL_RESIZE_TOP
                                 Gdx.graphics.setSystemCursor(Cursor.SystemCursor.VerticalResize)
                             }
                         // Vertical bottom resize
-                            mousePosInWorld.y in selectGORect.bottom() - 1 .. selectGORect.bottom() + 1 && mousePosInWorld.x in selectGORect.x..selectGORect.right() -> {
+                            mousePosInWorld.y in selectGORect.bottom() - 1..selectGORect.bottom() + 1 && mousePosInWorld.x in selectGORect.x..selectGORect.right() -> {
                                 selectGameObjectMode = SelectGOMode.VERTICAL_RESIZE_BOTTOM
                                 Gdx.graphics.setSystemCursor(Cursor.SystemCursor.VerticalResize)
                             }
@@ -804,7 +791,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
         if (editorSceneUI.editorMode == EditorSceneUI.EditorMode.TRY_LEVEL) {
             gameObjectContainer.cast<Level>()?.updateCamera(camera, true)
-        } else if(!isUIHover) {
+        } else if (!isUIHover) {
             if (Gdx.input.isKeyPressed(GameKeys.EDITOR_CAMERA_LEFT.key))
                 moveCameraX -= cameraMoveSpeed
             if (Gdx.input.isKeyPressed(GameKeys.EDITOR_CAMERA_RIGHT.key))
@@ -926,6 +913,8 @@ class EditorScene(val level: Level) : Scene(level.background) {
         with(ImGui) {
             drawMainMenuBar()
 
+            drawInfoEditorWindow()
+
             if (editorSceneUI.showGameObjectsWindow && editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL)
                 drawGameObjectsWindow()
 
@@ -959,6 +948,28 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
             if (editorSceneUI.showExitWindow) {
                 drawExitWindow()
+            }
+        }
+    }
+
+    private fun drawInfoEditorWindow() {
+        with(ImGui) {
+            setNextWindowPos(Vec2(10f, 10f + (Context.fontBaseSize + Context.style.framePadding.y * 2f).roundToInt()), Cond.Once)
+            functionalProgramming.withWindow("editor info", null, WindowFlags.AlwaysAutoResize.i or WindowFlags.NoTitleBar.i or WindowFlags.NoBringToFrontOnFocus.i) {
+                ImguiHelper.textPropertyColored(Color.ORANGE, "Nombre d'entités :", gameObjectContainer.getGameObjectsData().size)
+
+                if (editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL) {
+                    ImguiHelper.textPropertyColored(Color.ORANGE, "Layer sélectionné :", selectLayer)
+                    ImguiHelper.textPropertyColored(Color.ORANGE, "Resize mode :", resizeGameObjectMode.name)
+                    ImguiHelper.textPropertyColored(Color.ORANGE, "Mode de l'éditeur :", editorSceneUI.editorMode.name)
+
+                    functionalProgramming.collapsingHeader("Paramètres de l'éditeur") {
+                        checkbox("Afficher la fenêtre Game objects", editorSceneUI::showGameObjectsWindow)
+                        checkbox("Afficher la grille", gridMode::active)
+                    }
+                } else {
+                    ImguiHelper.textColored(Color.ORANGE, "Test du niveau..")
+                }
             }
         }
     }
@@ -1147,7 +1158,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
                 ImguiHelper.comboWithSettingsButton("type", editorSceneUI::gameObjectsTypeIndex, level.tags.apply { remove(Tags.Empty.tag) }, {
                     val tag = tags.elementAtOrElse(editorSceneUI.gameObjectsTypeIndex, { Tags.Sprite.tag })
-                    checkbox(if(tag == Tags.Sprite.tag) "pack importés" else "afficher les préfabs créé", editorSceneUI::gameObjectsShowUser)
+                    checkbox(if (tag == Tags.Sprite.tag) "pack importés" else "afficher les préfabs créé", editorSceneUI::gameObjectsShowUser)
                 })
 
                 val tag = tags.elementAtOrElse(editorSceneUI.gameObjectsTypeIndex, { Tags.Sprite.tag })
@@ -1197,7 +1208,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                     }
                     else -> {
                         var index = 0
-                        val prefabs = if(editorSceneUI.gameObjectsShowUser) level.resourcesPrefabs() else PrefabFactory.values().map { it.prefab }
+                        val prefabs = if (editorSceneUI.gameObjectsShowUser) level.resourcesPrefabs() else PrefabFactory.values().map { it.prefab }
                         prefabs.filter { it.prefabGO.tag == tag }.forEach {
                             it.prefabGO.loadResources()
 
@@ -1329,11 +1340,11 @@ class EditorScene(val level: Level) : Scene(level.background) {
                     val componentClass = components[editorSceneUI.gameObjectAddComponentComboIndex].component
 
                     val description = componentClass.findAnnotation<Description>()
-                    if(description != null) {
+                    if (description != null) {
                         sameLine()
                         text("(?)")
 
-                        if(isMouseHoveringRect(itemRectMin, itemRectMax)) {
+                        if (isMouseHoveringRect(itemRectMin, itemRectMax)) {
                             functionalProgramming.withTooltip {
                                 text(description.description)
                             }

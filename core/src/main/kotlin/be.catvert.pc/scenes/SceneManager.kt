@@ -93,6 +93,7 @@ class SceneManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Dis
 
         ImGui.style.alpha = currentScene.alpha
         batch.setColor(1f, 1f, 1f, currentScene.alpha)
+        currentScene.viewport.apply()
         currentScene.render(batch)
 
         ImGui.render()
@@ -102,6 +103,7 @@ class SceneManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Dis
 
             ImGui.style.alpha = scene.alpha
             batch.setColor(1f, 1f, 1f, scene.alpha)
+            scene.viewport.apply()
             scene.render(batch)
 
             ImGui.render()

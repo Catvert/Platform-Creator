@@ -6,6 +6,7 @@ import be.catvert.pc.scenes.EditorScene
 import com.fasterxml.jackson.annotation.JsonIgnore
 import imgui.ImGui
 import imgui.functionalProgramming
+import kotlin.math.roundToInt
 
 class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
     constructor(x: Float, y: Float, width: Int, height: Int) : this(Point(x, y), Size(width, height))
@@ -97,5 +98,5 @@ class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
         return super.equals(other)
     }
 
-    override fun toString(): String = "{ x: $x y: $y width: $width height: $height }"
+    override fun toString(): String = "{ x: ${x.roundToInt()} y: ${y.roundToInt()} width: $width height: $height }"
 }

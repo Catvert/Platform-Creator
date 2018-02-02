@@ -187,6 +187,8 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
                     ImGui.styleColorsDark()
                 else
                     ImGui.styleColorsLight()
+
+                ImGui.style.alpha = 0.5f
             }
 
         val availableLocales = mutableListOf<Locale>(Locale.FRENCH)

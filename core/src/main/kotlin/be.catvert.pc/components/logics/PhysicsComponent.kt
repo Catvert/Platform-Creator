@@ -160,7 +160,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         physicsActions.clear()
 
         // Si le déplacement est de type "fluide", on applique une interpolation linéaire à la vitesse à appliquer au gameObject
-        if (movementType == MovementType.SMOOTH) {
+        if (movementType != MovementType.SMOOTH) {
             moveSpeedX = MathUtils.lerp(actualMoveSpeedX, moveSpeedX, 0.2f)
             moveSpeedY = MathUtils.lerp(actualMoveSpeedY, moveSpeedY, 0.2f)
         }
@@ -185,9 +185,9 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
 
         val targetPos = Point((gameObject.position().x + moveX).clamp(level.matrixRect.left(), level.matrixRect.right() - gameObject.box.width), (gameObject.position().y + moveY).min(level.matrixRect.top() - gameObject.box.height))
 
-        gameObject.box.position = targetPos
-
         if(moveXCollides.isEmpty()) {
+            gameObject.box.x = targetPos.x
+
             if(gameObject.box.left() != level.matrixRect.left() && moveX < Constants.physicsEpsilon)
                 onLeftAction(gameObject)
             else if(gameObject.box.right() != level.matrixRect.right() && moveX > Constants.physicsEpsilon)
@@ -195,6 +195,8 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         }
 
         if(moveYCollides.isEmpty()) {
+            gameObject.box.y = targetPos.y
+
             if(moveY < Constants.physicsEpsilon)
                 onDownAction(gameObject)
             else if(moveY > Constants.physicsEpsilon)
@@ -261,7 +263,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                             moveY > 0 -> BoxSide.Up
                             moveY < 0 -> BoxSide.Down
                             else -> {
-                                BoxSide.All
+                                return@forEach
                             }
                         }
 
@@ -269,7 +271,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                     }
                 }
 
-
+        println(collideGameObjects.size)
         return collideGameObjects
     }
 
@@ -277,7 +279,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         val collideGameObjects = mutableSetOf<GameObject>()
 
         level.getAllGameObjectsInCells(gameObject.box).filter { it !== gameObject }.forEach {
-            when (boxSide) {
+            when (boxSide) { // TODO epsilon?
                 BoxSide.Left -> {
                     if (it.box.right() == gameObject.box.x) {
                         collideGameObjects += it

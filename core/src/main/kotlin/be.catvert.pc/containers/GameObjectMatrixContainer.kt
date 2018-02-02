@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonIgnore
 import glm_.func.common.clamp
+import glm_.min
 import kotlin.math.roundToInt
 
 abstract class GameObjectMatrixContainer : GameObjectContainer() {
@@ -122,8 +123,8 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
 
         if (followGameObject != null && allowUpdatingGO) {
             activeRect.position = Point(
-                    Math.abs((followGameObject!!.box.center().x.roundToInt().toFloat() - activeRect.width / 2).clamp(matrixRect.left(), matrixRect.right() - activeRect.width)),
-                    Math.abs((followGameObject!!.box.center().y.roundToInt().toFloat() - activeRect.height / 2).clamp(matrixRect.bottom(), matrixRect.top() - activeRect.height)))
+                   (followGameObject!!.box.center().x.roundToInt().toFloat() - activeRect.width / 2).clamp(matrixRect.left(), (matrixRect.right() - activeRect.width).min(0f)),
+                    ((followGameObject!!.box.center().y.roundToInt().toFloat() - activeRect.height / 2).clamp(matrixRect.bottom(), (matrixRect.top() - activeRect.height)).min(0f)))
         }
 
         super.update()

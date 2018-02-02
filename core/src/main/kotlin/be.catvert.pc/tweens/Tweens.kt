@@ -60,7 +60,6 @@ abstract class Tween(var duration: Float = 1f, var interpolationName: String) : 
             }
             ImguiHelper.action("end action", ::endAction, gameObject, level, editorSceneUI)
 
-            checkbox("tween state", ::useTweenState)
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                 if (combo("interpolation", ::currentInterpolationIndex, interpolations.map { it.component1() })) {
                     val (name, interp) = interpolations.entries.elementAt(currentInterpolationIndex)
@@ -68,6 +67,7 @@ abstract class Tween(var duration: Float = 1f, var interpolationName: String) : 
                     interpolation = interp
                 }
             }
+            checkbox("tween state", ::useTweenState)
         }
     }
 

@@ -25,7 +25,7 @@ class StateAction(var stateIndex: Int, var usePreviousMoverDirection: Boolean = 
             val previousMover = gameObject.getCurrentState().getComponent<MoverComponent>()!!
             gameObject.getStateOrDefault(stateIndex).getComponent<MoverComponent>()?.reverse = previousMover.reverse
         }
-        gameObject.setState(stateIndex)
+        gameObject.setState(stateIndex, true)
     }
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {

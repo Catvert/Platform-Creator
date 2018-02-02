@@ -46,8 +46,6 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
         set(value) {
             if (value in states.indices) {
                 field = value
-                if (container != null)
-                    states.elementAt(value).toggleActive(container!!)
             }
         }
 
@@ -70,7 +68,7 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
             field = value
             if (value != null) {
                 states.forEach { it.onAddToContainer(this) }
-                setState(initialState)
+                setState(initialState, true)
             }
         }
 
@@ -108,9 +106,11 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
         states.remove(states.elementAt(stateIndex))
     }
 
-    fun setState(stateIndex: Int) {
+    fun setState(stateIndex: Int, triggerStartAction: Boolean) {
         if (stateIndex in states.indices) {
             currentState = stateIndex
+
+            getCurrentState().toggleActive(container!!, triggerStartAction)
         }
     }
 
@@ -132,7 +132,7 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
         with(ImGui) {
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                 if (combo("State initial", ::initialState, getStates().map { it.name }))
-                    currentState = initialState
+                    setState(initialState, false)
             }
         }
     }

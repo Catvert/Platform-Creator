@@ -29,7 +29,7 @@ class TweenAction(var tween: Tween) : Action(), CustomEditorImpl {
     private var addTweenComboIndex = 0
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         fun addBtnAddTween(currentTween: Tween?, counter: Int) {
-            var openPopup = false // TODO bug?
+            var openPopup = false
             functionalProgramming.withId("tween add btn $counter") {
                 if (ImGui.button("->", Vec2(20f, -1))) {
                     openPopup = true
