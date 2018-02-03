@@ -1,7 +1,5 @@
 package be.catvert.pc.utility
 
-import com.badlogic.gdx.Gdx
-
 /**
  * Permet d'effectuer une action à chaque interval du chronomètre.
  */
@@ -13,7 +11,7 @@ class Timer(var interval: Float) : Updeatable {
     val onIncrement = Signal<Int>()
 
     override fun update() {
-        timerDelta += Gdx.graphics.deltaTime
+        timerDelta += Utility.getDeltaTime()
         if (timerDelta >= interval) {
             ++timer
             timerDelta = 0f

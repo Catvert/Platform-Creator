@@ -12,24 +12,15 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.math.Interpolation
-import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Matrix4
-import com.badlogic.gdx.physics.box2d.Box2D
-import com.badlogic.gdx.physics.box2d.World
 import com.kotcrab.vis.ui.VisUI
 import glm_.c
-import imgui.DEBUG
-import imgui.FontConfig
-import imgui.ImGui
+import imgui.*
 import imgui.impl.LwjglGL3
 import ktx.app.KtxApplicationAdapter
-import ktx.box2d.createWorld
-import ktx.box2d.earthGravity
 import uno.glfw.GlfwWindow
 import java.util.*
 import kotlin.collections.set
-import kotlin.math.roundToInt
 
 
 /** [com.badlogic.gdx.ApplicationListener, implementation shared by all platforms.  */
@@ -40,7 +31,7 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         LwjglGL3.init(GlfwWindow((Gdx.graphics as Lwjgl3Graphics).window.windowHandle), false)
 
         val fontBytes = Constants.imguiFontPath.readBytes()
-        imgui.IO.fonts.addFontFromMemoryTTF(CharArray(fontBytes.size, { fontBytes[it].c }), 19f, FontConfig(), glyphRanges = imgui.IO.fonts.glyphRangesDefault)
+        imguiDefaultFont = imgui.IO.fonts.addFontFromMemoryTTF(CharArray(fontBytes.size, { fontBytes[it].c }), 19f, FontConfig(), glyphRanges = imgui.IO.fonts.glyphRangesDefault)
     }
 
     override fun create() {
@@ -95,8 +86,6 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         gameSounds = Utility.getFilesRecursivly(Constants.soundsDirPath, *Constants.levelSoundExtension)
 
         initializeUI()
-
-        Box2D.init()
 
         sceneManager = SceneManager(MainMenuScene())
     }
@@ -168,6 +157,9 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         lateinit var mainFont: BitmapFont
             private set
 
+        lateinit var imguiDefaultFont: Font
+        lateinit var imguiBigFont: Font
+
         lateinit var defaultProjection: Matrix4
             private set
 
@@ -194,7 +186,12 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
                 else
                     ImGui.styleColorsLight()
 
-                ImGui.style.alpha = 0.5f
+                ImGui.pushStyleColor(Col.WindowBg, ImGui.getStyleColorVec4(Col.WindowBg).apply { a = 0.9f })
+                ImGui.pushStyleColor(Col.PopupBg, ImGui.getStyleColorVec4(Col.PopupBg).apply { a = 0.9f })
+                ImGui.pushStyleColor(Col.TitleBg, ImGui.getStyleColorVec4(Col.TitleBg).apply { a = 0.8f })
+                ImGui.pushStyleColor(Col.TitleBgActive, ImGui.getStyleColorVec4(Col.TitleBgActive).apply { a = 0.8f })
+                ImGui.pushStyleColor(Col.TitleBgCollapsed, ImGui.getStyleColorVec4(Col.TitleBgCollapsed).apply { a = 0.8f })
+                ImGui.pushStyleVar(StyleVar.FrameRounding, 3f)
             }
 
         val availableLocales = mutableListOf<Locale>(Locale.FRENCH)

@@ -5,7 +5,7 @@ import be.catvert.pc.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.CustomEditorImpl
 import be.catvert.pc.utility.Description
-import be.catvert.pc.utility.ImguiHelper
+import be.catvert.pc.utility.ImGuiHelper
 import be.catvert.pc.utility.Point
 import com.fasterxml.jackson.annotation.JsonCreator
 
@@ -21,7 +21,7 @@ class TeleportAction(var teleportPoint: Point) : Action(), CustomEditorImpl {
     }
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        ImguiHelper.point(::teleportPoint, Point(), Point(level.matrixRect.width.toFloat(), level.matrixRect.height.toFloat()), editorSceneUI)
+        ImGuiHelper.point(::teleportPoint, Point(), Point(level.matrixRect.width.toFloat(), level.matrixRect.height.toFloat()), editorSceneUI)
     }
 
     override fun toString() = super.toString() + " - $teleportPoint"

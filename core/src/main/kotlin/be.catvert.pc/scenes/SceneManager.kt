@@ -2,7 +2,6 @@ package be.catvert.pc.scenes
 
 import be.catvert.pc.Log
 import be.catvert.pc.utility.*
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.utils.Disposable
@@ -61,7 +60,7 @@ class SceneManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Dis
         if (nextScene != null && isTransitionRunning) {
             val (nextScene, _, disposeCurrentScene) = nextScene!!
 
-            elapsedTime += Gdx.graphics.deltaTime
+            elapsedTime += Utility.getDeltaTime()
             val progress = Math.min(1f, elapsedTime / 1f)
 
             currentScene.alpha = interpolation.apply(1f, 0f, progress)

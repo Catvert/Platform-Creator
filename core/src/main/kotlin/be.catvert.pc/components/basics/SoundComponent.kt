@@ -41,9 +41,9 @@ class SoundComponent(var sounds: ArrayList<SoundData>) : Component(), ResourceLo
 
                 val index = intArrayOf(soundsResources.indexOf(soundFile.get()))
                 functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                    checkbox("Sons importés", ::levelResources)
-
-                    if (combo("son", index, soundsResources.map { it.nameWithoutExtension() })) {
+                    if(ImGuiHelper.comboWithSettingsButton("son", index, soundsResources.map { it.nameWithoutExtension() }, {
+                                checkbox("sons importés", ::levelResources)
+                            })) {
                         soundFile = soundsResources[index[0]].toFileWrapper()
                     }
                 }
@@ -64,14 +64,14 @@ class SoundComponent(var sounds: ArrayList<SoundData>) : Component(), ResourceLo
     }
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        ImguiHelper.addImguiWidgetsArray("sons", sounds, { it.toString() }, { SoundData(Constants.defaultSoundPath.toFileWrapper()) }, gameObject, level, editorSceneUI)
+        ImGuiHelper.addImguiWidgetsArray("sons", sounds, { it.toString() }, { SoundData(Constants.defaultSoundPath.toFileWrapper()) }, gameObject, level, editorSceneUI)
     }
 
     override fun insertText() {
-        ImguiHelper.textColored(Color.RED, "<-->")
+        ImGuiHelper.textColored(Color.RED, "<-->")
         sounds.forEach {
-            ImguiHelper.textPropertyColored(Color.ORANGE, "sound :", it.soundFile.get().nameWithoutExtension())
+            ImGuiHelper.textPropertyColored(Color.ORANGE, "sound :", it.soundFile.get().nameWithoutExtension())
         }
-        ImguiHelper.textColored(Color.RED, "<-->")
+        ImGuiHelper.textColored(Color.RED, "<-->")
     }
 }

@@ -12,7 +12,7 @@ import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.CustomEditorImpl
 import be.catvert.pc.utility.CustomEditorTextImpl
 import be.catvert.pc.utility.Description
-import be.catvert.pc.utility.ImguiHelper
+import be.catvert.pc.utility.ImGuiHelper
 import com.badlogic.gdx.graphics.Color
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -66,17 +66,17 @@ class LifeComponent(onDeathAction: Action, lifePointActions: ArrayList<Action> =
     }
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        ImguiHelper.addImguiWidgetsArray("life actions", lpActions, { "vie ${lpActions.indexOf(it) + 1}" }, { EmptyAction() }, gameObject, level, editorSceneUI)
+        ImGuiHelper.addImguiWidgetsArray("life actions", lpActions, { "vie ${lpActions.indexOf(it) + 1}" }, { EmptyAction() }, gameObject, level, editorSceneUI)
     }
 
     override fun insertText() {
-        ImguiHelper.textPropertyColored(Color.ORANGE, "point de vie actuel :", lifePoint.toString())
+        ImGuiHelper.textPropertyColored(Color.ORANGE, "point de vie actuel :", lifePoint.toString())
 
         lpActions.forEachIndexed { index, it ->
-            ImguiHelper.textColored(Color.RED, "<-->")
-            ImguiHelper.textPropertyColored(Color.ORANGE, "point de vie :", index + 1)
-            ImguiHelper.textPropertyColored(Color.ORANGE, "action :", it)
-            ImguiHelper.textColored(Color.RED, "<-->")
+            ImGuiHelper.textColored(Color.RED, "<-->")
+            ImGuiHelper.textPropertyColored(Color.ORANGE, "point de vie :", index + 1)
+            ImGuiHelper.textPropertyColored(Color.ORANGE, "action :", it)
+            ImGuiHelper.textColored(Color.RED, "<-->")
         }
     }
 }

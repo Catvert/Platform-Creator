@@ -6,7 +6,7 @@ import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.CustomEditorImpl
 import be.catvert.pc.utility.CustomEditorTextImpl
 import be.catvert.pc.utility.Description
-import be.catvert.pc.utility.ImguiHelper
+import be.catvert.pc.utility.ImGuiHelper
 import com.badlogic.gdx.graphics.Color
 import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
@@ -27,16 +27,16 @@ class MultiplexerAction(var actions: ArrayList<Action>) : Action(), CustomEditor
     }
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        ImguiHelper.addImguiWidgetsArray(label, actions, { "action" }, { EmptyAction() }, gameObject, level, editorSceneUI)
+        ImGuiHelper.addImguiWidgetsArray(label, actions, { "action" }, { EmptyAction() }, gameObject, level, editorSceneUI)
     }
 
     override fun insertText() {
         ImGui.text(super.toString())
         actions.forEach {
             functionalProgramming.withIndent {
-                ImguiHelper.textColored(Color.RED, "<-->")
-                ImguiHelper.textPropertyColored(Color.ORANGE, "action :", it)
-                ImguiHelper.textColored(Color.RED, "<-->")
+                ImGuiHelper.textColored(Color.RED, "<-->")
+                ImGuiHelper.textPropertyColored(Color.ORANGE, "action :", it)
+                ImGuiHelper.textColored(Color.RED, "<-->")
             }
         }
     }

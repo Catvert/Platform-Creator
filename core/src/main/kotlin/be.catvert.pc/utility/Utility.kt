@@ -1,5 +1,6 @@
 package be.catvert.pc.utility
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
@@ -29,7 +30,7 @@ fun Batch.draw(textureRegion: TextureRegion, rect: Rect, flipX: Boolean = false,
         textureRegion.flip(false, true)
     }
 
-    this.draw(textureRegion, rect.x, rect.y, rect.width / 2f, rect.height / 2f, rect.width.toFloat(), rect.height.toFloat(), 1f, 1f, rotation)
+    this.draw(textureRegion, rect.x.roundToInt().toFloat(), rect.y.roundToInt().toFloat(), rect.width / 2f, rect.height / 2f, rect.width.toFloat(), rect.height.toFloat(), 1f, 1f, rotation)
 }
 
 fun ShapeRenderer.rect(rect: Rect) = this.rect(rect.x, rect.y, rect.width.toFloat(), rect.height.toFloat())
@@ -78,6 +79,8 @@ object Utility {
         }
         return files
     }
+
+    fun getDeltaTime() = Math.min(Gdx.graphics.deltaTime, 0.25f)
 }
 
 object ReflectionUtility {

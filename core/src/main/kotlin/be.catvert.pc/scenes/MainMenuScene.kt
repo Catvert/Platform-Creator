@@ -7,13 +7,12 @@ import be.catvert.pc.PCGame.Companion.soundVolume
 import be.catvert.pc.containers.Level
 import be.catvert.pc.i18n.MenusText
 import be.catvert.pc.utility.Constants
-import be.catvert.pc.utility.ImguiHelper
+import be.catvert.pc.utility.ImGuiHelper
 import be.catvert.pc.utility.PCInputProcessor
 import be.catvert.pc.utility.Size
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.files.FileHandle
-import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.kotcrab.vis.ui.widget.VisList
@@ -56,9 +55,25 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
     override fun render(batch: Batch) {
         super.render(batch)
         drawUI()
+
+        /* with(ImGui) {
+             ImGui.pushStyleColor(Col.WindowBg, ImGui.getStyleColorVec4(Col.WindowBg).apply { a = 0f })
+             ImGui.pushStyleColor(Col.Button, Vec4(0.2f, 0.5f, 0.9f, 1f))
+             ImGui.pushStyleColor(Col.Text, Vec4(1f, 1f, 1f, 1f))
+
+             ImGuiHelper.withCenteredWindow("main menu", null, Vec2(300f, 125f), WindowFlags.NoTitleBar.i or WindowFlags.NoMove.i or WindowFlags.NoResize.i) {
+                     button("Jouer", Vec2(-1, 0))
+                     cursorPosY += 10
+                     button("Options", Vec2(-1, 0))
+                     cursorPosY += 10
+                     button("Quitter", Vec2(-1, 0))
+             }
+
+             ImGui.popStyleColor(3)
+         }*/
     }
 
-    //region UI
+//region UI
 
     private fun showMainMenu() {
         stage + table {
@@ -276,7 +291,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
     private val settingsCurrentLocaleIndex = intArrayOf(PCGame.availableLocales.indexOf(PCGame.locale))
     private fun drawSettingsWindow() {
         with(ImGui) {
-            ImguiHelper.withCenteredWindow(MenusText.MM_SETTINGS_WINDOW_TITLE(), ::showSettingsWindow, Vec2(385f, 395f), WindowFlags.NoResize.i) {
+            ImGuiHelper.withCenteredWindow(MenusText.MM_SETTINGS_WINDOW_TITLE(), ::showSettingsWindow, Vec2(385f, 400f), WindowFlags.NoResize.i) {
                 functionalProgramming.withGroup {
                     functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                         sliderFloat(MenusText.MM_SETTINGS_SOUND(), ::soundVolume, 0f, 1f, "%.1f")
@@ -303,10 +318,12 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
                         }
                     }
                     if (button(MenusText.MM_SETTINGS_APPLY(), Vec2(-1, 0))) {
+                        /* TODO Bug imgui crash
                         if (settingsFullscreen[0])
                             Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
                         else
                             Gdx.graphics.setWindowedMode(settingsWindowSize[0], settingsWindowSize[1])
+                            */
                     }
                 }
 

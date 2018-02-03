@@ -6,11 +6,11 @@ import be.catvert.pc.components.Component
 import be.catvert.pc.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.*
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
+import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 import glm_.vec2.Vec2
@@ -75,6 +75,8 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                 if (::animation.isInitialized)
                     animation.frameDuration = value
             }
+        var repeatRegion: Boolean = false
+        var repeatRegionSize = Size(50, 50)
 
         private lateinit var animation: Animation<TextureAtlas.AtlasRegion>
 
@@ -88,9 +90,17 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
              * Si le nombre de région est <= à 1, il n'y a pas besoin de mettre à jour le temps écoulé car de toute façon une seule région sera dessinée.
              */
             if (regions.size > 1)
-                stateTime += Gdx.graphics.deltaTime
+                stateTime += Utility.getDeltaTime()
 
-            batch.draw(currentKeyFrame(), gameObject.box, flipX, flipY, rotation.degree)
+            val frame = currentKeyFrame()
+            if (repeatRegion && regions.size == 1) {
+                for (x in 0 until MathUtils.floor(gameObject.box.width / repeatRegionSize.width.toFloat())) {
+                    for (y in 0 until MathUtils.floor(gameObject.box.height / repeatRegionSize.height.toFloat())) {
+                        batch.draw(frame, gameObject.box.x + x * repeatRegionSize.width, gameObject.box.y + y * repeatRegionSize.height, repeatRegionSize.width.toFloat(), repeatRegionSize.height.toFloat())
+                    }
+                }
+            } else
+                batch.draw(frame, gameObject.box, flipX, flipY, rotation.degree)
         }
 
         fun currentKeyFrame(): TextureAtlas.AtlasRegion = animation.getKeyFrame(stateTime)
@@ -195,7 +205,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
         Pack, Animations, Textures
     }
 
-    private var editAtlasType: ImguiHelper.Item<Enum<*>> = ImguiHelper.Item(EditAtlasType.Pack)
+    private var editAtlasType: ImGuiHelper.Item<Enum<*>> = ImGuiHelper.Item(EditAtlasType.Pack)
     private var packFolderIndex = 0
     private var atlasIndex = 0
     private var selectRegionIndex = 0
@@ -235,9 +245,10 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                 } else if (atlasIndex in data.indices) {
                     var openAddAtlasPopup = false
 
-                    ImguiHelper.comboWithSettingsButton("atlas", ::atlasIndex, data.map { it.name }, {
+                    ImGuiHelper.comboWithSettingsButton("atlas", ::atlasIndex, data.map { it.name }, {
                         pushItemFlag(ItemFlags.Disabled.i, data.isEmpty())
-                        if(button("Supprimer ${data.elementAtOrNull(atlasIndex)?.name?: ""}", Vec2(Constants.defaultWidgetsWidth, 0f))) {
+                        if (button("Supprimer ${data.elementAtOrNull(atlasIndex)?.name
+                                        ?: ""}", Vec2(Constants.defaultWidgetsWidth, 0f))) {
                             data.removeAt(atlasIndex)
                             atlasIndex = let {
                                 if (atlasIndex > 0)
@@ -248,12 +259,12 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                         }
                         popItemFlag()
 
-                        if(button("Nouveau atlas", Vec2(Constants.defaultWidgetsWidth, 0f))) {
+                        if (button("Nouveau atlas", Vec2(Constants.defaultWidgetsWidth, 0f))) {
                             openAddAtlasPopup = true
                         }
                     })
 
-                    if(openAddAtlasPopup)
+                    if (openAddAtlasPopup)
                         openPopup(addAtlasTitle)
 
                     separator()
@@ -269,7 +280,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                                 itRegions.add(AtlasData.emptyRegionIdentifier.toLocalFile().toFileWrapper() to AtlasData.emptyRegionIdentifier)
                         }
 
-                        while(itRegions.hasNext()) {
+                        while (itRegions.hasNext()) {
                             val it = itRegions.next()
 
                             val region = AtlasComponent.AtlasData.loadRegion(it)
@@ -319,9 +330,14 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                                 sliderFloat("Vitesse", ::frameDuration, 0f, 1f)
                             }
-                            val playModeItem = ImguiHelper.Item(animationPlayMode)
-                            ImguiHelper.enum("play mode", playModeItem.cast())
+                            val playModeItem = ImGuiHelper.Item(animationPlayMode)
+                            ImGuiHelper.enum("play mode", playModeItem.cast())
                             animationPlayMode = playModeItem.obj
+                        } else if (this.regions.size == 1) {
+                            checkbox("repeat region", ::repeatRegion)
+                            if (repeatRegion) {
+                                ImGuiHelper.size(::repeatRegionSize, Size(1), Size(Constants.maxGameObjectSize))
+                            }
                         }
 
                         separator()
@@ -343,7 +359,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
                 }
 
                 functionalProgramming.popupModal(addAtlasTitle, extraFlags = WindowFlags.AlwaysAutoResize.i) {
-                    ImguiHelper.inputText("nom", ::addAtlasName)
+                    ImGuiHelper.inputText("nom", ::addAtlasName)
                     if (button("Ajouter", Vec2(-1, 0))) {
                         data.add(AtlasData(addAtlasName).apply { updateAtlas() })
                         closeCurrentPopup()
@@ -360,7 +376,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
             ressourcesCollapsing = false
             functionalProgramming.collapsingHeader("ressources") {
                 ressourcesCollapsing = true
-                ImguiHelper.enumWithSettingsButton("type", editAtlasType, {
+                ImGuiHelper.enumWithSettingsButton("type", editAtlasType, {
                     checkbox("ressources importées", ::showLevelAtlas)
                 })
 
@@ -487,17 +503,17 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
     }
 
     override fun insertText() {
-        ImguiHelper.textPropertyColored(Color.ORANGE, "atlas actuel :", data.elementAtOrNull(currentIndex)?.name ?: "/")
-        ImguiHelper.textPropertyColored(Color.OLIVE, "alpha :", alpha)
+        ImGuiHelper.textPropertyColored(Color.ORANGE, "atlas actuel :", data.elementAtOrNull(currentIndex)?.name ?: "/")
+        ImGuiHelper.textPropertyColored(Color.OLIVE, "alpha :", alpha)
         data.forEach {
-            ImguiHelper.textColored(Color.RED, "<-->")
-            ImguiHelper.textPropertyColored(Color.ORANGE, "nom :", it.name)
+            ImGuiHelper.textColored(Color.RED, "<-->")
+            ImGuiHelper.textPropertyColored(Color.ORANGE, "nom :", it.name)
             if (it.regions.size > 1)
-                ImguiHelper.textPropertyColored(Color.ORANGE, "anim mode :", it.animationPlayMode.toString())
+                ImGuiHelper.textPropertyColored(Color.ORANGE, "anim mode :", it.animationPlayMode.toString())
             it.regions.forEach {
-                ImguiHelper.textPropertyColored(Color.ORANGE, " - ${it.first.get().nameWithoutExtension()} ->", it.second)
+                ImGuiHelper.textPropertyColored(Color.ORANGE, " - ${it.first.get().nameWithoutExtension()} ->", it.second)
             }
-            ImguiHelper.textColored(Color.RED, "<-->")
+            ImGuiHelper.textColored(Color.RED, "<-->")
         }
     }
 }

@@ -5,7 +5,6 @@ import be.catvert.pc.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import com.fasterxml.jackson.annotation.JsonIgnore
 import imgui.ImGui
-import imgui.functionalProgramming
 import kotlin.math.roundToInt
 
 class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
@@ -56,7 +55,7 @@ class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
     fun bottom() = y
     fun top() = y + height
 
-    fun center() = Point(x + width / 2, y + height / 2)
+    fun center() = Point(x + width / 2f, y + height / 2f)
 
     fun set(size: Size, position: Point) {
         this.size = size
@@ -79,16 +78,26 @@ class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
 
     fun contains(point: Point) = this.x <= point.x && this.right() >= point.x && this.y <= point.y && this.top() >= point.y
 
-    fun overlaps(rect: Rect) = this.x < rect.right() && this.right() > rect.x && this.y < rect.top() && this.top() > rect.y
+    fun overlaps(rect: Rect) = this.left() < rect.right() && this.right() > rect.left() && this.bottom() < rect.top() && this.top() > rect.bottom()
+
+    fun merge(rect: Rect): Rect {
+        val minX = Math.min(x, rect.x)
+        val maxX = Math.max(x + width, rect.x + rect.width)
+        val x = minX
+        val width = maxX - minX
+
+        val minY = Math.min(y, rect.y)
+        val maxY = Math.max(y + height, rect.y + rect.height)
+        val y = minY
+        val height = maxY - minY
+
+        return Rect(x, y, width.roundToInt(), height.roundToInt())
+    }
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         with(ImGui) {
-            if (collapsingHeader(label)) {
-                functionalProgramming.withIndent {
-                    ImguiHelper.point(::position, Point(), Point(level.matrixRect.width.toFloat() - this@Rect.width, level.matrixRect.height.toFloat() - this@Rect.height), editorSceneUI)
-                    ImguiHelper.addImguiWidget("taille", ::size, gameObject, level, ExposeEditorFactory.createExposeEditor(max = Constants.maxGameObjectSize.toFloat()), editorSceneUI)
-                }
-            }
+            ImGuiHelper.point(::position, Point(), Point(level.matrixRect.width.toFloat() - this@Rect.width, level.matrixRect.height.toFloat() - this@Rect.height), editorSceneUI)
+            ImGuiHelper.size(::size, Size(1), Size(Constants.maxGameObjectSize))
         }
     }
 

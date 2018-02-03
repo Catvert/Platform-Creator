@@ -4,7 +4,7 @@ import be.catvert.pc.GameKeys
 import be.catvert.pc.PCGame
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
-import be.catvert.pc.utility.ImguiHelper
+import be.catvert.pc.utility.ImGuiHelper
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -32,7 +32,7 @@ class GameScene(private val level: Level) : Scene(level.background) {
 
         with(ImGui) {
             if (pause) {
-                ImguiHelper.withCenteredWindow("Pause", null, Vec2(200, 100), WindowFlags.NoResize.i or WindowFlags.NoCollapse.i) {
+                ImGuiHelper.withCenteredWindow("Pause", null, Vec2(200, 100), WindowFlags.NoResize.i or WindowFlags.NoCollapse.i) {
                     if (button("Reprendre", Vec2(-1, 0))) {
                         pause = false
                         gameObjectContainer.allowUpdatingGO = true

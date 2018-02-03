@@ -2,12 +2,12 @@ package be.catvert.pc.factories
 
 import be.catvert.pc.*
 import be.catvert.pc.actions.*
+import be.catvert.pc.components.basics.SoundComponent
 import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.components.graphics.AtlasRegion
 import be.catvert.pc.components.logics.*
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.graphics.g2d.Animation
-import be.catvert.pc.components.basics.SoundComponent
 
 enum class PrefabType {
     All, Kenney, SMC
@@ -39,7 +39,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     ),
     EndLevel(PrefabType.All,
             Prefab("end level", GameObject(Tags.Special.tag, box = Rect(size = Size(20, 20)), initDefaultState = {
-                this += SensorComponent(SensorComponent.SensorData(Tags.Player.tag, LevelAction(LevelAction.LevelActions.SUCCESS_EXIT)))
+                this += SensorComponent(SensorComponent.TagSensorData(Tags.Player.tag, LevelAction(LevelAction.LevelActions.SUCCESS_EXIT)))
             }))
     ),
     //region Kenney
@@ -58,11 +58,11 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         AtlasComponent.AtlasData("fall", atlas to "alienGreen_swim_1"))
 
                 this += InputComponent(
-                        InputComponent.InputData(GameKeys.GAME_PLAYER_LEFT.key, false, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_LEFT), RenderAction(RenderAction.RenderActions.FLIP_X))),
-                        InputComponent.InputData(GameKeys.GAME_PLAYER_RIGHT.key, false, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_RIGHT), RenderAction(RenderAction.RenderActions.UNFLIP_X))),
-                        InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_UP.key, false, PhysicsAction(PhysicsAction.PhysicsActions.GO_UP)),
-                        InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_DOWN.key, false, PhysicsAction(PhysicsAction.PhysicsActions.GO_DOWN)),
-                        InputComponent.InputData(GameKeys.GAME_PLAYER_JUMP.key, true, PhysicsAction(PhysicsAction.PhysicsActions.JUMP))
+                        InputComponent.InputData(GameKeys.GAME_PLAYER_LEFT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_LEFT), RenderAction(RenderAction.RenderActions.FLIP_X))),
+                        InputComponent.InputData(GameKeys.GAME_PLAYER_RIGHT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_RIGHT), RenderAction(RenderAction.RenderActions.UNFLIP_X))),
+                        InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_UP.key, true, PhysicsAction(PhysicsAction.PhysicsActions.GO_UP)),
+                        InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_DOWN.key, true, PhysicsAction(PhysicsAction.PhysicsActions.GO_DOWN)),
+                        InputComponent.InputData(GameKeys.GAME_PLAYER_JUMP.key, false, PhysicsAction(PhysicsAction.PhysicsActions.JUMP))
                 )
 
                 this += PhysicsComponent(false, 10, MovementType.SMOOTH, jumpHeight = 200).apply {
@@ -121,7 +121,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
             Prefab("gold coin", GameObject(Tags.Special.tag, box = Rect(size = Size(35, 35)), initDefaultState = {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.packsKenneyDirPath.child("jumper.atlas").toFileWrapper() to "coin_gold"))
                 this += SoundComponent(SoundComponent.SoundData(Constants.soundsDirPath.child("coin.wav").toFileWrapper()))
-                this += SensorComponent(SensorComponent.SensorData(sensorIn = MultiplexerAction(SoundAction(0), ScoreAction(1), TweenAction(TweenFactory.RemoveGO()))))
+                this += SensorComponent(SensorComponent.TagSensorData(sensorIn = MultiplexerAction(SoundAction(0), ScoreAction(1), TweenAction(TweenFactory.RemoveGO()))))
             }))
     ),
     //endregion
@@ -141,11 +141,11 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         AtlasComponent.AtlasData("fall", atlas to "big/fall_right"))
 
                 this += InputComponent(
-                        InputComponent.InputData(GameKeys.GAME_PLAYER_LEFT.key, false, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_LEFT), RenderAction(RenderAction.RenderActions.FLIP_X))),
-                        InputComponent.InputData(GameKeys.GAME_PLAYER_RIGHT.key, false, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_RIGHT), RenderAction(RenderAction.RenderActions.UNFLIP_X))),
-                        InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_UP.key, false, PhysicsAction(PhysicsAction.PhysicsActions.GO_UP)),
-                        InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_DOWN.key, false, PhysicsAction(PhysicsAction.PhysicsActions.GO_DOWN)),
-                        InputComponent.InputData(GameKeys.GAME_PLAYER_JUMP.key, true, PhysicsAction(PhysicsAction.PhysicsActions.JUMP))
+                        InputComponent.InputData(GameKeys.GAME_PLAYER_LEFT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_LEFT), RenderAction(RenderAction.RenderActions.FLIP_X))),
+                        InputComponent.InputData(GameKeys.GAME_PLAYER_RIGHT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_RIGHT), RenderAction(RenderAction.RenderActions.UNFLIP_X))),
+                        InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_UP.key, true, PhysicsAction(PhysicsAction.PhysicsActions.GO_UP)),
+                        InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_DOWN.key, true, PhysicsAction(PhysicsAction.PhysicsActions.GO_DOWN)),
+                        InputComponent.InputData(GameKeys.GAME_PLAYER_JUMP.key, false, PhysicsAction(PhysicsAction.PhysicsActions.JUMP))
                 )
 
                 this += PhysicsComponent(false, 10, MovementType.SMOOTH, jumpHeight = 200).apply {

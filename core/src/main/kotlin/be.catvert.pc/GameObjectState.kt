@@ -42,7 +42,7 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
     fun toggleActive(container: GameObjectContainer, triggerStartAction: Boolean) {
         components.forEach { it.onStateActive(gameObject, this, container) }
 
-        if(triggerStartAction)
+        if (triggerStartAction)
             startAction(gameObject)
     }
 

@@ -138,7 +138,7 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
     }
 
     override fun insertText() {
-        ImguiHelper.textColored(Color.ORANGE, name)
-        ImguiHelper.textPropertyColored(Color.CORAL, "state actuel :", getCurrentState().name)
+        ImGuiHelper.textColored(Color.ORANGE, name)
+        ImGuiHelper.textPropertyColored(Color.CORAL, "state actuel :", getCurrentState().name)
     }
 }

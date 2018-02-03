@@ -6,10 +6,9 @@ import be.catvert.pc.PCGame
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonIgnore
 import glm_.func.common.clamp
-import glm_.min
+import glm_.max
 import kotlin.math.roundToInt
 
 abstract class GameObjectMatrixContainer : GameObjectContainer() {
@@ -108,7 +107,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     fun getActiveGridCells() = activeGridCells.toList()
 
     @JsonIgnore
-    private var drawDebugCells = false
+    var drawDebugCells = false
 
     var followGameObject: GameObject? = null
 
@@ -123,8 +122,8 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
 
         if (followGameObject != null && allowUpdatingGO) {
             activeRect.position = Point(
-                   (followGameObject!!.box.center().x.roundToInt().toFloat() - activeRect.width / 2).clamp(matrixRect.left(), (matrixRect.right() - activeRect.width).min(0f)),
-                    ((followGameObject!!.box.center().y.roundToInt().toFloat() - activeRect.height / 2).clamp(matrixRect.bottom(), (matrixRect.top() - activeRect.height)).min(0f)))
+                    (followGameObject!!.box.center().x.roundToInt().toFloat() - activeRect.width / 2).clamp(matrixRect.left(), (matrixRect.right() - activeRect.width).max(0f)),
+                    ((followGameObject!!.box.center().y.roundToInt().toFloat() - activeRect.height / 2)).clamp(matrixRect.bottom(), (matrixRect.top() - activeRect.height)).max(0f))
         }
 
         super.update()

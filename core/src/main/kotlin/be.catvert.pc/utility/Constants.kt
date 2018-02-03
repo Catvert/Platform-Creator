@@ -24,7 +24,8 @@ object Constants {
 
     const val assetsDir = "assets/"
 
-    const val physicsEpsilon = 0.1f
+    const val physicsEpsilon = 0.2f
+    const val physicsDeltaSpeed = 60f
 
     val serializationType = SerializationFactory.MapperType.JSON
 

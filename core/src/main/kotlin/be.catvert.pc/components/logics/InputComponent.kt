@@ -11,6 +11,9 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Color
 import com.fasterxml.jackson.annotation.JsonCreator
+import glm_.vec2.Vec2
+import imgui.ImGui
+import imgui.functionalProgramming
 
 
 /**
@@ -21,36 +24,46 @@ class InputComponent(var inputs: ArrayList<InputData>) : Component(), Updeatable
     constructor(vararg inputs: InputData) : this(arrayListOf(*inputs))
     @JsonCreator private constructor() : this(arrayListOf())
 
-    data class InputData(var key: Int = Input.Keys.UNKNOWN, @ExposeEditor var justPressed: Boolean = false, @ExposeEditor var action: Action = EmptyAction()) : CustomEditorImpl {
+    data class InputData(var key: Int = Input.Keys.UNKNOWN, var pressed: Boolean = true, @ExposeEditor var action: Action = EmptyAction()) : CustomEditorImpl {
         override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-            ImguiHelper.gdxKey(::key)
+            with(ImGui) {
+                checkbox("", ::pressed)
+                if(ImGui.isItemHovered()) {
+                    functionalProgramming.withTooltip {
+                        text("Pressé en continu")
+                    }
+                }
+                sameLine(0f, style.itemInnerSpacing.x)
+                ImGuiHelper.gdxKey(::key)
+            }
         }
     }
 
     override fun update() {
         inputs.forEach {
-            if (it.justPressed) {
-                if (Gdx.input.isKeyJustPressed(it.key))
+            if (it.pressed) {
+                if (Gdx.input.isKeyPressed(it.key))
                     it.action(gameObject)
             } else {
-                if (Gdx.input.isKeyPressed(it.key))
+                if (Gdx.input.isKeyJustPressed(it.key))
                     it.action(gameObject)
             }
         }
     }
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        ImguiHelper.addImguiWidgetsArray("inputs", inputs, { item -> Input.Keys.toString(item.key) }, { InputData() }, gameObject, level, editorSceneUI)
+        ImGuiHelper.addImguiWidgetsArray("inputs", inputs, { item -> Input.Keys.toString(item.key) }, { InputData() }, gameObject, level, editorSceneUI)
     }
 
     override fun insertText() {
         inputs.forEach {
-            ImguiHelper.textColored(Color.RED, "<-->")
-            ImguiHelper.textPropertyColored(Color.ORANGE, "key :", Input.Keys.toString(it.key))
-            ImguiHelper.textPropertyColored(Color.ORANGE, "action :", it.action)
-            ImguiHelper.textPropertyColored(Color.ORANGE, "just pressed :", it.justPressed)
-            ImguiHelper.textPropertyColored(Color.ORANGE, "pressed :", if (it.justPressed) Gdx.input.isKeyJustPressed(it.key) else Gdx.input.isKeyPressed(it.key))
-            ImguiHelper.textColored(Color.RED, "<-->")
+            ImGuiHelper.textColored(Color.RED, "<-->")
+            ImGuiHelper.textPropertyColored(Color.ORANGE, "key :", Input.Keys.toString(it.key))
+            ImGuiHelper.textPropertyColored(Color.ORANGE, "action :", it.action)
+            ImGuiHelper.textPropertyColored(Color.ORANGE, "pressed :", it.pressed)
+            ImGui.sameLine()
+            ImGuiHelper.textColored(Color.ORANGE, if (it.pressed) Gdx.input.isKeyJustPressed(it.key) else Gdx.input.isKeyPressed(it.key))
+            ImGuiHelper.textColored(Color.RED, "<-->")
         }
     }
 }

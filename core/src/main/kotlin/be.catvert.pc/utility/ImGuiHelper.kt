@@ -2,7 +2,6 @@ package be.catvert.pc.utility
 
 import be.catvert.pc.GameObject
 import be.catvert.pc.GameObjectTag
-import be.catvert.pc.PCGame
 import be.catvert.pc.Prefab
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.Actions
@@ -14,7 +13,6 @@ import be.catvert.pc.scenes.EditorScene
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import glm_.func.common.clamp
 import glm_.vec2.Vec2
 import glm_.vec4.Vec4
@@ -24,7 +22,7 @@ import kotlin.math.roundToInt
 import kotlin.reflect.KMutableProperty0
 import kotlin.reflect.full.findAnnotation
 
-object ImguiHelper {
+object ImGuiHelper {
     class Item<T>(var obj: T) {
         inline fun <reified T : Any> cast() = this as Item<T>
     }
@@ -95,7 +93,9 @@ object ImguiHelper {
                     }
                     is Int -> {
                         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                            sliderInt(label, item.cast<Int>()::obj, exposeEditor.min.roundToInt(), exposeEditor.max.roundToInt())
+                            val item = item.cast<Int>()
+                            inputInt(label, item::obj)
+                            item.obj = item.obj.clamp(exposeEditor.min.roundToInt(), exposeEditor.max.roundToInt())
                         }
                     }
                     is Float -> {
@@ -110,7 +110,7 @@ object ImguiHelper {
                     is String -> {
                         when (exposeEditor.customType) {
                             CustomType.DEFAULT -> {
-                                ImguiHelper.inputText(label, item.cast())
+                                ImGuiHelper.inputText(label, item.cast())
                             }
                             CustomType.TAG_STRING -> {
                                 gameObjectTag(item.cast(), level)
@@ -171,7 +171,7 @@ object ImguiHelper {
                     false
                 }
 
-                if (comboWithSettingsButton(label, index, Actions.values().map {it.name }, {
+                if (comboWithSettingsButton(label, index, Actions.values().map { it.name }, {
                             insertImguiExposeEditorFields(action.obj, gameObject, level, editorSceneUI)
                         }, incorrectAction, {
                             if (isMouseHoveringRect(itemRectMin, itemRectMax)) {
@@ -184,11 +184,11 @@ object ImguiHelper {
                 }
 
                 val description = actionClass.findAnnotation<Description>()
-                if(description != null) {
+                if (description != null) {
                     sameLine()
                     text("(?)")
 
-                    if(isMouseHoveringRect(itemRectMin, itemRectMax)) {
+                    if (isMouseHoveringRect(itemRectMin, itemRectMax)) {
                         functionalProgramming.withTooltip {
                             text(description.description)
                         }
@@ -294,12 +294,19 @@ object ImguiHelper {
                     point.set(Point(x, y))
             }
             ImGui.sameLine()
-            if (ImGui.button("Sélect.")) {
-                editorSceneUI.editorMode = EditorScene.EditorSceneUI.EditorMode.SELECT_POINT
-                editorSceneUI.onSelectPoint.register(true) {
-                    point.set(Point(it.x.clamp(minPoint.x, maxPoint.x), it.y.clamp(minPoint.y, maxPoint.y)))
+
+            val moveYCursor = 0
+
+            ImGui.cursorPosY += moveYCursor
+            functionalProgramming.withStyleVar(StyleVar.FrameRounding, 15f) {
+                if (ImGui.button("Sélect.")) {
+                    editorSceneUI.editorMode = EditorScene.EditorSceneUI.EditorMode.SELECT_POINT
+                    editorSceneUI.onSelectPoint.register(true) {
+                        point.set(Point(it.x.clamp(minPoint.x, maxPoint.x), it.y.clamp(minPoint.y, maxPoint.y)))
+                    }
                 }
             }
+            ImGui.cursorPosY -= moveYCursor
         }
     }
 
@@ -348,7 +355,7 @@ object ImguiHelper {
         val enumConstants = enum.obj.javaClass.enumConstants
         val selectedIndex = intArrayOf(enumConstants.indexOfFirst { it == enum.obj })
 
-        if(ImguiHelper.comboWithSettingsButton(label, selectedIndex, enumConstants.map { (it as Enum<*>).name }, popupBlock, settingsBtnDisabled, onSettingsBtnDisabled))
+        if (ImGuiHelper.comboWithSettingsButton(label, selectedIndex, enumConstants.map { (it as Enum<*>).name }, popupBlock, settingsBtnDisabled, onSettingsBtnDisabled))
             enum.obj = enumConstants[selectedIndex[0]]
     }
 
@@ -371,8 +378,8 @@ object ImguiHelper {
         }
     }
 
-    fun textColored(color: Color, content: String) {
-        ImGui.textColored(Vec4(color.r, color.g, color.b, 1f), content)
+    fun textColored(color: Color, content: Any) {
+        ImGui.textColored(Vec4(color.r, color.g, color.b, 1f), content.toString())
     }
 
     fun textPropertyColored(color: Color, propertyName: String, value: Any) {

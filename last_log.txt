@@ -1,3 +1,6 @@
-11:47:06  -> Info. : Initialisation en cours.. 
+23:41:59  -> Info. : Initialisation en cours.. 
  Taille : 1920x1027
-11:47:11  -> Info. : Chargement de la scène : EditorScene
+23:42:02  -> Attention : Ressource non trouvée : assets/levels/ge/sounds/1051__rhumphries__rbh-mpls-bird.wav
+23:42:03  -> Info. : Chargement de la scène : EditorScene
+23:43:11  -> Info. : Chargement de la scène : MainMenuScene
+23:43:13  -> Info. : Chargement de la scène : EditorScene

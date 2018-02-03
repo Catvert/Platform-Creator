@@ -10,8 +10,8 @@ import be.catvert.pc.components.RequiredComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.GameObjectMatrixContainer
 import be.catvert.pc.utility.*
-import com.badlogic.gdx.Gdx
 import com.fasterxml.jackson.annotation.JsonCreator
+
 /**
  * Component permettant d'ajouter la possibilité à un gameObject de se déplacer automatiquement dans une direction.
  * Si le gameObject rencontre un obstacle, il ira dans la direction opposé
@@ -29,12 +29,16 @@ class MoverComponent(@ExposeEditor(max = 100f) var moveSpeedX: Int, @ExposeEdito
     var onReverseAction: Action = EmptyAction()
 
     private fun reverse() {
-        reverse = !reverse
-        if (reverse)
-            onReverseAction(gameObject)
-        else
-            onUnReverseAction(gameObject)
+        if (nextReverse != !reverse) {
+            nextReverse = !nextReverse
+            if (nextReverse)
+                onReverseAction(gameObject)
+            else
+                onUnReverseAction(gameObject)
+        }
     }
+
+    private var nextReverse = reverse
 
     override fun onStateActive(gameObject: GameObject, state: GameObjectState, container: GameObjectContainer) {
         super.onStateActive(gameObject, state, container)
@@ -42,11 +46,12 @@ class MoverComponent(@ExposeEditor(max = 100f) var moveSpeedX: Int, @ExposeEdito
 
         state.getComponent<PhysicsComponent>()?.apply {
             onCollisionWith.register {
-
-                if(moveSpeedX != 0 && (it.side == BoxSide.Left || it.side == BoxSide.Right))
-                    reverse()
-                else if(moveSpeedY != 0 && ((it.side == BoxSide.Up || !holdGameObjects) || it.side == BoxSide.Down))
-                    reverse()
+                if (it.triggerCallCount == 0) {
+                    if (moveSpeedX != 0 && (it.side == BoxSide.Left || it.side == BoxSide.Right))
+                        reverse()
+                    else if (moveSpeedY != 0 && ((it.side == BoxSide.Up || !holdGameObjects) || it.side == BoxSide.Down))
+                        reverse()
+                }
             }
         }
     }
@@ -54,19 +59,29 @@ class MoverComponent(@ExposeEditor(max = 100f) var moveSpeedX: Int, @ExposeEdito
     override fun update() {
         val physicsComp = gameObject.getCurrentState().getComponent<PhysicsComponent>()
 
-        physicsComp?.tryMove(if(reverse) (-moveSpeedX * Gdx.graphics.deltaTime * 60f) else (moveSpeedX * Gdx.graphics.deltaTime * 60f), if(reverse) (-moveSpeedY * Gdx.graphics.deltaTime * 60f) else (-moveSpeedY * Gdx.graphics.deltaTime * 60f), gameObject)
+        val deltaMove = Utility.getDeltaTime() * Constants.physicsDeltaSpeed
+
+        physicsComp?.move(true, if (reverse) (-moveSpeedX * deltaMove) else (moveSpeedX * deltaMove), if (reverse) (-moveSpeedY * deltaMove) else (moveSpeedY * deltaMove), gameObject)
 
         if (holdGameObjects) {
             physicsComp?.apply {
-                getCollisionsGameObjectOnSide(gameObject, BoxSide.Up).forEach {
-                    MoveAction(if(reverse) -moveSpeedX else moveSpeedX, if(reverse) -moveSpeedY else moveSpeedY, true).invoke(it)
+                // On double l'epsilon pour être sûr de la précision et éviter les problèmes liés au deltatime
+                getCollisionsGameObjectOnSide(gameObject, BoxSide.Up, Constants.physicsEpsilon * 2f).forEach {
+                    MoveAction(if (reverse) -moveSpeedX else moveSpeedX, if (reverse) -moveSpeedY else moveSpeedY, true).invoke(it)
                 }
             }
         }
 
         gameObject.container.cast<GameObjectMatrixContainer>()?.matrixRect?.also {
-            if(gameObject.position().x == 0f || gameObject.box.right() == it.right() || gameObject.box.top() == it.top())
-                reverse()
+            if (moveSpeedX != 0) {
+                if (gameObject.box.left() == it.left() || gameObject.box.right() == it.right())
+                    reverse()
+            } else if (moveSpeedY != 0) {
+                if (gameObject.box.top() == it.top())
+                    reverse()
+            }
         }
+
+        reverse = nextReverse
     }
 }

@@ -8,7 +8,6 @@ import be.catvert.pc.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.serialization.PostDeserialization
 import be.catvert.pc.utility.*
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.utils.reflect.ClassReflection
 import imgui.ImGui
@@ -43,7 +42,7 @@ abstract class Tween(var duration: Float = 1f, var interpolationName: String) : 
     }
 
     fun update(gameObject: GameObject): Boolean {
-        elapsedTime += Gdx.graphics.deltaTime
+        elapsedTime += Utility.getDeltaTime()
         progress = Math.min(1f, elapsedTime / duration)
 
         perform(gameObject)
@@ -58,7 +57,7 @@ abstract class Tween(var duration: Float = 1f, var interpolationName: String) : 
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                 sliderFloat("duration", ::duration, 0f, 10f, "%.1f")
             }
-            ImguiHelper.action("end action", ::endAction, gameObject, level, editorSceneUI)
+            ImGuiHelper.action("end action", ::endAction, gameObject, level, editorSceneUI)
 
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                 if (combo("interpolation", ::currentInterpolationIndex, interpolations.map { it.component1() })) {
@@ -149,7 +148,7 @@ class RepeatActionTween(duration: Float = 0f, var repeat: Int = 1, var repeatAct
         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
             ImGui.sliderInt("repeat", ::repeat, 1, 100)
         }
-        ImguiHelper.action("repeat action", ::repeatAction, gameObject, level, editorSceneUI)
+        ImGuiHelper.action("repeat action", ::repeatAction, gameObject, level, editorSceneUI)
     }
 }
 

@@ -5,7 +5,6 @@ import com.badlogic.gdx.InputAdapter
 import glm_.vec2.Vec2d
 import imgui.impl.LwjglGL3
 import org.lwjgl.glfw.GLFW
-import org.lwjgl.opengl.GL
 
 object PCInputProcessor : InputAdapter() {
     val keyDownSignal = Signal<Int>()
@@ -52,7 +51,7 @@ object PCInputProcessor : InputAdapter() {
     }
 
     override fun scrolled(amount: Int): Boolean {
-        LwjglGL3.scrollCallback(Vec2d(0, -amount))
+        LwjglGL3.scrollCallback(Vec2d(-amount, 0f))
         return false
     }
 
