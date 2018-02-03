@@ -54,7 +54,7 @@ class MoverComponent(@ExposeEditor(max = 100f) var moveSpeedX: Int, @ExposeEdito
     override fun update() {
         val physicsComp = gameObject.getCurrentState().getComponent<PhysicsComponent>()
 
-        physicsComp?.move(if(reverse) (-moveSpeedX * Gdx.graphics.deltaTime * 60f) else (moveSpeedX * Gdx.graphics.deltaTime * 60f), if(reverse) (-moveSpeedY * Gdx.graphics.deltaTime * 60f) else (-moveSpeedY * Gdx.graphics.deltaTime * 60f), gameObject)
+        physicsComp?.tryMove(if(reverse) (-moveSpeedX * Gdx.graphics.deltaTime * 60f) else (moveSpeedX * Gdx.graphics.deltaTime * 60f), if(reverse) (-moveSpeedY * Gdx.graphics.deltaTime * 60f) else (-moveSpeedY * Gdx.graphics.deltaTime * 60f), gameObject)
 
         if (holdGameObjects) {
             physicsComp?.apply {

@@ -17,7 +17,7 @@ class MoveAction(@ExposeEditor(min = -100f, max = 100f) var moveX: Int, @ExposeE
         val moveY = (moveY * Gdx.graphics.deltaTime * 60f)
 
         if (physics) {
-            gameObject.getCurrentState().getComponent<PhysicsComponent>()?.move(moveX, moveY, gameObject)
+            gameObject.getCurrentState().getComponent<PhysicsComponent>()?.tryMove(moveX, moveY, gameObject)
         } else {
             gameObject.box.move(moveX, moveY)
         }

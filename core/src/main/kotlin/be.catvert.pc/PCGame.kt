@@ -15,6 +15,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Matrix4
+import com.badlogic.gdx.physics.box2d.Box2D
+import com.badlogic.gdx.physics.box2d.World
 import com.kotcrab.vis.ui.VisUI
 import glm_.c
 import imgui.DEBUG
@@ -22,6 +24,8 @@ import imgui.FontConfig
 import imgui.ImGui
 import imgui.impl.LwjglGL3
 import ktx.app.KtxApplicationAdapter
+import ktx.box2d.createWorld
+import ktx.box2d.earthGravity
 import uno.glfw.GlfwWindow
 import java.util.*
 import kotlin.collections.set
@@ -91,6 +95,8 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         gameSounds = Utility.getFilesRecursivly(Constants.soundsDirPath, *Constants.levelSoundExtension)
 
         initializeUI()
+
+        Box2D.init()
 
         sceneManager = SceneManager(MainMenuScene())
     }
