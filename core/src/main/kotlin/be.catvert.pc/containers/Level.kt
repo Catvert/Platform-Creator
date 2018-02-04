@@ -4,6 +4,7 @@ import be.catvert.pc.Log
 import be.catvert.pc.PCGame
 import be.catvert.pc.Prefab
 import be.catvert.pc.Tags
+import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.scenes.EndLevelScene
 import be.catvert.pc.serialization.SerializationFactory
@@ -39,8 +40,11 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
     private val timer = Timer(1f)
 
     var initialZoom = 1f
+
     @JsonIgnore
     var zoom = 1f
+
+    var gravitySpeed = Constants.defaultGravitySpeed
 
     init {
         if (!levelTextures.first.exists())
@@ -152,8 +156,13 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
             val level = Level(levelDir.child(Constants.levelDataFile).path(), Constants.gameVersion, PCGame.parallaxBackgrounds().elementAtOrNull(0)
                     ?: PCGame.standardBackgrounds().elementAtOrNull(0) ?: StandardBackground(FileWrapper("")))
 
-            for (i in 0..5)
-                PrefabFactory.PhysicsSprite_Kenney.prefab.create(Point(i * 50f, 0f), level)
+            val ground = PrefabFactory.PhysicsSprite_Kenney.prefab.create(Point(0f, 0f), level)
+            ground.getCurrentState().getComponent<AtlasComponent>()?.data?.elementAtOrNull(0)?.apply {
+                repeatRegion = true
+                repeatRegionSize = Size(50)
+            }
+            ground.box.width = 300
+
 
             val player = PrefabFactory.Player_Kenney.prefab.create(Point(100f, 50f), level)
 

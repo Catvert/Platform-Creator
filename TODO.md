@@ -10,8 +10,8 @@
 
 ## BUGS
 
-- Bug de scene2D texte non blanc mais gris après changement éditeur -> menu principal
 - Si le joueur est supprimé mais toujours en follow camera -> présent mais pas dans la matrix
+
 ## IDÉE
 
 - Les groupes, permettant de grouper des gameObjects entre-eux

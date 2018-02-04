@@ -9,6 +9,7 @@ enum class Actions(val action: KClass<out Action>) {
     Atlas(AtlasAction::class),
     Empty(EmptyAction::class),
     GameObject(GameObjectAction::class),
+    Gravity(GravityAction::class),
     Level(LevelAction::class),
     Life(LifeAction::class),
     Move(MoveAction::class),

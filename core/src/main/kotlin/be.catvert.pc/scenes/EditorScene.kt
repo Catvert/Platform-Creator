@@ -986,7 +986,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
     }
 
     private fun drawExitWindow() {
-        ImGuiHelper.withCenteredWindow("Sauvegarder le niveau ?", editorSceneUI::showExitWindow, Vec2(240f, 125f), WindowFlags.NoResize.i or WindowFlags.NoCollapse.i) {
+        ImGuiHelper.withCenteredWindow("Save level?", editorSceneUI::showExitWindow, Vec2(240f, 105f), WindowFlags.NoResize.i or WindowFlags.NoCollapse.i or WindowFlags.NoTitleBar.i) {
             fun showMainMenu() {
                 PCGame.sceneManager.loadScene(MainMenuScene())
             }
@@ -1097,6 +1097,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                             ImGuiHelper.gameObject(level::followGameObject, editorSceneUI, "caméra go")
 
                             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
+                                inputInt("gravité", level::gravitySpeed)
                                 inputInt("largeur", level::matrixWidth)
                                 inputInt("hauteur", level::matrixHeight)
                                 sliderFloat("zoom initial", level::initialZoom, 0.1f, 2f, "%.1f")
@@ -1178,7 +1179,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         setCopyGameObject(prefab.create(Point()).apply { loadResources() })
                     }
 
-                    if (showTooltip && isMouseHoveringRect(itemRectMin, itemRectMax)) {
+                    if (showTooltip && isItemHovered()) {
                         functionalProgramming.withTooltip {
                             text(prefab.name)
                         }
@@ -1354,7 +1355,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                         sameLine()
                         text("(?)")
 
-                        if (isMouseHoveringRect(itemRectMin, itemRectMax)) {
+                        if (isItemHovered()) {
                             functionalProgramming.withTooltip {
                                 text(description.description)
                             }

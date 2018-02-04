@@ -26,6 +26,7 @@ object Constants {
 
     const val physicsEpsilon = 0.2f
     const val physicsDeltaSpeed = 60f
+    const val defaultGravitySpeed = 15
 
     val serializationType = SerializationFactory.MapperType.JSON
 

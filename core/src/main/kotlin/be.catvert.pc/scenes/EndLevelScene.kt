@@ -2,12 +2,14 @@ package be.catvert.pc.scenes
 
 import be.catvert.pc.PCGame
 import be.catvert.pc.containers.Level
+import be.catvert.pc.utility.ImGuiHelper
 import be.catvert.pc.utility.Size
-import ktx.actors.centerPosition
-import ktx.actors.onClick
-import ktx.actors.plus
+import com.badlogic.gdx.graphics.g2d.Batch
+import glm_.vec2.Vec2
+import imgui.Cond
+import imgui.ImGui
+import imgui.WindowFlags
 import ktx.assets.toLocalFile
-import ktx.vis.table
 
 /**
  * Scène de fin de niveau, appelé lorsque le joueur meurt ou fini le niveau
@@ -15,24 +17,24 @@ import ktx.vis.table
 class EndLevelScene(private val level: Level) : Scene(level.background) {
     private val logo = PCGame.generateLogo(gameObjectContainer)
 
-    init {
-        stage + table {
-            textButton("Recommencer") { cell ->
-                cell.minWidth(250f).space(10f)
-                onClick {
-                    val level = Level.loadFromFile(level.levelPath.toLocalFile().parent())
-                    if (level != null)
-                        PCGame.sceneManager.loadScene(GameScene(level))
+    override fun render(batch: Batch) {
+        super.render(batch)
+
+        with(ImGui) {
+            ImGuiHelper.withMenuButtonsStyle {
+                ImGuiHelper.withCenteredWindow("end level menu", null, Vec2(300f, 100f), WindowFlags.NoTitleBar.i or WindowFlags.NoMove.i or WindowFlags.NoResize.i or WindowFlags.NoBringToFrontOnFocus.i, Cond.Always) {
+                    if (button("Recommencer", Vec2(-1, 0))) {
+                        val level = Level.loadFromFile(level.levelPath.toLocalFile().parent())
+                        if (level != null)
+                            PCGame.sceneManager.loadScene(GameScene(level))
+                    }
+
+                    if (button("Quitter", Vec2(-1, 0))) {
+                        PCGame.sceneManager.loadScene(MainMenuScene())
+                    }
                 }
             }
-            row()
-            textButton("Quitter") { cell ->
-                cell.minWidth(250f).space(10f)
-                onClick {
-                    PCGame.sceneManager.loadScene(MainMenuScene())
-                }
-            }
-        }.apply { centerPosition(this@EndLevelScene.stage.width, this@EndLevelScene.stage.height) }
+        }
     }
 
     override fun resize(size: Size) {

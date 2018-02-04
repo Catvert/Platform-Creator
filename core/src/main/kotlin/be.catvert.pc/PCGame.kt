@@ -13,7 +13,6 @@ import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Matrix4
-import com.kotcrab.vis.ui.VisUI
 import glm_.c
 import imgui.*
 import imgui.impl.LwjglGL3
@@ -26,12 +25,10 @@ import kotlin.collections.set
 /** [com.badlogic.gdx.ApplicationListener, implementation shared by all platforms.  */
 class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
     private fun initializeUI() {
-        VisUI.load(Constants.uiDirPath.child("tinted/x1/tinted.json"))
-
         LwjglGL3.init(GlfwWindow((Gdx.graphics as Lwjgl3Graphics).window.windowHandle), false)
 
         val fontBytes = Constants.imguiFontPath.readBytes()
-        imguiDefaultFont = imgui.IO.fonts.addFontFromMemoryTTF(CharArray(fontBytes.size, { fontBytes[it].c }), 19f, FontConfig(), glyphRanges = imgui.IO.fonts.glyphRangesDefault)
+        imguiDefaultFont = imgui.IO.fonts.addFontFromMemoryTTF(CharArray(fontBytes.size, { fontBytes[it].c }), 20f, FontConfig(), glyphRanges = imgui.IO.fonts.glyphRangesDefault)
     }
 
     override fun create() {
@@ -85,6 +82,8 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         gameTextures = Utility.getFilesRecursivly(Constants.texturesDirPath, *Constants.levelTextureExtension)
         gameSounds = Utility.getFilesRecursivly(Constants.soundsDirPath, *Constants.levelSoundExtension)
 
+        Gdx.input.inputProcessor = PCInputProcessor
+
         initializeUI()
 
         sceneManager = SceneManager(MainMenuScene())
@@ -123,8 +122,6 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         sceneManager.dispose()
 
         mainFont.dispose()
-
-        VisUI.dispose(true)
 
         ResourceManager.dispose()
 

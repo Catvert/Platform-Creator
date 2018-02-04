@@ -14,19 +14,8 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.g2d.Batch
-import com.badlogic.gdx.scenes.scene2d.Touchable
-import com.kotcrab.vis.ui.widget.VisList
-import com.kotcrab.vis.ui.widget.VisTextButton
 import glm_.vec2.Vec2
-import imgui.ImGui
-import imgui.WindowFlags
-import imgui.functionalProgramming
-import ktx.actors.centerPosition
-import ktx.actors.onClick
-import ktx.actors.plus
-import ktx.collections.toGdxArray
-import ktx.vis.table
-import ktx.vis.window
+import imgui.*
 import java.io.IOException
 import kotlin.collections.set
 
@@ -43,10 +32,6 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
 
     private val levels = Constants.levelDirPath.list { dir -> dir.isDirectory && dir.list { _, s -> s == Constants.levelDataFile }.isNotEmpty() }.map { LevelItem(it) }.toMutableList()
 
-    init {
-        showMainMenu()
-    }
-
     override fun resize(size: Size) {
         super.resize(size)
         logo.box.set(PCGame.getLogoRect())
@@ -55,275 +40,175 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
     override fun render(batch: Batch) {
         super.render(batch)
         drawUI()
-
-        /* with(ImGui) {
-             ImGui.pushStyleColor(Col.WindowBg, ImGui.getStyleColorVec4(Col.WindowBg).apply { a = 0f })
-             ImGui.pushStyleColor(Col.Button, Vec4(0.2f, 0.5f, 0.9f, 1f))
-             ImGui.pushStyleColor(Col.Text, Vec4(1f, 1f, 1f, 1f))
-
-             ImGuiHelper.withCenteredWindow("main menu", null, Vec2(300f, 125f), WindowFlags.NoTitleBar.i or WindowFlags.NoMove.i or WindowFlags.NoResize.i) {
-                     button("Jouer", Vec2(-1, 0))
-                     cursorPosY += 10
-                     button("Options", Vec2(-1, 0))
-                     cursorPosY += 10
-                     button("Quitter", Vec2(-1, 0))
-             }
-
-             ImGui.popStyleColor(3)
-         }*/
     }
 
-//region UI
-
-    private fun showMainMenu() {
-        stage + table {
-            textButton(MenusText.MM_PLAY_BUTTON()) { cell ->
-                cell.width(250f).space(10f)
-                onClick {
-                    showSelectLevelWindow()
-                }
-            }
-            row()
-            textButton(MenusText.MM_SETTINGS_BUTTON()) { cell ->
-                cell.width(250f).space(10f)
-                onClick {
-                    settingsKeys.forEach {
-                        settingsKeys[it.key] = false
-                        PCInputProcessor.keyDownSignal.clear()
-                    }
-                    showSettingsWindow = true
-                }
-            }
-            row()
-            textButton(MenusText.MM_EXIT_BUTTON()) { cell ->
-                cell.width(250f).space(10f)
-                onClick {
-                    Gdx.app.exit()
-                }
-            }
-        }.apply { centerPosition(this@MainMenuScene.stage.width, this@MainMenuScene.stage.height) }
-    }
-
-    private fun showSelectLevelWindow() {
-        fun showErrorLevelDialog(level: LevelItem) {
-            stage + window("Erreur !") {
-                isModal = true
-                setSize(600f, 100f)
-                addCloseButton()
-
-                label("Le niveau $level est invalide ! :(")
-            }.apply { centerPosition(this@MainMenuScene.stage.width, this@MainMenuScene.stage.height) }
-        }
-
-        val newLevelButton = VisTextButton(MenusText.MM_SELECT_LEVEL_NEW_BUTTON()).apply {
-            onClick {
-                stage + window("Nouveau niveau") {
-                    setSize(300f, 150f)
-                    isModal = true
-                    addCloseButton()
-                    table {
-                        val newNameField = textField { cell ->
-                            cell.width(250f).space(10f)
-                            messageText = "Nom du niveau"
-                        }
-                        row()
-
-                        textButton("Créer") { cell ->
-                            cell.width(250f).space(10f)
-                            onClick {
-                                if (!newNameField.text.isBlank()) {
-                                    val level = Level.newLevel(newNameField.text)
-                                    PCGame.sceneManager.loadScene(EditorScene(level))
-                                }
-                            }
-                        }
-                    }
-                }.apply { centerPosition(this@MainMenuScene.stage.width, this@MainMenuScene.stage.height) }
-            }
-        }
-
-        if (levels.isNotEmpty()) {
-            stage + window(MenusText.MM_SELECT_LEVEL_WINDOW_TITLE()) {
-                setSize(450f, 400f)
-                isModal = true
-                addCloseButton()
-
-                table {
-                    val list = VisList<LevelItem>().apply { setItems(levels.toGdxArray()) }
-
-                    scrollPane(list) { cell -> cell.width(200f).height(300f).space(10f) }
-
-                    table { cell ->
-                        cell.size(200f)
-
-                        textButton(MenusText.MM_SELECT_LEVEL_PLAY_BUTTON()) { cell ->
-                            cell.width(200f).space(10f)
-
-                            onClick {
-                                if (list.selectedIndex in levels.indices) {
-                                    val level = Level.loadFromFile(levels[list.selectedIndex].dir)
-                                    if (level != null)
-                                        PCGame.sceneManager.loadScene(GameScene(level))
-                                    else
-                                        showErrorLevelDialog(levels[list.selectedIndex])
-                                }
-                            }
-                        }
-
-                        row()
-                        textButton(MenusText.MM_SELECT_LEVEL_EDIT_BUTTON()) { cell ->
-                            cell.width(200f).space(10f)
-                            onClick {
-                                if (list.selectedIndex in levels.indices) {
-                                    val level = Level.loadFromFile(levels[list.selectedIndex].dir)
-                                    if (level != null)
-                                        PCGame.sceneManager.loadScene(EditorScene(level))
-                                    else
-                                        showErrorLevelDialog(levels[list.selectedIndex])
-                                }
-                            }
-                        }
-
-                        row()
-                        textButton(MenusText.MM_SELECT_LEVEL_COPY_BUTTON()) { cell ->
-                            cell.width(200f).space(10f)
-
-                            onClick {
-                                if (list.selectedIndex in levels.indices) {
-                                    stage + window("Copier un niveau") {
-                                        setSize(350f, 150f)
-                                        isModal = true
-                                        addCloseButton()
-
-                                        table {
-                                            val newNameField = textField { cell -> cell.width(250f).space(10f); messageText = "Nouveau nom" }
-
-                                            row()
-
-                                            textButton("Copier") { cell ->
-                                                cell.width(250f).space(10f)
-                                                onClick {
-                                                    if (!newNameField.text.isBlank()) {
-                                                        val levelDir = levels[list.selectedIndex].dir
-                                                        val copyLevelDir = levelDir.parent().child(newNameField.text)
-                                                        levelDir.list().forEach {
-                                                            try {
-                                                                it.copyTo(copyLevelDir)
-                                                            } catch (e: IOException) {
-                                                                Log.error(e) { "Une erreur est survenue lors de la copie de ${levels[list.selectedIndex]} !" }
-                                                            }
-                                                        }
-                                                        levels.add(LevelItem(copyLevelDir))
-                                                        list.setItems(levels.toGdxArray())
-                                                        this@window.remove()
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }.apply { centerPosition(this@MainMenuScene.stage.width, this@MainMenuScene.stage.height) }
-                                }
-                            }
-                        }
-
-                        row()
-                        textButton(MenusText.MM_SELECT_LEVEL_DELETE_BUTTON()) { cell ->
-                            cell.width(200f).space(10f)
-
-                            onClick {
-                                if (list.selectedIndex in levels.indices) {
-                                    stage + window("Supprimer ${levels[list.selectedIndex]} ?") deleteWindow@ {
-                                        setSize(300f, 100f)
-                                        isModal = true
-                                        addCloseButton()
-                                        table {
-                                            textButton("Supprimer") { cell ->
-                                                cell.width(250f)
-                                                onClick {
-                                                    try {
-                                                        levels[list.selectedIndex].dir.deleteDirectory()
-                                                        levels.removeAt(list.selectedIndex)
-                                                        list.setItems(levels.toGdxArray())
-                                                        this@deleteWindow.remove()
-
-                                                        if (levels.isEmpty()) {
-                                                            this@window.remove()
-                                                            showSelectLevelWindow()
-                                                        }
-                                                    } catch (e: IOException) {
-                                                        Log.error(e) { "Une erreur est survenue lors de la suppression de ${levels[list.selectedIndex]} !" }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }.apply { centerPosition(this@MainMenuScene.stage.width, this@MainMenuScene.stage.height) }
-                                }
-                            }
-                        }
-                        row()
-                        add(newLevelButton).width(200f).space(10f)
-                    }
-                }
-            }.apply { centerPosition(this@MainMenuScene.stage.width, this@MainMenuScene.stage.height) }
-        } else {
-            stage + window(MenusText.MM_SELECT_LEVEL_WINDOW_TITLE()) {
-                setSize(400f, 100f)
-                isModal = true
-                addCloseButton()
-                table {
-                    add(newLevelButton).width(400f).space(10f)
-                }
-            }.apply { centerPosition(this@MainMenuScene.stage.width, this@MainMenuScene.stage.height) }
-        }
-    }
-
+    private var showSelectLevelWindow = false
     private var showSettingsWindow = false
     private fun drawUI() {
+        drawMainMenu()
+
+        if (showSelectLevelWindow)
+            drawSelectLevelWindow()
+
+        if (showSettingsWindow)
+            drawSettingsWindow()
+    }
+
+    private fun drawMainMenu() {
         with(ImGui) {
-            if (showSettingsWindow)
-                drawSettingsWindow()
-            stage.actors.forEach { it.touchable = if (showSettingsWindow) Touchable.disabled else Touchable.enabled }
+            ImGuiHelper.withMenuButtonsStyle {
+                ImGuiHelper.withCenteredWindow("main menu", null, Vec2(300f, 160f), WindowFlags.NoTitleBar.i or WindowFlags.NoCollapse.i or WindowFlags.NoMove.i or WindowFlags.NoResize.i or WindowFlags.NoBringToFrontOnFocus.i, Cond.Always) {
+                    if (button(MenusText.MM_PLAY_BUTTON(), Vec2(-1, 0))) {
+                        showSelectLevelWindow = true
+                    }
+
+                    if (button(MenusText.MM_SETTINGS_BUTTON(), Vec2(-1, 0))) {
+                        settingsKeys.forEach {
+                            settingsKeys[it.key] = false
+                            PCInputProcessor.keyDownSignal.clear()
+                        }
+                        showSettingsWindow = true
+                    }
+
+                    if (button(MenusText.MM_EXIT_BUTTON(), Vec2(-1, 0))) {
+                        Gdx.app.exit()
+                    }
+                }
+            }
         }
     }
 
-    private val settingsWindowSize = intArrayOf(Gdx.graphics.width, Gdx.graphics.height)
+    private var currentLevelIndex = 0
+
+    private val newLevelTitle = "Nouveau niveau"
+    private var newLevelNameBuf = ""
+    private var newLevelOpen = booleanArrayOf(true)
+
+    private val copyLevelTitle = "Copier un niveau"
+    private var copyLevelNameBuf = ""
+
+    private var errorInLevelTitle = "Impossible de charger le niveau !"
+
+    private fun drawSelectLevelWindow() {
+        with(ImGui) {
+            ImGuiHelper.withCenteredWindow(MenusText.MM_SELECT_LEVEL_WINDOW_TITLE(), ::showSelectLevelWindow, Vec2(215f, 165f), WindowFlags.NoResize.i or WindowFlags.NoCollapse.i) {
+                var openCopyPopup = false
+
+                pushItemFlag(ItemFlags.Disabled.i, levels.isEmpty())
+                ImGuiHelper.comboWithSettingsButton(MenusText.MM_SELECT_LEVEL_LEVEL_COMBO(), ::currentLevelIndex, levels.map { it.toString() }, {
+                    if (button(MenusText.MM_SELECT_LEVEL_COPY_BUTTON(), Vec2(Constants.defaultWidgetsWidth, 0))) {
+                        openCopyPopup = true
+                    }
+
+                    if (button(MenusText.MM_SELECT_LEVEL_DELETE_BUTTON(), Vec2(Constants.defaultWidgetsWidth, 0))) {
+                        if (currentLevelIndex in levels.indices) {
+                            try {
+                                levels[currentLevelIndex].dir.deleteDirectory()
+                                levels.removeAt(currentLevelIndex)
+                                closeCurrentPopup()
+                            } catch (e: IOException) {
+                                Log.error(e) { "Une erreur est survenue lors de la suppression de ${levels[currentLevelIndex]} !" }
+                            }
+                        }
+                    }
+                }, levels.isEmpty(), searchBar = true)
+                popItemFlag()
+
+                if(openCopyPopup)
+                    openPopup(copyLevelTitle)
+
+                pushItemFlag(ItemFlags.Disabled.i, levels.isEmpty())
+                if (button(MenusText.MM_SELECT_LEVEL_PLAY_BUTTON(), Vec2(-1, 0))) {
+                    if (currentLevelIndex in levels.indices) {
+                        val level = Level.loadFromFile(levels[currentLevelIndex].dir)
+                        if (level != null)
+                            PCGame.sceneManager.loadScene(GameScene(level))
+                        else
+                            openPopup(errorInLevelTitle)
+                    }
+                }
+
+                if (button(MenusText.MM_SELECT_LEVEL_EDIT_BUTTON(), Vec2(-1, 0))) {
+                    if (currentLevelIndex in levels.indices) {
+                        val level = Level.loadFromFile(levels[currentLevelIndex].dir)
+                        if (level != null)
+                            PCGame.sceneManager.loadScene(EditorScene(level))
+                        else
+                          openPopup(errorInLevelTitle)
+                    }
+                }
+                popItemFlag()
+
+                separator()
+                if (button(MenusText.MM_SELECT_LEVEL_NEW_BUTTON(), Vec2(-1, 0))) {
+                    openPopup(newLevelTitle)
+                    newLevelOpen[0] = true
+                }
+
+                functionalProgramming.popupModal(newLevelTitle, newLevelOpen, WindowFlags.NoResize.i or WindowFlags.NoCollapse.i) {
+                    functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
+                        ImGuiHelper.inputText(MenusText.MM_NAME(), ::newLevelNameBuf)
+                    }
+                    if(button(MenusText.MM_SELECT_LEVEL_NEW_LEVEL_CREATE(), Vec2(-1, 0))) {
+                        if(newLevelNameBuf.isNotBlank()) {
+                            val level = Level.newLevel(newLevelNameBuf)
+                            PCGame.sceneManager.loadScene(EditorScene(level))
+                        }
+                    }
+                }
+
+                functionalProgramming.popup(copyLevelTitle) {
+                    functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
+                        ImGuiHelper.inputText(MenusText.MM_NAME(), ::copyLevelNameBuf)
+                    }
+                    if(button(MenusText.MM_SELECT_LEVEL_COPY_BUTTON(), Vec2(-1, 0))) {
+                        if(copyLevelNameBuf.isNotBlank()) {
+                            val levelDir = levels[currentLevelIndex].dir
+                            val copyLevelDir = levelDir.parent().child(copyLevelNameBuf)
+                            levelDir.list().forEach {
+                                try {
+                                    it.copyTo(copyLevelDir)
+                                } catch (e: IOException) {
+                                    Log.error(e) { "Une erreur est survenue lors de la copie de ${levels[currentLevelIndex]} !" }
+                                }
+                            }
+                            levels.add(LevelItem(copyLevelDir))
+                            closeCurrentPopup()
+                        }
+                    }
+                }
+
+                functionalProgramming.popupModal(errorInLevelTitle) {
+                    text(MenusText.MM_ERROR_LEVEL_POPUP(levels[currentLevelIndex].toString()))
+                    if(button(MenusText.MM_ERROR_LEVEL_CLOSE(), Vec2(-1, 0)))
+                        closeCurrentPopup()
+                }
+            }
+        }
+    }
+
     private val settingsFullscreen = booleanArrayOf(Gdx.graphics.isFullscreen)
     private val settingsKeys = GameKeys.values().associate { it to false }.toMutableMap()
     private val settingsCurrentLocaleIndex = intArrayOf(PCGame.availableLocales.indexOf(PCGame.locale))
+
     private fun drawSettingsWindow() {
         with(ImGui) {
-            ImGuiHelper.withCenteredWindow(MenusText.MM_SETTINGS_WINDOW_TITLE(), ::showSettingsWindow, Vec2(385f, 400f), WindowFlags.NoResize.i) {
+            ImGuiHelper.withCenteredWindow(MenusText.MM_SETTINGS_WINDOW_TITLE(), ::showSettingsWindow, Vec2(385f, 435f), WindowFlags.NoResize.i) {
                 functionalProgramming.withGroup {
                     functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                         sliderFloat(MenusText.MM_SETTINGS_SOUND(), ::soundVolume, 0f, 1f, "%.1f")
 
                         if (combo(MenusText.MM_SETTINGS_LOCALE(), settingsCurrentLocaleIndex, PCGame.availableLocales.map { it.displayLanguage }))
                             PCGame.locale = PCGame.availableLocales[settingsCurrentLocaleIndex[0]]
-                        if (isMouseHoveringRect(itemRectMin, itemRectMax)) {
-                            functionalProgramming.withTooltip {
-                                text("Un redémarrage du jeu est requis\npour appliquer les changements !")
-                            }
-                        }
 
                         checkbox(MenusText.MM_SETTINGS_DARK_INTERFACE(), PCGame.Companion::darkUI)
-                    }
-                }
-                sameLine()
-                functionalProgramming.withGroup {
-                    functionalProgramming.withItemWidth(-1) {
-                        checkbox(MenusText.MM_SETTINGS_FULLSCREEN(), settingsFullscreen)
-                    }
-                    if (!settingsFullscreen[0]) {
-                        functionalProgramming.withItemWidth(75f) {
-                            inputInt2(MenusText.MM_SETTINGS_SCREEN_SIZE(), settingsWindowSize)
+
+                        if(checkbox(MenusText.MM_SETTINGS_FULLSCREEN(), settingsFullscreen)) {
+                            if(settingsFullscreen[0])
+                                Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
+                            else
+                                Gdx.graphics.setWindowedMode(1280, 720)
                         }
-                    }
-                    if (button(MenusText.MM_SETTINGS_APPLY(), Vec2(-1, 0))) {
-                        /* TODO Bug imgui crash
-                        if (settingsFullscreen[0])
-                            Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
-                        else
-                            Gdx.graphics.setWindowedMode(settingsWindowSize[0], settingsWindowSize[1])
-                            */
                     }
                 }
 
@@ -355,5 +240,4 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
             }
         }
     }
-//endregion
 }

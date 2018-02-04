@@ -35,7 +35,7 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
             if (value in Constants.minLayerIndex until Constants.maxLayerIndex) field = value
         }
 
-    @ExposeEditor(customName = "on out of map")
+    @ExposeEditor(description = "Action appelée quand le game object à une position y < 0", customName = "on out of map")
     var onOutOfMapAction: Action = RemoveGOAction()
 
     @JsonProperty("states")

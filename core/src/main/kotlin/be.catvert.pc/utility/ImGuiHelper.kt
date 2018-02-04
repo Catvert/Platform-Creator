@@ -29,6 +29,8 @@ object ImGuiHelper {
 
     private val settingsBtnIconHandle: Int = ResourceManager.getTexture(Constants.uiDirPath.child("settings.png")).textureObjectHandle
 
+    private val searchBarBuffers = mutableMapOf<String, Item<String>>()
+
     fun <T : Any> addImguiWidgetsArray(label: String, array: ArrayList<T>, itemLabel: (item: T) -> String, createItem: () -> T, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI, itemExposeEditor: ExposeEditor = ExposeEditorFactory.empty, endBlock: () -> Unit = {}) {
         addImguiWidgetsArray(label, array, itemLabel, createItem, {
             addImguiWidget(itemLabel(it.obj), it, gameObject, level, itemExposeEditor, editorSceneUI)
@@ -99,7 +101,9 @@ object ImGuiHelper {
                         }
                     }
                     is Float -> {
-                        sliderFloat(label, item.cast<Float>()::obj, exposeEditor.min, exposeEditor.max, "%.1f")
+                        functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
+                            sliderFloat(label, item.cast<Float>()::obj, exposeEditor.min, exposeEditor.max, "%.1f")
+                        }
                     }
                     is Prefab -> {
                         prefab(item.cast(), level, label)
@@ -125,7 +129,7 @@ object ImGuiHelper {
                     }
                 }
 
-                if (!exposeEditor.description.isBlank() && isMouseHoveringRect(itemRectMin, itemRectMax)) {
+                if (!exposeEditor.description.isBlank() && isItemHovered()) {
                     functionalProgramming.withTooltip {
                         text(exposeEditor.description)
                     }
@@ -174,12 +178,12 @@ object ImGuiHelper {
                 if (comboWithSettingsButton(label, index, Actions.values().map { it.name }, {
                             insertImguiExposeEditorFields(action.obj, gameObject, level, editorSceneUI)
                         }, incorrectAction, {
-                            if (isMouseHoveringRect(itemRectMin, itemRectMax)) {
+                            if (isItemHovered()) {
                                 functionalProgramming.withTooltip {
                                     textPropertyColored(Color.RED, "Il manque le(s) component(s) :", requiredComponent!!.component.map { it.simpleName })
                                 }
                             }
-                        })) {
+                        }, true)) {
                     action.obj = ReflectionUtility.findNoArgConstructor(Actions.values()[index[0]].action)!!.newInstance()
                 }
 
@@ -188,7 +192,7 @@ object ImGuiHelper {
                     sameLine()
                     text("(?)")
 
-                    if (isMouseHoveringRect(itemRectMin, itemRectMax)) {
+                    if (isItemHovered()) {
                         functionalProgramming.withTooltip {
                             text(description.description)
                         }
@@ -198,13 +202,23 @@ object ImGuiHelper {
         }
     }
 
-    fun comboWithSettingsButton(label: String, currentItem: IntArray, items: List<String>, popupBlock: () -> Unit, settingsBtnDisabled: Boolean = false, onSettingsBtnDisabled: () -> Unit = {}): Boolean {
+    fun comboWithSettingsButton(label: String, currentItem: IntArray, items: List<String>, popupBlock: () -> Unit, settingsBtnDisabled: Boolean = false, onSettingsBtnDisabled: () -> Unit = {}, searchBar: Boolean = false): Boolean {
         val popupTitle = "popup settings $label"
 
         var comboChanged = false
 
         with(ImGui) {
             val imgSize = Vec2(Context.fontSize)
+
+            functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth - imgSize.x - Context.style.itemInnerSpacing.x * 3f) {
+                if (searchBar) {
+                    if (searchCombo("", currentItem, items))
+                        comboChanged = true
+                } else if (combo("", currentItem, items))
+                    comboChanged = true
+            }
+
+            sameLine(0f, style.itemInnerSpacing.x)
 
             pushItemFlag(ItemFlags.Disabled.i, settingsBtnDisabled)
             if (imageButton(settingsBtnIconHandle, imgSize, uv1 = Vec2(1, 1))) {
@@ -215,12 +229,9 @@ object ImGuiHelper {
             if (settingsBtnDisabled)
                 onSettingsBtnDisabled()
 
-            sameLine(0f, Context.style.itemInnerSpacing.x)
+            sameLine(0f, style.itemInnerSpacing.x)
 
-            functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth - imgSize.x - Context.style.itemInnerSpacing.x * 3f) {
-                if (combo(label, currentItem, items))
-                    comboChanged = true
-            }
+            text(label)
 
             functionalProgramming.popup(popupTitle) {
                 popupBlock()
@@ -230,10 +241,48 @@ object ImGuiHelper {
         return comboChanged
     }
 
-    fun comboWithSettingsButton(label: String, currentItem: KMutableProperty0<Int>, items: List<String>, popupBlock: () -> Unit, settingsBtnDisabled: Boolean = false, onSettingsBtnDisabled: () -> Unit = {}) {
+    fun comboWithSettingsButton(label: String, currentItem: KMutableProperty0<Int>, items: List<String>, popupBlock: () -> Unit, settingsBtnDisabled: Boolean = false, onSettingsBtnDisabled: () -> Unit = {}, searchBar: Boolean = false) {
         val item = intArrayOf(currentItem.get())
-        comboWithSettingsButton(label, item, items, popupBlock, settingsBtnDisabled, onSettingsBtnDisabled)
+        comboWithSettingsButton(label, item, items, popupBlock, settingsBtnDisabled, onSettingsBtnDisabled, searchBar)
         currentItem.set(item[0])
+    }
+
+    fun searchCombo(label: String, currentItem: KMutableProperty0<Int>, items: List<String>) {
+        val item = intArrayOf(currentItem())
+        searchCombo(label, item, items)
+        currentItem.set(item[0])
+    }
+
+    fun searchCombo(label: String, currentItem: IntArray, items: List<String>): Boolean {
+        var changed = false
+
+        with(ImGui) {
+            if (beginCombo(label, items.elementAtOrNull(currentItem[0]))) {
+                cursorPosX += style.itemInnerSpacing.x
+                val buf = searchBarBuffers.getOrPut(label) { Item("") }
+                inputText("", buf)
+                cursorPosY += style.itemInnerSpacing.y
+
+                separator()
+
+                for (i in 0 until items.size) {
+                    if (!items[i].startsWith(buf.obj, true))
+                        continue
+                    pushId(i)
+                    val itemSelected = i == currentItem[0]
+                    val itemText = items.getOrElse(i, { "*Unknown item*" })
+                    if (selectable(itemText, itemSelected)) {
+                        currentItem[0] = i
+                        changed = true
+                    }
+                    if (itemSelected) setItemDefaultFocus()
+                    popId()
+                }
+
+                endCombo()
+            }
+        }
+        return changed
     }
 
     fun gameObjectTag(tag: Item<GameObjectTag>, level: Level, label: String = "tag") {
@@ -260,7 +309,7 @@ object ImGuiHelper {
                 }
             }
 
-            if (isMouseHoveringRect(itemRectMin, itemRectMax)) {
+            if (isItemHovered()) {
                 functionalProgramming.withTooltip {
                     val go = gameObject.get()
                     if (go == null)
@@ -387,6 +436,21 @@ object ImGuiHelper {
         ImGui.sameLine()
 
         value.cast<CustomEditorTextImpl>()?.insertText() ?: ImGui.text(value.toString())
+    }
+
+    fun withMenuButtonsStyle(block: () -> Unit) {
+        with(ImGui) {
+            pushStyleColor(Col.WindowBg, ImGui.getStyleColorVec4(Col.WindowBg).apply { a = 0f })
+            pushStyleColor(Col.Button, Vec4(0.2f, 0.5f, 0.9f, 1f))
+            pushStyleColor(Col.Text, Vec4(1f))
+            pushStyleVar(StyleVar.FrameRounding, 10f)
+            pushStyleVar(StyleVar.FramePadding, Vec2(10f))
+
+            block()
+
+            ImGui.popStyleColor(3)
+            ImGui.popStyleVar(2)
+        }
     }
 
     fun insertImguiExposeEditorFields(instance: Any, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {

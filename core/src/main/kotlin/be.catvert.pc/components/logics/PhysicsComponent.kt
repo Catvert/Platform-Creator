@@ -99,11 +99,6 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
     @JsonIgnore
     val onCollisionWith = Signal<CollisionListener>()
 
-    /**
-     * Vitesse de la gravité, représente aussi la vitesse de saut (inversé)
-     */
-    private val gravitySpeed = 15f
-
     private lateinit var level: Level
 
     override fun onStateActive(gameObject: GameObject, state: GameObjectState, container: GameObjectContainer) {
@@ -119,8 +114,8 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         var moveSpeedY = 0f
         var addJumpAfterClear = false
 
-        if (gravity && gameObject.container.cast<Level>()?.applyGravity == true)
-            moveSpeedY -= gravitySpeed
+        if (gravity && level.applyGravity)
+            moveSpeedY -= level.gravitySpeed
 
         physicsActions.forEach actions@ {
             when (it) {
@@ -129,30 +124,34 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                 PhysicsActions.GO_UP -> moveSpeedY += moveSpeed
                 PhysicsActions.GO_DOWN -> moveSpeedY -= moveSpeed
                 PhysicsActions.JUMP, PhysicsActions.FORCE_JUMP -> {
-                    if (!jumpData.isJumping) {
-                        if (it != PhysicsActions.FORCE_JUMP) {
-                            //  On vérifie si le gameObject est sur le sol
-                            if (!move(false, 0f, -1f, gameObject)) {
-                                return@actions
+                    if (level.applyGravity) {
+                        if (!jumpData.isJumping) {
+                            if(gravity) {
+                                if (it != PhysicsActions.FORCE_JUMP) {
+                                    //  On vérifie si le gameObject est sur le sol
+                                    if (!move(false, 0f, -1f, gameObject)) {
+                                        return@actions
+                                    }
+                                }
+                                jumpData.isJumping = true
+                                jumpData.targetHeight = gameObject.box.y.roundToInt() + jumpHeight
+
+                                gravity = false
+
+                                moveSpeedY = level.gravitySpeed.toFloat()
+                                addJumpAfterClear = true
+
+                                onJumpAction(gameObject)
                             }
-                        }
-                        jumpData.isJumping = true
-                        jumpData.targetHeight = gameObject.box.y.roundToInt() + jumpHeight
-
-                        gravity = false
-
-                        moveSpeedY = gravitySpeed
-                        addJumpAfterClear = true
-
-                        onJumpAction(gameObject)
-                    } else {
-                        // Vérifie si le go est arrivé à la bonne hauteur de saut ou s'il rencontre un obstacle au dessus de lui
-                        if (gameObject.box.y >= jumpData.targetHeight || move(false, 0f, 1f, gameObject) || gameObject.box.top() == level.matrixRect.top()) {
-                            gravity = true
-                            jumpData.isJumping = false
                         } else {
-                            moveSpeedY = gravitySpeed
-                            addJumpAfterClear = true
+                            // Vérifie si le go est arrivé à la bonne hauteur de saut ou s'il rencontre un obstacle au dessus de lui
+                            if (gameObject.box.y >= jumpData.targetHeight || move(false, 0f, 1f, gameObject) || gameObject.box.top() == level.matrixRect.top()) {
+                                gravity = true
+                                jumpData.isJumping = false
+                            } else {
+                                moveSpeedY = level.gravitySpeed.toFloat()
+                                addJumpAfterClear = true
+                            }
                         }
                     }
                 }

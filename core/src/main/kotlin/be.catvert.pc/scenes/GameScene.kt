@@ -32,7 +32,7 @@ class GameScene(private val level: Level) : Scene(level.background) {
 
         with(ImGui) {
             if (pause) {
-                ImGuiHelper.withCenteredWindow("Pause", null, Vec2(200, 100), WindowFlags.NoResize.i or WindowFlags.NoCollapse.i) {
+                ImGuiHelper.withCenteredWindow("pause", null, Vec2(200f, 105f), WindowFlags.NoResize.i or WindowFlags.NoCollapse.i or WindowFlags.NoTitleBar.i) {
                     if (button("Reprendre", Vec2(-1, 0))) {
                         pause = false
                         gameObjectContainer.allowUpdatingGO = true
@@ -54,6 +54,7 @@ class GameScene(private val level: Level) : Scene(level.background) {
         super.postBatchRender()
         level.drawDebug()
 
+        PCGame.hudBatch.projectionMatrix = PCGame.defaultProjection
         PCGame.hudBatch.use {
             PCGame.mainFont.draw(it, "Score : ${level.scorePoints}", 10f, Gdx.graphics.height - 10f)
             PCGame.mainFont.draw(it, "Temps écoulé : ${level.getTimer()}", 10f, Gdx.graphics.height - 40f)
