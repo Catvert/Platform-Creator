@@ -18,7 +18,10 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 import glm_.func.common.clamp
 import glm_.min
+import imgui.ImGui
+import imgui.ItemFlags
 import imgui.functionalProgramming
+import java.awt.SystemColor.text
 import kotlin.math.roundToInt
 
 /**
@@ -41,7 +44,7 @@ private data class JumpData(var isJumping: Boolean = false, var targetHeight: In
 data class CollisionListener(val gameObject: GameObject, val collideGameObject: GameObject, val side: BoxSide, val triggerCallCount: Int)
 
 
-data class CollisionAction(@ExposeEditor var side: BoxSide = BoxSide.Left, @ExposeEditor(customType = CustomType.TAG_STRING) var target: GameObjectTag = Tags.Player.tag, @ExposeEditor var action: Action = EmptyAction(), @ExposeEditor(customType = CustomType.NO_CHECK_COMPS_GO) var collideAction: Action = EmptyAction())
+data class CollisionAction(@ExposeEditor var side: BoxSide = BoxSide.Left, @ExposeEditor(customType = CustomType.TAG_STRING) var target: GameObjectTag = Tags.Player.tag, @ExposeEditor var action: Action = EmptyAction())
 
 /**
  * Ce component permet d'ajouter à l'entité des propriétés physique tel que la gravité, vitesse de déplacement ...
@@ -187,7 +190,6 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         gameObject.getCurrentState().getComponent<PhysicsComponent>()?.apply {
             this.collisionsActions.firstOrNull { collisionAction -> (collisionAction.side == side || collisionAction.side == BoxSide.All) && collisionAction.target == collideGameObject.tag }?.apply {
                 action(gameObject)
-                collideAction(collideGameObject)
             }
             onCollisionWith.invoke(CollisionListener(gameObject, collideGameObject, side, collideIndex))
         }
@@ -195,7 +197,6 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         collideGameObject.getCurrentState().getComponent<PhysicsComponent>()?.apply {
             this.collisionsActions.firstOrNull { collisionAction -> (collisionAction.side == -side || collisionAction.side == BoxSide.All) && collisionAction.target == gameObject.tag }?.apply {
                 action(collideGameObject)
-                collideAction(gameObject)
             }
             onCollisionWith.invoke(CollisionListener(collideGameObject, gameObject, -side, collideIndex))
         }
@@ -338,6 +339,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
     }
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+        ImGui.pushItemFlag(ItemFlags.Disabled.i, isStatic)
         functionalProgramming.collapsingHeader("move actions") {
             functionalProgramming.withIndent {
                 ImGuiHelper.action("on left", ::onLeftAction, gameObject, level, editorSceneUI)
@@ -346,6 +348,13 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                 ImGuiHelper.action("on down", ::onDownAction, gameObject, level, editorSceneUI)
                 ImGuiHelper.action("on jump", ::onJumpAction, gameObject, level, editorSceneUI)
                 ImGuiHelper.action("on nothing", ::onNothingAction, gameObject, level, editorSceneUI)
+            }
+        }
+        ImGui.popItemFlag()
+
+        if(ImGui.isItemHovered() && isStatic) {
+            functionalProgramming.withTooltip {
+                ImGui.text("Impossible d'utiliser des actions liés aux mouvements si le game object est statique.")
             }
         }
 
@@ -370,7 +379,6 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                 ImGuiHelper.textPropertyColored(Color.ORANGE, "target :", it.target)
                 ImGuiHelper.textPropertyColored(Color.ORANGE, "side :", it.side)
                 ImGuiHelper.textPropertyColored(Color.ORANGE, "action :", it.action)
-                ImGuiHelper.textPropertyColored(Color.ORANGE, "collide action :", it.collideAction)
                 ImGuiHelper.textColored(Color.RED, "<-->")
             }
         }

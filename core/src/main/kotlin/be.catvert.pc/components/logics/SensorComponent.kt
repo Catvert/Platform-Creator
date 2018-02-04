@@ -23,22 +23,13 @@ class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeata
     private var level: Level? = null
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
-    abstract class SensorData(var sensorIn: Action = EmptyAction(), var sensorOut: Action = EmptyAction()) : CustomEditorImpl {
+    abstract class SensorData(@ExposeEditor(description = "Action appelée quand le game object ciblé passe devant/derrière(overlaps) ce game object") var sensorIn: Action = EmptyAction(), @ExposeEditor(description = "Action appelée quand le game object ciblé quitte ce game object") var sensorOut: Action = EmptyAction()) {
         protected val sensorOverlaps: MutableSet<GameObject> = mutableSetOf()
 
         abstract fun checkSensorOverlaps(gameObject: GameObject, level: Level)
-
-        override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-            functionalProgramming.withId("in action") {
-                ImGuiHelper.action("in action", ::sensorIn, gameObject, level, editorSceneUI)
-            }
-            functionalProgramming.withId("out action") {
-                ImGuiHelper.action("out action", ::sensorOut, gameObject, level, editorSceneUI)
-            }
-        }
     }
 
-    class TagSensorData(var target: GameObjectTag = Tags.Player.tag, sensorIn: Action = EmptyAction(), sensorOut: Action = EmptyAction()) : SensorData(sensorIn, sensorOut) {
+    class TagSensorData(@ExposeEditor(customType = CustomType.TAG_STRING) var target: GameObjectTag = Tags.Player.tag, sensorIn: Action = EmptyAction(), sensorOut: Action = EmptyAction()) : SensorData(sensorIn, sensorOut) {
         override fun checkSensorOverlaps(gameObject: GameObject, level: Level) {
             val checkedGameObject = mutableSetOf<GameObject>()
 
@@ -57,16 +48,10 @@ class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeata
             }
         }
 
-        override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-            ImGuiHelper.gameObjectTag(::target, level, "sensor target")
-
-            super.insertImgui(label, gameObject, level, editorSceneUI)
-        }
-
         override fun toString(): String = ""
     }
 
-    class GameObjectSensorData(var target: GameObject?, sensorIn: Action = EmptyAction(), sensorOut: Action = EmptyAction()) : SensorData(sensorIn, sensorOut) {
+    class GameObjectSensorData(var target: GameObject?, sensorIn: Action = EmptyAction(), sensorOut: Action = EmptyAction()) : SensorData(sensorIn, sensorOut), CustomEditorImpl {
         override fun checkSensorOverlaps(gameObject: GameObject, level: Level) {
             if (target != null) {
                 val target = target!!
@@ -85,7 +70,6 @@ class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeata
 
         override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
             ImGuiHelper.gameObject(::target, editorSceneUI, "target")
-            super.insertImgui(label, gameObject, level, editorSceneUI)
         }
     }
 

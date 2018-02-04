@@ -2,6 +2,7 @@ package be.catvert.pc.containers
 
 import be.catvert.pc.GameKeys
 import be.catvert.pc.GameObject
+import be.catvert.pc.GameObjectTag
 import be.catvert.pc.PCGame
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
@@ -113,6 +114,8 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
 
     override val processGameObjects: Set<GameObject>
         get() = getAllGameObjectsInCells(activeGridCells)
+
+    override fun findGameObjectsByTag(tag: GameObjectTag) = getAllGameObjectsInCells(activeGridCells).filter { it.tag == tag }.toSet()
 
     override fun update() {
         updateActiveCells()

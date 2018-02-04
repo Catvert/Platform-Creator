@@ -29,7 +29,7 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
     @JsonIgnore
     fun getGameObjectsData() = gameObjects.toSet()
 
-    fun findGameObjectsByTag(tag: GameObjectTag): Set<GameObject> = gameObjects.filter { it.tag == tag }.toSet()
+    open fun findGameObjectsByTag(tag: GameObjectTag): Set<GameObject> = gameObjects.filter { it.tag == tag }.toSet()
 
     open fun removeGameObject(gameObject: GameObject) {
         removeGameObjects.add(gameObject)

@@ -41,11 +41,13 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
     @JsonCreator private constructor() : this(0, arrayListOf())
 
     @ExposeEditor
+    var rotation: Rotation = Rotation.Zero
+
+    @ExposeEditor
     var flipX: Boolean = false
     @ExposeEditor
     var flipY: Boolean = false
-    @ExposeEditor
-    var rotation: Rotation = Rotation.Zero
+
     @JsonIgnore
     var alpha: Float = 1f
 

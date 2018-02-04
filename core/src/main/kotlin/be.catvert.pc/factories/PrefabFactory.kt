@@ -27,6 +27,8 @@ object PrefabSetup {
     }))
 
     val killActionTween = MultiplexerAction(TweenAction(TweenFactory.RemoveGO()), TweenAction(TweenFactory.ReduceSize()))
+
+    fun playerAction(action: Action) = TagAction(Tags.Player.tag, action)
 }
 
 enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
@@ -86,10 +88,10 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
             Prefab("spider", GameObject(Tags.Enemy.tag, box = Rect(size = Size(48, 48)), initDefaultState = {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("walk", Constants.packsKenneyDirPath.child("enemies.atlas").toFileWrapper(), "spider_walk", 0.33f))
                 this += PhysicsComponent(false, 5, collisionsActions = arrayListOf(
-                        CollisionAction(BoxSide.Left, collideAction = LifeAction(LifeAction.LifeActions.REMOVE_LP)),
-                        CollisionAction(BoxSide.Right, collideAction = LifeAction(LifeAction.LifeActions.REMOVE_LP)),
-                        CollisionAction(BoxSide.Down, collideAction = LifeAction(LifeAction.LifeActions.REMOVE_LP)),
-                        CollisionAction(BoxSide.Up, action = LifeAction(LifeAction.LifeActions.REMOVE_LP), collideAction = PhysicsAction(PhysicsAction.PhysicsActions.FORCE_JUMP))
+                        CollisionAction(BoxSide.Left, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP))),
+                        CollisionAction(BoxSide.Right, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP))),
+                        CollisionAction(BoxSide.Down, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP))),
+                        CollisionAction(BoxSide.Up, action = MultiplexerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP), PrefabSetup.playerAction(PhysicsAction(PhysicsAction.PhysicsActions.FORCE_JUMP))))
                 ))
                 this += LifeComponent(PrefabSetup.killActionTween)
                 this += MoverComponent(5, 0, true).apply { onReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X) }
@@ -99,7 +101,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
             Prefab("snake slime", GameObject(Tags.Enemy.tag, box = Rect(size = Size(35, 120)), initDefaultState = {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.packsKenneyDirPath.child("enemies.atlas").toFileWrapper(), "snakeSlime", 0.33f))
                 this += PhysicsComponent(true, collisionsActions = arrayListOf(
-                        CollisionAction(BoxSide.All, collideAction = LifeAction(LifeAction.LifeActions.REMOVE_LP))
+                        CollisionAction(BoxSide.All, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP)))
                 ))
                 this += LifeComponent(PrefabSetup.killActionTween)
             }))
@@ -108,10 +110,10 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
             Prefab("bee", GameObject(Tags.Enemy.tag, box = Rect(size = Size(35, 35)), initDefaultState = {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.packsKenneyDirPath.child("enemies.atlas").toFileWrapper() to "bee"))
                 this += PhysicsComponent(false, 5, gravity = false, collisionsActions = arrayListOf(
-                        CollisionAction(BoxSide.Left, collideAction = LifeAction(LifeAction.LifeActions.REMOVE_LP)),
-                        CollisionAction(BoxSide.Right, collideAction = LifeAction(LifeAction.LifeActions.REMOVE_LP)),
-                        CollisionAction(BoxSide.Down, collideAction = LifeAction(LifeAction.LifeActions.REMOVE_LP)),
-                        CollisionAction(BoxSide.Up, action = LifeAction(LifeAction.LifeActions.REMOVE_LP), collideAction = PhysicsAction(PhysicsAction.PhysicsActions.FORCE_JUMP))
+                        CollisionAction(BoxSide.Left, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP))),
+                        CollisionAction(BoxSide.Right, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP))),
+                        CollisionAction(BoxSide.Down, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP))),
+                        CollisionAction(BoxSide.Up, action = MultiplexerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP), PrefabSetup.playerAction(PhysicsAction(PhysicsAction.PhysicsActions.FORCE_JUMP))))
                 ))
                 this += LifeComponent(PrefabSetup.killActionTween)
                 this += MoverComponent(5, 0, true).apply { onReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X) }
@@ -201,10 +203,10 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
             Prefab("furball", GameObject(Tags.Enemy.tag, box = Rect(size = Size(48, 48)), initDefaultState = {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("walk", Constants.packsSMCDirPath.child("enemies.atlas").toFileWrapper(), "furball/brown/walk", 0.1f))
                 this += PhysicsComponent(false, 5, collisionsActions = arrayListOf(
-                        CollisionAction(BoxSide.Left, collideAction = LifeAction(LifeAction.LifeActions.REMOVE_LP)),
-                        CollisionAction(BoxSide.Right, collideAction = LifeAction(LifeAction.LifeActions.REMOVE_LP)),
-                        CollisionAction(BoxSide.Down, collideAction = LifeAction(LifeAction.LifeActions.REMOVE_LP)),
-                        CollisionAction(BoxSide.Up, action = LifeAction(LifeAction.LifeActions.REMOVE_LP), collideAction = PhysicsAction(PhysicsAction.PhysicsActions.FORCE_JUMP))
+                        CollisionAction(BoxSide.Left, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP))),
+                        CollisionAction(BoxSide.Right, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP))),
+                        CollisionAction(BoxSide.Down, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP))),
+                        CollisionAction(BoxSide.Up, action = MultiplexerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP), PrefabSetup.playerAction(PhysicsAction(PhysicsAction.PhysicsActions.FORCE_JUMP))))
                 ))
                 this += LifeComponent(PrefabSetup.killActionTween)
                 this += MoverComponent(5, 0, true).apply { onReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X) }
@@ -214,21 +216,21 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
             Prefab("turtle", GameObject(Tags.Enemy.tag, box = Rect(size = Size(48, 98)), initDefaultState = {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("walk", Constants.packsSMCDirPath.child("enemies.atlas").toFileWrapper(), "turtle/green/walk", 0.33f))
                 this += PhysicsComponent(false, 5, collisionsActions = arrayListOf(
-                        CollisionAction(BoxSide.Left, collideAction = LifeAction(LifeAction.LifeActions.REMOVE_LP)),
-                        CollisionAction(BoxSide.Right, collideAction = LifeAction(LifeAction.LifeActions.REMOVE_LP)),
-                        CollisionAction(BoxSide.Down, collideAction = LifeAction(LifeAction.LifeActions.REMOVE_LP)),
-                        CollisionAction(BoxSide.Up, action = LifeAction(LifeAction.LifeActions.REMOVE_LP), collideAction = PhysicsAction(PhysicsAction.PhysicsActions.FORCE_JUMP))
+                        CollisionAction(BoxSide.Left, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP))),
+                        CollisionAction(BoxSide.Right, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP))),
+                        CollisionAction(BoxSide.Down, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP))),
+                        CollisionAction(BoxSide.Up, action = MultiplexerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP), PrefabSetup.playerAction(PhysicsAction(PhysicsAction.PhysicsActions.FORCE_JUMP))))
                 ))
                 this += LifeComponent(MultiplexerAction(StateAction(1, true), ResizeAction(Size(45, 45))))
                 this += MoverComponent(5, 0, true).apply { onReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X) }
             }, otherStates = *arrayOf(GameObjectState("shell") {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("walk", Constants.packsSMCDirPath.child("enemies.atlas").toFileWrapper(), "turtle/green/shell_move", 0.33f))
                 this += PhysicsComponent(false, 10, collisionsActions = arrayListOf(
-                        CollisionAction(BoxSide.Left, collideAction = LifeAction(LifeAction.LifeActions.REMOVE_LP)),
-                        CollisionAction(BoxSide.Right, collideAction = LifeAction(LifeAction.LifeActions.REMOVE_LP)),
-                        CollisionAction(BoxSide.Up, collideAction = PhysicsAction(PhysicsAction.PhysicsActions.JUMP)),
-                        CollisionAction(BoxSide.Right, Tags.Enemy.tag, collideAction = LifeAction(LifeAction.LifeActions.ONE_SHOT)),
-                        CollisionAction(BoxSide.Left, Tags.Enemy.tag, collideAction = LifeAction(LifeAction.LifeActions.ONE_SHOT))
+                        CollisionAction(BoxSide.Left, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP))),
+                        CollisionAction(BoxSide.Right, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP))),
+                        CollisionAction(BoxSide.Up, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP))),
+                        CollisionAction(BoxSide.Right, Tags.Enemy.tag, action = TagAction(Tags.Enemy.tag, LifeAction(LifeAction.LifeActions.ONE_SHOT))),
+                        CollisionAction(BoxSide.Left, Tags.Enemy.tag, action = TagAction(Tags.Enemy.tag, PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.ONE_SHOT))))
                 ))
                 this += MoverComponent(10, 0)
             })))
@@ -237,7 +239,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
             Prefab("eato", GameObject(Tags.Enemy.tag, box = Rect(size = Size(45, 45)), initDefaultState = {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.packsSMCDirPath.child("enemies.atlas").toFileWrapper(), "eato/green/eato", 0.15f, Animation.PlayMode.LOOP_PINGPONG))
                 this += PhysicsComponent(true, collisionsActions = arrayListOf(
-                        CollisionAction(BoxSide.All, collideAction = LifeAction(LifeAction.LifeActions.REMOVE_LP))
+                        CollisionAction(BoxSide.All, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP)))
                 ))
                 this += LifeComponent(PrefabSetup.killActionTween)
             }))

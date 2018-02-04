@@ -85,7 +85,7 @@ object ImGuiHelper {
             with(ImGui) {
                 when (value) {
                     is Action -> {
-                        action(label, item.cast(), gameObject, level, editorSceneUI, exposeEditor.customType == CustomType.NO_CHECK_COMPS_GO)
+                        action(label, item.cast(), gameObject, level, editorSceneUI)
                     }
                     is CustomEditorImpl -> {
                         insertImguiExposeEditorFields(value, gameObject, level, editorSceneUI)
@@ -158,7 +158,7 @@ object ImGuiHelper {
         action.set(item.obj)
     }
 
-    fun action(label: String, action: Item<Action>, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI, noCheckComps: Boolean = false) {
+    fun action(label: String, action: Item<Action>, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         with(ImGui) {
             val index = intArrayOf(Actions.values().indexOfFirst { it.action.isInstance(action.obj) })
 
@@ -170,7 +170,7 @@ object ImGuiHelper {
                 val incorrectAction = let {
                     requiredComponent?.component?.forEach {
                         if (!gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex).hasComponent(it))
-                            return@let !noCheckComps
+                            return@let true
                     }
                     false
                 }

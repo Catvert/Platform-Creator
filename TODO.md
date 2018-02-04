@@ -14,6 +14,8 @@
 
 ## IDÉE
 
+-Place order pour l'expose editor 
+- Sélecteur de skin basé sur la couleur (colorpicker)
 - Les groupes, permettant de grouper des gameObjects entre-eux
 - Structure, permet de créer une structure prédéfinie ou créer. Un peu à la méthode des prefabs sauf que c'est plusieurs gameObjects placé a côté de l'autre
 - Ajout du pseudo de l'utilisateur au premier lancement

@@ -30,7 +30,7 @@ class MoverComponent(@ExposeEditor(max = 100f) var moveSpeedX: Int, @ExposeEdito
 
     private fun reverse() {
         if (nextReverse != !reverse) {
-            nextReverse = !nextReverse
+            nextReverse = !reverse
             if (nextReverse)
                 onReverseAction(gameObject)
             else
@@ -54,6 +54,8 @@ class MoverComponent(@ExposeEditor(max = 100f) var moveSpeedX: Int, @ExposeEdito
                 }
             }
         }
+
+        nextReverse = reverse
     }
 
     override fun update() {
