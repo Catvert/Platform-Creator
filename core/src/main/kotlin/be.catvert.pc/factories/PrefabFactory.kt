@@ -26,7 +26,7 @@ object PrefabSetup {
         this += PhysicsComponent(true)
     }))
 
-    val killActionTween = MultiplexerAction(TweenAction(TweenFactory.RemoveGO()), TweenAction(TweenFactory.ReduceSize()))
+    val killActionTween = MultiplexerAction(TweenAction(TweenFactory.RemoveGO(), false), TweenAction(TweenFactory.ReduceSize(), false))
 
     fun playerAction(action: Action) = TagAction(Tags.Player.tag, action)
 }
@@ -123,7 +123,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
             Prefab("gold coin", GameObject(Tags.Special.tag, box = Rect(size = Size(35, 35)), initDefaultState = {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.packsKenneyDirPath.child("jumper.atlas").toFileWrapper() to "coin_gold"))
                 this += SoundComponent(SoundComponent.SoundData(Constants.soundsDirPath.child("coin.wav").toFileWrapper()))
-                this += SensorComponent(SensorComponent.TagSensorData(sensorIn = MultiplexerAction(SoundAction(0), ScoreAction(1), TweenAction(TweenFactory.RemoveGO()))))
+                this += SensorComponent(SensorComponent.TagSensorData(sensorIn = MultiplexerAction(SoundAction(0), ScoreAction(1), TweenAction(TweenFactory.RemoveGO(), false))))
             }))
     ),
     //endregion
@@ -248,7 +248,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
             Prefab("mushroom red", GameObject(Tags.Special.tag, box = Rect(size = Size(45, 45)), initDefaultState = {
                 this += AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.packsSMCDirPath.child("items.atlas").toFileWrapper() to "mushroom_red"))
                 this += PhysicsComponent(false, 5, collisionsActions = arrayListOf(
-                        CollisionAction(BoxSide.All, action = TweenAction(TweenFactory.RemoveGO()))
+                        CollisionAction(BoxSide.All, action = TweenAction(TweenFactory.RemoveGO(), false))
                 ))
                 this += MoverComponent(5, 0)
             }))
@@ -261,7 +261,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         CollisionAction(BoxSide.Down, action = StateAction(1))
                 ))
             }, otherStates = *arrayOf(GameObjectState("pop") {
-                this.startAction = SpawnAction(PrefabFactory.MushroomRed_SMC.prefab, BoxSide.Up, true)
+                this.startAction = SpawnSideAction(PrefabFactory.MushroomRed_SMC.prefab, BoxSide.Up, true)
                 this += AtlasComponent(0, AtlasComponent.AtlasData("pop", Constants.packsSMCDirPath.child("box.atlas").toFileWrapper() to "brown1_1"))
                 this += PhysicsComponent(true)
             })).apply { this.layer = 1 })

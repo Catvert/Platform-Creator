@@ -8,10 +8,12 @@ import be.catvert.pc.utility.Updeatable
 object TweenSystem : Updeatable {
     private data class TweenData(val tween: Tween, val stateBackupIndex: Int)
 
-    private val tweens = mutableListOf<Pair<GameObject, TweenData>>()
+    private data class TweenInfo(val gameObject: GameObject, val tweenData: TweenData, val loopTween: Tween?)
 
-    fun startTween(tween: Tween, gameObject: GameObject) {
-        tweens.add(gameObject to TweenData(tween, gameObject.getCurrentStateIndex()))
+    private val tweens = mutableListOf<TweenInfo>()
+
+    fun startTween(tween: Tween, gameObject: GameObject, loopTween: Tween?) {
+        tweens.add(TweenInfo(gameObject, TweenData(tween, gameObject.getCurrentStateIndex()), loopTween))
         tween.init(gameObject)
 
         if (tween.useTweenState) {
@@ -28,8 +30,9 @@ object TweenSystem : Updeatable {
         val list = mutableListOf(*tweens.toTypedArray())
 
         list.forEach {
-            val gameObject = it.first
-            val (tween, backupStateIndex) = it.second
+            val gameObject = it.gameObject
+            val (tween, backupStateIndex) = it.tweenData
+            val loopTween = it.loopTween
 
             if (tween.update(gameObject)) {
                 if (tween.endAction !is RemoveGOAction) // TODO workaround?
@@ -44,7 +47,10 @@ object TweenSystem : Updeatable {
                 if (nextTween != null) {
                     gameObject.setState(backupStateIndex, false)
 
-                    startTween(nextTween, gameObject)
+                    startTween(nextTween, gameObject, null)
+                }
+                else if(loopTween != null) {
+                    startTween(loopTween, gameObject, loopTween)
                 }
             }
         }

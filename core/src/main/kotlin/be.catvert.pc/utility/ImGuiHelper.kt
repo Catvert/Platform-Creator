@@ -52,13 +52,21 @@ object ImGuiHelper {
 
                 val item = Item(array[index])
                 functionalProgramming.withId("collapse $index") {
-                    functionalProgramming.collapsingHeader(itemLabel(item.obj)) {
+                    if(collapsingHeader("")) {
+                        sameLine(0f, style.itemInnerSpacing.x)
+                        text(itemLabel(item.obj))
+
                         functionalProgramming.withIndent {
                             functionalProgramming.withId("array item $index") {
                                 itemBlock(item)
                             }
                         }
                     }
+                    else {
+                        sameLine(0f, style.itemInnerSpacing.x)
+                        text(itemLabel(item.obj))
+                    }
+
                     array[index] = item.obj
                 }
             }
@@ -189,7 +197,7 @@ object ImGuiHelper {
 
                 val description = actionClass.findAnnotation<Description>()
                 if (description != null) {
-                    sameLine()
+                    sameLine(0f, style.itemInnerSpacing.x)
                     text("(?)")
 
                     if (isItemHovered()) {
@@ -211,11 +219,13 @@ object ImGuiHelper {
             val imgSize = Vec2(Context.fontSize)
 
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth - imgSize.x - Context.style.itemInnerSpacing.x * 3f) {
-                if (searchBar) {
-                    if (searchCombo("", currentItem, items))
+                functionalProgramming.withId(label) {
+                    if (searchBar) {
+                        if (searchCombo("", currentItem, items))
+                            comboChanged = true
+                    } else if (combo("", currentItem, items))
                         comboChanged = true
-                } else if (combo("", currentItem, items))
-                    comboChanged = true
+                }
             }
 
             sameLine(0f, style.itemInnerSpacing.x)

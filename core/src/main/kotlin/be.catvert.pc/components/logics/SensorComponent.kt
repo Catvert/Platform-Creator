@@ -6,6 +6,7 @@ import be.catvert.pc.GameObjectTag
 import be.catvert.pc.Tags
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
+import be.catvert.pc.actions.TagAction
 import be.catvert.pc.components.Component
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
@@ -13,6 +14,7 @@ import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.*
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import imgui.ImGui
 import imgui.functionalProgramming
 
 @Description("Permet d'effectuer une action quand un game object précis est au-dessus d'une autre game object")
@@ -88,6 +90,18 @@ class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeata
     }
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        ImGuiHelper.addImguiWidgetsArray("sensors", sensors, { "sensor" }, { GameObjectSensorData(null) }, gameObject, level, editorSceneUI)
+        ImGuiHelper.addImguiWidgetsArray("sensors", sensors, { "sensor" }, { GameObjectSensorData(null) }, {
+            val typeIndex = intArrayOf(if(it.obj is GameObjectSensorData) 0 else 1)
+            functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
+                if (ImGui.combo("target type", typeIndex, listOf("GameObject", "Tag"))) {
+                    it.obj = when (typeIndex[0]) {
+                        0 -> GameObjectSensorData(null)
+                        else -> TagSensorData(Tags.Player.tag)
+                    }
+                }
+            }
+            ImGui.separator()
+            ImGuiHelper.insertImguiExposeEditorFields(it.obj, gameObject, level, editorSceneUI)
+        })
     }
 }

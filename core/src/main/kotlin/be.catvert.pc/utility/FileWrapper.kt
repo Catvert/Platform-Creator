@@ -19,4 +19,6 @@ class FileWrapper(file: FileHandle) {
     }
 
     fun get() = file.toLocalFile()
+
+    override fun equals(other: Any?) = (other as? FileWrapper)?.file == this.file
 }

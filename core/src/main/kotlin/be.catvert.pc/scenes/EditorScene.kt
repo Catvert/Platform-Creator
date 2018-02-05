@@ -1072,22 +1072,22 @@ class EditorScene(val level: Level) : Scene(level.background) {
                             when (editorSceneUI.settingsLevelBackgroundType.obj.cast<BackgroundType>()) {
                                 BackgroundType.Standard -> {
                                     if (editorSceneUI.settingsLevelStandardBackgroundIndex[0] == -1) {
-                                        editorSceneUI.settingsLevelStandardBackgroundIndex[0] = PCGame.standardBackgrounds().indexOfFirst { it == level.background }
+                                        editorSceneUI.settingsLevelStandardBackgroundIndex[0] = PCGame.standardBackgrounds().indexOfFirst { it.backgroundFile == (level.background as? StandardBackground)?.backgroundFile}
                                     }
 
                                     functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                                        if (sliderInt("Fond d'écran", editorSceneUI.settingsLevelStandardBackgroundIndex, 0, PCGame.standardBackgrounds().size - 1)) {
+                                        if (sliderInt("fond d'écran", editorSceneUI.settingsLevelStandardBackgroundIndex, 0, PCGame.standardBackgrounds().size - 1)) {
                                             updateBackground(PCGame.standardBackgrounds()[editorSceneUI.settingsLevelStandardBackgroundIndex[0]])
                                         }
                                     }
                                 }
                                 BackgroundType.Parallax -> {
                                     if (editorSceneUI.settingsLevelParallaxBackgroundIndex[0] == -1) {
-                                        editorSceneUI.settingsLevelParallaxBackgroundIndex[0] = PCGame.parallaxBackgrounds().indexOfFirst { it == level.background }
+                                        editorSceneUI.settingsLevelParallaxBackgroundIndex[0] = PCGame.parallaxBackgrounds().indexOfFirst { it.parallaxDataFile == (level.background as? ParallaxBackground)?.parallaxDataFile }
                                     }
 
                                     functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                                        if (sliderInt("Fond d'écran", editorSceneUI.settingsLevelParallaxBackgroundIndex, 0, PCGame.parallaxBackgrounds().size - 1)) {
+                                        if (sliderInt("fond d'écran", editorSceneUI.settingsLevelParallaxBackgroundIndex, 0, PCGame.parallaxBackgrounds().size - 1)) {
                                             updateBackground(PCGame.parallaxBackgrounds()[editorSceneUI.settingsLevelParallaxBackgroundIndex[0]])
                                         }
                                     }
@@ -1352,7 +1352,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
                     val description = componentClass.findAnnotation<Description>()
                     if (description != null) {
-                        sameLine()
+                        sameLine(0f, style.itemInnerSpacing.x)
                         text("(?)")
 
                         if (isItemHovered()) {
