@@ -71,7 +71,7 @@ class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeata
         }
 
         override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-            ImGuiHelper.gameObject(::target, editorSceneUI, "target")
+            ImGuiHelper.gameObject(::target, level, editorSceneUI, "target")
         }
     }
 

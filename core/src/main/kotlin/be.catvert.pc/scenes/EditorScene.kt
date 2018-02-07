@@ -120,6 +120,8 @@ class EditorScene(val level: Level) : Scene(level.background) {
         var showInfoGameObjectWindow = false
         var showInfoGameObjectTextWindow = false
 
+        var addTagPopupNameBuffer = ""
+
         var showGameObjectsWindow = true
         var gameObjectsTypeIndex = 0
         var gameObjectsShowUser = false
@@ -1056,9 +1058,37 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
                     menu("Éditer") {
                         menu("Tags") {
-                            ImGuiHelper.addImguiWidgetsArray("tags", level.tags, { it }, { "tag" }, {
-                                ImGuiHelper.inputText("tag", it)
-                            })
+                            val popupTitle = "add tag popup"
+                            val it = level.tags.iterator()
+
+                            var counter = 0
+                            while (it.hasNext()) {
+                                val tag = it.next()
+
+                                functionalProgramming.withId("del btn ${++counter}") {
+                                    pushItemFlag(ItemFlags.Disabled.i, Tags.values().any { it.tag == tag })
+                                    if (button("Suppr.")) {
+                                        it.remove()
+                                    }
+                                    popItemFlag()
+                                }
+
+                                sameLine(0f, style.itemInnerSpacing.x)
+
+                                text(tag)
+                            }
+
+                            if (button("Ajouter un tag", Vec2(-1, 0))) {
+                                openPopup(popupTitle)
+                            }
+
+                            functionalProgramming.popup(popupTitle) {
+                                ImGuiHelper.inputText("nom", editorSceneUI::addTagPopupNameBuffer)
+                                if (button("Ajouter", Vec2(-1, 0))) {
+                                    if (editorSceneUI.addTagPopupNameBuffer.isNotBlank() && level.tags.none { it == editorSceneUI.addTagPopupNameBuffer })
+                                        level.tags.add(editorSceneUI.addTagPopupNameBuffer)
+                                }
+                            }
                         }
                         menu("Options du niveau") {
                             fun updateBackground(newBackground: Background) {
@@ -1072,7 +1102,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                             when (editorSceneUI.settingsLevelBackgroundType.obj.cast<BackgroundType>()) {
                                 BackgroundType.Standard -> {
                                     if (editorSceneUI.settingsLevelStandardBackgroundIndex[0] == -1) {
-                                        editorSceneUI.settingsLevelStandardBackgroundIndex[0] = PCGame.standardBackgrounds().indexOfFirst { it.backgroundFile == (level.background as? StandardBackground)?.backgroundFile}
+                                        editorSceneUI.settingsLevelStandardBackgroundIndex[0] = PCGame.standardBackgrounds().indexOfFirst { it.backgroundFile == (level.background as? StandardBackground)?.backgroundFile }
                                     }
 
                                     functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
@@ -1094,7 +1124,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                                 }
                             }
 
-                            ImGuiHelper.gameObject(level::followGameObject, editorSceneUI, "caméra go")
+                            ImGuiHelper.gameObject(level::followGameObject, level, editorSceneUI, "caméra go")
 
                             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                                 inputInt("gravité", level::gravitySpeed)
@@ -1257,6 +1287,14 @@ class EditorScene(val level: Level) : Scene(level.background) {
                 if (button("Créer un prefab", Vec2(-1, 0)))
                     openPopup(createPrefabTitle)
 
+                val favChecked = booleanArrayOf(level.favoris.contains(gameObject))
+                if (checkbox("favoris", favChecked)) {
+                    if (favChecked[0])
+                        level.favoris.add(gameObject)
+                    else
+                        level.favoris.remove(gameObject)
+                }
+
                 ImGuiHelper.insertImguiExposeEditorFields(gameObject, gameObject, level, editorSceneUI)
 
                 separator()
@@ -1381,7 +1419,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
     private fun drawInfoGameObjectTextWindow(gameObject: GameObject) {
         with(ImGui) {
-            functionalProgramming.withWindow("Données du gameObject", editorSceneUI::showInfoGameObjectTextWindow, WindowFlags.AlwaysAutoResize.i) {
+            functionalProgramming.withWindow("Données du game object", editorSceneUI::showInfoGameObjectTextWindow, WindowFlags.AlwaysAutoResize.i) {
                 ImGuiHelper.insertImguiTextExposeEditorFields(gameObject)
                 separator()
 

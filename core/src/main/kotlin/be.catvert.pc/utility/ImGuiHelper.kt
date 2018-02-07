@@ -6,6 +6,7 @@ import be.catvert.pc.Prefab
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.Actions
 import be.catvert.pc.components.RequiredComponent
+import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.containers.Level
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.i18n.MenusText
@@ -28,6 +29,7 @@ object ImGuiHelper {
     }
 
     private val settingsBtnIconHandle: Int = ResourceManager.getTexture(Constants.uiDirPath.child("settings.png")).textureObjectHandle
+    private val favBtnIconHandle: Int = ResourceManager.getTexture(Constants.uiDirPath.child("fav.png")).textureObjectHandle
 
     private val searchBarBuffers = mutableMapOf<String, Item<String>>()
 
@@ -216,9 +218,7 @@ object ImGuiHelper {
         var comboChanged = false
 
         with(ImGui) {
-            val imgSize = Vec2(Context.fontSize)
-
-            functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth - imgSize.x - Context.style.itemInnerSpacing.x * 3f) {
+            functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth - Context.fontSize - Context.style.itemInnerSpacing.x * 3f) {
                 functionalProgramming.withId(label) {
                     if (searchBar) {
                         if (searchCombo("", currentItem, items))
@@ -231,9 +231,8 @@ object ImGuiHelper {
             sameLine(0f, style.itemInnerSpacing.x)
 
             pushItemFlag(ItemFlags.Disabled.i, settingsBtnDisabled)
-            if (imageButton(settingsBtnIconHandle, imgSize, uv1 = Vec2(1, 1))) {
+            if(settingsButton())
                 openPopup(popupTitle)
-            }
             popItemFlag()
 
             if (settingsBtnDisabled)
@@ -257,43 +256,46 @@ object ImGuiHelper {
         currentItem.set(item[0])
     }
 
-    fun searchCombo(label: String, currentItem: KMutableProperty0<Int>, items: List<String>) {
-        val item = intArrayOf(currentItem())
-        searchCombo(label, item, items)
-        currentItem.set(item[0])
-    }
-
-    fun searchCombo(label: String, currentItem: IntArray, items: List<String>): Boolean {
+    fun searchCombo(label: String, currentItem: IntArray, items: List<String>, selectableHovered: (index: Int) -> Unit = {}): Boolean {
         var changed = false
 
         with(ImGui) {
-            if (beginCombo(label, items.elementAtOrNull(currentItem[0]))) {
-                cursorPosX += style.itemInnerSpacing.x
-                val buf = searchBarBuffers.getOrPut(label) { Item("") }
-                inputText("", buf)
-                cursorPosY += style.itemInnerSpacing.y
+            functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
+                if (beginCombo(label, items.elementAtOrNull(currentItem[0]))) {
+                    cursorPosX += style.itemInnerSpacing.x
+                    val buf = searchBarBuffers.getOrPut(label) { Item("") }
+                    inputText("", buf)
+                    cursorPosY += style.itemInnerSpacing.y
 
-                separator()
+                    separator()
 
-                for (i in 0 until items.size) {
-                    if (!items[i].startsWith(buf.obj, true))
-                        continue
-                    pushId(i)
-                    val itemSelected = i == currentItem[0]
-                    val itemText = items.getOrElse(i, { "*Unknown item*" })
-                    if (selectable(itemText, itemSelected)) {
-                        currentItem[0] = i
-                        changed = true
+                    for (i in 0 until items.size) {
+                        if (!items[i].startsWith(buf.obj, true))
+                            continue
+                        pushId(i)
+                        val itemSelected = i == currentItem[0]
+                        val itemText = items.getOrElse(i, { "*Unknown item*" })
+                        if (selectable(itemText, itemSelected)) {
+                            currentItem[0] = i
+                            changed = true
+                        }
+                        if (itemSelected) setItemDefaultFocus()
+
+                        if(isItemHovered())
+                            selectableHovered(i)
+
+                        popId()
                     }
-                    if (itemSelected) setItemDefaultFocus()
-                    popId()
-                }
 
-                endCombo()
+                    endCombo()
+                }
             }
         }
         return changed
     }
+
+    fun settingsButton(size: Vec2 = Vec2(Context.fontSize)) = ImGui.imageButton(settingsBtnIconHandle, size, uv1 = Vec2(1, 1))
+    fun favButton(size: Vec2 = Vec2(Context.fontSize)) = ImGui.imageButton(favBtnIconHandle, size, uv1 = Vec2(1, 1))
 
     fun gameObjectTag(tag: Item<GameObjectTag>, level: Level, label: String = "tag") {
         val selectedIndex = intArrayOf(level.tags.indexOfFirst { it == tag.obj })
@@ -304,15 +306,11 @@ object ImGuiHelper {
         }
     }
 
-    fun gameObjectTag(tag: KMutableProperty0<GameObjectTag>, level: Level, label: String = "tag") {
-        val item = Item(tag.get())
-        gameObjectTag(item, level, label)
-        tag.set(item.obj)
-    }
+    fun gameObject(gameObject: KMutableProperty0<GameObject?>, level: Level, editorSceneUI: EditorScene.EditorSceneUI, label: String = "game object") {
+        val favTitle = "set gameobject fav"
 
-    fun gameObject(gameObject: KMutableProperty0<GameObject?>, editorSceneUI: EditorScene.EditorSceneUI, label: String = "game object") {
         with(ImGui) {
-            if (button("Sélect. $label", Vec2(Constants.defaultWidgetsWidth, 0))) {
+            if (button("Sélect. $label", Vec2(Constants.defaultWidgetsWidth - Context.fontSize - Context.style.itemInnerSpacing.x * 3f, 0))) {
                 editorSceneUI.editorMode = EditorScene.EditorSceneUI.EditorMode.SELECT_GO
                 editorSceneUI.onSelectGO.register(true) {
                     gameObject.set(it)
@@ -326,6 +324,55 @@ object ImGuiHelper {
                         textColored(Color.RED, "aucun game object sélectionner")
                     else
                         textPropertyColored(Color.ORANGE, "game object actuel :", go.name)
+                }
+            }
+
+            sameLine(0f, style.itemInnerSpacing.x)
+
+            if(favButton())
+                openPopup(favTitle)
+
+            val fav = favoritesPopup(favTitle, level)
+
+            if(fav != null) {
+                gameObject.set(fav)
+            }
+        }
+    }
+
+    private val favoritesIndex = mutableMapOf<String, IntArray>()
+    fun favoritesPopup(id: String, level: Level): GameObject? {
+        var gameObject: GameObject? = null
+
+        with(ImGui) {
+            functionalProgramming.popup(id) {
+                if(level.favoris.isNotEmpty()) {
+                    searchCombo("favoris", favoritesIndex.getOrPut(id, { intArrayOf(0) }), level.favoris.map { it.name }, {
+                        val fav = level.favoris[it]
+
+                        atlasPreviewTooltip(fav)
+                    })
+
+                    if (button("Sélectionner", Vec2(-1, 0))) {
+                        gameObject = level.favoris[favoritesIndex[id]!![0]]
+                        closeCurrentPopup()
+                    }
+                }
+                else {
+                    text("Aucun favoris n'est présent dans votre collection.")
+                }
+            }
+        }
+        return gameObject
+    }
+
+    fun atlasPreviewTooltip(gameObject: GameObject) {
+        val atlas = gameObject.getCurrentState().getComponent<AtlasComponent>()
+        if(atlas != null) {
+            functionalProgramming.withStyleColor(Col.PopupBg, ImGui.getStyleColorVec4(Col.PopupBg).apply { a = 0.5f }) {
+                functionalProgramming.withTooltip {
+                    val region = atlas.data[atlas.currentIndex].currentKeyFrame()
+                    ImGui.image(region.texture.textureObjectHandle, Vec2(gameObject.box.width, gameObject.box.height), Vec2(region.u, region.v), Vec2(region.u2, region.v2))
                 }
             }
         }

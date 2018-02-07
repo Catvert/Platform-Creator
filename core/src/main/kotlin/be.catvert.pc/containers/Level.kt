@@ -1,9 +1,6 @@
 package be.catvert.pc.containers
 
-import be.catvert.pc.Log
-import be.catvert.pc.PCGame
-import be.catvert.pc.Prefab
-import be.catvert.pc.Tags
+import be.catvert.pc.*
 import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.scenes.EndLevelScene
@@ -17,6 +14,7 @@ import glm_.func.common.clamp
 import ktx.assets.toLocalFile
 import kotlin.math.roundToInt
 
+
 class Level(val levelPath: String, val gameVersion: Float, var background: Background) : GameObjectMatrixContainer() {
     private val levelTextures = levelPath.toLocalFile().parent().child("textures") to mutableListOf<FileHandle>()
     private val levelAtlas = levelPath.toLocalFile().parent().child("atlas") to mutableListOf<FileHandle>()
@@ -24,6 +22,8 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
     private val levelPrefabs = levelPath.toLocalFile().parent().child("prefabs") to mutableListOf<Prefab>()
 
     val tags = arrayListOf(*Tags.values().map { it.tag }.toTypedArray())
+
+    val favoris = arrayListOf<GameObject>()
 
     @JsonIgnore
     var applyGravity = true
@@ -184,5 +184,4 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
             return null
         }
     }
-
 }
