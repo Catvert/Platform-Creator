@@ -1,3 +1,8 @@
-15:53:32  -> Info. : Initialisation en cours.. 
+12:25:58  -> Info. : Initialisation en cours.. 
  Taille : 1920x1027
-15:53:36  -> Info. : Chargement de la scène : EditorScene
+12:28:15  -> Info. : Chargement de la scène : EditorScene
+12:28:20  -> Info. : Chargement de la scène : MainMenuScene
+12:28:22  -> Attention : Un niveau portant le même nom existe déjà !
+12:28:23  -> Info. : Chargement de la scène : EditorScene
+12:29:37  -> Info. : Chargement de la scène : MainMenuScene
+12:29:44  -> Info. : Chargement de la scène : EditorScene
