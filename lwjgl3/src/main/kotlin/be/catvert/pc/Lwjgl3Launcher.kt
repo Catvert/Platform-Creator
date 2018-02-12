@@ -4,6 +4,7 @@ import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.GameConfig
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration
+import glm_.min
 
 /** Launches the desktop (LWJGL3) application.  */
 object Lwjgl3Launcher {
@@ -16,12 +17,14 @@ object Lwjgl3Launcher {
             val config = GameConfig.loadGameConfig()
 
             if(config.fullScreen) {
-                val mode = Lwjgl3ApplicationConfiguration.getDisplayModes().firstOrNull { it.width == config.screenWidth && it.height == config.screenHeight && it.refreshRate == config.refreshRate } ?:
-                Lwjgl3ApplicationConfiguration.getDisplayMode()
+                val mode = Lwjgl3ApplicationConfiguration.getDisplayModes().firstOrNull { it.width == config.screenWidth && it.height == config.screenHeight && it.refreshRate == config.refreshRate } ?: Lwjgl3ApplicationConfiguration.getDisplayMode()
                 configuration.setFullscreenMode(mode)
             }
-            else
-                configuration.setWindowedMode(config.screenWidth, config.screenHeight)
+            else {
+                val mode = Lwjgl3ApplicationConfiguration.getDisplayMode()
+                configuration.setWindowedMode(config.screenWidth.min(mode.width), config.screenHeight.min(mode.height))
+                configuration.setWindowPosition(mode.width / 2 - config.screenWidth.min(mode.width) / 2, mode.height / 2 - config.screenHeight.min(mode.height) / 2)
+            }
 
             configuration.setResizable(true)
             configuration.useVsync(true)

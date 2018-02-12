@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 
 @Description("Permet de changer la gravité du niveau")
 class GravityAction(@ExposeEditor(min = 0f, max = 100f) var gravitySpeed: Int) : Action() {
-    @JsonCreator private constructor(): this(Constants.defaultGravitySpeed)
+    @JsonCreator private constructor() : this(Constants.defaultGravitySpeed)
 
     override fun invoke(gameObject: GameObject) {
         (gameObject.container as? Level)?.gravitySpeed = gravitySpeed

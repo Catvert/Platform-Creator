@@ -41,7 +41,7 @@ class SoundComponent(var sounds: ArrayList<SoundData>) : Component(), ResourceLo
 
                 val index = intArrayOf(soundsResources.indexOf(soundFile.get()))
                 functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                    if(ImGuiHelper.comboWithSettingsButton("son", index, soundsResources.map { it.nameWithoutExtension() }, {
+                    if (ImGuiHelper.comboWithSettingsButton("son", index, soundsResources.map { it.nameWithoutExtension() }, {
                                 checkbox("sons importés", ::levelResources)
                             })) {
                         soundFile = soundsResources[index[0]].toFileWrapper()

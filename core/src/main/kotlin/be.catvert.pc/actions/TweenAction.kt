@@ -10,7 +10,6 @@ import be.catvert.pc.tweens.Tweens
 import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.CustomEditorImpl
 import be.catvert.pc.utility.Description
-import be.catvert.pc.utility.ExposeEditor
 import com.fasterxml.jackson.annotation.JsonCreator
 import glm_.vec2.Vec2
 import imgui.ImGui
@@ -22,7 +21,7 @@ class TweenAction(var tween: Tween, var loop: Boolean) : Action(), CustomEditorI
     @JsonCreator private constructor() : this(EmptyTween(), false)
 
     override fun invoke(gameObject: GameObject) {
-        TweenSystem.startTween(tween, gameObject, if(loop) tween else null)
+        TweenSystem.startTween(tween, gameObject, if (loop) tween else null)
     }
 
     private var addTweenTitle = "Ajouter un tween"

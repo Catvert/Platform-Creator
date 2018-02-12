@@ -4,6 +4,7 @@ import be.catvert.pc.GameObject
 import be.catvert.pc.GameObjectState
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
+import be.catvert.pc.actions.LifeAction
 import be.catvert.pc.actions.RemoveGOAction
 import be.catvert.pc.components.Component
 import be.catvert.pc.containers.GameObjectContainer
@@ -35,27 +36,26 @@ class LifeComponent(onDeathAction: Action, lifePointActions: ArrayList<Action> =
     /**
      * Permet de retirer un point de vie à un gameObject
      */
-    fun removeLifePoint() {
-        if (lifePoint >= 1) {
-            lpActions.elementAt(lifePoint - 1).invoke(gameObject)
-            lifePoint = (lifePoint - 1).max(1)
-        }
-    }
+    fun lifeAction(action: LifeAction.LifeActions) {
+        if (!active)
+            return
 
-    /**
-     * Permet de supprimer tout les points de vie à un gameObject
-     */
-    fun kill() {
-        lpActions.elementAt(0).invoke(gameObject)
-        lifePoint = 1
-    }
-
-    /**
-     * Permet de rajouter un point de vie au gameObject
-     */
-    fun addLifePoint() {
-        if (lpActions.size > lifePoint) {
-            ++lifePoint
+        when (action) {
+            LifeAction.LifeActions.ADD_LP -> {
+                if (lpActions.size > lifePoint) {
+                    ++lifePoint
+                }
+            }
+            LifeAction.LifeActions.REMOVE_LP -> {
+                if (lifePoint >= 1) {
+                    lpActions.elementAt(lifePoint - 1).invoke(gameObject)
+                    lifePoint = (lifePoint - 1).max(1)
+                }
+            }
+            LifeAction.LifeActions.ONE_SHOT -> {
+                lpActions.elementAt(0).invoke(gameObject)
+                lifePoint = 1
+            }
         }
     }
 

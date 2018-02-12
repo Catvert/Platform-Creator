@@ -2,9 +2,9 @@ package be.catvert.pc.actions
 
 import be.catvert.pc.GameObject
 import be.catvert.pc.Prefab
+import be.catvert.pc.builders.TweenBuilder
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.tweens.MoveTween
-import be.catvert.pc.tweens.TweenBuilder
 import be.catvert.pc.utility.BoxSide
 import be.catvert.pc.utility.Description
 import be.catvert.pc.utility.ExposeEditor
@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 
 @Description("Permet de faire apparaître un game object sur un côté de ce game object")
 class SpawnSideAction(@ExposeEditor var prefab: Prefab, @ExposeEditor var spawnSide: BoxSide, @ExposeEditor var tweenMove: Boolean) : Action() {
-    @JsonCreator private constructor() : this(PrefabFactory.MushroomRed_SMC.prefab, BoxSide.Left, true)
+    @JsonCreator private constructor() : this(PrefabFactory.MushroomRed_SMC.prefab, BoxSide.Up, true)
 
     override fun invoke(gameObject: GameObject) {
         gameObject.container?.apply {

@@ -2,6 +2,7 @@ package be.catvert.pc.utility
 
 import be.catvert.pc.GameObject
 import be.catvert.pc.GameObjectTag
+import be.catvert.pc.PCGame
 import be.catvert.pc.Prefab
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.Actions
@@ -54,7 +55,7 @@ object ImGuiHelper {
 
                 val item = Item(array[index])
                 functionalProgramming.withId("collapse $index") {
-                    if(collapsingHeader("")) {
+                    if (collapsingHeader("")) {
                         sameLine(0f, style.itemInnerSpacing.x)
                         text(itemLabel(item.obj))
 
@@ -63,8 +64,7 @@ object ImGuiHelper {
                                 itemBlock(item)
                             }
                         }
-                    }
-                    else {
+                    } else {
                         sameLine(0f, style.itemInnerSpacing.x)
                         text(itemLabel(item.obj))
                     }
@@ -119,7 +119,7 @@ object ImGuiHelper {
                         prefab(item.cast(), level, label)
                     }
                     is Size -> {
-                        size(item.cast(), Size(exposeEditor.min.roundToInt(), exposeEditor.min.roundToInt()), Size(exposeEditor.min.roundToInt(), exposeEditor.min.roundToInt()))
+                        size(item.cast(), Size(exposeEditor.min.roundToInt(), exposeEditor.min.roundToInt()), Size(exposeEditor.max.roundToInt(), exposeEditor.max.roundToInt()))
                     }
                     is String -> {
                         when (exposeEditor.customType) {
@@ -231,7 +231,7 @@ object ImGuiHelper {
             sameLine(0f, style.itemInnerSpacing.x)
 
             pushItemFlag(ItemFlags.Disabled.i, settingsBtnDisabled)
-            if(settingsButton())
+            if (settingsButton())
                 openPopup(popupTitle)
             popItemFlag()
 
@@ -260,35 +260,33 @@ object ImGuiHelper {
         var changed = false
 
         with(ImGui) {
-            functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                if (beginCombo(label, items.elementAtOrNull(currentItem[0]))) {
-                    cursorPosX += style.itemInnerSpacing.x
-                    val buf = searchBarBuffers.getOrPut(label) { Item("") }
-                    inputText("", buf)
-                    cursorPosY += style.itemInnerSpacing.y
+            if (beginCombo(label, items.elementAtOrNull(currentItem[0]))) {
+                cursorPosX += style.itemInnerSpacing.x
+                val buf = searchBarBuffers.getOrPut(label) { Item("") }
+                inputText("", buf)
+                cursorPosY += style.itemInnerSpacing.y
 
-                    separator()
+                separator()
 
-                    for (i in 0 until items.size) {
-                        if (!items[i].startsWith(buf.obj, true))
-                            continue
-                        pushId(i)
-                        val itemSelected = i == currentItem[0]
-                        val itemText = items.getOrElse(i, { "*Unknown item*" })
-                        if (selectable(itemText, itemSelected)) {
-                            currentItem[0] = i
-                            changed = true
-                        }
-                        if (itemSelected) setItemDefaultFocus()
-
-                        if(isItemHovered())
-                            selectableHovered(i)
-
-                        popId()
+                for (i in 0 until items.size) {
+                    if (!items[i].startsWith(buf.obj, true))
+                        continue
+                    pushId(i)
+                    val itemSelected = i == currentItem[0]
+                    val itemText = items.getOrElse(i, { "*Unknown item*" })
+                    if (selectable(itemText, itemSelected)) {
+                        currentItem[0] = i
+                        changed = true
                     }
+                    if (itemSelected) setItemDefaultFocus()
 
-                    endCombo()
+                    if (isItemHovered())
+                        selectableHovered(i)
+
+                    popId()
                 }
+
+                endCombo()
             }
         }
         return changed
@@ -329,12 +327,12 @@ object ImGuiHelper {
 
             sameLine(0f, style.itemInnerSpacing.x)
 
-            if(favButton())
+            if (favButton())
                 openPopup(favTitle)
 
             val fav = favoritesPopup(favTitle, level)
 
-            if(fav != null) {
+            if (fav != null) {
                 gameObject.set(fav)
             }
         }
@@ -346,19 +344,20 @@ object ImGuiHelper {
 
         with(ImGui) {
             functionalProgramming.popup(id) {
-                if(level.favoris.isNotEmpty()) {
-                    searchCombo("favoris", favoritesIndex.getOrPut(id, { intArrayOf(0) }), level.favoris.map { it.name }, {
-                        val fav = level.favoris[it]
+                if (level.favoris.isNotEmpty()) {
+                    functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
+                        searchCombo("favoris", favoritesIndex.getOrPut(id, { intArrayOf(0) }), level.favoris.map { it.name }, {
+                            val fav = level.favoris[it]
 
-                        atlasPreviewTooltip(fav)
-                    })
+                            atlasPreviewTooltip(fav)
+                        })
+                    }
 
                     if (button("Sélectionner", Vec2(-1, 0))) {
                         gameObject = level.favoris[favoritesIndex[id]!![0]]
                         closeCurrentPopup()
                     }
-                }
-                else {
+                } else {
                     text("Aucun favoris n'est présent dans votre collection.")
                 }
             }
@@ -368,7 +367,7 @@ object ImGuiHelper {
 
     fun atlasPreviewTooltip(gameObject: GameObject) {
         val atlas = gameObject.getCurrentState().getComponent<AtlasComponent>()
-        if(atlas != null) {
+        if (atlas != null) {
             functionalProgramming.withStyleColor(Col.PopupBg, ImGui.getStyleColorVec4(Col.PopupBg).apply { a = 0.5f }) {
                 functionalProgramming.withTooltip {
                     val region = atlas.data[atlas.currentIndex].currentKeyFrame()
@@ -500,13 +499,16 @@ object ImGuiHelper {
             pushStyleColor(Col.WindowBg, ImGui.getStyleColorVec4(Col.WindowBg).apply { a = 0f })
             pushStyleColor(Col.Button, Vec4(0.2f, 0.5f, 0.9f, 1f))
             pushStyleColor(Col.Text, Vec4(1f))
+            pushStyleColor(Col.Border, ImGui.getStyleColorVec4(Col.Border).apply { a = 0f })
             pushStyleVar(StyleVar.FrameRounding, 10f)
             pushStyleVar(StyleVar.FramePadding, Vec2(10f))
+            pushFont(PCGame.imguiBigFont)
 
             block()
 
-            ImGui.popStyleColor(3)
+            ImGui.popStyleColor(4)
             ImGui.popStyleVar(2)
+            popFont()
         }
     }
 

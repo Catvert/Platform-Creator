@@ -27,6 +27,7 @@ import com.badlogic.gdx.math.Vector3
 import glm_.func.common.clamp
 import glm_.func.common.min
 import glm_.vec2.Vec2
+import glm_.vec4.Vec4
 import imgui.*
 import imgui.functionalProgramming.mainMenuBar
 import imgui.functionalProgramming.menu
@@ -42,7 +43,7 @@ import kotlin.reflect.full.findAnnotation
 /**
  * Scène de l'éditeur de niveau
  */
-class EditorScene(val level: Level) : Scene(level.background) {
+class EditorScene(val level: Level) : Scene(level.background, level.backgroundColor) {
     private enum class ResizeMode {
         FREE, PROPORTIONAL
     }
@@ -94,7 +95,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
         }
     }
 
-    class EditorSceneUI(background: Background) {
+    class EditorSceneUI(background: Background?) {
         enum class EditorMode {
             NO_MODE, SELECT, COPY, SELECT_POINT, SELECT_GO, TRY_LEVEL
         }
@@ -113,7 +114,8 @@ class EditorScene(val level: Level) : Scene(level.background) {
         val settingsLevelStandardBackgroundIndex = intArrayOf(-1)
         val settingsLevelParallaxBackgroundIndex = intArrayOf(-1)
 
-        val settingsLevelBackgroundType: ImGuiHelper.Item<Enum<*>> = ImGuiHelper.Item(background.type)
+        val settingsLevelBackgroundType: ImGuiHelper.Item<Enum<*>> = ImGuiHelper.Item(background?.type
+                ?: BackgroundType.None)
 
         var showExitWindow = false
 
@@ -137,7 +139,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
         var createPrefabInputText = "Nouveau prefab"
 
         init {
-            when (background.type) {
+            when (background?.type) {
                 BackgroundType.Standard -> settingsLevelStandardBackgroundIndex[0] = PCGame.standardBackgrounds().indexOfFirst { it.backgroundFile == (background as StandardBackground).backgroundFile }
                 BackgroundType.Parallax -> settingsLevelParallaxBackgroundIndex[0] = PCGame.parallaxBackgrounds().indexOfFirst { it.parallaxDataFile == (background as ParallaxBackground).parallaxDataFile }
             }
@@ -433,7 +435,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
                     }
                 }
                 EditorSceneUI.EditorMode.SELECT -> {
-                    if (selectGameObjects.isEmpty()) {
+                    if (selectGameObjects.isEmpty() || selectGameObject == null) {
                         editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
                         return
                     }
@@ -1097,29 +1099,50 @@ class EditorScene(val level: Level) : Scene(level.background) {
                                 background = newBackground
                             }
 
-                            ImGuiHelper.enum("type de fond d'écran", editorSceneUI.settingsLevelBackgroundType)
+                            functionalProgramming.collapsingHeader("arrière plan") {
+                                functionalProgramming.withIndent {
+                                    val colorPopupTitle = "level background color popup"
 
-                            when (editorSceneUI.settingsLevelBackgroundType.obj.cast<BackgroundType>()) {
-                                BackgroundType.Standard -> {
-                                    if (editorSceneUI.settingsLevelStandardBackgroundIndex[0] == -1) {
-                                        editorSceneUI.settingsLevelStandardBackgroundIndex[0] = PCGame.standardBackgrounds().indexOfFirst { it.backgroundFile == (level.background as? StandardBackground)?.backgroundFile }
+                                    text("couleur : ")
+                                    sameLine(0f, style.itemInnerSpacing.x)
+                                    if (colorButton("level background color", Vec4(level.backgroundColor[0], level.backgroundColor[1], level.backgroundColor[2], 0f))) {
+                                        openPopup(colorPopupTitle)
                                     }
 
-                                    functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                                        if (sliderInt("fond d'écran", editorSceneUI.settingsLevelStandardBackgroundIndex, 0, PCGame.standardBackgrounds().size - 1)) {
-                                            updateBackground(PCGame.standardBackgrounds()[editorSceneUI.settingsLevelStandardBackgroundIndex[0]])
+                                    ImGuiHelper.enum("type de fond d'écran", editorSceneUI.settingsLevelBackgroundType)
+
+                                    when (editorSceneUI.settingsLevelBackgroundType.obj.cast<BackgroundType>()) {
+                                        BackgroundType.Standard -> {
+                                            if (editorSceneUI.settingsLevelStandardBackgroundIndex[0] == -1) {
+                                                editorSceneUI.settingsLevelStandardBackgroundIndex[0] = PCGame.standardBackgrounds().indexOfFirst { it.backgroundFile == (level.background as? StandardBackground)?.backgroundFile }
+                                            }
+
+                                            functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
+                                                if (sliderInt("fond d'écran", editorSceneUI.settingsLevelStandardBackgroundIndex, 0, PCGame.standardBackgrounds().size - 1)) {
+                                                    updateBackground(PCGame.standardBackgrounds()[editorSceneUI.settingsLevelStandardBackgroundIndex[0]])
+                                                }
+                                            }
+                                        }
+                                        BackgroundType.Parallax -> {
+                                            if (editorSceneUI.settingsLevelParallaxBackgroundIndex[0] == -1) {
+                                                editorSceneUI.settingsLevelParallaxBackgroundIndex[0] = PCGame.parallaxBackgrounds().indexOfFirst { it.parallaxDataFile == (level.background as? ParallaxBackground)?.parallaxDataFile }
+                                            }
+
+                                            functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
+                                                if (sliderInt("fond d'écran", editorSceneUI.settingsLevelParallaxBackgroundIndex, 0, PCGame.parallaxBackgrounds().size - 1)) {
+                                                    updateBackground(PCGame.parallaxBackgrounds()[editorSceneUI.settingsLevelParallaxBackgroundIndex[0]])
+                                                }
+                                            }
+                                        }
+                                        BackgroundType.None -> {
+                                            level.background = null
+                                            background = null
                                         }
                                     }
-                                }
-                                BackgroundType.Parallax -> {
-                                    if (editorSceneUI.settingsLevelParallaxBackgroundIndex[0] == -1) {
-                                        editorSceneUI.settingsLevelParallaxBackgroundIndex[0] = PCGame.parallaxBackgrounds().indexOfFirst { it.parallaxDataFile == (level.background as? ParallaxBackground)?.parallaxDataFile }
-                                    }
 
-                                    functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                                        if (sliderInt("fond d'écran", editorSceneUI.settingsLevelParallaxBackgroundIndex, 0, PCGame.parallaxBackgrounds().size - 1)) {
-                                            updateBackground(PCGame.parallaxBackgrounds()[editorSceneUI.settingsLevelParallaxBackgroundIndex[0]])
-                                        }
+                                    functionalProgramming.popup(colorPopupTitle) {
+                                        if (colorEdit3("couleur de l'arrière plan", level.backgroundColor))
+                                            backgroundColors = level.backgroundColor
                                     }
                                 }
                             }
@@ -1419,6 +1442,7 @@ class EditorScene(val level: Level) : Scene(level.background) {
 
     private fun drawInfoGameObjectTextWindow(gameObject: GameObject) {
         with(ImGui) {
+            setNextWindowSizeConstraints(Vec2(), Vec2(500f, 500f))
             functionalProgramming.withWindow("Données du game object", editorSceneUI::showInfoGameObjectTextWindow, WindowFlags.AlwaysAutoResize.i) {
                 ImGuiHelper.insertImguiTextExposeEditorFields(gameObject)
                 separator()

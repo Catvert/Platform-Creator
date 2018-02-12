@@ -57,7 +57,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
     private fun drawMainMenu() {
         with(ImGui) {
             ImGuiHelper.withMenuButtonsStyle {
-                ImGuiHelper.withCenteredWindow("main menu", null, Vec2(300f, 160f), WindowFlags.NoTitleBar.i or WindowFlags.NoCollapse.i or WindowFlags.NoMove.i or WindowFlags.NoResize.i or WindowFlags.NoBringToFrontOnFocus.i, Cond.Always) {
+                ImGuiHelper.withCenteredWindow("main menu", null, Vec2(300f, 180f), WindowFlags.NoTitleBar.i or WindowFlags.NoCollapse.i or WindowFlags.NoMove.i or WindowFlags.NoResize.i or WindowFlags.NoBringToFrontOnFocus.i, Cond.Always) {
                     if (button(MenusText.MM_PLAY_BUTTON(), Vec2(-1, 0))) {
                         showSelectLevelWindow = true
                     }
@@ -114,7 +114,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
                 }, levels.isEmpty(), searchBar = true)
                 popItemFlag()
 
-                if(openCopyPopup)
+                if (openCopyPopup)
                     openPopup(copyLevelTitle)
 
                 pushItemFlag(ItemFlags.Disabled.i, levels.isEmpty())
@@ -134,7 +134,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
                         if (level != null)
                             PCGame.sceneManager.loadScene(EditorScene(level))
                         else
-                          openPopup(errorInLevelTitle)
+                            openPopup(errorInLevelTitle)
                     }
                 }
                 popItemFlag()
@@ -149,8 +149,8 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
                     functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                         ImGuiHelper.inputText(MenusText.MM_NAME(), ::newLevelNameBuf)
                     }
-                    if(button(MenusText.MM_SELECT_LEVEL_NEW_LEVEL_CREATE(), Vec2(-1, 0))) {
-                        if(newLevelNameBuf.isNotBlank()) {
+                    if (button(MenusText.MM_SELECT_LEVEL_NEW_LEVEL_CREATE(), Vec2(-1, 0))) {
+                        if (newLevelNameBuf.isNotBlank()) {
                             val level = Level.newLevel(newLevelNameBuf)
                             PCGame.sceneManager.loadScene(EditorScene(level))
                         }
@@ -161,8 +161,8 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
                     functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                         ImGuiHelper.inputText(MenusText.MM_NAME(), ::copyLevelNameBuf)
                     }
-                    if(button(MenusText.MM_SELECT_LEVEL_COPY_BUTTON(), Vec2(-1, 0))) {
-                        if(copyLevelNameBuf.isNotBlank()) {
+                    if (button(MenusText.MM_SELECT_LEVEL_COPY_BUTTON(), Vec2(-1, 0))) {
+                        if (copyLevelNameBuf.isNotBlank()) {
                             val levelDir = levels[currentLevelIndex].dir
                             val copyLevelDir = levelDir.parent().child(copyLevelNameBuf)
                             levelDir.list().forEach {
@@ -180,7 +180,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
 
                 functionalProgramming.popupModal(errorInLevelTitle) {
                     text(MenusText.MM_ERROR_LEVEL_POPUP(levels[currentLevelIndex].toString()))
-                    if(button(MenusText.MM_ERROR_LEVEL_CLOSE(), Vec2(-1, 0)))
+                    if (button(MenusText.MM_ERROR_LEVEL_CLOSE(), Vec2(-1, 0)))
                         closeCurrentPopup()
                 }
             }
@@ -203,12 +203,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
 
                         checkbox(MenusText.MM_SETTINGS_DARK_INTERFACE(), PCGame.Companion::darkUI)
 
-                        if(checkbox(MenusText.MM_SETTINGS_FULLSCREEN(), settingsFullscreen)) {
-                            if(settingsFullscreen[0])
-                                Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
-                            else
-                                Gdx.graphics.setWindowedMode(1280, 720)
-                        }
+                        checkbox(MenusText.MM_SETTINGS_FULLSCREEN(), settingsFullscreen)
                     }
                 }
 
@@ -237,6 +232,18 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
                         }
                     }
                 }
+            }
+
+            if (Gdx.graphics.isFullscreen != settingsFullscreen[0]) {
+                // Workaround lors du switch pour éviter à imgui de planter
+                ImGui.render()
+
+                if (settingsFullscreen[0])
+                    Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
+                else
+                    Gdx.graphics.setWindowedMode(1280, 720)
+
+                ImGui.newFrame()
             }
         }
     }

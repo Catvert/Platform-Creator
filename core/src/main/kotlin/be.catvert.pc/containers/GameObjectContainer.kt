@@ -1,10 +1,8 @@
 package be.catvert.pc.containers
 
 import be.catvert.pc.GameObject
-import be.catvert.pc.GameObjectState
 import be.catvert.pc.GameObjectTag
 import be.catvert.pc.serialization.PostDeserialization
-import be.catvert.pc.utility.Rect
 import be.catvert.pc.utility.Renderable
 import be.catvert.pc.utility.ResourceLoader
 import be.catvert.pc.utility.Updeatable
@@ -42,14 +40,6 @@ abstract class GameObjectContainer : Renderable, Updeatable, PostDeserialization
         gameObject.container = this
 
         return gameObject
-    }
-
-    fun createGameObject(name: String, tag: GameObjectTag, rectangle: Rect = Rect(), initDefaultState: GameObjectState.() -> Unit = {}, initGO: GameObject.() -> Unit = {}): GameObject {
-        val go = GameObject(tag, name, rectangle, this, initDefaultState).apply(initGO)
-
-        addGameObject(go)
-
-        return go
     }
 
     protected open fun onRemoveGameObject(gameObject: GameObject) {}

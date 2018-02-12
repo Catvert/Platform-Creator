@@ -13,7 +13,7 @@ import java.io.FileReader
 import kotlin.math.roundToInt
 
 enum class BackgroundType {
-    Standard, Parallax
+    Standard, Parallax, None
 }
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)

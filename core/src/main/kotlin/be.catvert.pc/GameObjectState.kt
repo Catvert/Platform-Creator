@@ -63,13 +63,13 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
     fun hasComponent(klass: KClass<out Component>) = getComponents().any { klass.isInstance(it) }
 
     override fun render(batch: Batch) {
-        components.filter { it is Renderable }.forEach {
+        components.filter { it is Renderable && it.active }.forEach {
             (it as Renderable).render(batch)
         }
     }
 
     override fun update() {
-        components.filter { it is Updeatable }.forEach {
+        components.filter { it is Updeatable && it.active }.forEach {
             (it as Updeatable).update()
         }
     }

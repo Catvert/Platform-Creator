@@ -86,7 +86,11 @@ class SceneManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Dis
     }
 
     override fun render(batch: Batch) {
-        clearScreen(currentScene.backgroundColors.first, currentScene.backgroundColors.second, currentScene.backgroundColors.third)
+        // Permet d'effacer l'écran avec la couleur de la prochaine scène(si on est en transition) pour améliorer la cohérence de la transition.
+        if (nextScene != null)
+            clearScreen(nextScene!!.scene.backgroundColors[0], nextScene!!.scene.backgroundColors[1], nextScene!!.scene.backgroundColors[2])
+        else
+            clearScreen(currentScene.backgroundColors[0], currentScene.backgroundColors[1], currentScene.backgroundColors[2])
 
         LwjglGL3.newFrame()
 

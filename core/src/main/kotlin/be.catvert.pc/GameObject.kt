@@ -23,10 +23,10 @@ import imgui.functionalProgramming
  */
 @JsonIdentityInfo(property = "id", generator = ObjectIdGenerators.IntSequenceGenerator::class)
 class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: GameObjectTag,
-                 @ExposeEditor var name: String = tag,
-                 @ExposeEditor var box: Rect = Rect(size = Size(1, 1)),
+                 @ExposeEditor var name: String,
+                 @ExposeEditor var box: Rect,
+                 defaultState: GameObjectState = GameObjectState("default"),
                  container: GameObjectContainer? = null,
-                 initDefaultState: GameObjectState.() -> Unit = {},
                  vararg otherStates: GameObjectState = arrayOf()) : Updeatable, Renderable, ResourceLoader, CustomEditorImpl, CustomEditorTextImpl {
 
     @ExposeEditor(min = -100f, max = 100f)
@@ -39,7 +39,7 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
     var onOutOfMapAction: Action = RemoveGOAction()
 
     @JsonProperty("states")
-    private val states: MutableSet<GameObjectState> = mutableSetOf(GameObjectState("default").apply(initDefaultState), *otherStates)
+    private val states: MutableSet<GameObjectState> = mutableSetOf(defaultState, *otherStates)
 
     @JsonProperty("currentState")
     private var currentState: Int = 0
@@ -71,6 +71,7 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
                 setState(initialState, true)
             }
         }
+
 
     @JsonIgnore
     fun getCurrentState() = states.elementAt(currentState)

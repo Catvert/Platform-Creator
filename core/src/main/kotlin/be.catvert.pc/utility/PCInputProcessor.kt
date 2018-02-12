@@ -51,7 +51,7 @@ object PCInputProcessor : InputAdapter() {
     }
 
     override fun scrolled(amount: Int): Boolean {
-        LwjglGL3.scrollCallback(Vec2d(-amount, 0f))
+        LwjglGL3.scrollCallback(Vec2d(0f, -amount))
         return false
     }
 

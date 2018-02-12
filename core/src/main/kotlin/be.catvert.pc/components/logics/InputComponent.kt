@@ -11,7 +11,6 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Color
 import com.fasterxml.jackson.annotation.JsonCreator
-import glm_.vec2.Vec2
 import imgui.ImGui
 import imgui.functionalProgramming
 
@@ -28,7 +27,7 @@ class InputComponent(var inputs: ArrayList<InputData>) : Component(), Updeatable
         override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
             with(ImGui) {
                 checkbox("", ::pressed)
-                if(ImGui.isItemHovered()) {
+                if (ImGui.isItemHovered()) {
                     functionalProgramming.withTooltip {
                         text("Pressé en continu")
                     }

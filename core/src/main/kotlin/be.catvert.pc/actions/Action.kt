@@ -7,6 +7,7 @@ import kotlin.reflect.KClass
 
 enum class Actions(val action: KClass<out Action>) {
     Atlas(AtlasAction::class),
+    AtlasFlipSwitcher(AtlasFlipSwitcherAction::class),
     Empty(EmptyAction::class),
     GameObject(GameObjectAction::class),
     Gravity(GravityAction::class),
@@ -23,6 +24,7 @@ enum class Actions(val action: KClass<out Action>) {
     SpawnPosition(SpawnPositionAction::class),
     SpawnSide(SpawnSideAction::class),
     State(StateAction::class),
+    StateSwitcher(StateSwitcherAction::class),
     Tag(TagAction::class),
     Teleport(TeleportAction::class),
     Tween(TweenAction::class),

@@ -15,7 +15,7 @@ object Constants {
     const val maxLayerIndex = 100
 
     const val minMatrixSize = 10
-    const val matrixCellSize = 200
+    const val matrixCellSize = 300
 
     const val viewportRatioWidth = 1920f
     const val viewportRatioHeight = 1080f

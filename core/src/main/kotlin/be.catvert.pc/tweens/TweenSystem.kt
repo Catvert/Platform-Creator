@@ -35,7 +35,7 @@ object TweenSystem : Updeatable {
             val loopTween = it.loopTween
 
             if (tween.update(gameObject)) {
-                if (tween.endAction !is RemoveGOAction) // TODO workaround?
+                if (tween.endAction !is RemoveGOAction && tween.useTweenState) // TODO workaround?
                     gameObject.setState(backupStateIndex, false)
 
                 tween.endAction.invoke(gameObject)
@@ -45,11 +45,11 @@ object TweenSystem : Updeatable {
                 tweens.remove(it)
 
                 if (nextTween != null) {
-                    gameObject.setState(backupStateIndex, false)
+                    if (tween.useTweenState)
+                        gameObject.setState(backupStateIndex, false)
 
                     startTween(nextTween, gameObject, null)
-                }
-                else if(loopTween != null) {
+                } else if (loopTween != null) {
                     startTween(loopTween, gameObject, loopTween)
                 }
             }

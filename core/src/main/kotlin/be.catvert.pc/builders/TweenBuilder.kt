@@ -1,7 +1,8 @@
-package be.catvert.pc.tweens
+package be.catvert.pc.builders
 
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
+import be.catvert.pc.tweens.Tween
 
 class TweenBuilder(private val initialTween: Tween, useTweenState: Boolean = false) {
     private var actualTween: Tween = initialTween

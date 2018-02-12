@@ -1,5 +1,6 @@
 package be.catvert.pc
 
+import be.catvert.pc.builders.GameObjectBuilder
 import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.i18n.Locales
@@ -29,6 +30,7 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
 
         val fontBytes = Constants.imguiFontPath.readBytes()
         imguiDefaultFont = imgui.IO.fonts.addFontFromMemoryTTF(CharArray(fontBytes.size, { fontBytes[it].c }), 20f, FontConfig(), glyphRanges = imgui.IO.fonts.glyphRangesDefault)
+        imguiBigFont = imgui.IO.fonts.addFontFromMemoryTTF(CharArray(fontBytes.size, { fontBytes[it].c }), 32f, FontConfig(), glyphRanges = imgui.IO.fonts.glyphRangesDefault)
     }
 
     override fun create() {
@@ -199,11 +201,11 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         /**
          * Permet de retourner le logo du jeu
          */
-        fun generateLogo(container: GameObjectContainer): GameObject {
-            return container.createGameObject("logo", "logo", getLogoRect(), {
-                this += AtlasComponent(0, AtlasComponent.AtlasData("logo", Constants.gameLogoPath.toFileWrapper()))
-            })
-        }
+        fun generateLogo(container: GameObjectContainer) = GameObjectBuilder("logo", getLogoSize())
+                .withDefaultState {
+                    withComponent(AtlasComponent(0, AtlasComponent.AtlasData("logo", Constants.gameLogoPath.toFileWrapper())))
+                }
+                .build(getLogoRect().position, container)
 
         /**
          * Permet de retourner la taille du logo au cas où la taille de l'écran changerait.

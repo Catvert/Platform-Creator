@@ -6,7 +6,6 @@ import be.catvert.pc.GameObjectTag
 import be.catvert.pc.Tags
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
-import be.catvert.pc.actions.TagAction
 import be.catvert.pc.components.Component
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
@@ -91,7 +90,7 @@ class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeata
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         ImGuiHelper.addImguiWidgetsArray("sensors", sensors, { "sensor" }, { GameObjectSensorData(null) }, {
-            val typeIndex = intArrayOf(if(it.obj is GameObjectSensorData) 0 else 1)
+            val typeIndex = intArrayOf(if (it.obj is GameObjectSensorData) 0 else 1)
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                 if (ImGui.combo("target type", typeIndex, listOf("GameObject", "Tag"))) {
                     it.obj = when (typeIndex[0]) {

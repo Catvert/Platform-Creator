@@ -1,0 +1,195 @@
+
+animations.png
+size: 1024,1024
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+fire_1/fire_0
+  rotate: false
+  xy: 326, 662
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+fire_1/fire_1
+  rotate: false
+  xy: 344, 728
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+fire_1/fire_2
+  rotate: false
+  xy: 518, 886
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+fire_1/fire_3
+  rotate: false
+  xy: 552, 920
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+fireball/fireball
+  rotate: false
+  xy: 132, 150
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+iceball/iceball
+  rotate: false
+  xy: 2, 20
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+light_1/light_0
+  rotate: false
+  xy: 618, 986
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+light_1/light_1
+  rotate: false
+  xy: 2, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+light_1/light_2
+  rotate: false
+  xy: 36, 36
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particles/axis
+  rotate: false
+  xy: 584, 970
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+particles/cloud
+  rotate: false
+  xy: 774, 1004
+  size: 32, 16
+  orig: 32, 16
+  offset: 0, 0
+  index: -1
+particles/dirt
+  rotate: false
+  xy: 518, 904
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+particles/green_ghost_light
+  rotate: false
+  xy: 2, 508
+  size: 256, 512
+  orig: 256, 512
+  offset: 0, 0
+  index: -1
+particles/ice_1
+  rotate: false
+  xy: 198, 216
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+particles/leaf_brown
+  rotate: false
+  xy: 132, 184
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+particles/leaf_green
+  rotate: false
+  xy: 260, 680
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+particles/light
+  rotate: false
+  xy: 584, 952
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+particles/rain
+  rotate: false
+  xy: 326, 680
+  size: 16, 64
+  orig: 16, 64
+  offset: 0, 0
+  index: -1
+particles/rain_small
+  rotate: false
+  xy: 260, 612
+  size: 16, 32
+  orig: 16, 32
+  offset: 0, 0
+  index: -1
+particles/slime_1
+  rotate: false
+  xy: 260, 646
+  size: 64, 32
+  orig: 64, 32
+  offset: 0, 0
+  index: -1
+particles/smoke
+  rotate: false
+  xy: 68, 86
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+particles/smoke_black
+  rotate: false
+  xy: 518, 938
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+particles/smoke_grey_big
+  rotate: false
+  xy: 260, 746
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+particles/snowflake_1
+  rotate: false
+  xy: 2, 250
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+particles/star
+  rotate: false
+  xy: 2, 54
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+particles/star_2
+  rotate: false
+  xy: 2, 120
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+particles/windtrail_1
+  rotate: false
+  xy: 260, 1004
+  size: 512, 16
+  orig: 512, 16
+  offset: 0, 0
+  index: -1

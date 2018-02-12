@@ -18,7 +18,7 @@ import ktx.assets.toLocalFile
 /**
  * Scène du jeu
  */
-class GameScene(private val level: Level) : Scene(level.background) {
+class GameScene(private val level: Level) : Scene(level.background, level.backgroundColor) {
     override var gameObjectContainer: GameObjectContainer = level
 
     private var pause = false
@@ -56,6 +56,7 @@ class GameScene(private val level: Level) : Scene(level.background) {
 
         PCGame.hudBatch.projectionMatrix = PCGame.defaultProjection
         PCGame.hudBatch.use {
+            PCGame.mainFont.color.a = alpha
             PCGame.mainFont.draw(it, "Score : ${level.scorePoints}", 10f, Gdx.graphics.height - 10f)
             PCGame.mainFont.draw(it, "Temps écoulé : ${level.getTimer()}", 10f, Gdx.graphics.height - 40f)
         }

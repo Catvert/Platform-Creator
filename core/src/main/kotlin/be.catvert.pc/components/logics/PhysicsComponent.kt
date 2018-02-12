@@ -13,7 +13,6 @@ import be.catvert.pc.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
@@ -22,7 +21,6 @@ import glm_.min
 import imgui.ImGui
 import imgui.ItemFlags
 import imgui.functionalProgramming
-import java.awt.SystemColor.text
 import kotlin.math.roundToInt
 
 /**
@@ -130,7 +128,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                 PhysicsActions.JUMP, PhysicsActions.FORCE_JUMP -> {
                     if (level.applyGravity) {
                         if (!jumpData.isJumping) {
-                            if(gravity) {
+                            if (gravity) {
                                 if (it != PhysicsActions.FORCE_JUMP) {
                                     //  On vérifie si le gameObject est sur le sol
                                     if (!move(false, 0f, -1f, gameObject)) {
@@ -353,7 +351,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         }
         ImGui.popItemFlag()
 
-        if(ImGui.isItemHovered() && isStatic) {
+        if (ImGui.isItemHovered() && isStatic) {
             functionalProgramming.withTooltip {
                 ImGui.text("Impossible d'utiliser des actions liés aux mouvements si le game object est statique.")
             }

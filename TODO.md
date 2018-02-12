@@ -10,13 +10,12 @@
 
 ## BUGS
 
-- Si le joueur est supprimé mais toujours en follow camera -> présent mais pas dans la matrix
+- Si le joueur est supprimé mais toujours en follow camera(ou autre genre en gameObjectAction) -> présent mais pas dans la matrix
 
 ## IDÉE
 
--Place order pour l'expose editor 
+- Place order pour l'expose editor 
 - Sélecteur de skin basé sur la couleur (colorpicker)
-- Les groupes, permettant de grouper des gameObjects entre-eux
 - Structure, permet de créer une structure prédéfinie ou créer. Un peu à la méthode des prefabs sauf que c'est plusieurs gameObjects placé a côté de l'autre
 - Ajout du pseudo de l'utilisateur au premier lancement
 - Ajouter la possibilité d'importer des atlas .xml

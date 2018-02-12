@@ -22,12 +22,7 @@ class LifeAction(@ExposeEditor var action: LifeActions) : Action() {
     }
 
     override fun invoke(gameObject: GameObject) {
-        val lifeComponent = gameObject.getCurrentState().getComponent<LifeComponent>()
-        when (action) {
-            LifeActions.ADD_LP -> lifeComponent?.addLifePoint()
-            LifeActions.REMOVE_LP -> lifeComponent?.removeLifePoint()
-            LifeActions.ONE_SHOT -> lifeComponent?.kill()
-        }
+        gameObject.getCurrentState().getComponent<LifeComponent>()?.lifeAction(action)
     }
 
     override fun toString(): String = super.toString() + " - $action"

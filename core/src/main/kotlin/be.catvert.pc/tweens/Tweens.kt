@@ -3,7 +3,9 @@ package be.catvert.pc.tweens
 import be.catvert.pc.GameObject
 import be.catvert.pc.actions.Action
 import be.catvert.pc.actions.EmptyAction
+import be.catvert.pc.components.Component
 import be.catvert.pc.components.graphics.AtlasComponent
+import be.catvert.pc.components.logics.LifeComponent
 import be.catvert.pc.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.serialization.PostDeserialization
@@ -21,10 +23,11 @@ enum class Tweens(val tween: KClass<out Tween>) {
     Move(MoveTween::class),
     AlphaAtlas(AlphaAtlasTween::class),
     RepeatAction(RepeatActionTween::class),
-    Resize(ResizeTween::class)
+    Resize(ResizeTween::class),
+    DisableComponent(DisableComponentTween::class)
 }
 
-abstract class Tween(var duration: Float = 1f, var interpolationName: String) : CustomEditorImpl, PostDeserialization {
+abstract class Tween(var duration: Float = 1f, var interpolationName: String, var authorizeTweenState: Boolean = true) : CustomEditorImpl, PostDeserialization {
     var nextTween: Tween? = null
     var endAction: Action = EmptyAction()
 
@@ -54,8 +57,9 @@ abstract class Tween(var duration: Float = 1f, var interpolationName: String) : 
     private var currentInterpolationIndex = 0
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         with(ImGui) {
+            text("type : ${ReflectionUtility.simpleNameOf(this@Tween).removeSuffix("Tween")}")
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                sliderFloat("duration", ::duration, 0f, 10f, "%.1f")
+                inputFloat("duration", ::duration, 0.1f, 0f, 1)
             }
             ImGuiHelper.action("end action", ::endAction, gameObject, level, editorSceneUI)
 
@@ -66,7 +70,8 @@ abstract class Tween(var duration: Float = 1f, var interpolationName: String) : 
                     interpolation = interp
                 }
             }
-            checkbox("tween state", ::useTweenState)
+            if (authorizeTweenState)
+                checkbox("tween state", ::useTweenState)
         }
     }
 
@@ -174,6 +179,35 @@ class ResizeTween(duration: Float = 0f, var newWidth: Int = 1, var newHeight: In
         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
             ImGui.inputInt("new width", ::newWidth, 1, Constants.maxGameObjectSize)
             ImGui.inputInt("new height", ::newHeight, 1, Constants.maxGameObjectSize)
+        }
+    }
+}
+
+class DisableComponentTween(var disableComponent: Class<out Component> = LifeComponent::class.java, duration: Float = 0f) : Tween(duration, linearInterpolation, false) {
+    private var component: Component? = null
+
+    override fun init(gameObject: GameObject) {
+        super.init(gameObject)
+
+        component = gameObject.getCurrentState().getComponents().filterIsInstance(disableComponent).firstOrNull()
+        component?.active = false
+    }
+
+    override fun perform(gameObject: GameObject) {
+        if (progress == 1f) {
+            component?.active = true
+        }
+    }
+
+    override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+        super.insertImgui(label, gameObject, level, editorSceneUI)
+
+        functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
+            val components = gameObject.getCurrentState().getComponents()
+            val index = intArrayOf(components.indexOfFirst { disableComponent.isInstance(it) })
+            if (ImGui.combo("disable component", index, components.map { ReflectionUtility.simpleNameOf(it).removeSuffix("Component") })) {
+                disableComponent = components.elementAt(index[0]).javaClass
+            }
         }
     }
 }
