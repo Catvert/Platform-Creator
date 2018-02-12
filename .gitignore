@@ -65,3 +65,9 @@ nb-configuration.xml
 imgui\.ini
 
 Platform-Creator.jar
+
+assets/config\.json
+
+last_log\.txt
+
+assets/keysConfig\.json
