@@ -1,21 +1,28 @@
 package be.catvert.pc.scenes
 
+import be.catvert.pc.GameObject
 import be.catvert.pc.PCGame
 import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.containers.GameObjectContainer
+import be.catvert.pc.tweens.Tween
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.audio.Music
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.viewport.StretchViewport
+import glm_.min
 import imgui.ImGui
+import imgui.imgui.demo.widgets.progress
 import ktx.app.use
 
 /**
  * Classe abstraite permettant l'implémentation d'une scène
  */
-abstract class Scene(protected var background: Background?, var backgroundColors: FloatArray = floatArrayOf(0f, 0f, 0f)) : Renderable, Updeatable, Resizable, Disposable {
+abstract class Scene(protected var background: Background?,
+                     var backgroundColors: FloatArray = floatArrayOf(0f, 0f, 0f)) : Renderable, Updeatable, Resizable, Disposable {
     protected val camera = OrthographicCamera()
 
     val viewport = StretchViewport(Constants.viewportRatioWidth, Constants.viewportRatioHeight, camera)

@@ -6,10 +6,7 @@ import be.catvert.pc.PCGame
 import be.catvert.pc.PCGame.Companion.soundVolume
 import be.catvert.pc.containers.Level
 import be.catvert.pc.i18n.MenusText
-import be.catvert.pc.utility.Constants
-import be.catvert.pc.utility.ImGuiHelper
-import be.catvert.pc.utility.PCInputProcessor
-import be.catvert.pc.utility.Size
+import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.files.FileHandle
@@ -31,6 +28,10 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
     }
 
     private val levels = Constants.levelDirPath.list { dir -> dir.isDirectory && dir.list { _, s -> s == Constants.levelDataFile }.isNotEmpty() }.map { LevelItem(it) }.toMutableList()
+
+    init {
+        MusicManager.startMusic(Constants.menuMusicPath, true)
+    }
 
     override fun resize(size: Size) {
         super.resize(size)
@@ -58,11 +59,11 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
         with(ImGui) {
             ImGuiHelper.withMenuButtonsStyle {
                 ImGuiHelper.withCenteredWindow("main menu", null, Vec2(300f, 180f), WindowFlags.NoTitleBar.i or WindowFlags.NoCollapse.i or WindowFlags.NoMove.i or WindowFlags.NoResize.i or WindowFlags.NoBringToFrontOnFocus.i, Cond.Always) {
-                    if (button(MenusText.MM_PLAY_BUTTON(), Vec2(-1, 0))) {
+                    if (ImGuiHelper.tickSoundButton(MenusText.MM_PLAY_BUTTON(), Vec2(-1, 0))) {
                         showSelectLevelWindow = true
                     }
 
-                    if (button(MenusText.MM_SETTINGS_BUTTON(), Vec2(-1, 0))) {
+                    if (ImGuiHelper.tickSoundButton(MenusText.MM_SETTINGS_BUTTON(), Vec2(-1, 0))) {
                         settingsKeys.forEach {
                             settingsKeys[it.key] = false
                             PCInputProcessor.keyDownSignal.clear()
@@ -70,7 +71,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
                         showSettingsWindow = true
                     }
 
-                    if (button(MenusText.MM_EXIT_BUTTON(), Vec2(-1, 0))) {
+                    if (ImGuiHelper.tickSoundButton(MenusText.MM_EXIT_BUTTON(), Vec2(-1, 0))) {
                         Gdx.app.exit()
                     }
                 }

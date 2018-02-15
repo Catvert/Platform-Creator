@@ -4,6 +4,7 @@ import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.GameConfig
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration
+import glm_.func.common.clamp
 import glm_.min
 
 /** Launches the desktop (LWJGL3) application.  */
@@ -22,7 +23,7 @@ object Lwjgl3Launcher {
             }
             else {
                 val mode = Lwjgl3ApplicationConfiguration.getDisplayMode()
-                configuration.setWindowedMode(config.screenWidth.min(mode.width), config.screenHeight.min(mode.height))
+                configuration.setWindowedMode(config.screenWidth.clamp(100, mode.width), config.screenHeight.clamp(100, mode.height))
                 configuration.setWindowPosition(mode.width / 2 - config.screenWidth.min(mode.width) / 2, mode.height / 2 - config.screenHeight.min(mode.height) / 2)
             }
 

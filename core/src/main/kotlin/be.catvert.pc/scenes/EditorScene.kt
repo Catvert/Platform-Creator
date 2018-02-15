@@ -143,6 +143,8 @@ class EditorScene(val level: Level) : Scene(level.background, level.backgroundCo
                 BackgroundType.Standard -> settingsLevelStandardBackgroundIndex[0] = PCGame.standardBackgrounds().indexOfFirst { it.backgroundFile == (background as StandardBackground).backgroundFile }
                 BackgroundType.Parallax -> settingsLevelParallaxBackgroundIndex[0] = PCGame.parallaxBackgrounds().indexOfFirst { it.parallaxDataFile == (background as ParallaxBackground).parallaxDataFile }
             }
+
+            MusicManager.startMusic(Constants.menuMusicPath, true)
         }
     }
 
@@ -893,6 +895,9 @@ class EditorScene(val level: Level) : Scene(level.background, level.backgroundCo
 
         editorSceneUI.editorMode = EditorSceneUI.EditorMode.TRY_LEVEL
 
+        if(level.musicPath != null)
+            MusicManager.startMusic(level.musicPath!!.get(), true)
+
         gameObjectContainer = SerializationFactory.copy(level).apply {
             this.exit = { if (!editorSceneUI.godModeTryMode) finishTryLevel() }
             this.activeRect.position = level.activeRect.position
@@ -908,6 +913,8 @@ class EditorScene(val level: Level) : Scene(level.background, level.backgroundCo
         gameObjectContainer = level
         camera.position.set(backupTryModeCameraPos)
         camera.zoom = backupTryModeCameraZoom
+
+        MusicManager.startMusic(Constants.menuMusicPath, true)
 
         selectGameObjectTryMode = null
     }
@@ -1144,6 +1151,18 @@ class EditorScene(val level: Level) : Scene(level.background, level.backgroundCo
                                         if (colorEdit3("couleur de l'arrière plan", level.backgroundColor))
                                             backgroundColors = level.backgroundColor
                                     }
+                                }
+                            }
+
+                            val currentMusicIndex = let {
+                                if(level.musicPath != null)
+                                    intArrayOf(PCGame.gameMusics.indexOf(level.musicPath!!.get()))
+                                else
+                                    intArrayOf(-1)
+                            }
+                            functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
+                                if (combo("musique", currentMusicIndex, PCGame.gameMusics.map { it.nameWithoutExtension() })) {
+                                    level.musicPath = PCGame.gameMusics[currentMusicIndex[0]].toFileWrapper()
                                 }
                             }
 

@@ -49,13 +49,17 @@ object Constants {
     val packsKenneyDirPath = packsDirPath.child("kenney")
     val packsSMCDirPath = packsDirPath.child("smc")
 
+    val gameDirPath = assetsDirPath.child("game")
+
     val texturesDirPath = assetsDirPath.child("textures")
     val soundsDirPath = assetsDirPath.child("sounds")
+    val musicsDirPath = soundsDirPath.child("music")
     val backgroundsDirPath = assetsDirPath.child("backgrounds")
     val levelDirPath = assetsDirPath.child("levels")
 
-    val gameBackgroundMenuPath = assetsDirPath.child("game/mainmenu.png")
-    val gameLogoPath = assetsDirPath.child("game/logo.png")
+    val gameBackgroundMenuPath = gameDirPath.child("mainmenu.png")
+    val gameLogoPath = gameDirPath.child("logo.png")
+    val menuMusicPath = gameDirPath.child("main_music.ogg")
 
     val prefabExtension = "prefab"
     val levelExtension = "pclvl"

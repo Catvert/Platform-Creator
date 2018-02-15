@@ -23,13 +23,13 @@ class EndLevelScene(private val level: Level) : Scene(level.background, level.ba
         with(ImGui) {
             ImGuiHelper.withMenuButtonsStyle {
                 ImGuiHelper.withCenteredWindow("end level menu", null, Vec2(300f, 125f), WindowFlags.NoTitleBar.i or WindowFlags.NoMove.i or WindowFlags.NoResize.i or WindowFlags.NoBringToFrontOnFocus.i, Cond.Always) {
-                    if (button("Recommencer", Vec2(-1, 0))) {
+                    if (ImGuiHelper.tickSoundButton("Recommencer", Vec2(-1, 0))) {
                         val level = Level.loadFromFile(level.levelPath.toLocalFile().parent())
                         if (level != null)
                             PCGame.sceneManager.loadScene(GameScene(level))
                     }
 
-                    if (button("Quitter", Vec2(-1, 0))) {
+                    if (ImGuiHelper.tickSoundButton("Quitter", Vec2(-1, 0))) {
                         PCGame.sceneManager.loadScene(MainMenuScene())
                     }
                 }

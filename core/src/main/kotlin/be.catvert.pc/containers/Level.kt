@@ -15,7 +15,7 @@ import ktx.assets.toLocalFile
 import kotlin.math.roundToInt
 
 
-class Level(val levelPath: String, val gameVersion: Float, var background: Background?) : GameObjectMatrixContainer() {
+class Level(val levelPath: String, val gameVersion: Float, var background: Background?, var musicPath: FileWrapper?) : GameObjectMatrixContainer() {
     private val levelTextures = levelPath.toLocalFile().parent().child("textures") to mutableListOf<FileHandle>()
     private val levelAtlas = levelPath.toLocalFile().parent().child("atlas") to mutableListOf<FileHandle>()
     private val levelSounds = levelPath.toLocalFile().parent().child("sounds") to mutableListOf<FileHandle>()
@@ -30,7 +30,7 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
 
     @JsonIgnore
     var exit: (success: Boolean) -> Unit = {
-        ResourceManager.getSound(if (it) Constants.soundsDirPath.child("game-over-success.wav") else Constants.soundsDirPath.child("game-over-fail.wav"))?.play(PCGame.soundVolume)
+        ResourceManager.getSound(if (it) Constants.gameDirPath.child("game-over-success.wav") else Constants.gameDirPath.child("game-over-fail.wav"))?.play(PCGame.soundVolume)
         PCGame.sceneManager.loadScene(EndLevelScene(this))
     }
 
@@ -156,7 +156,7 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
             }
             levelDir.mkdirs()
             val level = Level(levelDir.child(Constants.levelDataFile).path(), Constants.gameVersion, PCGame.parallaxBackgrounds().elementAtOrNull(0)
-                    ?: PCGame.standardBackgrounds().elementAtOrNull(0))
+                    ?: PCGame.standardBackgrounds().elementAtOrNull(0), null)
 
             val ground = PrefabFactory.PhysicsSprite.prefab.create(Point(0f, 0f), level)
             ground.getCurrentState().getComponent<AtlasComponent>()?.data?.elementAtOrNull(0)?.apply {

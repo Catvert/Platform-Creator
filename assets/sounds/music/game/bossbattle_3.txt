@@ -1,0 +1,4 @@
+from Vegastrike.
+Original name : battle4showdown.ogg
+author : Ken Seguro
+license : GPL

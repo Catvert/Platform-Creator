@@ -14,6 +14,7 @@ import be.catvert.pc.i18n.MenusText
 import be.catvert.pc.scenes.EditorScene
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
+import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.graphics.Color
 import glm_.func.common.clamp
 import glm_.vec2.Vec2
@@ -31,6 +32,9 @@ object ImGuiHelper {
 
     private val settingsBtnIconHandle: Int = ResourceManager.getTexture(Constants.uiDirPath.child("settings.png")).textureObjectHandle
     private val favBtnIconHandle: Int = ResourceManager.getTexture(Constants.uiDirPath.child("fav.png")).textureObjectHandle
+    private val tickButtonSound: Sound? = ResourceManager.getSound(Constants.gameDirPath.child("tick.mp3"))
+
+    private val hoveredTickButtons = mutableSetOf<Int>()
 
     private val searchBarBuffers = mutableMapOf<String, Item<String>>()
 
@@ -492,6 +496,22 @@ object ImGuiHelper {
         ImGui.sameLine()
 
         value.cast<CustomEditorTextImpl>()?.insertText() ?: ImGui.text(value.toString())
+    }
+
+    fun tickSoundButton(label: String, size: Vec2): Boolean {
+        val pressed = ImGui.button(label, size)
+
+        val id = ImGui.currentWindow.dc.lastItemId
+
+        if(ImGui.isItemHovered()) {
+            if(!hoveredTickButtons.contains(id)) {
+                tickButtonSound?.play(PCGame.soundVolume)
+                hoveredTickButtons.add(id)
+            }
+        }
+        else hoveredTickButtons.remove(id)
+
+        return pressed
     }
 
     fun withMenuButtonsStyle(block: () -> Unit) {

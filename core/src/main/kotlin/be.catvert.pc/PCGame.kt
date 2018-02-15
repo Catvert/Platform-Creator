@@ -9,6 +9,7 @@ import be.catvert.pc.scenes.SceneManager
 import be.catvert.pc.tweens.TweenSystem
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.audio.Music
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.g2d.BitmapFont
@@ -83,6 +84,7 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         }
         gameTextures = Utility.getFilesRecursivly(Constants.texturesDirPath, *Constants.levelTextureExtension)
         gameSounds = Utility.getFilesRecursivly(Constants.soundsDirPath, *Constants.levelSoundExtension)
+        gameMusics = Utility.getFilesRecursivly(Constants.musicsDirPath, *Constants.levelSoundExtension)
 
         Gdx.input.inputProcessor = PCInputProcessor
 
@@ -99,6 +101,8 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         sceneManager.update()
 
         TweenSystem.update()
+
+        MusicManager.update()
 
         sceneManager.render(mainBatch)
 
@@ -126,6 +130,7 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         mainFont.dispose()
 
         ResourceManager.dispose()
+        MusicManager.dispose()
 
         Log.dispose()
 
@@ -168,6 +173,9 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
             private set
         lateinit var gameSounds: List<FileHandle>
             private set
+        lateinit var gameMusics: List<FileHandle>
+            private set
+
         lateinit var mainBackground: Background
             private set
 

@@ -5,6 +5,7 @@ import be.catvert.pc.PCGame
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.containers.Level
 import be.catvert.pc.utility.ImGuiHelper
+import be.catvert.pc.utility.MusicManager
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -25,6 +26,8 @@ class GameScene(private val level: Level) : Scene(level.background, level.backgr
 
     init {
         level.updateCamera(camera, false)
+        if(level.musicPath != null)
+            MusicManager.startMusic(level.musicPath!!.get(), true)
     }
 
     override fun render(batch: Batch) {
