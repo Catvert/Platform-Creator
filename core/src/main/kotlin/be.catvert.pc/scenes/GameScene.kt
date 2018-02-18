@@ -26,7 +26,7 @@ class GameScene(private val level: Level) : Scene(level.background, level.backgr
 
     init {
         level.updateCamera(camera, false)
-        if(level.musicPath != null)
+        if (level.musicPath != null)
             MusicManager.startMusic(level.musicPath!!.get(), true)
     }
 

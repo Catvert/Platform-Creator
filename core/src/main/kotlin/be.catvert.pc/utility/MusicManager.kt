@@ -65,8 +65,7 @@ object MusicManager : Updeatable, Disposable {
             startMusicInterpolation.progress = Math.min(1f, startMusicInterpolation.elapsedTime / startMusicInterpolation.duration)
 
             music?.volume = interpolation.apply(0f, getMaxSoundVolume(), startMusicInterpolation.progress)
-        }
-        else if (stopMusicInterpolation != null && stopMusicInterpolation?.progress != 1f) {
+        } else if (stopMusicInterpolation != null && stopMusicInterpolation?.progress != 1f) {
             val stopMusicInterpolation = stopMusicInterpolation!!
             stopMusicInterpolation.elapsedTime += Utility.getDeltaTime()
             stopMusicInterpolation.progress = Math.min(1f, stopMusicInterpolation.elapsedTime / stopMusicInterpolation.duration)
@@ -77,8 +76,7 @@ object MusicManager : Updeatable, Disposable {
                 music?.stop()
                 onStopMusicInterpolationEnd()
             }
-        }
-        else {
+        } else {
             music?.volume = getMaxSoundVolume()
         }
     }

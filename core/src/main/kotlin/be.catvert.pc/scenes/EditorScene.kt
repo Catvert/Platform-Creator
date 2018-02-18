@@ -200,7 +200,7 @@ class EditorScene(val level: Level) : Scene(level.background, level.backgroundCo
         level.updateCamera(camera, false)
 
         // Permet de décaler le viewport vers le bas pour afficher la totalité du niveau avec la barre de menu.
-        viewport.screenHeight -= (Context.fontBaseSize + Context.style.framePadding.y * 2f).roundToInt()
+        viewport.screenHeight -= (g.fontBaseSize + g.style.framePadding.y * 2f).roundToInt()
         viewport.apply()
     }
 
@@ -895,7 +895,7 @@ class EditorScene(val level: Level) : Scene(level.background, level.backgroundCo
 
         editorSceneUI.editorMode = EditorSceneUI.EditorMode.TRY_LEVEL
 
-        if(level.musicPath != null)
+        if (level.musicPath != null)
             MusicManager.startMusic(level.musicPath!!.get(), true)
 
         gameObjectContainer = SerializationFactory.copy(level).apply {
@@ -974,7 +974,7 @@ class EditorScene(val level: Level) : Scene(level.background, level.backgroundCo
 
     private fun drawInfoEditorWindow() {
         with(ImGui) {
-            setNextWindowPos(Vec2(10f, 10f + (Context.fontBaseSize + Context.style.framePadding.y * 2f).roundToInt()), Cond.Once)
+            setNextWindowPos(Vec2(10f, 10f + (g.fontBaseSize + g.style.framePadding.y * 2f).roundToInt()), Cond.Once)
             functionalProgramming.withWindow("editor info", null, WindowFlags.AlwaysAutoResize.i or WindowFlags.NoTitleBar.i or WindowFlags.NoBringToFrontOnFocus.i) {
                 ImGuiHelper.textPropertyColored(Color.ORANGE, "Nombre d'entités :", gameObjectContainer.getGameObjectsData().size)
 
@@ -1155,7 +1155,7 @@ class EditorScene(val level: Level) : Scene(level.background, level.backgroundCo
                             }
 
                             val currentMusicIndex = let {
-                                if(level.musicPath != null)
+                                if (level.musicPath != null)
                                     intArrayOf(PCGame.gameMusics.indexOf(level.musicPath!!.get()))
                                 else
                                     intArrayOf(-1)
@@ -1428,30 +1428,32 @@ class EditorScene(val level: Level) : Scene(level.background, level.backgroundCo
                         combo("component", editorSceneUI::gameObjectAddComponentComboIndex, components.map { it.name })
                     }
 
-                    val componentClass = components[editorSceneUI.gameObjectAddComponentComboIndex].component
+                    if (editorSceneUI.gameObjectAddComponentComboIndex in components.indices) {
+                        val componentClass = components[editorSceneUI.gameObjectAddComponentComboIndex].component
 
-                    val description = componentClass.findAnnotation<Description>()
-                    if (description != null) {
-                        sameLine(0f, style.itemInnerSpacing.x)
-                        text("(?)")
+                        val description = componentClass.findAnnotation<Description>()
+                        if (description != null) {
+                            sameLine(0f, style.itemInnerSpacing.x)
+                            text("(?)")
 
-                        if (isItemHovered()) {
-                            functionalProgramming.withTooltip {
-                                text(description.description)
+                            if (isItemHovered()) {
+                                functionalProgramming.withTooltip {
+                                    text(description.description)
+                                }
                             }
                         }
-                    }
 
-                    if (button("Ajouter", Vec2(-1, 0))) {
-                        if (editorSceneUI.gameObjectAddComponentComboIndex in components.indices) {
-                            val newComp = ReflectionUtility.findNoArgConstructor(components[editorSceneUI.gameObjectAddComponentComboIndex].component)!!.newInstance()
-                            val state = gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex)
+                        if (button("Ajouter", Vec2(-1, 0))) {
+                            if (editorSceneUI.gameObjectAddComponentComboIndex in components.indices) {
+                                val newComp = ReflectionUtility.findNoArgConstructor(components[editorSceneUI.gameObjectAddComponentComboIndex].component)!!.newInstance()
+                                val state = gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex)
 
-                            if (gameObject.getCurrentState() === state)
-                                newComp.onStateActive(gameObject, state, level)
+                                if (gameObject.getCurrentState() === state)
+                                    newComp.onStateActive(gameObject, state, level)
 
-                            state.addComponent(newComp)
-                            closeCurrentPopup()
+                                state.addComponent(newComp)
+                                closeCurrentPopup()
+                            }
                         }
                     }
                 }

@@ -27,11 +27,15 @@ import kotlin.collections.set
 /** [com.badlogic.gdx.ApplicationListener, implementation shared by all platforms.  */
 class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
     private fun initializeUI() {
+        Context()
+        
         LwjglGL3.init(GlfwWindow((Gdx.graphics as Lwjgl3Graphics).window.windowHandle), false)
 
+        PCGame.darkUI = initialConfig.darkUI
+
         val fontBytes = Constants.imguiFontPath.readBytes()
-        imguiDefaultFont = imgui.IO.fonts.addFontFromMemoryTTF(CharArray(fontBytes.size, { fontBytes[it].c }), 20f, FontConfig(), glyphRanges = imgui.IO.fonts.glyphRangesDefault)
-        imguiBigFont = imgui.IO.fonts.addFontFromMemoryTTF(CharArray(fontBytes.size, { fontBytes[it].c }), 32f, FontConfig(), glyphRanges = imgui.IO.fonts.glyphRangesDefault)
+        imguiDefaultFont = imgui.g.io.fonts.addFontFromMemoryTTF(CharArray(fontBytes.size, { fontBytes[it].c }), 20f, FontConfig(), glyphRanges = imgui.g.io.fonts.glyphRangesDefault)
+        imguiBigFont = imgui.g.io.fonts.addFontFromMemoryTTF(CharArray(fontBytes.size, { fontBytes[it].c }), 32f, FontConfig(), glyphRanges = imgui.g.io.fonts.glyphRangesDefault)
     }
 
     override fun create() {
@@ -40,7 +44,6 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         DEBUG = false
 
         PCGame.soundVolume = initialConfig.soundVolume
-        PCGame.darkUI = initialConfig.darkUI
         PCGame.locale = initialConfig.locale
 
         Log.info { "Initialisation en cours.. \n Taille : ${Gdx.graphics.width}x${Gdx.graphics.height}" }

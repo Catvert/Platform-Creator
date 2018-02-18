@@ -357,7 +357,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         withComponent(PhysicsComponent(false, 10, collisionsActions = arrayListOf(
                                 CollisionAction(BoxSide.Left, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP))),
                                 CollisionAction(BoxSide.Right, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP))),
-                                CollisionAction(BoxSide.Up, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP))),
+                                CollisionAction(BoxSide.Up, action = PrefabSetup.playerAction(PhysicsAction(PhysicsAction.PhysicsActions.FORCE_JUMP))),
                                 CollisionAction(BoxSide.Right, Tags.Enemy.tag, action = TagAction(Tags.Enemy.tag, LifeAction(LifeAction.LifeActions.ONE_SHOT))),
                                 CollisionAction(BoxSide.Left, Tags.Enemy.tag, action = TagAction(Tags.Enemy.tag, PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.ONE_SHOT)))))
                         ))

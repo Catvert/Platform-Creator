@@ -222,7 +222,7 @@ object ImGuiHelper {
         var comboChanged = false
 
         with(ImGui) {
-            functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth - Context.fontSize - Context.style.itemInnerSpacing.x * 3f) {
+            functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth - g.fontSize - g.style.itemInnerSpacing.x * 3f) {
                 functionalProgramming.withId(label) {
                     if (searchBar) {
                         if (searchCombo("", currentItem, items))
@@ -296,8 +296,8 @@ object ImGuiHelper {
         return changed
     }
 
-    fun settingsButton(size: Vec2 = Vec2(Context.fontSize)) = ImGui.imageButton(settingsBtnIconHandle, size, uv1 = Vec2(1, 1))
-    fun favButton(size: Vec2 = Vec2(Context.fontSize)) = ImGui.imageButton(favBtnIconHandle, size, uv1 = Vec2(1, 1))
+    fun settingsButton(size: Vec2 = Vec2(g.fontSize)) = ImGui.imageButton(settingsBtnIconHandle, size, uv1 = Vec2(1, 1))
+    fun favButton(size: Vec2 = Vec2(g.fontSize)) = ImGui.imageButton(favBtnIconHandle, size, uv1 = Vec2(1, 1))
 
     fun gameObjectTag(tag: Item<GameObjectTag>, level: Level, label: String = "tag") {
         val selectedIndex = intArrayOf(level.tags.indexOfFirst { it == tag.obj })
@@ -312,7 +312,7 @@ object ImGuiHelper {
         val favTitle = "set gameobject fav"
 
         with(ImGui) {
-            if (button("Sélect. $label", Vec2(Constants.defaultWidgetsWidth - Context.fontSize - Context.style.itemInnerSpacing.x * 3f, 0))) {
+            if (button("Sélect. $label", Vec2(Constants.defaultWidgetsWidth - g.fontSize - g.style.itemInnerSpacing.x * 3f, 0))) {
                 editorSceneUI.editorMode = EditorScene.EditorSceneUI.EditorMode.SELECT_GO
                 editorSceneUI.onSelectGO.register(true) {
                     gameObject.set(it)
@@ -503,13 +503,12 @@ object ImGuiHelper {
 
         val id = ImGui.currentWindow.dc.lastItemId
 
-        if(ImGui.isItemHovered()) {
-            if(!hoveredTickButtons.contains(id)) {
+        if (ImGui.isItemHovered()) {
+            if (!hoveredTickButtons.contains(id)) {
                 tickButtonSound?.play(PCGame.soundVolume)
                 hoveredTickButtons.add(id)
             }
-        }
-        else hoveredTickButtons.remove(id)
+        } else hoveredTickButtons.remove(id)
 
         return pressed
     }
