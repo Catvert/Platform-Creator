@@ -20,7 +20,7 @@ import kotlin.collections.set
 /**
  * Scène du menu principal
  */
-class MainMenuScene : Scene(PCGame.mainBackground) {
+class MainMenuScene(applyMusicTransition: Boolean) : Scene(PCGame.mainBackground) {
     private val logo = PCGame.generateLogo(gameObjectContainer)
 
     private class LevelItem(val dir: FileHandle) {
@@ -30,7 +30,8 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
     private val levels = Constants.levelDirPath.list { dir -> dir.isDirectory && dir.list { _, s -> s == Constants.levelDataFile }.isNotEmpty() }.map { LevelItem(it) }.toMutableList()
 
     init {
-        MusicManager.startMusic(Constants.menuMusicPath, true)
+        if(applyMusicTransition)
+            MusicManager.startMusic(Constants.menuMusicPath, true)
     }
 
     override fun resize(size: Size) {
@@ -133,7 +134,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
                     if (currentLevelIndex in levels.indices) {
                         val level = Level.loadFromFile(levels[currentLevelIndex].dir)
                         if (level != null)
-                            PCGame.sceneManager.loadScene(EditorScene(level))
+                            PCGame.sceneManager.loadScene(EditorScene(level, false))
                         else
                             openPopup(errorInLevelTitle)
                     }
@@ -153,7 +154,7 @@ class MainMenuScene : Scene(PCGame.mainBackground) {
                     if (button(MenusText.MM_SELECT_LEVEL_NEW_LEVEL_CREATE(), Vec2(-1, 0))) {
                         if (newLevelNameBuf.isNotBlank()) {
                             val level = Level.newLevel(newLevelNameBuf)
-                            PCGame.sceneManager.loadScene(EditorScene(level))
+                            PCGame.sceneManager.loadScene(EditorScene(level, false))
                         }
                     }
                 }

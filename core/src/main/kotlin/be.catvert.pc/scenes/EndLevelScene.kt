@@ -30,7 +30,7 @@ class EndLevelScene(private val level: Level) : Scene(level.background, level.ba
                     }
 
                     if (ImGuiHelper.tickSoundButton("Quitter", Vec2(-1, 0))) {
-                        PCGame.sceneManager.loadScene(MainMenuScene())
+                        PCGame.sceneManager.loadScene(MainMenuScene(true))
                     }
                 }
             }

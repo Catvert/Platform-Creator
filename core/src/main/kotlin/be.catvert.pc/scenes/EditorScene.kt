@@ -43,7 +43,7 @@ import kotlin.reflect.full.findAnnotation
 /**
  * Scène de l'éditeur de niveau
  */
-class EditorScene(val level: Level) : Scene(level.background, level.backgroundColor) {
+class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level.background, level.backgroundColor) {
     private enum class ResizeMode {
         FREE, PROPORTIONAL
     }
@@ -121,6 +121,9 @@ class EditorScene(val level: Level) : Scene(level.background, level.backgroundCo
 
         var showInfoGameObjectWindow = false
         var showInfoGameObjectTextWindow = false
+        var showInfoPrefabWindow = false
+
+        var prefabInfoPrefabWindow: Prefab? = null
 
         var addTagPopupNameBuffer = ""
 
@@ -143,8 +146,6 @@ class EditorScene(val level: Level) : Scene(level.background, level.backgroundCo
                 BackgroundType.Standard -> settingsLevelStandardBackgroundIndex[0] = PCGame.standardBackgrounds().indexOfFirst { it.backgroundFile == (background as StandardBackground).backgroundFile }
                 BackgroundType.Parallax -> settingsLevelParallaxBackgroundIndex[0] = PCGame.parallaxBackgrounds().indexOfFirst { it.parallaxDataFile == (background as ParallaxBackground).parallaxDataFile }
             }
-
-            MusicManager.startMusic(Constants.menuMusicPath, true)
         }
     }
 
@@ -202,6 +203,9 @@ class EditorScene(val level: Level) : Scene(level.background, level.backgroundCo
         // Permet de décaler le viewport vers le bas pour afficher la totalité du niveau avec la barre de menu.
         viewport.screenHeight -= (g.fontBaseSize + g.style.framePadding.y * 2f).roundToInt()
         viewport.apply()
+
+        if(applyMusicTransition)
+            MusicManager.startMusic(Constants.menuMusicPath, true)
     }
 
     override fun postBatchRender() {
@@ -941,6 +945,9 @@ class EditorScene(val level: Level) : Scene(level.background, level.backgroundCo
             if (gridMode.active && editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL)
                 drawGridSettingsWindow()
 
+            if (editorSceneUI.showInfoPrefabWindow && editorSceneUI.prefabInfoPrefabWindow != null && editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL)
+                drawInfoPrefabWindow(editorSceneUI.prefabInfoPrefabWindow!!)
+
             val goUnderMouse = findGameObjectUnderMouse(false)
             if (goUnderMouse != null && !isUIHover) {
                 functionalProgramming.withTooltip {
@@ -999,7 +1006,7 @@ class EditorScene(val level: Level) : Scene(level.background, level.backgroundCo
     private fun drawExitWindow() {
         ImGuiHelper.withCenteredWindow("Save level?", editorSceneUI::showExitWindow, Vec2(240f, 105f), WindowFlags.NoResize.i or WindowFlags.NoCollapse.i or WindowFlags.NoTitleBar.i) {
             fun showMainMenu() {
-                PCGame.sceneManager.loadScene(MainMenuScene())
+                PCGame.sceneManager.loadScene(MainMenuScene(false))
             }
 
             if (ImGui.button("Sauvegarder", Vec2(225f, 0))) {
@@ -1094,8 +1101,10 @@ class EditorScene(val level: Level) : Scene(level.background, level.backgroundCo
                             functionalProgramming.popup(popupTitle) {
                                 ImGuiHelper.inputText("nom", editorSceneUI::addTagPopupNameBuffer)
                                 if (button("Ajouter", Vec2(-1, 0))) {
-                                    if (editorSceneUI.addTagPopupNameBuffer.isNotBlank() && level.tags.none { it == editorSceneUI.addTagPopupNameBuffer })
+                                    if (editorSceneUI.addTagPopupNameBuffer.isNotBlank() && level.tags.none { it == editorSceneUI.addTagPopupNameBuffer }) {
                                         level.tags.add(editorSceneUI.addTagPopupNameBuffer)
+                                        closeCurrentPopup()
+                                    }
                                 }
                             }
                         }
@@ -1299,6 +1308,11 @@ class EditorScene(val level: Level) : Scene(level.background, level.backgroundCo
                                 data.elementAtOrNull(currentIndex)?.apply {
                                     addImageBtn(currentKeyFrame(), it, true)
 
+                                    if (isItemHovered() && Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
+                                        editorSceneUI.prefabInfoPrefabWindow = it
+                                        editorSceneUI.showInfoPrefabWindow = true
+                                    }
+
                                     if ((++index) % 3 != 0)
                                         sameLine(0f, style.itemInnerSpacing.x)
                                 }
@@ -1310,10 +1324,152 @@ class EditorScene(val level: Level) : Scene(level.background, level.backgroundCo
         }
     }
 
-    private fun drawInfoGameObjectWindow(gameObject: GameObject) {
-        val createPrefabTitle = "Créer un prefab"
+    private fun drawInfoPrefabWindow(prefab: Prefab) {
+        with(ImGui) {
+            functionalProgramming.withWindow("Réglages du prefab", editorSceneUI::showInfoPrefabWindow, WindowFlags.AlwaysAutoResize.i) {
+                val isGamePrefab = PrefabFactory.values().any { it.prefab === prefab }
+
+                if (isGamePrefab) {
+                    ImGuiHelper.textColored(Color.RED, "Modifications temporaires !")
+                    if (isItemHovered()) {
+                        functionalProgramming.withTooltip {
+                            text("Les modifications apportés à ce prefab seront temporaires !\nMerci de créer un nouveau prefab pour sauvegarder les changements apportés.")
+                        }
+                    }
+                } else {
+                    if (button("Supprimer ce prefab", Vec2(-1, 0))) {
+                        level.removePrefab(prefab)
+                        editorSceneUI.showInfoPrefabWindow = false
+                        editorSceneUI.prefabInfoPrefabWindow = null
+                    }
+                }
+
+                drawInfoGameObjectProps(prefab.prefabGO)
+            }
+        }
+    }
+
+    private fun drawInfoGameObjectProps(gameObject: GameObject) {
         val newStateTitle = "Nouveau state"
         val addComponentTitle = "Ajouter un component"
+
+        with(ImGui) {
+            ImGuiHelper.insertImguiExposeEditorFields(gameObject, gameObject, level, editorSceneUI)
+
+            separator()
+
+            ImGuiHelper.comboWithSettingsButton("state", editorSceneUI::gameObjectCurrentStateIndex, gameObject.getStates().map { it.name }, {
+                if (button("Ajouter un state")) {
+                    openPopup(newStateTitle)
+                }
+
+                if (gameObject.getStates().size > 1) {
+                    sameLine()
+                    if (button("Supprimer ${gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex).name}")) {
+                        gameObject.removeState(editorSceneUI.gameObjectCurrentStateIndex)
+                        editorSceneUI.gameObjectCurrentStateIndex = Math.max(0, editorSceneUI.gameObjectCurrentStateIndex - 1)
+                    }
+                }
+
+                functionalProgramming.popup(newStateTitle) {
+                    val comboItems = mutableListOf("State vide").apply { addAll(gameObject.getStates().map { "Copier de : ${it.name}" }) }
+
+                    functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
+                        combo("type", editorSceneUI::gameObjectAddStateComboIndex, comboItems)
+                    }
+
+                    ImGuiHelper.inputText("nom", editorSceneUI::createStateInputText)
+
+                    if (button("Ajouter", Vec2(Constants.defaultWidgetsWidth, 0))) {
+                        if (editorSceneUI.gameObjectAddStateComboIndex == 0)
+                            gameObject.addState(editorSceneUI.createStateInputText) {}
+                        else
+                            gameObject.addState(SerializationFactory.copy(gameObject.getStateOrDefault(editorSceneUI.gameObjectAddStateComboIndex - 1)).apply { name = editorSceneUI.createStateInputText })
+                        closeCurrentPopup()
+                    }
+                }
+            })
+
+            ImGuiHelper.action("start action", gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex)::startAction, gameObject, level, editorSceneUI)
+
+            separator()
+
+            val components = gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex).getComponents()
+
+            functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
+                combo("component", editorSceneUI::gameObjectCurrentComponentIndex, components.map { ReflectionUtility.simpleNameOf(it).removeSuffix("Component") })
+            }
+
+            val component = components.elementAtOrNull(editorSceneUI.gameObjectCurrentComponentIndex)
+            if (component != null) {
+                functionalProgramming.withIndent {
+                    val requiredComponent = component.javaClass.kotlin.findAnnotation<RequiredComponent>()
+                    val incorrectComponent = let {
+                        requiredComponent?.component?.forEach {
+                            if (!gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex).hasComponent(it))
+                                return@let true
+                        }
+                        false
+                    }
+                    if (!incorrectComponent)
+                        ImGuiHelper.insertImguiExposeEditorFields(component, gameObject, level, editorSceneUI)
+                    else {
+                        text("Il manque le(s) component(s) :")
+                        functionalProgramming.withIndent {
+                            text("${requiredComponent!!.component.map { it.simpleName }}")
+                        }
+                    }
+                }
+                if (button("Supprimer ce comp.", Vec2(-1, 0))) {
+                    gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex).removeComponent(component)
+                }
+            }
+            separator()
+            pushItemFlag(ItemFlags.Disabled.i, gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex).getComponents().size == Components.values().size)
+            if (button("Ajouter un component", Vec2(-1, 0)))
+                openPopup(addComponentTitle)
+            popItemFlag()
+
+            functionalProgramming.popup(addComponentTitle) {
+                val components = Components.values().filter { comp -> gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex).getComponents().none { comp.component.isInstance(it) } }
+                functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
+                    combo("component", editorSceneUI::gameObjectAddComponentComboIndex, components.map { it.name })
+                }
+
+                if (editorSceneUI.gameObjectAddComponentComboIndex in components.indices) {
+                    val componentClass = components[editorSceneUI.gameObjectAddComponentComboIndex].component
+
+                    val description = componentClass.findAnnotation<Description>()
+                    if (description != null) {
+                        sameLine(0f, style.itemInnerSpacing.x)
+                        text("(?)")
+
+                        if (isItemHovered()) {
+                            functionalProgramming.withTooltip {
+                                text(description.description)
+                            }
+                        }
+                    }
+
+                    if (button("Ajouter", Vec2(-1, 0))) {
+                        if (editorSceneUI.gameObjectAddComponentComboIndex in components.indices) {
+                            val newComp = ReflectionUtility.findNoArgConstructor(components[editorSceneUI.gameObjectAddComponentComboIndex].component)!!.newInstance()
+                            val state = gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex)
+
+                            if (gameObject.getCurrentState() === state)
+                                newComp.onStateActive(gameObject, state, level)
+
+                            state.addComponent(newComp)
+                            closeCurrentPopup()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun drawInfoGameObjectWindow(gameObject: GameObject) {
+        val createPrefabTitle = "Créer un prefab"
 
         with(ImGui) {
             functionalProgramming.withWindow("Réglages du gameObject", editorSceneUI::showInfoGameObjectWindow, WindowFlags.AlwaysAutoResize.i) {
@@ -1337,124 +1493,14 @@ class EditorScene(val level: Level) : Scene(level.background, level.backgroundCo
                         level.favoris.remove(gameObject)
                 }
 
-                ImGuiHelper.insertImguiExposeEditorFields(gameObject, gameObject, level, editorSceneUI)
-
-                separator()
-
-                ImGuiHelper.comboWithSettingsButton("state", editorSceneUI::gameObjectCurrentStateIndex, gameObject.getStates().map { it.name }, {
-                    if (button("Ajouter un state")) {
-                        openPopup(newStateTitle)
-                    }
-
-                    if (gameObject.getStates().size > 1) {
-                        sameLine()
-                        if (button("Supprimer ${gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex).name}")) {
-                            gameObject.removeState(editorSceneUI.gameObjectCurrentStateIndex)
-                            editorSceneUI.gameObjectCurrentStateIndex = Math.max(0, editorSceneUI.gameObjectCurrentStateIndex - 1)
-                        }
-                    }
-
-                    functionalProgramming.popup(newStateTitle) {
-                        val comboItems = mutableListOf("State vide").apply { addAll(gameObject.getStates().map { "Copier de : ${it.name}" }) }
-
-                        functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                            combo("type", editorSceneUI::gameObjectAddStateComboIndex, comboItems)
-                        }
-
-                        ImGuiHelper.inputText("nom", editorSceneUI::createStateInputText)
-
-                        if (button("Ajouter", Vec2(Constants.defaultWidgetsWidth, 0))) {
-                            if (editorSceneUI.gameObjectAddStateComboIndex == 0)
-                                gameObject.addState(editorSceneUI.createStateInputText) {}
-                            else
-                                gameObject.addState(SerializationFactory.copy(gameObject.getStateOrDefault(editorSceneUI.gameObjectAddStateComboIndex - 1)).apply { name = editorSceneUI.createStateInputText })
-                            closeCurrentPopup()
-                        }
-                    }
-                })
-
-                ImGuiHelper.action("start action", gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex)::startAction, gameObject, level, editorSceneUI)
-
-                separator()
-
-                val components = gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex).getComponents()
-
-                functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                    combo("component", editorSceneUI::gameObjectCurrentComponentIndex, components.map { ReflectionUtility.simpleNameOf(it).removeSuffix("Component") })
-                }
-
-                val component = components.elementAtOrNull(editorSceneUI.gameObjectCurrentComponentIndex)
-                if (component != null) {
-                    functionalProgramming.withIndent {
-                        val requiredComponent = component.javaClass.kotlin.findAnnotation<RequiredComponent>()
-                        val incorrectComponent = let {
-                            requiredComponent?.component?.forEach {
-                                if (!gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex).hasComponent(it))
-                                    return@let true
-                            }
-                            false
-                        }
-                        if (!incorrectComponent)
-                            ImGuiHelper.insertImguiExposeEditorFields(component, gameObject, level, editorSceneUI)
-                        else {
-                            text("Il manque le(s) component(s) :")
-                            functionalProgramming.withIndent {
-                                text("${requiredComponent!!.component.map { it.simpleName }}")
-                            }
-                        }
-                    }
-                    if (button("Supprimer ce comp.", Vec2(-1, 0))) {
-                        gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex).removeComponent(component)
-                    }
-                }
-                separator()
-                pushItemFlag(ItemFlags.Disabled.i, gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex).getComponents().size == Components.values().size)
-                if (button("Ajouter un component", Vec2(-1, 0)))
-                    openPopup(addComponentTitle)
-                popItemFlag()
+                drawInfoGameObjectProps(gameObject)
 
                 functionalProgramming.popup(createPrefabTitle) {
                     ImGuiHelper.inputText("nom", editorSceneUI::createPrefabInputText)
 
                     if (button("Ajouter", Vec2(-1, 0))) {
-                        level.addPrefab(Prefab(editorSceneUI.createPrefabInputText, gameObject))
+                        level.addPrefab(Prefab(editorSceneUI.createPrefabInputText, SerializationFactory.copy(gameObject)))
                         closeCurrentPopup()
-                    }
-                }
-
-                functionalProgramming.popup(addComponentTitle) {
-                    val components = Components.values().filter { comp -> gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex).getComponents().none { comp.component.isInstance(it) } }
-                    functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                        combo("component", editorSceneUI::gameObjectAddComponentComboIndex, components.map { it.name })
-                    }
-
-                    if (editorSceneUI.gameObjectAddComponentComboIndex in components.indices) {
-                        val componentClass = components[editorSceneUI.gameObjectAddComponentComboIndex].component
-
-                        val description = componentClass.findAnnotation<Description>()
-                        if (description != null) {
-                            sameLine(0f, style.itemInnerSpacing.x)
-                            text("(?)")
-
-                            if (isItemHovered()) {
-                                functionalProgramming.withTooltip {
-                                    text(description.description)
-                                }
-                            }
-                        }
-
-                        if (button("Ajouter", Vec2(-1, 0))) {
-                            if (editorSceneUI.gameObjectAddComponentComboIndex in components.indices) {
-                                val newComp = ReflectionUtility.findNoArgConstructor(components[editorSceneUI.gameObjectAddComponentComboIndex].component)!!.newInstance()
-                                val state = gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex)
-
-                                if (gameObject.getCurrentState() === state)
-                                    newComp.onStateActive(gameObject, state, level)
-
-                                state.addComponent(newComp)
-                                closeCurrentPopup()
-                            }
-                        }
                     }
                 }
             }

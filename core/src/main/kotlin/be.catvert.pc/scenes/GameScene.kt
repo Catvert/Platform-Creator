@@ -46,7 +46,7 @@ class GameScene(private val level: Level) : Scene(level.background, level.backgr
                             PCGame.sceneManager.loadScene(GameScene(level))
                     }
                     if (button("Quitter le niveau", Vec2(-1, 0))) {
-                        PCGame.sceneManager.loadScene(MainMenuScene())
+                        PCGame.sceneManager.loadScene(MainMenuScene(true))
                     }
                 }
             }
@@ -77,7 +77,7 @@ class GameScene(private val level: Level) : Scene(level.background, level.backgr
         if (Gdx.input.isKeyJustPressed(GameKeys.GAME_SWITCH_GRAVITY.key))
             level.applyGravity = !level.applyGravity
         if (Gdx.input.isKeyJustPressed(GameKeys.GAME_EDIT_LEVEL.key))
-            PCGame.sceneManager.loadScene(EditorScene(Level.loadFromFile(level.levelPath.toLocalFile().parent())!!))
+            PCGame.sceneManager.loadScene(EditorScene(Level.loadFromFile(level.levelPath.toLocalFile().parent())!!, true))
     }
 
     private fun updateCamera(lerp: Boolean) {

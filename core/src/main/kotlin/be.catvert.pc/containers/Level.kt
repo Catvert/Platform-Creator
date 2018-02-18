@@ -103,6 +103,11 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
         SerializationFactory.serializeToFile(prefab, levelPrefabs.first.child("${prefab.name}.${Constants.prefabExtension}"))
     }
 
+    fun removePrefab(prefab: Prefab) {
+        levelPrefabs.second.remove(prefab)
+        levelPrefabs.first.child("${prefab.name}.${Constants.prefabExtension}").delete()
+    }
+
     fun updateCamera(camera: OrthographicCamera, lerp: Boolean) {
         camera.zoom = MathUtils.lerp(camera.zoom, zoom, 0.1f)
 

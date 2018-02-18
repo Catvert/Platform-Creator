@@ -93,7 +93,7 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
 
         initializeUI()
 
-        sceneManager = SceneManager(MainMenuScene())
+        sceneManager = SceneManager(MainMenuScene(true))
     }
 
     override fun render() {
