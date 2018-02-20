@@ -1,7 +1,9 @@
-package be.catvert.pc.utility
+package be.catvert.pc.managers
 
 import be.catvert.pc.Log
 import be.catvert.pc.PCGame
+import be.catvert.pc.utility.Updeatable
+import be.catvert.pc.utility.Utility
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.audio.Music
 import com.badlogic.gdx.files.FileHandle
@@ -40,7 +42,11 @@ object MusicManager : Updeatable, Disposable {
                 music?.volume = getMaxSoundVolume()
             }
 
-            music?.play()
+            try {
+                music?.play()
+            } catch (e: GdxRuntimeException) {
+                Log.error(e) { "Une erreur est survenue lors de la lecture de la musique : $path" }
+            }
         } else {
             fun launchMusic() {
                 music = null

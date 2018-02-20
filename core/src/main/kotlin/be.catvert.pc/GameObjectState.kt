@@ -30,6 +30,8 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
     @JsonProperty("comps")
     private val components: MutableSet<Component> = components
 
+    private var active = false
+
     var startAction: Action = EmptyAction()
 
     @JsonIgnore
@@ -39,16 +41,26 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
         this.gameObject = gameObject
     }
 
-    fun toggleActive(container: GameObjectContainer, triggerStartAction: Boolean) {
+    fun active(container: GameObjectContainer, triggerStartAction: Boolean) {
         components.forEach { it.onStateActive(gameObject, this, container) }
 
         if (triggerStartAction)
             startAction(gameObject)
+
+        active = true
+    }
+
+    fun disabled() {
+        active = false
     }
 
     fun addComponent(component: Component) {
         if (components.none { it.javaClass.isInstance(component) }) {
             components.add(component)
+
+            if (active) {
+                component.onStateActive(gameObject, this, gameObject.container!!)
+            }
         }
     }
 

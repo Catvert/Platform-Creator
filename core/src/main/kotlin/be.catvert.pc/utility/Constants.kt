@@ -67,6 +67,7 @@ object Constants {
     val levelTextureExtension = arrayOf("jpg", "png")
     val levelAtlasExtension = arrayOf("atlas")
     val levelSoundExtension = arrayOf("mp3", "wav", "ogg")
+    val levelScriptExtension = arrayOf("js")
 
     val levelDataFile = "data.$levelExtension"
 

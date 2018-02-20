@@ -4,6 +4,7 @@ import be.catvert.pc.GameObject
 import be.catvert.pc.PCGame
 import be.catvert.pc.components.Component
 import be.catvert.pc.containers.Level
+import be.catvert.pc.managers.ResourceManager
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.graphics.Color

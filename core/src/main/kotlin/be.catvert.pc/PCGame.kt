@@ -4,12 +4,13 @@ import be.catvert.pc.builders.GameObjectBuilder
 import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.containers.GameObjectContainer
 import be.catvert.pc.i18n.Locales
+import be.catvert.pc.managers.MusicManager
+import be.catvert.pc.managers.ResourceManager
+import be.catvert.pc.managers.SceneManager
 import be.catvert.pc.scenes.MainMenuScene
-import be.catvert.pc.scenes.SceneManager
 import be.catvert.pc.tweens.TweenSystem
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.audio.Music
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.g2d.BitmapFont
@@ -27,8 +28,6 @@ import kotlin.collections.set
 /** [com.badlogic.gdx.ApplicationListener, implementation shared by all platforms.  */
 class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
     private fun initializeUI() {
-        Context()
-        
         LwjglGL3.init(GlfwWindow((Gdx.graphics as Lwjgl3Graphics).window.windowHandle), false)
 
         PCGame.darkUI = initialConfig.darkUI
@@ -138,9 +137,12 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         Log.dispose()
 
         LwjglGL3.shutdown()
+        imguiCtx.destroy()
     }
 
     companion object {
+        val imguiCtx = Context()
+
         private val standardBackgrounds = mutableListOf<StandardBackground>()
         private val parallaxBackgrounds = mutableListOf<ParallaxBackground>()
 

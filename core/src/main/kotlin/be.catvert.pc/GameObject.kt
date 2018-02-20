@@ -109,8 +109,11 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
 
     fun setState(stateIndex: Int, triggerStartAction: Boolean) {
         if (stateIndex in states.indices) {
+            getCurrentState().disabled()
             currentState = stateIndex
-            getCurrentState().toggleActive(container!!, triggerStartAction)
+
+            if (container != null)
+                getCurrentState().active(container!!, triggerStartAction)
         }
     }
 

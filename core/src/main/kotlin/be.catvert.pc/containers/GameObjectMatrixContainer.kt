@@ -115,7 +115,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
     override val processGameObjects: Set<GameObject>
         get() = getAllGameObjectsInCells(activeGridCells)
 
-    override fun findGameObjectsByTag(tag: GameObjectTag) = getAllGameObjectsInCells(activeGridCells).filter { it.tag == tag }.toSet()
+    override fun findGameObjectsByTag(tag: GameObjectTag) = getAllGameObjectsInCells(activeGridCells).filter { it.tag == tag }.toList()
 
     override fun update() {
         updateActiveCells()

@@ -9,6 +9,8 @@ import be.catvert.pc.containers.Level
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.factories.PrefabSetup
 import be.catvert.pc.factories.PrefabType
+import be.catvert.pc.managers.MusicManager
+import be.catvert.pc.managers.ResourceManager
 import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
@@ -204,7 +206,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         viewport.screenHeight -= (g.fontBaseSize + g.style.framePadding.y * 2f).roundToInt()
         viewport.apply()
 
-        if(applyMusicTransition)
+        if (applyMusicTransition)
             MusicManager.startMusic(Constants.menuMusicPath, true)
     }
 
@@ -493,28 +495,29 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                             if (selectGameObjectMode == SelectGOMode.NO_MODE)
                                 selectGameObjectMode = SelectGOMode.MOVE
 
+                            val deltaMouseX = (latestMousePosInWorld.x - mousePosInWorld.x).roundToInt()
+                            val deltaMouseY = (latestMousePosInWorld.y - mousePosInWorld.y).roundToInt()
+
                             when (selectGameObjectMode) {
                                 SelectGOMode.NO_MODE -> {
                                 }
                                 SelectGOMode.HORIZONTAL_RESIZE_RIGHT -> {
-                                    selectGORect.width = (selectGORect.width - (latestMousePosInWorld.x - mousePosInWorld.x)).roundToInt().clamp(1, Constants.maxGameObjectSize)
+                                    selectGORect.width = (selectGORect.width - deltaMouseX).clamp(1, Constants.maxGameObjectSize)
                                 }
                                 SelectGOMode.HORIZONTAL_RESIZE_LEFT -> {
-                                    val deltaMouse = latestMousePosInWorld.x - mousePosInWorld.x
-                                    selectGORect.width = (selectGORect.width + deltaMouse).roundToInt().clamp(1, Constants.maxGameObjectSize)
-                                    selectGORect.x = (selectGORect.x - deltaMouse).clamp(0f, level.matrixRect.width.toFloat() - selectGORect.width)
+                                    selectGORect.width = (selectGORect.width + deltaMouseX).clamp(1, Constants.maxGameObjectSize)
+                                    selectGORect.x = (selectGORect.x - deltaMouseX).clamp(0f, level.matrixRect.width.toFloat() - selectGORect.width)
                                 }
                                 SelectGOMode.VERTICAL_RESIZE_BOTTOM -> {
-                                    val deltaMouse = latestMousePosInWorld.y - mousePosInWorld.y
-                                    selectGORect.height = (selectGORect.height + deltaMouse).roundToInt().clamp(1, Constants.maxGameObjectSize)
-                                    selectGORect.y = (selectGORect.y - deltaMouse).clamp(0f, level.matrixRect.height.toFloat() - selectGORect.height)
+                                    selectGORect.height = (selectGORect.height + deltaMouseY).clamp(1, Constants.maxGameObjectSize)
+                                    selectGORect.y = (selectGORect.y - deltaMouseY).clamp(0f, level.matrixRect.height.toFloat() - selectGORect.height)
                                 }
                                 SelectGOMode.VERTICAL_RESIZE_TOP -> {
-                                    selectGORect.height = (selectGORect.height - (latestMousePosInWorld.y - mousePosInWorld.y)).roundToInt().clamp(1, Constants.maxGameObjectSize)
+                                    selectGORect.height = (selectGORect.height - deltaMouseY).clamp(1, Constants.maxGameObjectSize)
                                 }
                                 SelectGOMode.DIAGONALE_RESIZE -> {
-                                    var deltaX = latestMousePosInWorld.x - mousePosInWorld.x
-                                    var deltaY = latestMousePosInWorld.y - mousePosInWorld.y
+                                    var deltaX = deltaMouseX
+                                    var deltaY = deltaMouseY
 
                                     if (resizeGameObjectMode == ResizeMode.PROPORTIONAL) {
                                         if (Math.abs(deltaX) > Math.abs(deltaY))
@@ -523,12 +526,12 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                                             deltaX = deltaY
                                     }
 
-                                    selectGORect.width = (selectGORect.width - deltaX).roundToInt().clamp(1, Constants.maxGameObjectSize)
-                                    selectGORect.height = (selectGORect.height - deltaY).roundToInt().clamp(1, Constants.maxGameObjectSize)
+                                    selectGORect.width = (selectGORect.width - deltaX).clamp(1, Constants.maxGameObjectSize)
+                                    selectGORect.height = (selectGORect.height - deltaY).clamp(1, Constants.maxGameObjectSize)
                                 }
                                 SelectGOMode.MOVE -> {
-                                    val moveX = (mousePosInWorld.x - latestMousePosInWorld.x) + (camera.position.x - latestCameraPos.x)
-                                    val moveY = (mousePosInWorld.y - latestMousePosInWorld.y) + (camera.position.y - latestCameraPos.y)
+                                    val moveX = -deltaMouseX + (camera.position.x - latestCameraPos.x)
+                                    val moveY = -deltaMouseY + (camera.position.y - latestCameraPos.y)
 
                                     moveGameObjects(moveX.roundToInt(), moveY.roundToInt())
                                 }

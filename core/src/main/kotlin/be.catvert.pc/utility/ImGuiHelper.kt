@@ -11,6 +11,7 @@ import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.containers.Level
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.i18n.MenusText
+import be.catvert.pc.managers.ResourceManager
 import be.catvert.pc.scenes.EditorScene
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
@@ -190,14 +191,12 @@ object ImGuiHelper {
                 }
 
                 if (comboWithSettingsButton(label, index, Actions.values().map { it.name }, {
-                            insertImguiExposeEditorFields(action.obj, gameObject, level, editorSceneUI)
-                        }, incorrectAction, {
-                            if (isItemHovered()) {
-                                functionalProgramming.withTooltip {
-                                    textPropertyColored(Color.RED, "Il manque le(s) component(s) :", requiredComponent!!.component.map { it.simpleName })
-                                }
+                            if (incorrectAction) {
+                                textColored(Color.RED, "\\!/ Il manque le component :")
+                                text("${requiredComponent!!.component.map { it.simpleName }}")
                             }
-                        }, true)) {
+                            insertImguiExposeEditorFields(action.obj, gameObject, level, editorSceneUI)
+                        }, searchBar = true)) {
                     action.obj = ReflectionUtility.findNoArgConstructor(Actions.values()[index[0]].action)!!.newInstance()
                 }
 

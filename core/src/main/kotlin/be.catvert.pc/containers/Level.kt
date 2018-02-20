@@ -3,6 +3,8 @@ package be.catvert.pc.containers
 import be.catvert.pc.*
 import be.catvert.pc.components.graphics.AtlasComponent
 import be.catvert.pc.factories.PrefabFactory
+import be.catvert.pc.managers.ResourceManager
+import be.catvert.pc.managers.ScriptManager
 import be.catvert.pc.scenes.EndLevelScene
 import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.*
@@ -20,6 +22,7 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
     private val levelAtlas = levelPath.toLocalFile().parent().child("atlas") to mutableListOf<FileHandle>()
     private val levelSounds = levelPath.toLocalFile().parent().child("sounds") to mutableListOf<FileHandle>()
     private val levelPrefabs = levelPath.toLocalFile().parent().child("prefabs") to mutableListOf<Prefab>()
+    private val levelScripts = levelPath.toLocalFile().parent().child("scripts") to mutableListOf<Script>()
 
     val tags = arrayListOf(*Tags.values().map { it.tag }.toTypedArray())
 
@@ -71,12 +74,21 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
                 levelPrefabs.second.add(SerializationFactory.deserializeFromFile(it))
             }
         }
+
+        if (!levelScripts.first.exists())
+            levelScripts.first.mkdirs()
+        else {
+            Utility.getFilesRecursivly(levelScripts.first, *Constants.levelScriptExtension).forEach {
+                levelScripts.second.add(Script(it, ScriptManager.compile(it)))
+            }
+        }
     }
 
     fun resourcesTextures() = levelTextures.second.toList()
     fun resourcesAtlas() = levelAtlas.second.toList()
     fun resourcesSounds() = levelSounds.second.toList()
     fun resourcesPrefabs() = levelPrefabs.second.toList()
+    fun resourcesScripts() = levelScripts.second.toList()
 
     fun addResources(vararg resources: FileHandle) {
         resources.forEach {

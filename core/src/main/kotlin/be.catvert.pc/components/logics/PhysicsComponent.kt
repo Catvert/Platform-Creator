@@ -43,7 +43,10 @@ private data class JumpData(var isJumping: Boolean = false, var targetHeight: In
 data class CollisionListener(val gameObject: GameObject, val collideGameObject: GameObject, val side: BoxSide, val triggerCallCount: Int)
 
 
-data class CollisionAction(@ExposeEditor var side: BoxSide = BoxSide.Left, @ExposeEditor(customType = CustomType.TAG_STRING) var target: GameObjectTag = Tags.Player.tag, @ExposeEditor var action: Action = EmptyAction())
+data class CollisionAction(@ExposeEditor var side: BoxSide = BoxSide.Left,
+                           @ExposeEditor(customType = CustomType.TAG_STRING) var target: GameObjectTag = Tags.Player.tag,
+                           @ExposeEditor var action: Action = EmptyAction(),
+                           @ExposeEditor(customName = "apply action on collider") var applyActionOnCollider: Boolean = false)
 
 /**
  * Ce component permet d'ajouter à l'entité des propriétés physique tel que la gravité, vitesse de déplacement ...
@@ -188,14 +191,14 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
     private fun triggerCollisionEvent(gameObject: GameObject, collideGameObject: GameObject, side: BoxSide, collideIndex: Int) {
         gameObject.getCurrentState().getComponent<PhysicsComponent>()?.apply {
             this.collisionsActions.firstOrNull { collisionAction -> (collisionAction.side == side || collisionAction.side == BoxSide.All) && collisionAction.target == collideGameObject.tag }?.apply {
-                action(gameObject)
+                action(if (this.applyActionOnCollider) collideGameObject else gameObject)
             }
             onCollisionWith.invoke(CollisionListener(gameObject, collideGameObject, side, collideIndex))
         }
 
         collideGameObject.getCurrentState().getComponent<PhysicsComponent>()?.apply {
             this.collisionsActions.firstOrNull { collisionAction -> (collisionAction.side == -side || collisionAction.side == BoxSide.All) && collisionAction.target == gameObject.tag }?.apply {
-                action(collideGameObject)
+                action(if (this.applyActionOnCollider) gameObject else collideGameObject)
             }
             onCollisionWith.invoke(CollisionListener(collideGameObject, gameObject, -side, collideIndex))
         }
@@ -303,33 +306,47 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
         return returnCollide
     }
 
+    // TODO refactor + ignore tags
     fun getCollisionsGameObjectOnSide(gameObject: GameObject, boxSide: BoxSide, epsilon: Float = Constants.physicsEpsilon): Set<GameObject> {
         val collideGameObjects = mutableSetOf<GameObject>()
-
         level.getAllGameObjectsInCells(gameObject.box).filter { it !== gameObject }.forEach {
             when (boxSide) {
                 BoxSide.Left -> {
-                    if (it.box.right().equalsEpsilon(gameObject.box.left(), epsilon)) {
+                    if ((gameObject.box.bottom() in it.box.bottom()..it.box.top()
+                                    || gameObject.box.top() in it.box.bottom()..it.box.top()
+                                    || it.box.bottom() in gameObject.box.bottom()..gameObject.box.top()
+                                    || it.box.top() in gameObject.box.bottom()..gameObject.box.top())
+                            && it.box.right().equalsEpsilon(gameObject.box.left(), epsilon)) {
                         collideGameObjects += it
                     }
                 }
                 BoxSide.Right -> {
-                    if (it.box.x.equalsEpsilon(gameObject.box.right(), epsilon)) {
+                    if ((gameObject.box.bottom() in it.box.bottom()..it.box.top()
+                                    || gameObject.box.top() in it.box.bottom()..it.box.top()
+                                    || it.box.bottom() in gameObject.box.bottom()..gameObject.box.top()
+                                    || it.box.top() in gameObject.box.bottom()..gameObject.box.top())
+                            && it.box.x.equalsEpsilon(gameObject.box.right(), epsilon)) {
                         collideGameObjects += it
                     }
                 }
                 BoxSide.Up -> {
-                    if (it.box.y.equalsEpsilon(gameObject.box.top(), epsilon)) {
+                    if ((gameObject.box.left() in it.box.left()..it.box.right()
+                                    || gameObject.box.right() in it.box.left()..it.box.right()
+                                    || it.box.left() in gameObject.box.left()..gameObject.box.right()
+                                    || it.box.right() in gameObject.box.left()..gameObject.box.right())
+                            && it.box.y.equalsEpsilon(gameObject.box.top(), epsilon))
                         collideGameObjects += it
-                    }
                 }
                 BoxSide.Down -> {
-                    if (it.box.top().equalsEpsilon(gameObject.box.bottom(), epsilon)) {
+                    if ((gameObject.box.left() in it.box.left()..it.box.right()
+                                    || gameObject.box.right() in it.box.left()..it.box.right()
+                                    || it.box.left() in gameObject.box.left()..gameObject.box.right()
+                                    || it.box.right() in gameObject.box.left()..gameObject.box.right())
+                            && it.box.top().equalsEpsilon(gameObject.box.bottom(), epsilon))
                         collideGameObjects += it
-                    }
                 }
                 BoxSide.All -> {
-                    collideGameObjects += it
+                    // TODO collideGameObjects += it
                 }
             }
         }

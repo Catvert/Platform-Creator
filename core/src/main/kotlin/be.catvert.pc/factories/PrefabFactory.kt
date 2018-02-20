@@ -52,7 +52,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     BlockEnemy(PrefabType.All, Prefab("block enemy",
             GameObjectBuilder(Tags.Special.tag, Size(20, 20))
                     .withDefaultState {
-                        withComponent(PhysicsComponent(true, ignoreTags = arrayListOf(Tags.Player.tag)))
+                        withComponent(PhysicsComponent(true, ignoreTags = arrayListOf(Tags.Player.tag, Tags.Special.tag)))
                     }
                     .build()
     )),
@@ -182,10 +182,10 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
 
                         withComponent(PhysicsComponent(false, jumpHeight = 50, collisionsActions = arrayListOf(
                                 CollisionAction(BoxSide.Down, Tags.Sprite.tag, PhysicsAction(PhysicsAction.PhysicsActions.JUMP)),
-                                CollisionAction(BoxSide.All, Tags.Enemy.tag, RemoveGOAction())
+                                CollisionAction(BoxSide.All, Tags.Enemy.tag, LifeAction(LifeAction.LifeActions.REMOVE_LP), true)
                         ), ignoreTags = arrayListOf(Tags.Player.tag)))
 
-                        withComponent(MoverComponent(15, 0, true).apply { this.onReverseAction = RemoveGOAction() })
+                        withComponent(MoverComponent(15, 0, true).apply { this.onUnReverseAction = RemoveGOAction() })
                     }
                     .build())),
 
@@ -196,7 +196,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
 
                         withComponent(PhysicsComponent(false, jumpHeight = 50, collisionsActions = arrayListOf(
                                 CollisionAction(BoxSide.Down, Tags.Sprite.tag, PhysicsAction(PhysicsAction.PhysicsActions.JUMP)),
-                                CollisionAction(BoxSide.All, Tags.Enemy.tag, RemoveGOAction())
+                                CollisionAction(BoxSide.All, Tags.Enemy.tag, LifeAction(LifeAction.LifeActions.REMOVE_LP), true)
                         ), ignoreTags = arrayListOf(Tags.Player.tag)))
 
                         withComponent(MoverComponent(15, 0).apply { this.onReverseAction = RemoveGOAction() })
@@ -358,8 +358,8 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                                 CollisionAction(BoxSide.Left, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP))),
                                 CollisionAction(BoxSide.Right, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP))),
                                 CollisionAction(BoxSide.Up, action = PrefabSetup.playerAction(PhysicsAction(PhysicsAction.PhysicsActions.FORCE_JUMP))),
-                                CollisionAction(BoxSide.Right, Tags.Enemy.tag, action = TagAction(Tags.Enemy.tag, LifeAction(LifeAction.LifeActions.ONE_SHOT))),
-                                CollisionAction(BoxSide.Left, Tags.Enemy.tag, action = TagAction(Tags.Enemy.tag, PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.ONE_SHOT)))))
+                                CollisionAction(BoxSide.Right, Tags.Enemy.tag, LifeAction(LifeAction.LifeActions.ONE_SHOT), true),
+                                CollisionAction(BoxSide.Left, Tags.Enemy.tag, LifeAction(LifeAction.LifeActions.ONE_SHOT), true))
                         ))
 
                         withComponent(MoverComponent(10, 0))

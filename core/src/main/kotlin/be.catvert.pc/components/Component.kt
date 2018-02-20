@@ -18,7 +18,8 @@ enum class Components(val component: KClass<out Component>) {
     Mover(MoverComponent::class),
     Physics(PhysicsComponent::class),
     Sensor(SensorComponent::class),
-    Timer(TimerComponent::class);
+    Timer(TimerComponent::class),
+    Script(ScriptComponent::class)
 }
 
 /**

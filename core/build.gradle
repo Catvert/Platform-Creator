@@ -44,8 +44,6 @@ dependencies {
     compile "com.github.kotlin-graphics:imgui:$imguiVersion"
     compile "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
     compile "io.leangen.geantyref:geantyref:$geantyrefVersion"
-
-    compile fileTree(dir: '../libs', include: '*.jar')
 }
 
 kotlin {

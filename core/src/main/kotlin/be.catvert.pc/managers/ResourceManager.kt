@@ -1,6 +1,7 @@
-package be.catvert.pc.utility
+package be.catvert.pc.managers
 
 import be.catvert.pc.Log
+import be.catvert.pc.utility.loadOnDemand
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.files.FileHandle
@@ -43,9 +44,11 @@ object ResourceManager : Disposable {
         assetManager.clear()
     }
 
-    fun getTexture(file: FileHandle): Texture = tryLoad(file) ?: defaultTexture
+    fun getTexture(file: FileHandle): Texture = tryLoad(file)
+            ?: defaultTexture
 
-    fun getPack(file: FileHandle): TextureAtlas = tryLoad(file) ?: defaultPack
+    fun getPack(file: FileHandle): TextureAtlas = tryLoad(file)
+            ?: defaultPack
 
     fun getPackRegion(file: FileHandle, region: String): TextureAtlas.AtlasRegion = tryLoad<TextureAtlas>(file)?.findRegion(region)
             ?: defaultPackRegion

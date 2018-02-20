@@ -6,11 +6,12 @@
 - Ajouter la possibilité de supprimer une ressource importé
 - Écran de chargement d'un niveau
 - Utiliser un i18n pour les descriptions des props des components/actions (à la place de la description en str mettre : desc_physics_movementType par exemple)
-- Editeur de prefabs (ce qui suppose que les prefabs de base sont pré-enregistré en fichier)
 
 ## BUGS
 
 - Si le joueur est supprimé mais toujours en follow camera(ou autre genre en gameObjectAction) -> présent mais pas dans la matrix
+- Si hauteur > x ( haut a plus de 10 cell à mon avis ), possible crash depuis le TweenSystem.update si c'est des pièces par exemples.
+- Bug delta time trop grand (physics problem)
 
 ## IDÉE
 

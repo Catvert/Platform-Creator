@@ -1,6 +1,7 @@
-package be.catvert.pc.scenes
+package be.catvert.pc.managers
 
 import be.catvert.pc.Log
+import be.catvert.pc.scenes.Scene
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Interpolation
@@ -101,6 +102,9 @@ class SceneManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Dis
 
         ImGui.render()
 
+        if (ImGui.drawData != null)
+            LwjglGL3.renderDrawData(ImGui.drawData!!)
+
         nextScene?.apply {
             ImGui.newFrame()
 
@@ -110,6 +114,9 @@ class SceneManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Dis
             scene.render(batch)
 
             ImGui.render()
+
+            if (ImGui.drawData != null)
+                LwjglGL3.renderDrawData(ImGui.drawData!!)
         }
     }
 

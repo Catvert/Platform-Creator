@@ -6,7 +6,11 @@ import be.catvert.pc.PCGame
 import be.catvert.pc.PCGame.Companion.soundVolume
 import be.catvert.pc.containers.Level
 import be.catvert.pc.i18n.MenusText
-import be.catvert.pc.utility.*
+import be.catvert.pc.managers.MusicManager
+import be.catvert.pc.utility.Constants
+import be.catvert.pc.utility.ImGuiHelper
+import be.catvert.pc.utility.PCInputProcessor
+import be.catvert.pc.utility.Size
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.files.FileHandle
@@ -20,6 +24,7 @@ import kotlin.collections.set
 /**
  * Scène du menu principal
  */
+
 class MainMenuScene(applyMusicTransition: Boolean) : Scene(PCGame.mainBackground) {
     private val logo = PCGame.generateLogo(gameObjectContainer)
 
@@ -30,7 +35,7 @@ class MainMenuScene(applyMusicTransition: Boolean) : Scene(PCGame.mainBackground
     private val levels = Constants.levelDirPath.list { dir -> dir.isDirectory && dir.list { _, s -> s == Constants.levelDataFile }.isNotEmpty() }.map { LevelItem(it) }.toMutableList()
 
     init {
-        if(applyMusicTransition)
+        if (applyMusicTransition)
             MusicManager.startMusic(Constants.menuMusicPath, true)
     }
 
@@ -63,7 +68,6 @@ class MainMenuScene(applyMusicTransition: Boolean) : Scene(PCGame.mainBackground
                     if (ImGuiHelper.tickSoundButton(MenusText.MM_PLAY_BUTTON(), Vec2(-1, 0))) {
                         showSelectLevelWindow = true
                     }
-
                     if (ImGuiHelper.tickSoundButton(MenusText.MM_SETTINGS_BUTTON(), Vec2(-1, 0))) {
                         settingsKeys.forEach {
                             settingsKeys[it.key] = false

@@ -41,7 +41,7 @@ abstract class Scene(protected var background: Background?,
     protected open fun postBatchRender() {}
 
     fun calcIsUIHover() {
-        isUIHover = imgui.findHoveredWindow(ImGui.mousePos) != null || ImGui.isAnyItemActive || ImGui.isAnyItemHovered
+        isUIHover = imgui.findHoveredWindow() != null || ImGui.isAnyItemActive || ImGui.isAnyItemHovered
     }
 
     override fun render(batch: Batch) {
