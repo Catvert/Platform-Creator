@@ -10,6 +10,9 @@ import be.catvert.pc.utility.*
 import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
 
+/**
+ * Permet d'effectuer une action sur tout les game objects ayant un tag précis présents dans l'active rect
+ */
 @Description("[Expérimental] Permet d'effectuer une action sur tout les game objects ayant un tag précis")
 class TagAction(@ExposeEditor(customType = CustomType.TAG_STRING) val tag: GameObjectTag, var action: Action) : Action(), CustomEditorImpl {
     @JsonCreator private constructor() : this(Tags.Player.tag, EmptyAction())

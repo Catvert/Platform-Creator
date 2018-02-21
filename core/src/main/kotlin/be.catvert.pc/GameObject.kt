@@ -17,9 +17,20 @@ import imgui.functionalProgramming
 
 
 /**
- * Classe représentant un objet en jeu
- * @param box Représente le box de l'objet dans l'espace (position + taille)
- * @param container Item dans lequel l'objet va être implémenté
+ * Représente une entité dans le jeu
+ * Cette entité est représentée dans l'espace grâce à sa box
+ *
+ * Une entité a un état de base et un conteneur
+ * @see GameObjectState
+ * @see GameObjectContainer
+ * @see Level
+ *
+ * @param tag Représente la catégorie à laquelle cette entité appartient
+ * @param name Le nom de l'entité
+ * @param box La représentation spatiale de l'entité
+ * @param defaultState L'état par défaut
+ * @param container Le conteneur "contenant" cette entité
+ * @param otherStates Les autres états de l'entité
  */
 @JsonIdentityInfo(property = "id", generator = ObjectIdGenerators.IntSequenceGenerator::class)
 class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: GameObjectTag,
@@ -29,18 +40,30 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
                  container: GameObjectContainer? = null,
                  vararg otherStates: GameObjectState = arrayOf()) : Updeatable, Renderable, ResourceLoader, CustomEditorImpl, CustomEditorTextImpl {
 
+    /**
+     * Représente la "couche" à laquelle cette entité va être affichée
+     */
     @ExposeEditor(min = -100f, max = 100f)
     var layer: Int = 0
         set(value) {
             if (value in Constants.minLayerIndex until Constants.maxLayerIndex) field = value
         }
 
-    @ExposeEditor(description = "Action appelée quand le game object à une position y < 0", customName = "on out of map")
+    /**
+     * Action spéciale appelée quand le game object sort de la carte verticalement
+     */
+    @ExposeEditor(description = "Action appelée quand le game object à une position y < 0", customName = "dehors de carte")
     var onOutOfMapAction: Action = RemoveGOAction()
 
+    /**
+     * Les différents états de l'entité
+     */
     @JsonProperty("states")
     private val states: MutableSet<GameObjectState> = mutableSetOf(defaultState, *otherStates)
 
+    /**
+     * État actuel de l'entité
+     */
     @JsonProperty("currentState")
     private var currentState: Int = 0
         set(value) {
@@ -49,6 +72,10 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
             }
         }
 
+    /**
+     * État initial de l'entité
+     * @see states -> index
+     */
     var initialState: Int = 0
         set(value) {
             if (value in states.indices) {
@@ -56,12 +83,24 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
             }
         }
 
+    /**
+     * Signal appelé quand cette entité est supprimé de son conteneur
+     * @see GameObjectContainer.update
+     */
     @JsonIgnore
     val onRemoveFromParent = Signal<GameObject>()
 
+    /**
+     * Cellules dans lesquels cette entité est présente
+     */
     @JsonIgnore
     var gridCells: MutableList<GridCell> = mutableListOf()
 
+    /**
+     * Conteneur dans lequel l'entité est présente
+     * @see GameObjectContainer
+     * @see Level
+     */
     @JsonIgnore
     var container: GameObjectContainer? = container
         set(value) {
@@ -71,7 +110,6 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
                 setState(initialState, true)
             }
         }
-
 
     @JsonIgnore
     fun getCurrentState() = states.elementAt(currentState)
@@ -85,6 +123,9 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
     fun position() = box.position
     fun size() = box.size
 
+    /**
+     * Supprime cette entité de son conteneur
+     */
     fun removeFromParent() {
         onRemoveFromParent(this)
         container?.removeGameObject(this)
@@ -117,6 +158,9 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
         }
     }
 
+    /**
+     * Permet d'obtenir un état spécifique de l'entité ou dans le cas échéant son état par défaut
+     */
     fun getStateOrDefault(stateIndex: Int) = getStates().elementAtOrNull(stateIndex) ?: getStates().elementAt(0)
 
     override fun update() {
@@ -134,7 +178,7 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         with(ImGui) {
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                if (combo("State initial", ::initialState, getStates().map { it.name }))
+                if (combo("state initial", ::initialState, getStates().map { it.name }))
                     setState(initialState, false)
             }
         }

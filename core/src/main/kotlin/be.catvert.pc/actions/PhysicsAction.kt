@@ -16,6 +16,9 @@ import com.fasterxml.jackson.annotation.JsonCreator
 class PhysicsAction(@ExposeEditor var physicsAction: PhysicsActions) : Action() {
     @JsonCreator private constructor() : this(PhysicsActions.GO_LEFT)
 
+    /**
+     * Représente les différentes actions physiques possible.
+     */
     enum class PhysicsActions {
         GO_LEFT, GO_RIGHT, GO_UP, GO_DOWN, JUMP, FORCE_JUMP;
     }

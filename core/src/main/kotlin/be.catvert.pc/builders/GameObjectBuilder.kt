@@ -11,6 +11,10 @@ import be.catvert.pc.utility.Point
 import be.catvert.pc.utility.Rect
 import be.catvert.pc.utility.Size
 
+/**
+ * Builder permettant de construire un game object
+ * @see GameObject
+ */
 class GameObjectBuilder(val tag: GameObjectTag, val defaultSize: Size, val name: String = tag) {
     private val defaultState = GameObjectState("default")
     private val states = mutableListOf<GameObjectState>()
@@ -50,6 +54,10 @@ class GameObjectBuilder(val tag: GameObjectTag, val defaultSize: Size, val name:
     }
 }
 
+/**
+ * Builder permettant de construire un état d'un game object
+ * @see GameObjectState
+ */
 class StateBuilder(val state: GameObjectState) {
     fun withStartAction(action: Action): StateBuilder {
         state.startAction = action

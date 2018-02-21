@@ -80,7 +80,7 @@ object Utility {
         return files
     }
 
-    fun getDeltaTime() = Math.min(Gdx.graphics.deltaTime, 0.25f)
+    fun getDeltaTime() = Math.min(Gdx.graphics.deltaTime, 0.1f)
 }
 
 object ReflectionUtility {

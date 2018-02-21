@@ -8,6 +8,9 @@ import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.*
 import com.fasterxml.jackson.annotation.JsonCreator
 
+/**
+ * Action permettant de faire apparaître un game object à un position spécifique
+ */
 @Description("Permet de faire apparaître un game object à une position spécifique")
 class SpawnPositionAction(@ExposeEditor var prefab: Prefab, var position: Point) : Action(), CustomEditorImpl {
     @JsonCreator private constructor() : this(PrefabFactory.MushroomRed_SMC.prefab, Point(0f, 0f))
@@ -19,7 +22,7 @@ class SpawnPositionAction(@ExposeEditor var prefab: Prefab, var position: Point)
     }
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        (gameObject.container as? Level)?.matrixRect?.apply {
+        gameObject.container.cast<Level>()?.matrixRect?.apply {
             ImGuiHelper.point(this@SpawnPositionAction::position, Point(0f, 0f), Point(this.width - gameObject.size().width.toFloat(), this.height - gameObject.size().height.toFloat()), editorSceneUI)
         }
     }

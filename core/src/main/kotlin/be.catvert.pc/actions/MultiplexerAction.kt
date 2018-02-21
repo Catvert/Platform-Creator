@@ -13,7 +13,7 @@ import imgui.ImGui
 import imgui.functionalProgramming
 
 /**
- * Action permettant d'utiliser d'appliquer plusieurs actions sur un gameObject à la place d'une seule.
+ * Action permettant d'appeler plusieurs actions à la place d'une seule.
  */
 @Description("Permet d'effectuer plusieurs actions sur un game object")
 class MultiplexerAction(var actions: ArrayList<Action>) : Action(), CustomEditorImpl, CustomEditorTextImpl {

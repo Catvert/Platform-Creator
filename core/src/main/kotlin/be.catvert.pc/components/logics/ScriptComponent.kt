@@ -9,6 +9,7 @@ import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.CustomEditorImpl
 import be.catvert.pc.utility.Updeatable
+import be.catvert.pc.utility.cast
 import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
 import imgui.functionalProgramming
@@ -20,7 +21,7 @@ class ScriptComponent(var scriptIndex: Int) : Component(), Updeatable, CustomEdi
     private var firstCall = true
 
     private fun executeFunction(name: String, vararg params: Any) {
-        (gameObject.container as? Level)?.apply {
+        gameObject.container.cast<Level>()?.apply {
             resourcesScripts().elementAtOrNull(scriptIndex)?.apply {
                 compiledScript.eval(ScriptManager.bindings)
 

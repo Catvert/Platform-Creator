@@ -8,13 +8,13 @@ import be.catvert.pc.utility.ExposeEditor
 import be.catvert.pc.utility.Utility
 import com.fasterxml.jackson.annotation.JsonCreator
 
-@Description("Permet de déplacer un game object sans utiliser le moteur physique")
+@Description("Permet de déplacer un game object en utilisant ou non le moteur physique")
 class MoveAction(@ExposeEditor(min = -100f, max = 100f) var moveX: Int, @ExposeEditor(min = -100f, max = 100f) var moveY: Int, @ExposeEditor var physics: Boolean) : Action() {
     @JsonCreator private constructor() : this(0, 0, true)
 
     override fun invoke(gameObject: GameObject) {
-        val moveX = (moveX * Utility.getDeltaTime() * Constants.physicsDeltaSpeed)
-        val moveY = (moveY * Utility.getDeltaTime() * Constants.physicsDeltaSpeed)
+        val moveX = moveX * Utility.getDeltaTime() * Constants.physicsDeltaSpeed
+        val moveY = moveY * Utility.getDeltaTime() * Constants.physicsDeltaSpeed
 
         if (physics) {
             gameObject.getCurrentState().getComponent<PhysicsComponent>()?.move(true, moveX, moveY, gameObject)

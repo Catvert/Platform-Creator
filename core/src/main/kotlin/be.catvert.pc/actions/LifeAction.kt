@@ -17,6 +17,9 @@ import com.fasterxml.jackson.annotation.JsonCreator
 class LifeAction(@ExposeEditor var action: LifeActions) : Action() {
     @JsonCreator private constructor() : this(LifeActions.REMOVE_LP)
 
+    /**
+     * Représente les différentes actions possibles au niveau des points de vie.
+     */
     enum class LifeActions {
         ADD_LP, REMOVE_LP, ONE_SHOT
     }

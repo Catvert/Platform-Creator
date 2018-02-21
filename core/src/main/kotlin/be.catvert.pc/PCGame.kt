@@ -220,9 +220,7 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
                 }
                 .build(getLogoRect().position, container)
 
-        /**
-         * Permet de retourner la taille du logo au cas où la taille de l'écran changerait.
-         */
+
         private fun getLogoSize() = Size(600, 125)
 
         fun getLogoRect(): Rect {

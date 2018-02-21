@@ -19,12 +19,13 @@ import kotlin.reflect.KClass
  * Un état est par exemple quand le joueur à sa vie au maximum, et un autre état quand il lui reste 1 point de vie. Différents états permettent d'avoir différentes intéractions sur le gameObject au cour du temps.
  */
 class GameObjectState(var name: String, components: MutableSet<Component> = mutableSetOf()) : Renderable, Updeatable, ResourceLoader {
-    constructor(name: String, initState: GameObjectState.() -> Unit) : this(name) {
-        initState()
-    }
-
     @JsonCreator private constructor() : this("State")
 
+    /**
+     * Représente le game object où cet état est implémenté.
+     * Injecté lors de l'ajout du game object à son conteneur(par exemple le niveau), via la méthode
+     * @see onAddToContainer
+     */
     private lateinit var gameObject: GameObject
 
     @JsonProperty("comps")
@@ -32,6 +33,9 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
 
     private var active = false
 
+    /**
+     * Action appelée lorsque cet état devient actif.
+     */
     var startAction: Action = EmptyAction()
 
     @JsonIgnore
@@ -41,6 +45,10 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
         this.gameObject = gameObject
     }
 
+    /**
+     * Permet d'activer cet état.
+     * @param triggerStartAction Permet de spécifier si l'action de départ doit être appelée.
+     */
     fun active(container: GameObjectContainer, triggerStartAction: Boolean) {
         components.forEach { it.onStateActive(gameObject, this, container) }
 
@@ -50,10 +58,17 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
         active = true
     }
 
+    /**
+     * Permet de désactiver cet état.
+     */
     fun disabled() {
         active = false
     }
 
+    /**
+     * Permet d'ajouter un component à cet état.
+     * @see Component
+     */
     fun addComponent(component: Component) {
         if (components.none { it.javaClass.isInstance(component) }) {
             components.add(component)
@@ -64,14 +79,24 @@ class GameObjectState(var name: String, components: MutableSet<Component> = muta
         }
     }
 
+    /**
+     * Permet de supprimer un component de cet état.
+     * @see Component
+     */
     fun removeComponent(component: Component) {
         components.remove(component)
     }
 
+    /**
+     * Permet d'obtenir un component présent dans cet état.
+     * @return Le component ou null si le component n'existe pas.
+     */
     inline fun <reified T : Component> getComponent(): T? = getComponents().firstOrNull { it is T }.cast()
 
+    /**
+     * Permet de vérifier si un component est présent dans cet état.
+     */
     inline fun <reified T : Component> hasComponent(): Boolean = getComponent<T>() != null
-
     fun hasComponent(klass: KClass<out Component>) = getComponents().any { klass.isInstance(it) }
 
     override fun render(batch: Batch) {

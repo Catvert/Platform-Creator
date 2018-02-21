@@ -143,6 +143,8 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         var createStateInputText = "Nouveau state"
         var createPrefabInputText = "Nouveau prefab"
 
+        val menuBarHeight = (g.fontBaseSize + g.style.framePadding.y * 2f).roundToInt()
+
         init {
             when (background?.type) {
                 BackgroundType.Standard -> settingsLevelStandardBackgroundIndex[0] = PCGame.standardBackgrounds().indexOfFirst { it.backgroundFile == (background as StandardBackground).backgroundFile }
@@ -203,7 +205,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         level.updateCamera(camera, false)
 
         // Permet de décaler le viewport vers le bas pour afficher la totalité du niveau avec la barre de menu.
-        viewport.screenHeight -= (g.fontBaseSize + g.style.framePadding.y * 2f).roundToInt()
+        viewport.screenHeight -= editorSceneUI.menuBarHeight
         viewport.apply()
 
         if (applyMusicTransition)
@@ -1133,7 +1135,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                                     when (editorSceneUI.settingsLevelBackgroundType.obj.cast<BackgroundType>()) {
                                         BackgroundType.Standard -> {
                                             if (editorSceneUI.settingsLevelStandardBackgroundIndex[0] == -1) {
-                                                editorSceneUI.settingsLevelStandardBackgroundIndex[0] = PCGame.standardBackgrounds().indexOfFirst { it.backgroundFile == (level.background as? StandardBackground)?.backgroundFile }
+                                                editorSceneUI.settingsLevelStandardBackgroundIndex[0] = PCGame.standardBackgrounds().indexOfFirst { it.backgroundFile == (level.background.cast<StandardBackground>())?.backgroundFile }
                                             }
 
                                             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
@@ -1144,7 +1146,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                                         }
                                         BackgroundType.Parallax -> {
                                             if (editorSceneUI.settingsLevelParallaxBackgroundIndex[0] == -1) {
-                                                editorSceneUI.settingsLevelParallaxBackgroundIndex[0] = PCGame.parallaxBackgrounds().indexOfFirst { it.parallaxDataFile == (level.background as? ParallaxBackground)?.parallaxDataFile }
+                                                editorSceneUI.settingsLevelParallaxBackgroundIndex[0] = PCGame.parallaxBackgrounds().indexOfFirst { it.parallaxDataFile == (level.background.cast<ParallaxBackground>())?.parallaxDataFile }
                                             }
 
                                             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
@@ -1211,6 +1213,13 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                             }
                         }
                     }
+                    ImGui.cursorPosX = Gdx.graphics.width.toFloat() - 175f
+
+                    if(smallButton("Sauvegarder"))
+                        saveLevelToFile()
+                    sameLine()
+                    if(smallButton("Essayer"))
+                        launchTryLevel()
                 } else {
                     menuItem("Arrêter l'essai") {
                         finishTryLevel()
@@ -1244,9 +1253,9 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
     private fun drawGameObjectsWindow() {
         with(ImGui) {
-            val nextWindowSize = Vec2(210f, Gdx.graphics.height)
+            val nextWindowSize = Vec2(210f, Gdx.graphics.height - editorSceneUI.menuBarHeight)
             setNextWindowSize(nextWindowSize, Cond.Once)
-            setNextWindowPos(Vec2(Gdx.graphics.width - nextWindowSize.x, 0), Cond.Once)
+            setNextWindowPos(Vec2(Gdx.graphics.width - nextWindowSize.x, editorSceneUI.menuBarHeight), Cond.Once)
             setNextWindowSizeConstraints(Vec2(nextWindowSize.x, 250f), Vec2(nextWindowSize.x, Gdx.graphics.height))
             functionalProgramming.withWindow("Game objects", editorSceneUI::showGameObjectsWindow) {
                 val tags = level.tags.apply { remove(Tags.Empty.tag) }

@@ -83,8 +83,8 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         )
 
                         withComponent(InputComponent(
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_LEFT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_LEFT), RenderAction(RenderAction.RenderActions.FLIP_X))),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_RIGHT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_RIGHT), RenderAction(RenderAction.RenderActions.UNFLIP_X))),
+                                InputComponent.InputData(GameKeys.GAME_PLAYER_LEFT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_LEFT), AtlasFlipAction(true, false))),
+                                InputComponent.InputData(GameKeys.GAME_PLAYER_RIGHT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_RIGHT), AtlasFlipAction(false, false))),
                                 InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_UP.key, true, PhysicsAction(PhysicsAction.PhysicsActions.GO_UP)),
                                 InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_DOWN.key, true, PhysicsAction(PhysicsAction.PhysicsActions.GO_DOWN)),
                                 InputComponent.InputData(GameKeys.GAME_PLAYER_JUMP.key, false, PhysicsAction(PhysicsAction.PhysicsActions.JUMP)))
@@ -122,7 +122,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
 
                         withComponent(LifeComponent(PrefabSetup.killActionTween))
 
-                        withComponent(MoverComponent(5, 0, true).apply { onReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X) })
+                        withComponent(MoverComponent(5, 0, true).apply { onReverseAction = AtlasFlipAction(false, false); onUnReverseAction = AtlasFlipAction(true, false) })
                     }
                     .build()
     )),
@@ -155,7 +155,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
 
                         withComponent(LifeComponent(PrefabSetup.killActionTween))
 
-                        withComponent(MoverComponent(5, 0, true).apply { onReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X) })
+                        withComponent(MoverComponent(5, 0, true).apply { onReverseAction = AtlasFlipAction(false, false); onUnReverseAction = AtlasFlipAction(true, false) })
                     }
                     .build()
     )),
@@ -219,8 +219,8 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         )
 
                         withComponent(InputComponent(
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_LEFT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_LEFT), RenderAction(RenderAction.RenderActions.FLIP_X))),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_RIGHT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_RIGHT), RenderAction(RenderAction.RenderActions.UNFLIP_X))),
+                                InputComponent.InputData(GameKeys.GAME_PLAYER_LEFT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_LEFT), AtlasFlipAction(true, false))),
+                                InputComponent.InputData(GameKeys.GAME_PLAYER_RIGHT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_RIGHT), AtlasFlipAction(false, false))),
                                 InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_UP.key, true, PhysicsAction(PhysicsAction.PhysicsActions.GO_UP)),
                                 InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_DOWN.key, true, PhysicsAction(PhysicsAction.PhysicsActions.GO_DOWN)),
                                 InputComponent.InputData(GameKeys.GAME_PLAYER_JUMP.key, false, PhysicsAction(PhysicsAction.PhysicsActions.JUMP)))
@@ -254,8 +254,8 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         )
 
                         withComponent(InputComponent(
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_LEFT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_LEFT), RenderAction(RenderAction.RenderActions.FLIP_X))),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_RIGHT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_RIGHT), RenderAction(RenderAction.RenderActions.UNFLIP_X))),
+                                InputComponent.InputData(GameKeys.GAME_PLAYER_LEFT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_LEFT), AtlasFlipAction(true, false))),
+                                InputComponent.InputData(GameKeys.GAME_PLAYER_RIGHT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_RIGHT), AtlasFlipAction(false, false))),
                                 InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_UP.key, true, PhysicsAction(PhysicsAction.PhysicsActions.GO_UP)),
                                 InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_DOWN.key, true, PhysicsAction(PhysicsAction.PhysicsActions.GO_DOWN)),
                                 InputComponent.InputData(GameKeys.GAME_PLAYER_JUMP.key, false, PhysicsAction(PhysicsAction.PhysicsActions.JUMP)))
@@ -288,8 +288,8 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         )
 
                         withComponent(InputComponent(
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_LEFT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_LEFT), RenderAction(RenderAction.RenderActions.FLIP_X))),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_RIGHT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_RIGHT), RenderAction(RenderAction.RenderActions.UNFLIP_X))),
+                                InputComponent.InputData(GameKeys.GAME_PLAYER_LEFT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_LEFT), AtlasFlipAction(true, false))),
+                                InputComponent.InputData(GameKeys.GAME_PLAYER_RIGHT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_RIGHT), AtlasFlipAction(false, false))),
                                 InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_UP.key, true, PhysicsAction(PhysicsAction.PhysicsActions.GO_UP)),
                                 InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_DOWN.key, true, PhysicsAction(PhysicsAction.PhysicsActions.GO_DOWN)),
                                 InputComponent.InputData(GameKeys.GAME_PLAYER_JUMP.key, false, PhysicsAction(PhysicsAction.PhysicsActions.JUMP)),
@@ -328,7 +328,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
 
                         withComponent(LifeComponent(PrefabSetup.killActionTween))
 
-                        withComponent(MoverComponent(5, 0, true).apply { onReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X) })
+                        withComponent(MoverComponent(5, 0, true).apply { onReverseAction = AtlasFlipAction(false, false); onUnReverseAction = AtlasFlipAction(true, false) })
                     }
                     .build()
     )),
@@ -347,7 +347,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
 
                         withComponent(LifeComponent(StateAction(1, true)))
 
-                        withComponent(MoverComponent(5, 0, true).apply { onReverseAction = RenderAction(RenderAction.RenderActions.UNFLIP_X); onUnReverseAction = RenderAction(RenderAction.RenderActions.FLIP_X) })
+                        withComponent(MoverComponent(5, 0, true).apply { onReverseAction = AtlasFlipAction(false, false); onUnReverseAction = AtlasFlipAction(true, false) })
                     }
                     .withState("shell") {
                         withStartAction(ResizeAction(Size(45, 45)))

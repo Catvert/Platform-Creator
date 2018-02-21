@@ -13,6 +13,9 @@ import imgui.functionalProgramming
 
 typealias StateSwitchAction = Pair<Int, Action>
 
+/**
+ * Permet d'effectuer une action sur un game object selon le stateIndex actuel du game object
+ */
 @Description("Permet d'effectuer une action sur un game object selon son état.")
 class StateSwitcherAction(var stateSwitchActions: ArrayList<StateSwitchAction>) : Action(), CustomEditorImpl {
     constructor(vararg stateSwitchActions: StateSwitchAction) : this(arrayListOf(*stateSwitchActions))

@@ -16,6 +16,11 @@ import imgui.ImGui
 import imgui.functionalProgramming
 import kotlin.reflect.full.createInstance
 
+/**
+ * Action permettant de lancer un Tween sur un game object
+ * @see Tween
+ * @see TweenSystem
+ */
 @Description("Permet d'appliquer un/des tween(s) précis sur un game object")
 class TweenAction(var tween: Tween, var loop: Boolean) : Action(), CustomEditorImpl {
     @JsonCreator private constructor() : this(EmptyTween(), false)

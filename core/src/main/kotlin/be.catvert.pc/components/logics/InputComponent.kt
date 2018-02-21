@@ -36,17 +36,21 @@ class InputComponent(var inputs: ArrayList<InputData>) : Component(), Updeatable
                 ImGuiHelper.gdxKey(::key)
             }
         }
+
+        fun update(gameObject: GameObject) {
+            if (pressed) {
+                if (Gdx.input.isKeyPressed(key))
+                    action(gameObject)
+            } else {
+                if (Gdx.input.isKeyJustPressed(key))
+                    action(gameObject)
+            }
+        }
     }
 
     override fun update() {
         inputs.forEach {
-            if (it.pressed) {
-                if (Gdx.input.isKeyPressed(it.key))
-                    it.action(gameObject)
-            } else {
-                if (Gdx.input.isKeyJustPressed(it.key))
-                    it.action(gameObject)
-            }
+           it.update(gameObject)
         }
     }
 
