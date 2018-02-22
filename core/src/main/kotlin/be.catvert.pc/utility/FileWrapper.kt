@@ -6,6 +6,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import ktx.assets.toLocalFile
 
+/**
+ * Wrapper permettant de sérialiser un FileHandle
+ */
 class FileWrapper(file: FileHandle) {
     constructor(path: String) : this(path.toLocalFile())
     @JsonCreator private constructor() : this("")

@@ -10,6 +10,9 @@ import imgui.ImGui
 import imgui.impl.LwjglGL3
 import ktx.app.clearScreen
 
+/**
+ * Permet de gérer les scènes
+ */
 class SceneManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Disposable {
     private var currentScene: Scene = initialScene
     private var nextScene: NextWaitingScene? = null

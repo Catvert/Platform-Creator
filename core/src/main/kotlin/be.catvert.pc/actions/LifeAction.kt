@@ -9,11 +9,11 @@ import com.fasterxml.jackson.annotation.JsonCreator
 
 
 /**
- * Une action permettant d'ajouter ou de retirer des points de vies à un gameObject ayant le component LifeComponent
+ * Une action permettant d'ajouter ou de retirer des points de vies à une entité ayant le component LifeComponent
  * @see LifeComponent
  */
 @RequiredComponent(LifeComponent::class)
-@Description("Permet d'ajouter/supprimer des points de vie à un game object")
+@Description("Permet d'ajouter/supprimer des points de vie à une entité")
 class LifeAction(@ExposeEditor var action: LifeActions) : Action() {
     @JsonCreator private constructor() : this(LifeActions.REMOVE_LP)
 

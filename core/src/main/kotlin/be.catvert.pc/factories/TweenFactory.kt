@@ -6,6 +6,9 @@ import be.catvert.pc.builders.TweenBuilder
 import be.catvert.pc.components.logics.LifeComponent
 import be.catvert.pc.tweens.*
 
+/**
+ * Permet d'ajouter des tweens de base au jeu
+ */
 enum class TweenFactory(val tween: () -> Tween) {
     Empty({ EmptyTween() }),
     RemoveGO({ TweenBuilder(AlphaAtlasTween(0.5f, 0f), true).build(RemoveGOAction()) }),

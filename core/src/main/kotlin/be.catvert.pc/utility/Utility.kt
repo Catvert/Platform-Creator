@@ -21,7 +21,10 @@ import kotlin.reflect.KClass
 import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaConstructor
 
-
+/**
+ * Extension permettant de dessiner facilement une texture avec un Rect
+ * @see Rect
+ */
 fun Batch.draw(textureRegion: TextureRegion, rect: Rect, flipX: Boolean = false, flipY: Boolean = false, rotation: Float = 0f) {
     if (flipX && !textureRegion.isFlipX || !flipX && textureRegion.isFlipX) {
         textureRegion.flip(true, false)
@@ -66,6 +69,9 @@ fun ShapeRenderer.withColor(color: Color, block: ShapeRenderer.() -> Unit) {
 inline fun <reified T : Any> Any?.cast(): T? = this as? T
 
 object Utility {
+    /**
+     * Permet de parcourir les fichiers d'un dossier récursivement en ne gardant que les fichiers ayant une extension particulière
+     */
     fun getFilesRecursivly(dir: FileHandle, vararg fileExt: String = arrayOf()): List<FileHandle> {
         val files = mutableListOf<FileHandle>()
 
@@ -80,12 +86,16 @@ object Utility {
         return files
     }
 
+    /**
+     * Permet de retourné l'écart de temps entre 2 rafraîchissement de l'écran en évitant la spirale de la mort
+     */
     fun getDeltaTime() = Math.min(Gdx.graphics.deltaTime, 0.1f)
 }
 
 object ReflectionUtility {
-    inline fun <reified T : Any> hasNoArgConstructor(klass: KClass<out T>) = findNoArgConstructor(klass) != null
-
+    /**
+     * Permet d'obtenir le constructeur sans arguments d'une classe
+     */
     inline fun <reified T : Any> findNoArgConstructor(klass: KClass<out T>): Constructor<T>? {
         klass.constructors.forEach {
             if (it.parameters.isEmpty())
@@ -94,7 +104,9 @@ object ReflectionUtility {
         return null
     }
 
-
+    /**
+     * Permet d'obtenir tout les champs d'une classe
+     */
     fun getAllFieldsOf(type: Class<*>): List<Field> {
         val fields = mutableListOf<Field>()
 
@@ -108,5 +120,8 @@ object ReflectionUtility {
         return fields
     }
 
+    /**
+     * Permet d'obtenir le nom d'une classe
+     */
     fun simpleNameOf(instance: Any) = instance.javaClass.kotlin.simpleName ?: "Nom introuvable"
 }

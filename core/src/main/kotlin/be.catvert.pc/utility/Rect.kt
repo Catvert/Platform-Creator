@@ -7,6 +7,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import imgui.ImGui
 import kotlin.math.roundToInt
 
+/**
+ * Représente un rectangle dans l'espace
+ * @param position Position du rectangle dans l'espace
+ * @param size Taille du rectangle
+ */
 class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
     constructor(x: Float, y: Float, width: Int, height: Int) : this(Point(x, y), Size(width, height))
     constructor(rect: Rect) : this(rect.x, rect.y, rect.width, rect.height)

@@ -6,6 +6,9 @@ import glm_.vec2.Vec2d
 import imgui.impl.LwjglGL3
 import org.lwjgl.glfw.GLFW
 
+/**
+ * Permet à ImGui de mettre à jour les entrées clavier/souris
+ */
 object PCInputProcessor : InputAdapter() {
     val keyDownSignal = Signal<Int>()
 

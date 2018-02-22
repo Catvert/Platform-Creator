@@ -8,7 +8,7 @@ import be.catvert.pc.utility.Description
 import be.catvert.pc.utility.ImGuiHelper
 import com.fasterxml.jackson.annotation.JsonCreator
 
-@Description("Permet d'exécuter une action sur un game object précis")
+@Description("Permet d'exécuter une action sur une entité précise")
 class GameObjectAction(var target: GameObject?, var action: Action) : Action(), CustomEditorImpl {
     @JsonCreator private constructor() : this(null, EmptyAction())
 

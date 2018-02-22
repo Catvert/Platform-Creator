@@ -13,13 +13,14 @@ import be.catvert.pc.utility.*
 import com.fasterxml.jackson.annotation.JsonCreator
 
 /**
- * Component permettant d'ajouter la possibilité à un gameObject de se déplacer automatiquement dans une direction.
- * Si le gameObject rencontre un obstacle, il ira dans la direction opposé
- * @param orientation L'orientation dans laquelle le gameObject se déplacer (verticalement/horizontalement)
+ * Component permettant d'ajouter la possibilité à une entité de se déplacer automatiquement dans une direction.
+ * Si l'entité rencontre un obstacle, elle ira dans la direction opposé
+ * @param moveSpeedX Vitesse de déplacement horizontal
+ * @param moveSpeedY Vitesse de déplacement vertical
  * @see PhysicsComponent
  */
 @RequiredComponent(PhysicsComponent::class)
-@Description("Permet de déplacer automatiquement un game object sur un axe")
+@Description("Permet de déplacer automatiquement une entité sur un axe")
 class MoverComponent(@ExposeEditor(max = 100f) var moveSpeedX: Int, @ExposeEditor(max = 100f) var moveSpeedY: Int, @ExposeEditor var reverse: Boolean = false, @ExposeEditor var holdGameObjects: Boolean = false) : Component(), Updeatable {
     @JsonCreator private constructor() : this(0, 0)
 

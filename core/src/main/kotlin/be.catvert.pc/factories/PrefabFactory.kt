@@ -44,6 +44,9 @@ object PrefabSetup {
     fun playerAction(action: Action) = TagAction(Tags.Player.tag, action)
 }
 
+/**
+ * Permet d'ajouter des préfabs de base au jeu
+ */
 enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     Empty(PrefabType.All, Prefab("empty",
             GameObjectBuilder(Tags.Empty.tag, Size(50, 50))
@@ -275,6 +278,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
 
                         withComponent(LifeComponent(StateAction(0)))
                     }
+                    // Fire state
                     .withState("fire") {
                         val pack = Constants.packsSMCDirPath.child("maryo.atlas").toFileWrapper()
 

@@ -15,7 +15,7 @@ import imgui.functionalProgramming
 /**
  * Action permettant d'appeler plusieurs actions à la place d'une seule.
  */
-@Description("Permet d'effectuer plusieurs actions sur un game object")
+@Description("Permet d'effectuer plusieurs actions sur une entité")
 class MultiplexerAction(var actions: ArrayList<Action>) : Action(), CustomEditorImpl, CustomEditorTextImpl {
     constructor(vararg actions: Action) : this(arrayListOf(*actions))
     @JsonCreator private constructor() : this(arrayListOf())

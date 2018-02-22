@@ -14,9 +14,9 @@ import imgui.ImGui
 import imgui.functionalProgramming
 
 /**
- * Component permettant d'ajouter des sons à un gameObject
+ * Component permettant d'ajouter des sons à une entité
  */
-@Description("Ajoute la possibilité d'ajouter des sons à un game object")
+@Description("Ajoute la possibilité d'ajouter des sons à une entité")
 class SoundComponent(var sounds: ArrayList<SoundData>) : Component(), ResourceLoader, CustomEditorImpl, CustomEditorTextImpl {
     constructor(vararg sounds: SoundData) : this(arrayListOf(*sounds))
     @JsonCreator private constructor() : this(arrayListOf())
@@ -65,13 +65,13 @@ class SoundComponent(var sounds: ArrayList<SoundData>) : Component(), ResourceLo
     }
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        ImGuiHelper.addImguiWidgetsArray("sons", sounds, { it.toString() }, { SoundData(Constants.defaultSoundPath.toFileWrapper()) }, gameObject, level, editorSceneUI)
+        ImGuiHelper.addImguiWidgetsArray("sounds", sounds, { it.toString() }, { SoundData(Constants.defaultSoundPath.toFileWrapper()) }, gameObject, level, editorSceneUI)
     }
 
     override fun insertText() {
         ImGuiHelper.textColored(Color.RED, "<-->")
         sounds.forEach {
-            ImGuiHelper.textPropertyColored(Color.ORANGE, "sound :", it.soundFile.get().nameWithoutExtension())
+            ImGuiHelper.textPropertyColored(Color.ORANGE, "son :", it.soundFile.get().nameWithoutExtension())
         }
         ImGuiHelper.textColored(Color.RED, "<-->")
     }

@@ -1,7 +1,7 @@
 package be.catvert.pc.utility
 
 /**
- * Interface permettant à un objet d'être redimensionné
+ * Interface permettant de spécifier qu'un objet peut-être redimensionné
  */
 interface Resizable {
     fun resize(size: Size)

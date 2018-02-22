@@ -10,7 +10,7 @@ import be.catvert.pc.utility.Description
 import be.catvert.pc.utility.ExposeEditor
 import com.fasterxml.jackson.annotation.JsonCreator
 
-@Description("Permet de faire apparaître un game object sur un côté de ce game object")
+@Description("Permet de faire apparaître une entité sur un côté de cette entité")
 class SpawnSideAction(@ExposeEditor var prefab: Prefab, @ExposeEditor var spawnSide: BoxSide, @ExposeEditor var tweenMove: Boolean) : Action() {
     @JsonCreator private constructor() : this(PrefabFactory.MushroomRed_SMC.prefab, BoxSide.Up, true)
 

@@ -8,11 +8,11 @@ import be.catvert.pc.utility.ExposeEditor
 import com.fasterxml.jackson.annotation.JsonCreator
 
 /**
- * Action permettant de flip horizontalement ou verticalement l'atlas d'un game object
+ * Action permettant de flip horizontalement ou verticalement l'atlas d'une entité
  * @see AtlasComponent
  */
 @RequiredComponent(AtlasComponent::class)
-@Description("Permet de flip la texture d'une game object")
+@Description("Permet d'appliquer un effet de miroir sur l'atlas actuel d'une entité")
 class AtlasFlipAction(@ExposeEditor var flipX: Boolean, @ExposeEditor var flipY: Boolean) : Action() {
     @JsonCreator private constructor() : this(false, false)
 

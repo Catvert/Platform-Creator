@@ -223,7 +223,7 @@ abstract class GameObjectMatrixContainer : GameObjectContainer() {
 
     /**
      * Permet de mettre à jour la liste des cellules où l'entité se trouve
-     * @param entity L'entité à mettre à jour
+     * @param gameObject L'entité à mettre à jour
      */
     private fun setGameObjectToGrid(gameObject: GameObject) {
         gameObject.gridCells.forEach {

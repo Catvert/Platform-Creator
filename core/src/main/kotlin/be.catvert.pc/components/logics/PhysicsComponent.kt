@@ -43,10 +43,10 @@ private data class JumpData(var isJumping: Boolean = false, var targetHeight: In
 data class CollisionListener(val gameObject: GameObject, val collideGameObject: GameObject, val side: BoxSide, val triggerCallCount: Int)
 
 
-data class CollisionAction(@ExposeEditor var side: BoxSide = BoxSide.Left,
-                           @ExposeEditor(customType = CustomType.TAG_STRING) var target: GameObjectTag = Tags.Player.tag,
+data class CollisionAction(@ExposeEditor(customName = "côté") var side: BoxSide = BoxSide.Left,
+                           @ExposeEditor(customName = "cible", customType = CustomType.TAG_STRING) var target: GameObjectTag = Tags.Player.tag,
                            @ExposeEditor var action: Action = EmptyAction(),
-                           @ExposeEditor(customName = "apply action on collider") var applyActionOnCollider: Boolean = false)
+                           @ExposeEditor(customName = "appliquer l'action sur la cible") var applyActionOnCollider: Boolean = false)
 
 /**
  * Ce component permet d'ajouter à l'entité des propriétés physique tel que la gravité, vitesse de déplacement ...
@@ -60,15 +60,15 @@ data class CollisionAction(@ExposeEditor var side: BoxSide = BoxSide.Left,
  * @param onDownAction Action appelée quand le gameObject est en chute libre
  * @param onNothingAction Action appelée quand le gameObject ne subit aucune action physique
  */
-@Description("Ajoute des propriétés physique à un game object")
-class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
-                       @ExposeEditor(max = 100f) var moveSpeed: Int = 0,
-                       @ExposeEditor(description = "Défini si le mouvement doit être \"fluide\" ou non.") var movementType: MovementType = MovementType.SMOOTH,
-                       @ExposeEditor var gravity: Boolean = !isStatic,
-                       @ExposeEditor var isPlatform: Boolean = false,
+@Description("Ajoute des propriétés physique à une entité")
+class PhysicsComponent(@ExposeEditor(customName = "figée") var isStatic: Boolean,
+                       @ExposeEditor(customName = "vitesse", max = 100f) var moveSpeed: Int = 0,
+                       @ExposeEditor(customName = "type de déplacement", description = "Défini si le mouvement doit être \"fluide\" ou non.") var movementType: MovementType = MovementType.SMOOTH,
+                       @ExposeEditor(customName = "gravité") var gravity: Boolean = !isStatic,
+                       @ExposeEditor(customName = "est une plateforme") var isPlatform: Boolean = false,
                        val ignoreTags: ArrayList<GameObjectTag> = arrayListOf(),
                        val collisionsActions: ArrayList<CollisionAction> = arrayListOf(),
-                       @ExposeEditor(max = 1000f) var jumpHeight: Int = 0,
+                       @ExposeEditor(customName = "hauteur du saut", max = 1000f) var jumpHeight: Int = 0,
                        var onLeftAction: Action = EmptyAction(),
                        var onRightAction: Action = EmptyAction(),
                        var onUpAction: Action = EmptyAction(),
@@ -224,7 +224,7 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
 
         val checkRect = Rect(gameObject.box)
         var triggerCallCounter = 0
-        // Do-while à la place de while pour pouvoir vérifier si le game object n'est pas déjà en overlaps avec un autre (mal placé dans l'éditeur)
+        // Do-while à la place de while pour pouvoir vérifier si l'entité n'est pas déjà en overlaps avec une autre (mal placé dans l'éditeur)
         do {
             checkRect.y = gameObject.box.y + moveY + Math.signum(targetMoveY) * Constants.physicsEpsilon
 
@@ -346,7 +346,10 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
                         collideGameObjects += it
                 }
                 BoxSide.All -> {
-                    // TODO collideGameObjects += it
+                    collideGameObjects += getCollisionsGameObjectOnSide(gameObject, BoxSide.Left, epsilon)
+                    collideGameObjects += getCollisionsGameObjectOnSide(gameObject, BoxSide.Right, epsilon)
+                    collideGameObjects += getCollisionsGameObjectOnSide(gameObject, BoxSide.Up, epsilon)
+                    collideGameObjects += getCollisionsGameObjectOnSide(gameObject, BoxSide.Down, epsilon)
                 }
             }
         }
@@ -356,33 +359,33 @@ class PhysicsComponent(@ExposeEditor var isStatic: Boolean,
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         ImGui.pushItemFlag(ItemFlags.Disabled.i, isStatic)
-        functionalProgramming.collapsingHeader("move actions") {
+        functionalProgramming.collapsingHeader("actions de déplacement") {
             functionalProgramming.withIndent {
-                ImGuiHelper.action("on left", ::onLeftAction, gameObject, level, editorSceneUI)
-                ImGuiHelper.action("on right", ::onRightAction, gameObject, level, editorSceneUI)
-                ImGuiHelper.action("on up", ::onUpAction, gameObject, level, editorSceneUI)
-                ImGuiHelper.action("on down", ::onDownAction, gameObject, level, editorSceneUI)
-                ImGuiHelper.action("on jump", ::onJumpAction, gameObject, level, editorSceneUI)
-                ImGuiHelper.action("on nothing", ::onNothingAction, gameObject, level, editorSceneUI)
+                ImGuiHelper.action("à gauche", ::onLeftAction, gameObject, level, editorSceneUI)
+                ImGuiHelper.action("à droite", ::onRightAction, gameObject, level, editorSceneUI)
+                ImGuiHelper.action("au-dessus", ::onUpAction, gameObject, level, editorSceneUI)
+                ImGuiHelper.action("en-dessous", ::onDownAction, gameObject, level, editorSceneUI)
+                ImGuiHelper.action("au saut", ::onJumpAction, gameObject, level, editorSceneUI)
+                ImGuiHelper.action("rien", ::onNothingAction, gameObject, level, editorSceneUI)
             }
         }
         ImGui.popItemFlag()
 
         if (ImGui.isItemHovered() && isStatic) {
             functionalProgramming.withTooltip {
-                ImGui.text("Impossible d'utiliser des actions liés aux mouvements si le game object est statique.")
+                ImGui.text("Impossible d'utiliser des actions liés aux mouvements si l'entité est figée.")
             }
         }
 
-        functionalProgramming.collapsingHeader("ignore tags") {
+        functionalProgramming.collapsingHeader("tags ignorés") {
             functionalProgramming.withIndent {
-                ImGuiHelper.addImguiWidgetsArray("ignore tags", ignoreTags, { it }, { Tags.Player.tag }, gameObject, level, editorSceneUI, ExposeEditorFactory.createExposeEditor(customType = CustomType.TAG_STRING))
+                ImGuiHelper.addImguiWidgetsArray("tags ignorés", ignoreTags, { it }, { Tags.Player.tag }, gameObject, level, editorSceneUI, ExposeEditorFactory.createExposeEditor(customType = CustomType.TAG_STRING))
             }
         }
 
-        functionalProgramming.collapsingHeader("collisions actions") {
+        functionalProgramming.collapsingHeader("actions de collision") {
             functionalProgramming.withIndent {
-                ImGuiHelper.addImguiWidgetsArray("collisions actions", collisionsActions, { it.side.name }, { CollisionAction() }, gameObject, level, editorSceneUI)
+                ImGuiHelper.addImguiWidgetsArray("collide actions", collisionsActions, { it.side.name }, { CollisionAction() }, gameObject, level, editorSceneUI)
             }
         }
     }

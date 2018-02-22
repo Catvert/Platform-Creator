@@ -4,7 +4,7 @@ import be.catvert.pc.serialization.SerializationFactory
 import ktx.assets.toLocalFile
 
 /**
- * Objet permettant d'accéder aux antes du jeu
+ * Permet d'accéder aux constantes du jeu
  */
 object Constants {
     const val gameTitle = "Platform-Creator"

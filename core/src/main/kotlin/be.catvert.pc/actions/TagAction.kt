@@ -11,9 +11,9 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
 
 /**
- * Permet d'effectuer une action sur tout les game objects ayant un tag précis présents dans l'active rect
+ * Permet d'effectuer une action sur toutes les entités ayant un tag précis présents dans l'active rect
  */
-@Description("[Expérimental] Permet d'effectuer une action sur tout les game objects ayant un tag précis")
+@Description("[Expérimental] Permet d'effectuer une action sur toutes les entités ayant un tag précis")
 class TagAction(@ExposeEditor(customType = CustomType.TAG_STRING) val tag: GameObjectTag, var action: Action) : Action(), CustomEditorImpl {
     @JsonCreator private constructor() : this(Tags.Player.tag, EmptyAction())
 
@@ -28,7 +28,7 @@ class TagAction(@ExposeEditor(customType = CustomType.TAG_STRING) val tag: GameO
             ImGuiHelper.action("action", ::action, this, level, editorSceneUI)
         } ?: PrefabFactory.values().firstOrNull { it.prefab.prefabGO.tag == tag }?.apply {
             ImGuiHelper.action("action", ::action, this.prefab.prefabGO, level, editorSceneUI)
-        } ?: ImGui.text("Aucun game object ou prefab\navec ce tag trouvé.")
+        } ?: ImGui.text("Aucune entité ou prefab\navec ce tag trouvé.")
     }
 
     override fun toString() = super.toString() + " - tag : $tag | action : $action"

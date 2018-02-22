@@ -13,7 +13,9 @@ import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.I18NBundle
 
-
+/**
+ * Permet de gérer les ressources
+ */
 object ResourceManager : Disposable {
     private val assetManager = AssetManager()
 

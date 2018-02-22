@@ -24,7 +24,6 @@ import kotlin.collections.set
 /**
  * Scène du menu principal
  */
-
 class MainMenuScene(applyMusicTransition: Boolean) : Scene(PCGame.mainBackground) {
     private val logo = PCGame.generateLogo(gameObjectContainer)
 
@@ -199,7 +198,7 @@ class MainMenuScene(applyMusicTransition: Boolean) : Scene(PCGame.mainBackground
 
     private fun drawSettingsWindow() {
         with(ImGui) {
-            ImGuiHelper.withCenteredWindow(MenusText.MM_SETTINGS_WINDOW_TITLE(), ::showSettingsWindow, Vec2(385f, 435f), WindowFlags.NoResize.i) {
+            ImGuiHelper.withCenteredWindow(MenusText.MM_SETTINGS_WINDOW_TITLE(), ::showSettingsWindow, Vec2(425f, 435f), WindowFlags.NoResize.i) {
                 functionalProgramming.withGroup {
                     functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                         sliderFloat(MenusText.MM_SETTINGS_SOUND(), ::soundVolume, 0f, 1f, "%.1f")
@@ -214,11 +213,11 @@ class MainMenuScene(applyMusicTransition: Boolean) : Scene(PCGame.mainBackground
                 }
 
                 separator()
-                functionalProgramming.withChild("game keys", size = Vec2(360f, 265f)) {
+                functionalProgramming.withChild("game keys", size = Vec2(400f, 265f)) {
                     settingsKeys.forEach { keyValue ->
                         text(keyValue.key.description)
                         sameLine()
-                        cursorPosX = 260f
+                        cursorPosX = 300f
                         functionalProgramming.withId(keyValue.key.name) {
                             if (button(if (keyValue.value) MenusText.MM_SETTINGS_PRESSKEY() else Input.Keys.toString(keyValue.key.key), Vec2(75f, 0))) {
                                 if (!keyValue.value) {

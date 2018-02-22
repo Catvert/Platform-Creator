@@ -20,10 +20,10 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import glm_.func.common.max
 
 /**
- * Component permettant d'ajouter des points de vie à un gameObject
+ * Component permettant d'ajouter des points de vie à une entité
  * Chaque point de vie à une action quand celui-ci devient actif et inactif
  */
-@Description("Ajoute la possibilité d'ajouter des points de vie à un game object")
+@Description("Ajoute la possibilité d'ajouter des points de vie à une entité")
 class LifeComponent(onDeathAction: Action, lifePointActions: ArrayList<Action> = arrayListOf()) : Component(), CustomEditorImpl, CustomEditorTextImpl {
     @JsonCreator private constructor() : this(RemoveGOAction(), arrayListOf())
 
@@ -66,7 +66,7 @@ class LifeComponent(onDeathAction: Action, lifePointActions: ArrayList<Action> =
     }
 
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        ImGuiHelper.addImguiWidgetsArray("life actions", lpActions, { "vie ${lpActions.indexOf(it) + 1}" }, { EmptyAction() }, gameObject, level, editorSceneUI)
+        ImGuiHelper.addImguiWidgetsArray("life points actions", lpActions, { "vie ${lpActions.indexOf(it) + 1}" }, { EmptyAction() }, gameObject, level, editorSceneUI)
     }
 
     override fun insertText() {

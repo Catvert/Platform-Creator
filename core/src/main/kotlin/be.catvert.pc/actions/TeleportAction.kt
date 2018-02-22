@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 /**
  * Action permettant de téléporter un gameObject à un point précis
  */
-@Description("Permet de téléporter un game object")
+@Description("Permet de téléporter une entité")
 class TeleportAction(var teleportPoint: Point) : Action(), CustomEditorImpl {
     @JsonCreator private constructor() : this(Point())
 

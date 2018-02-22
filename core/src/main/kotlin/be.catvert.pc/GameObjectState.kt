@@ -15,15 +15,15 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import kotlin.reflect.KClass
 
 /**
- * Représente un état d'un gameObject, cet état contient différents components.
- * Un état est par exemple quand le joueur à sa vie au maximum, et un autre état quand il lui reste 1 point de vie. Différents états permettent d'avoir différentes intéractions sur le gameObject au cour du temps.
+ * Représente un état d'une entité, cet état contient différents components.
+ * Un état est par exemple quand le joueur à sa vie au maximum, et un autre état quand il lui reste 1 point de vie. Différents états permettent d'avoir différentes interactions sur l'entité au cour du temps.
  */
 class GameObjectState(var name: String, components: MutableSet<Component> = mutableSetOf()) : Renderable, Updeatable, ResourceLoader {
     @JsonCreator private constructor() : this("State")
 
     /**
-     * Représente le game object où cet état est implémenté.
-     * Injecté lors de l'ajout du game object à son conteneur(par exemple le niveau), via la méthode
+     * Représente l'entité où cet état est implémenté.
+     * Injecté lors de l'ajout de l'entité à son conteneur(par exemple le niveau), via la méthode
      * @see onAddToContainer
      */
     private lateinit var gameObject: GameObject

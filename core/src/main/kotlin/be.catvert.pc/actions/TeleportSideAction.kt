@@ -9,9 +9,9 @@ import be.catvert.pc.utility.*
 import com.fasterxml.jackson.annotation.JsonCreator
 
 /**
- * Action permettant de téléporter un game object sur un des côtés d'un autre game object (centré au centre)
+ * Action permettant de téléporter une entité sur un des côtés d'une autre entité (centré au centre)
  */
-@Description("Permet de téléporter un game object sur un des côtés d'un autre game object")
+@Description("Permet de téléporter une entité sur un des côtés d'une autre entité")
 class TeleportSideAction(var teleportTo: GameObject?, @ExposeEditor var spawnSide: BoxSide, @ExposeEditor var tweenMove: Boolean) : Action(), CustomEditorImpl {
     @JsonCreator private constructor() : this(null, BoxSide.Up, true)
 

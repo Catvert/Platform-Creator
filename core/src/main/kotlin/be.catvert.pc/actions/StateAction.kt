@@ -12,9 +12,9 @@ import imgui.ImGui
 import imgui.functionalProgramming
 
 /**
- * Action permettant de changer l'état d'un gameObject
+ * Action permettant de changer l'état d'une entité
  */
-@Description("Permet de changer l'état d'un game object")
+@Description("Permet de changer l'état d'une entité")
 class StateAction(var stateIndex: Int, var usePreviousMoverDirection: Boolean = false) : Action(), CustomEditorImpl {
     @JsonCreator private constructor() : this(0)
 

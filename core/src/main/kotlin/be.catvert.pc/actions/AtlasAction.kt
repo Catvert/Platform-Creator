@@ -13,10 +13,10 @@ import imgui.ImGui
 import imgui.functionalProgramming
 
 /**
- * Action permettant de changer l'atlas en cour d'un gameObject
+ * Action permettant de changer l'atlas en cour d'une entité
  */
 @RequiredComponent(AtlasComponent::class)
-@Description("Permet de changer l'atlas actuel d'un game object")
+@Description("Permet de changer l'atlas actuel d'une entité")
 class AtlasAction(var atlasIndex: Int) : Action(), CustomEditorImpl {
     @JsonCreator private constructor() : this(-1)
 

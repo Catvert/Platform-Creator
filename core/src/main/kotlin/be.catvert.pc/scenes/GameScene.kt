@@ -74,8 +74,6 @@ class GameScene(private val level: Level) : Scene(level.background, level.backgr
             pause = true
             gameObjectContainer.allowUpdatingGO = false
         }
-        if (Gdx.input.isKeyJustPressed(GameKeys.GAME_SWITCH_GRAVITY.key))
-            level.applyGravity = !level.applyGravity
         if (Gdx.input.isKeyJustPressed(GameKeys.GAME_EDIT_LEVEL.key))
             PCGame.sceneManager.loadScene(EditorScene(Level.loadFromFile(level.levelPath.toLocalFile().parent())!!, true))
     }

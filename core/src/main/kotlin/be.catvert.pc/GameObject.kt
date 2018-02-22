@@ -34,7 +34,7 @@ import imgui.functionalProgramming
  */
 @JsonIdentityInfo(property = "id", generator = ObjectIdGenerators.IntSequenceGenerator::class)
 class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: GameObjectTag,
-                 @ExposeEditor var name: String,
+                 @ExposeEditor(customName = "nom") var name: String,
                  @ExposeEditor var box: Rect,
                  defaultState: GameObjectState = GameObjectState("default"),
                  container: GameObjectContainer? = null,
@@ -43,16 +43,16 @@ class GameObject(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: Game
     /**
      * Représente la "couche" à laquelle cette entité va être affichée
      */
-    @ExposeEditor(min = -100f, max = 100f)
+    @ExposeEditor(min = -100f, max = 100f, customName = "couche")
     var layer: Int = 0
         set(value) {
             if (value in Constants.minLayerIndex until Constants.maxLayerIndex) field = value
         }
 
     /**
-     * Action spéciale appelée quand le game object sort de la carte verticalement
+     * Action spéciale appelée quand l'entité sort de la carte verticalement
      */
-    @ExposeEditor(description = "Action appelée quand le game object à une position y < 0", customName = "dehors de carte")
+    @ExposeEditor(description = "Action appelée quand l'entité à une position y < 0", customName = "dehors de carte")
     var onOutOfMapAction: Action = RemoveGOAction()
 
     /**

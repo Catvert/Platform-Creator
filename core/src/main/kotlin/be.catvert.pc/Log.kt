@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter
 object Log : Disposable {
     private val writer = FileWriter("last_log.txt")
 
-    private fun suffix() = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+    private fun prefix() = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
 
     fun info(info: () -> String) = write("Info.", info())
 
@@ -22,7 +22,7 @@ object Log : Disposable {
     fun warn(warn: () -> String) = write("Attention", warn())
 
     private fun write(type: String, content: String) {
-        val str = "${suffix()}  -> $type : $content\n"
+        val str = "${prefix()}  -> $type : $content\n"
 
         writer.write(str)
         print(str)

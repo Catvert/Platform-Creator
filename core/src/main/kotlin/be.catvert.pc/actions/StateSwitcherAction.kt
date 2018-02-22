@@ -14,9 +14,9 @@ import imgui.functionalProgramming
 typealias StateSwitchAction = Pair<Int, Action>
 
 /**
- * Permet d'effectuer une action sur un game object selon le stateIndex actuel du game object
+ * Permet d'effectuer une action sur une entité selon l'état actuel de l'entité
  */
-@Description("Permet d'effectuer une action sur un game object selon son état.")
+@Description("Permet d'effectuer une action sur une entité selon son état.")
 class StateSwitcherAction(var stateSwitchActions: ArrayList<StateSwitchAction>) : Action(), CustomEditorImpl {
     constructor(vararg stateSwitchActions: StateSwitchAction) : this(arrayListOf(*stateSwitchActions))
     @JsonCreator private constructor() : this(arrayListOf())
@@ -31,7 +31,7 @@ class StateSwitcherAction(var stateSwitchActions: ArrayList<StateSwitchAction>) 
         ImGuiHelper.addImguiWidgetsArray("state actions", stateSwitchActions, { item: StateSwitchAction -> gameObject.getStateOrDefault(item.first).name }, { 0 to EmptyAction() }, {
             val stateIndex = intArrayOf(it.obj.first)
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                ImGui.combo("state", stateIndex, gameObject.getStates().map { it.name })
+                ImGui.combo("état", stateIndex, gameObject.getStates().map { it.name })
             }
 
             val actionItem = ImGuiHelper.Item(it.obj.second)

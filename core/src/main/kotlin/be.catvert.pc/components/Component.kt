@@ -10,6 +10,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import kotlin.reflect.KClass
 
+/**
+ * Représente les différents components disponibles
+ */
 enum class Components(val component: KClass<out Component>) {
     Atlas(AtlasComponent::class),
     Sound(SoundComponent::class),

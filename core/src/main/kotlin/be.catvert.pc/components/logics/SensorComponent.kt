@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import imgui.ImGui
 import imgui.functionalProgramming
 
-@Description("Permet d'effectuer une action quand un game object précis est au-dessus d'une autre game object")
+@Description("Permet d'effectuer une action quand une entité précise est au-dessus d'une autre entité (couche)")
 class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeatable, CustomEditorImpl {
     constructor(vararg sensors: SensorData) : this(arrayListOf(*sensors))
     @JsonCreator private constructor() : this(arrayListOf())
@@ -24,7 +24,7 @@ class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeata
     private var level: Level? = null
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
-    abstract class SensorData(@ExposeEditor(description = "Action appelée quand le game object ciblé passe devant/derrière(overlaps) ce game object") var sensorIn: Action = EmptyAction(), @ExposeEditor(description = "Action appelée quand le game object ciblé quitte ce game object") var sensorOut: Action = EmptyAction()) {
+    abstract class SensorData(@ExposeEditor(description = "Action appelée quand l'entité ciblée passe devant/derrière(overlaps) cette entité") var sensorIn: Action = EmptyAction(), @ExposeEditor(description = "Action appelée quand l'entité ciblée quitte cette entité") var sensorOut: Action = EmptyAction()) {
         protected val sensorOverlaps: MutableSet<GameObject> = mutableSetOf()
 
         abstract fun checkSensorOverlaps(gameObject: GameObject, level: Level)
@@ -70,7 +70,7 @@ class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeata
         }
 
         override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-            ImGuiHelper.gameObject(::target, level, editorSceneUI, "target")
+            ImGuiHelper.gameObject(::target, level, editorSceneUI, "cible")
         }
     }
 
@@ -92,7 +92,7 @@ class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeata
         ImGuiHelper.addImguiWidgetsArray("sensors", sensors, { "sensor" }, { GameObjectSensorData(null) }, {
             val typeIndex = intArrayOf(if (it.obj is GameObjectSensorData) 0 else 1)
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                if (ImGui.combo("target type", typeIndex, listOf("GameObject", "Tag"))) {
+                if (ImGui.combo("type de cible", typeIndex, listOf("Entité", "Tag"))) {
                     it.obj = when (typeIndex[0]) {
                         0 -> GameObjectSensorData(null)
                         else -> TagSensorData(Tags.Player.tag)

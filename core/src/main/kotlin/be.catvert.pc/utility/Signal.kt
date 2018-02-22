@@ -2,6 +2,9 @@ package be.catvert.pc.utility
 
 class SignalListener<in T>(val removeAfterInvoke: Boolean = false, val onSignal: (T) -> Unit)
 
+/**
+ * Représente un événement
+ */
 class Signal<T> {
     private val listeners = mutableSetOf<SignalListener<T>>()
 

@@ -8,9 +8,9 @@ import com.sun.org.glassfish.gmbal.Description
 import imgui.ImGui
 
 /**
- * Action permettant de supprimer un gameObject
+ * Action permettant de supprimer une entité
  */
-@Description("Permet de supprimer un game object")
+@Description("Permet de supprimer une entité")
 class RemoveGOAction : Action(), CustomEditorImpl {
     override fun invoke(gameObject: GameObject) {
         gameObject.removeFromParent()

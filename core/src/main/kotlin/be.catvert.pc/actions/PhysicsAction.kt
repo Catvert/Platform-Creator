@@ -8,11 +8,11 @@ import be.catvert.pc.utility.ExposeEditor
 import com.fasterxml.jackson.annotation.JsonCreator
 
 /**
- * Action permettant d'appliquer une action physique sur un gameObject ayant le component PhysicsComponent
+ * Action permettant d'appliquer une action physique sur une entité ayant le component PhysicsComponent
  * @see PhysicsComponent
  */
 @RequiredComponent(PhysicsComponent::class)
-@Description("Permet d'effectuer une action physique sur un game object")
+@Description("Permet d'effectuer une action physique sur une entité")
 class PhysicsAction(@ExposeEditor var physicsAction: PhysicsActions) : Action() {
     @JsonCreator private constructor() : this(PhysicsActions.GO_LEFT)
 

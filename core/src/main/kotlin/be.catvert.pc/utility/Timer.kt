@@ -1,7 +1,7 @@
 package be.catvert.pc.utility
 
 /**
- * Permet d'effectuer une action à chaque interval du chronomètre.
+ * Chronomètre permettant d'effectuer une action à chacune de ses intervals
  */
 class Timer(var interval: Float) : Updeatable {
     private var timerDelta = 0f

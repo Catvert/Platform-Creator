@@ -28,11 +28,11 @@ import ktx.collections.isEmpty
 typealias AtlasRegion = Pair<FileWrapper, String>
 
 /**
- * Component permettant d'ajouter des textures et animations au gameObject
+ * Component permettant d'ajouter des textures et animations a l'entité
  * @param currentIndex L'atlas actuel à dessiner
- * @param data Les atlas disponibles pour le gameObject
+ * @param data Les atlas disponibles pour l'entité
  */
-@Description("Permet d'ajouter une texture ou une animation à un game object")
+@Description("Permet d'ajouter une texture ou une animation à une entité")
 class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) : Component(), Renderable, ResourceLoader, CustomEditorImpl, CustomEditorTextImpl {
     enum class Rotation(val degree: Float) {
         Zero(0f), Quarter(90f), Half(180f), ThreeQuarter(270f)
@@ -44,9 +44,9 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
     @ExposeEditor
     var rotation: Rotation = Rotation.Zero
 
-    @ExposeEditor
+    @ExposeEditor(customName = "miroir x")
     var flipX: Boolean = false
-    @ExposeEditor
+    @ExposeEditor(customName = "miroir y")
     var flipY: Boolean = false
 
     @JsonIgnore
@@ -331,13 +331,13 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
 
                         if (this.regions.size > 1) {
                             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                                sliderFloat("Vitesse", ::frameDuration, 0f, 1f)
+                                sliderFloat("vitesse", ::frameDuration, 0f, 1f)
                             }
                             val playModeItem = ImGuiHelper.Item(animationPlayMode)
-                            ImGuiHelper.enum("play mode", playModeItem.cast())
+                            ImGuiHelper.enum("mode", playModeItem.cast())
                             animationPlayMode = playModeItem.obj
                         } else if (this.regions.size == 1) {
-                            checkbox("repeat region", ::repeatRegion)
+                            checkbox("répéter la région", ::repeatRegion)
                             if (repeatRegion) {
                                 ImGuiHelper.size(::repeatRegionSize, Size(1), Size(Constants.maxGameObjectSize))
                             }

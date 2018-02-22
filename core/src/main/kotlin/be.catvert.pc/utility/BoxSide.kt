@@ -1,10 +1,13 @@
 package be.catvert.pc.utility
 
+/**
+ * Représente un côté d'un rectangle
+ */
 enum class BoxSide {
     Left, Right, Up, Down, All;
 
     /**
-     * Permet d'inverser le côté de la collision
+     * Permet d'inverser le côté
      */
     operator fun unaryMinus(): BoxSide = when (this) {
         BoxSide.Left -> Right

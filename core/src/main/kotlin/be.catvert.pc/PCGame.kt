@@ -23,10 +23,14 @@ import ktx.app.KtxApplicationAdapter
 import uno.glfw.GlfwWindow
 import java.util.*
 import kotlin.collections.set
+import kotlin.reflect.full.createInstance
 
 
 /** [com.badlogic.gdx.ApplicationListener, implementation shared by all platforms.  */
 class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
+    /**
+     * Permet d'initialiser ImGui
+     */
     private fun initializeUI() {
         LwjglGL3.init(GlfwWindow((Gdx.graphics as Lwjgl3Graphics).window.windowHandle), false)
 
@@ -40,7 +44,7 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
     override fun create() {
         super.create()
         // Permet de supprimer les logs d'imgui
-        DEBUG = false
+        imgui.DEBUG = false
 
         PCGame.soundVolume = initialConfig.soundVolume
         PCGame.locale = initialConfig.locale

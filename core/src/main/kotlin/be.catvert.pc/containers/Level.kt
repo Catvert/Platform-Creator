@@ -14,9 +14,12 @@ import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonIgnore
 import glm_.func.common.clamp
 import ktx.assets.toLocalFile
+import javax.script.ScriptException
 import kotlin.math.roundToInt
 
-
+/**
+ * Représente un niveau
+ */
 class Level(val levelPath: String, val gameVersion: Float, var background: Background?, var musicPath: FileWrapper?) : GameObjectMatrixContainer() {
     private val levelTextures = levelPath.toLocalFile().parent().child("textures") to mutableListOf<FileHandle>()
     private val levelAtlas = levelPath.toLocalFile().parent().child("atlas") to mutableListOf<FileHandle>()
@@ -79,7 +82,11 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
             levelScripts.first.mkdirs()
         else {
             Utility.getFilesRecursivly(levelScripts.first, *Constants.levelScriptExtension).forEach {
-                levelScripts.second.add(Script(it, ScriptManager.compile(it)))
+                try {
+                    levelScripts.second.add(Script(it, ScriptManager.compile(it)))
+                } catch(e: ScriptException) {
+                    Log.error(e) { "Impossible de charger le script : $it" }
+                }
             }
         }
     }

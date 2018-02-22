@@ -307,7 +307,7 @@ object ImGuiHelper {
         }
     }
 
-    fun gameObject(gameObject: KMutableProperty0<GameObject?>, level: Level, editorSceneUI: EditorScene.EditorSceneUI, label: String = "game object") {
+    fun gameObject(gameObject: KMutableProperty0<GameObject?>, level: Level, editorSceneUI: EditorScene.EditorSceneUI, label: String = "entité") {
         val favTitle = "set gameobject fav"
 
         with(ImGui) {
@@ -322,9 +322,9 @@ object ImGuiHelper {
                 functionalProgramming.withTooltip {
                     val go = gameObject.get()
                     if (go == null)
-                        textColored(Color.RED, "aucun game object sélectionner")
+                        textColored(Color.RED, "aucune entité sélectionnée")
                     else
-                        textPropertyColored(Color.ORANGE, "game object actuel :", go.name)
+                        textPropertyColored(Color.ORANGE, "entité actuelle :", go.name)
                 }
             }
 

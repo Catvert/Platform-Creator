@@ -59,9 +59,9 @@ abstract class Tween(var duration: Float = 1f, var interpolationName: String, va
         with(ImGui) {
             text("type : ${ReflectionUtility.simpleNameOf(this@Tween).removeSuffix("Tween")}")
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                inputFloat("duration", ::duration, 0.1f, 0f, 1)
+                inputFloat("durée", ::duration, 0.1f, 0f, 1)
             }
-            ImGuiHelper.action("end action", ::endAction, gameObject, level, editorSceneUI)
+            ImGuiHelper.action("action de fin", ::endAction, gameObject, level, editorSceneUI)
 
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                 if (combo("interpolation", ::currentInterpolationIndex, interpolations.map { it.component1() })) {
@@ -70,8 +70,15 @@ abstract class Tween(var duration: Float = 1f, var interpolationName: String, va
                     interpolation = interp
                 }
             }
-            if (authorizeTweenState)
-                checkbox("tween state", ::useTweenState)
+            if (authorizeTweenState) {
+                checkbox("état tween", ::useTweenState)
+
+                if(isItemHovered()) {
+                    functionalProgramming.withTooltip {
+                        text("Permet d'utiliser un état spécial dans lequel seulement l'atlas est gardé")
+                    }
+                }
+            }
         }
     }
 
@@ -110,8 +117,8 @@ class MoveTween(duration: Float = 0f, var moveX: Int = 0, var moveY: Int = 0) : 
         super.insertImgui(label, gameObject, level, editorSceneUI)
 
         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-            ImGui.inputInt("move x", ::moveX)
-            ImGui.inputInt("move y", ::moveY)
+            ImGui.inputInt("déplacement x", ::moveX)
+            ImGui.inputInt("déplacement y", ::moveY)
         }
     }
 }
@@ -134,7 +141,7 @@ class AlphaAtlasTween(duration: Float = 0f, var targetAlpha: Float = 0f) : Tween
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         super.insertImgui(label, gameObject, level, editorSceneUI)
         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-            ImGui.sliderFloat("target alpha", ::targetAlpha, 0f, 1f, "%.1f")
+            ImGui.sliderFloat("alpha ciblé", ::targetAlpha, 0f, 1f, "%.1f")
         }
     }
 }
@@ -151,9 +158,9 @@ class RepeatActionTween(duration: Float = 0f, var repeat: Int = 1, var repeatAct
     override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         super.insertImgui(label, gameObject, level, editorSceneUI)
         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-            ImGui.sliderInt("repeat", ::repeat, 1, 100)
+            ImGui.sliderInt("répétition", ::repeat, 1, 100)
         }
-        ImGuiHelper.action("repeat action", ::repeatAction, gameObject, level, editorSceneUI)
+        ImGuiHelper.action("action répétée", ::repeatAction, gameObject, level, editorSceneUI)
     }
 }
 
@@ -177,8 +184,8 @@ class ResizeTween(duration: Float = 0f, var newWidth: Int = 1, var newHeight: In
         super.insertImgui(label, gameObject, level, editorSceneUI)
 
         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-            ImGui.inputInt("new width", ::newWidth, 1, Constants.maxGameObjectSize)
-            ImGui.inputInt("new height", ::newHeight, 1, Constants.maxGameObjectSize)
+            ImGui.inputInt("largeur ciblée", ::newWidth, 1, Constants.maxGameObjectSize)
+            ImGui.inputInt("hauteur ciblée", ::newHeight, 1, Constants.maxGameObjectSize)
         }
     }
 }
@@ -205,7 +212,7 @@ class DisableComponentTween(var disableComponent: Class<out Component> = LifeCom
         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
             val components = gameObject.getCurrentState().getComponents()
             val index = intArrayOf(components.indexOfFirst { disableComponent.isInstance(it) })
-            if (ImGui.combo("disable component", index, components.map { ReflectionUtility.simpleNameOf(it).removeSuffix("Component") })) {
+            if (ImGui.combo("component désactivé", index, components.map { ReflectionUtility.simpleNameOf(it).removeSuffix("Component") })) {
                 disableComponent = components.elementAt(index[0]).javaClass
             }
         }
