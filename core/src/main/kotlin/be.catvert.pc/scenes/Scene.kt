@@ -1,8 +1,8 @@
 package be.catvert.pc.scenes
 
 import be.catvert.pc.PCGame
-import be.catvert.pc.components.graphics.AtlasComponent
-import be.catvert.pc.containers.GameObjectContainer
+import be.catvert.pc.eca.components.graphics.AtlasComponent
+import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.OrthographicCamera
@@ -21,7 +21,7 @@ abstract class Scene(protected var background: Background?,
 
     val viewport = StretchViewport(Constants.viewportRatioWidth, Constants.viewportRatioHeight, camera)
 
-    protected open var gameObjectContainer: GameObjectContainer = object : GameObjectContainer() {}
+    protected open var entityContainer: EntityContainer = object : EntityContainer() {}
 
     protected var isUIHover = false
         private set
@@ -33,7 +33,7 @@ abstract class Scene(protected var background: Background?,
     var alpha = 1f
         set(value) {
             field = value
-            gameObjectContainer.getGameObjectsData().forEach {
+            entityContainer.getEntitiesData().forEach {
                 it.getCurrentState().getComponent<AtlasComponent>()?.alpha = value
             }
         }
@@ -50,14 +50,14 @@ abstract class Scene(protected var background: Background?,
             background?.render(it)
 
             it.projectionMatrix = camera.combined
-            gameObjectContainer.render(it)
+            entityContainer.render(it)
         }
 
         postBatchRender()
     }
 
     override fun update() {
-        gameObjectContainer.update()
+        entityContainer.update()
 
         background.cast<ParallaxBackground>()?.updateOffsets(camera)
     }

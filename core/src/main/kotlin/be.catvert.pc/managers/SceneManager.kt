@@ -48,7 +48,7 @@ class SceneManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Dis
             if (isTransitionRunning)
                 waitingScene[scene.javaClass] = NextWaitingScene(scene, applyTransition, disposeCurrentScene)
             else
-                setScene(scene, false)
+                setScene(scene, disposeCurrentScene)
         }
     }
 

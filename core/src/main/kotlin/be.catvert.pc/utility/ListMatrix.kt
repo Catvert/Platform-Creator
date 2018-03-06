@@ -10,7 +10,7 @@ inline fun <reified T> matrix2d(height: Int, width: Int, init: (Int, Int) -> Mut
 
 /**
  * Cette classe permet de représenter une cellule contenant des entités
- * @see GameObjectMatrixContainer
+ * @see EntityMatrixContainer
  * @property x La position x de la cellule
  * @property y La position y de la cellule
  */

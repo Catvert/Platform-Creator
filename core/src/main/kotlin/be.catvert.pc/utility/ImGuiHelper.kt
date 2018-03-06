@@ -1,14 +1,14 @@
 package be.catvert.pc.utility
 
-import be.catvert.pc.GameObject
-import be.catvert.pc.GameObjectTag
 import be.catvert.pc.PCGame
-import be.catvert.pc.Prefab
-import be.catvert.pc.actions.Action
-import be.catvert.pc.actions.Actions
-import be.catvert.pc.components.RequiredComponent
-import be.catvert.pc.components.graphics.AtlasComponent
-import be.catvert.pc.containers.Level
+import be.catvert.pc.eca.Entity
+import be.catvert.pc.eca.EntityTag
+import be.catvert.pc.eca.Prefab
+import be.catvert.pc.eca.actions.Action
+import be.catvert.pc.eca.actions.Actions
+import be.catvert.pc.eca.components.RequiredComponent
+import be.catvert.pc.eca.components.graphics.AtlasComponent
+import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.i18n.MenusText
 import be.catvert.pc.managers.ResourceManager
@@ -17,6 +17,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.graphics.Color
+import com.esotericsoftware.reflectasm.ClassAccess
 import glm_.func.common.clamp
 import glm_.vec2.Vec2
 import glm_.vec4.Vec4
@@ -24,7 +25,6 @@ import imgui.*
 import uno.kotlin.isPrintable
 import kotlin.math.roundToInt
 import kotlin.reflect.KMutableProperty0
-import kotlin.reflect.full.findAnnotation
 
 object ImGuiHelper {
     class Item<T>(var obj: T) {
@@ -39,26 +39,30 @@ object ImGuiHelper {
 
     private val searchBarBuffers = mutableMapOf<String, Item<String>>()
 
-    fun <T : Any> addImguiWidgetsArray(label: String, array: ArrayList<T>, itemLabel: (item: T) -> String, createItem: () -> T, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI, itemExposeEditor: ExposeEditor = ExposeEditorFactory.empty, endBlock: () -> Unit = {}) {
+    private val exposeEditorCache = AnnotationCache(ExposeEditor::class.java)
+    private val descriptionCache = AnnotationCache(Description::class.java)
+    private val requiredComponentCache = AnnotationCache(RequiredComponent::class.java)
+
+    fun <T : Any> addImguiWidgetsArray(label: String, array: ArrayList<T>, itemLabel: (item: T) -> String, createItem: () -> T, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI, itemExposeEditor: ExposeEditor = ExposeEditorFactory.empty, endBlock: () -> Unit = {}) {
         addImguiWidgetsArray(label, array, itemLabel, createItem, {
-            addImguiWidget(itemLabel(it.obj), it, gameObject, level, itemExposeEditor, editorSceneUI)
+            addImguiWidget(itemLabel(it.obj), it, entity, level, itemExposeEditor, editorSceneUI)
         }, endBlock)
     }
 
     fun <T : Any> addImguiWidgetsArray(label: String, array: ArrayList<T>, itemLabel: (item: T) -> String, createItem: () -> T, itemBlock: (item: Item<T>) -> Unit, endBlock: () -> Unit = {}) {
         with(ImGui) {
-            for (index in 0 until array.size) {
+            var removeItem: T? = null
+
+            array.forEachIndexed { index, it ->
                 pushId("remove $index")
                 if (button("Suppr.")) {
-                    array.removeAt(index)
-                    break
+                    removeItem = it
                 }
-
                 popId()
 
                 sameLine()
 
-                val item = Item(array[index])
+                val item = Item(it)
                 functionalProgramming.withId("collapse $index") {
                     if (collapsingHeader("")) {
                         sameLine(0f, style.itemInnerSpacing.x)
@@ -77,33 +81,38 @@ object ImGuiHelper {
                     array[index] = item.obj
                 }
             }
+
+            if(removeItem != null)
+                array.remove(removeItem!!)
+
             functionalProgramming.withId("$label add btn") {
                 if (button("Ajouter", Vec2(if (array.isEmpty()) Constants.defaultWidgetsWidth else -1f, 0))) {
                     array.add(createItem())
                 }
             }
+
             endBlock()
         }
     }
 
-    fun <T : Any> addImguiWidget(label: String, item: KMutableProperty0<T>, gameObject: GameObject, level: Level, exposeEditor: ExposeEditor, editorSceneUI: EditorScene.EditorSceneUI) {
+    fun <T : Any> addImguiWidget(label: String, item: KMutableProperty0<T>, entity: Entity, level: Level, exposeEditor: ExposeEditor, editorSceneUI: EditorScene.EditorSceneUI) {
         val value = Item(item.get())
 
-        addImguiWidget(label, value, gameObject, level, exposeEditor, editorSceneUI)
+        addImguiWidget(label, value, entity, level, exposeEditor, editorSceneUI)
         item.set(value.obj)
     }
 
-    fun <T : Any> addImguiWidget(label: String, item: Item<T>, gameObject: GameObject, level: Level, exposeEditor: ExposeEditor, editorSceneUI: EditorScene.EditorSceneUI) {
+    fun <T : Any> addImguiWidget(label: String, item: Item<T>, entity: Entity, level: Level, exposeEditor: ExposeEditor, editorSceneUI: EditorScene.EditorSceneUI) {
         val value = item.obj
 
         with(ReflectionUtility) {
             with(ImGui) {
                 when (value) {
                     is Action -> {
-                        action(label, item.cast(), gameObject, level, editorSceneUI)
+                        action(label, item.cast(), entity, level, editorSceneUI)
                     }
                     is CustomEditorImpl -> {
-                        insertImguiExposeEditorFields(value, gameObject, level, editorSceneUI)
+                        insertImguiExposeEditorFields(value, entity, level, editorSceneUI)
                     }
                     is Boolean -> {
                         checkbox(label, item.cast<Boolean>()::obj)
@@ -132,7 +141,7 @@ object ImGuiHelper {
                                 ImGuiHelper.inputText(label, item.cast())
                             }
                             CustomType.TAG_STRING -> {
-                                gameObjectTag(item.cast(), level)
+                                entityTag(item.cast(), level)
                             }
                         }
                     }
@@ -140,7 +149,7 @@ object ImGuiHelper {
                         enum(label, item.cast())
                     }
                     else -> {
-                        insertImguiExposeEditorFields(item.obj, gameObject, level, editorSceneUI)
+                        insertImguiExposeEditorFields(item.obj, entity, level, editorSceneUI)
                     }
                 }
 
@@ -167,24 +176,24 @@ object ImGuiHelper {
         value.set(item.obj)
     }
 
-    fun action(label: String, action: KMutableProperty0<Action>, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    fun action(label: String, action: KMutableProperty0<Action>, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         val item = Item(action())
-        action(label, item, gameObject, level, editorSceneUI)
+        action(label, item, entity, level, editorSceneUI)
         action.set(item.obj)
     }
 
-    fun action(label: String, action: Item<Action>, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    fun action(label: String, action: Item<Action>, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         with(ImGui) {
             val index = intArrayOf(Actions.values().indexOfFirst { it.action.isInstance(action.obj) })
 
             functionalProgramming.withId("prop $label") {
 
-                val actionClass = Actions.values()[index[0]].action
+                val actionClass = Actions.values()[index[0]].action.java
 
-                val requiredComponent = actionClass.findAnnotation<RequiredComponent>()
+                val requiredComponent = requiredComponentCache.getClassAnnotations(actionClass).firstOrNull()
                 val incorrectAction = let {
                     requiredComponent?.component?.forEach {
-                        if (!gameObject.getStateOrDefault(editorSceneUI.gameObjectCurrentStateIndex).hasComponent(it))
+                        if (!entity.getStateOrDefault(editorSceneUI.entityCurrentStateIndex).hasComponent(it))
                             return@let true
                     }
                     false
@@ -195,12 +204,13 @@ object ImGuiHelper {
                                 textColored(Color.RED, "\\!/ Il manque le component :")
                                 text("${requiredComponent!!.component.map { it.simpleName }}")
                             }
-                            insertImguiExposeEditorFields(action.obj, gameObject, level, editorSceneUI)
+                            insertImguiExposeEditorFields(action.obj, entity, level, editorSceneUI)
                         }, searchBar = true)) {
-                    action.obj = ReflectionUtility.findNoArgConstructor(Actions.values()[index[0]].action)!!.newInstance()
+                    action.obj = ReflectionUtility.createInstance(Actions.values()[index[0]].action.java)
                 }
 
-                val description = actionClass.findAnnotation<Description>()
+                val description = descriptionCache.getClassAnnotations(actionClass).firstOrNull()
+
                 if (description != null) {
                     sameLine(0f, style.itemInnerSpacing.x)
                     text("(?)")
@@ -296,9 +306,9 @@ object ImGuiHelper {
     }
 
     fun settingsButton(size: Vec2 = Vec2(g.fontSize)) = ImGui.imageButton(settingsBtnIconHandle, size, uv1 = Vec2(1, 1))
-    fun favButton(size: Vec2 = Vec2(g.fontSize)) = ImGui.imageButton(favBtnIconHandle, size, uv1 = Vec2(1, 1))
+    fun favButton(size: Vec2 = Vec2(g.fontSize), tintColor: Vec4 = Vec4(1)) = ImGui.imageButton(favBtnIconHandle, size, uv1 = Vec2(1, 1), tintCol = tintColor)
 
-    fun gameObjectTag(tag: Item<GameObjectTag>, level: Level, label: String = "tag") {
+    fun entityTag(tag: Item<EntityTag>, level: Level, label: String = "tag") {
         val selectedIndex = intArrayOf(level.tags.indexOfFirst { it == tag.obj })
         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
             if (ImGui.combo(label, selectedIndex, level.tags)) {
@@ -307,20 +317,20 @@ object ImGuiHelper {
         }
     }
 
-    fun gameObject(gameObject: KMutableProperty0<GameObject?>, level: Level, editorSceneUI: EditorScene.EditorSceneUI, label: String = "entité") {
-        val favTitle = "set gameobject fav"
+    fun entity(entity: KMutableProperty0<Entity?>, level: Level, editorSceneUI: EditorScene.EditorSceneUI, label: String = "entité") {
+        val favTitle = "set entity fav"
 
         with(ImGui) {
             if (button("Sélect. $label", Vec2(Constants.defaultWidgetsWidth - g.fontSize - g.style.itemInnerSpacing.x * 3f, 0))) {
                 editorSceneUI.editorMode = EditorScene.EditorSceneUI.EditorMode.SELECT_GO
                 editorSceneUI.onSelectGO.register(true) {
-                    gameObject.set(it)
+                    entity.set(it)
                 }
             }
 
             if (isItemHovered()) {
                 functionalProgramming.withTooltip {
-                    val go = gameObject.get()
+                    val go = entity.get()
                     if (go == null)
                         textColored(Color.RED, "aucune entité sélectionnée")
                     else
@@ -336,14 +346,14 @@ object ImGuiHelper {
             val fav = favoritesPopup(favTitle, level)
 
             if (fav != null) {
-                gameObject.set(fav)
+                entity.set(fav)
             }
         }
     }
 
     private val favoritesIndex = mutableMapOf<String, IntArray>()
-    fun favoritesPopup(id: String, level: Level): GameObject? {
-        var gameObject: GameObject? = null
+    fun favoritesPopup(id: String, level: Level): Entity? {
+        var entity: Entity? = null
 
         with(ImGui) {
             functionalProgramming.popup(id) {
@@ -357,7 +367,7 @@ object ImGuiHelper {
                     }
 
                     if (button("Sélectionner", Vec2(-1, 0))) {
-                        gameObject = level.favoris[favoritesIndex[id]!![0]]
+                        entity = level.favoris[favoritesIndex[id]!![0]]
                         closeCurrentPopup()
                     }
                 } else {
@@ -365,16 +375,16 @@ object ImGuiHelper {
                 }
             }
         }
-        return gameObject
+        return entity
     }
 
-    fun atlasPreviewTooltip(gameObject: GameObject) {
-        val atlas = gameObject.getCurrentState().getComponent<AtlasComponent>()
+    fun atlasPreviewTooltip(entity: Entity) {
+        val atlas = entity.getCurrentState().getComponent<AtlasComponent>()
         if (atlas != null) {
             functionalProgramming.withStyleColor(Col.PopupBg, ImGui.getStyleColorVec4(Col.PopupBg).apply { a = 0.5f }) {
                 functionalProgramming.withTooltip {
                     val region = atlas.data[atlas.currentIndex].currentKeyFrame()
-                    ImGui.image(region.texture.textureObjectHandle, Vec2(gameObject.box.width, gameObject.box.height), Vec2(region.u, region.v), Vec2(region.u2, region.v2))
+                    ImGui.image(region.texture.textureObjectHandle, Vec2(entity.box.width, entity.box.height), Vec2(region.u, region.v), Vec2(region.u2, region.v2))
                 }
             }
         }
@@ -392,29 +402,35 @@ object ImGuiHelper {
     }
 
     fun point(point: KMutableProperty0<Point>, minPoint: Point, maxPoint: Point, editorSceneUI: EditorScene.EditorSceneUI) {
-        functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
+        with(ImGui) {
             val pos = floatArrayOf(point.get().x, point.get().y)
-            if (ImGui.inputFloat2("position", pos, 0)) {
-                val x = pos[0]
-                val y = pos[1]
+            functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth - g.fontSize - g.style.itemInnerSpacing.x * 3f) {
+                if (inputFloat2("", pos, 0)) {
+                    val x = pos[0]
+                    val y = pos[1]
 
-                if (x >= minPoint.x && x <= maxPoint.x && y >= minPoint.y && y <= maxPoint.y)
-                    point.set(Point(x, y))
-            }
-            ImGui.sameLine()
-
-            val moveYCursor = 0
-
-            ImGui.cursorPosY += moveYCursor
-            functionalProgramming.withStyleVar(StyleVar.FrameRounding, 15f) {
-                if (ImGui.button("Sélect.")) {
-                    editorSceneUI.editorMode = EditorScene.EditorSceneUI.EditorMode.SELECT_POINT
-                    editorSceneUI.onSelectPoint.register(true) {
-                        point.set(Point(it.x.clamp(minPoint.x, maxPoint.x), it.y.clamp(minPoint.y, maxPoint.y)))
-                    }
+                    if (x >= minPoint.x && x <= maxPoint.x && y >= minPoint.y && y <= maxPoint.y)
+                        point.set(Point(x, y))
                 }
             }
-            ImGui.cursorPosY -= moveYCursor
+
+            sameLine(0f, 0f)
+
+            if (ImGuiHelper.settingsButton()) {
+                editorSceneUI.editorMode = EditorScene.EditorSceneUI.EditorMode.SELECT_POINT
+                editorSceneUI.onSelectPoint.register(true) {
+                    point.set(Point(it.x.clamp(minPoint.x, maxPoint.x), it.y.clamp(minPoint.y, maxPoint.y)))
+                }
+            }
+
+            if(isItemHovered()) {
+                functionalProgramming.withTooltip {
+                    text("Sélectionner un point")
+                }
+            }
+
+            sameLine(0f, style.itemInnerSpacing.x)
+            text("position")
         }
     }
 
@@ -530,18 +546,18 @@ object ImGuiHelper {
         }
     }
 
-    fun insertImguiExposeEditorFields(instance: Any, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    fun insertImguiExposeEditorFields(instance: Any, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         if (instance is CustomEditorImpl) {
-            instance.insertImgui(ReflectionUtility.simpleNameOf(instance), gameObject, level, editorSceneUI)
+            instance.insertImgui(ReflectionUtility.simpleNameOf(instance), entity, level, editorSceneUI)
         }
 
-        ReflectionUtility.getAllFieldsOf(instance.javaClass).filter { it.isAnnotationPresent(ExposeEditor::class.java) }.forEach { field ->
-            field.isAccessible = true
+        val t = System.nanoTime()
+        val access = ClassAccess.access(instance.javaClass)
 
-            val exposeField = field.getAnnotation(ExposeEditor::class.java)
-            val item = Item(field.get(instance))
-            addImguiWidget(if (exposeField.customName.isBlank()) field.name else exposeField.customName, item, gameObject, level, exposeField, editorSceneUI)
-            field.set(instance, item.obj)
+        exposeEditorCache.getFieldsAnnotations(instance.javaClass).forEach { name, exposeEditor ->
+            val item = Item(access.get<Any>(instance, name))
+            addImguiWidget(if (exposeEditor.customName.isBlank()) name else exposeEditor.customName, item, entity, level, exposeEditor, editorSceneUI)
+            access.set<Any>(instance, name, item.obj)
         }
     }
 
@@ -549,13 +565,13 @@ object ImGuiHelper {
         with(ImGui) {
             instance.cast<CustomEditorTextImpl>()?.insertText()
                     ?: if (instance.toString().isNotBlank()) text(instance.toString())
-            ReflectionUtility.getAllFieldsOf(instance.javaClass).filter { it.isAnnotationPresent(ExposeEditor::class.java) }.forEach { field ->
-                field.isAccessible = true
 
-                val exposeField = field.getAnnotation(ExposeEditor::class.java)
-                val value = field.get(instance)
+            val access = ClassAccess.access(instance.javaClass)
 
-                textPropertyColored(Color.ORANGE, "${if (exposeField.customName.isBlank()) field.name else exposeField.customName} :", value)
+            exposeEditorCache.getFieldsAnnotations(instance.javaClass).forEach { name, exposeEditor ->
+                val value = access.get<Any>(instance, name)
+
+                textPropertyColored(Color.ORANGE, "${if (exposeEditor.customName.isBlank()) name else exposeEditor.customName} :", value)
             }
         }
     }

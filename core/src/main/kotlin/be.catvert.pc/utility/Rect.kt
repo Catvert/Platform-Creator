@@ -1,7 +1,7 @@
 package be.catvert.pc.utility
 
-import be.catvert.pc.GameObject
-import be.catvert.pc.containers.Level
+import be.catvert.pc.eca.Entity
+import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import com.fasterxml.jackson.annotation.JsonIgnore
 import imgui.ImGui
@@ -99,10 +99,10 @@ class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
         return Rect(x, y, width.roundToInt(), height.roundToInt())
     }
 
-    override fun insertImgui(label: String, gameObject: GameObject, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertImgui(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         with(ImGui) {
             ImGuiHelper.point(::position, Point(), Point(level.matrixRect.width.toFloat() - this@Rect.width, level.matrixRect.height.toFloat() - this@Rect.height), editorSceneUI)
-            ImGuiHelper.size(::size, Size(1), Size(Constants.maxGameObjectSize))
+            ImGuiHelper.size(::size, Size(1), Size(Constants.maxEntitySize))
         }
     }
 

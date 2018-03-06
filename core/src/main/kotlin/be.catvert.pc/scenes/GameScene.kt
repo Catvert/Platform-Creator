@@ -2,8 +2,8 @@ package be.catvert.pc.scenes
 
 import be.catvert.pc.GameKeys
 import be.catvert.pc.PCGame
-import be.catvert.pc.containers.GameObjectContainer
-import be.catvert.pc.containers.Level
+import be.catvert.pc.eca.containers.EntityContainer
+import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.managers.MusicManager
 import be.catvert.pc.utility.ImGuiHelper
 import com.badlogic.gdx.Gdx
@@ -20,7 +20,7 @@ import ktx.assets.toLocalFile
  * Scène du jeu
  */
 class GameScene(private val level: Level) : Scene(level.background, level.backgroundColor) {
-    override var gameObjectContainer: GameObjectContainer = level
+    override var entityContainer: EntityContainer = level
 
     private var pause = false
 
@@ -38,7 +38,7 @@ class GameScene(private val level: Level) : Scene(level.background, level.backgr
                 ImGuiHelper.withCenteredWindow("pause", null, Vec2(200f, 105f), WindowFlags.NoResize.i or WindowFlags.NoCollapse.i or WindowFlags.NoTitleBar.i) {
                     if (button("Reprendre", Vec2(-1, 0))) {
                         pause = false
-                        gameObjectContainer.allowUpdatingGO = true
+                        entityContainer.allowUpdatingGO = true
                     }
                     if (button("Recommencer", Vec2(-1, 0))) {
                         val level = Level.loadFromFile(this@GameScene.level.levelPath.toLocalFile().parent())
@@ -72,7 +72,7 @@ class GameScene(private val level: Level) : Scene(level.background, level.backgr
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             pause = true
-            gameObjectContainer.allowUpdatingGO = false
+            entityContainer.allowUpdatingGO = false
         }
         if (Gdx.input.isKeyJustPressed(GameKeys.GAME_EDIT_LEVEL.key))
             PCGame.sceneManager.loadScene(EditorScene(Level.loadFromFile(level.levelPath.toLocalFile().parent())!!, true))

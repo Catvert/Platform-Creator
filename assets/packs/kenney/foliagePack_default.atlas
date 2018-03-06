@@ -1,4 +1,6 @@
+
 foliagePack_default.png
+size: 1016,1016
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none

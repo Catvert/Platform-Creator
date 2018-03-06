@@ -1,9 +1,9 @@
 package be.catvert.pc.factories
 
 
-import be.catvert.pc.actions.RemoveGOAction
 import be.catvert.pc.builders.TweenBuilder
-import be.catvert.pc.components.logics.LifeComponent
+import be.catvert.pc.eca.actions.RemoveGOAction
+import be.catvert.pc.eca.components.logics.LifeComponent
 import be.catvert.pc.tweens.*
 
 /**

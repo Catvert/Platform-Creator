@@ -1,8 +1,8 @@
 package be.catvert.pc
 
-import be.catvert.pc.builders.GameObjectBuilder
-import be.catvert.pc.components.graphics.AtlasComponent
-import be.catvert.pc.containers.GameObjectContainer
+import be.catvert.pc.builders.EntityBuilder
+import be.catvert.pc.eca.components.graphics.AtlasComponent
+import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.i18n.Locales
 import be.catvert.pc.managers.MusicManager
 import be.catvert.pc.managers.ResourceManager
@@ -23,7 +23,6 @@ import ktx.app.KtxApplicationAdapter
 import uno.glfw.GlfwWindow
 import java.util.*
 import kotlin.collections.set
-import kotlin.reflect.full.createInstance
 
 
 /** [com.badlogic.gdx.ApplicationListener, implementation shared by all platforms.  */
@@ -218,7 +217,7 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         /**
          * Permet de retourner le logo du jeu
          */
-        fun generateLogo(container: GameObjectContainer) = GameObjectBuilder("logo", getLogoSize())
+        fun generateLogo(container: EntityContainer) = EntityBuilder("logo", getLogoSize())
                 .withDefaultState {
                     withComponent(AtlasComponent(0, AtlasComponent.AtlasData("logo", Constants.gameLogoPath.toFileWrapper())))
                 }

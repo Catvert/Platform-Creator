@@ -1,4 +1,6 @@
+
 aliens_rect.png
+size: 512,256
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none

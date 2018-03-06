@@ -1,7 +1,7 @@
 package be.catvert.pc.managers
 
-import be.catvert.pc.actions.Actions
-import be.catvert.pc.components.Components
+import be.catvert.pc.eca.actions.Actions
+import be.catvert.pc.eca.components.Components
 import com.badlogic.gdx.files.FileHandle
 import jdk.nashorn.api.scripting.NashornScriptEngine
 import javax.script.ScriptContext

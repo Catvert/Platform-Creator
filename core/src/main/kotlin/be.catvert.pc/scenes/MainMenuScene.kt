@@ -4,7 +4,7 @@ import be.catvert.pc.GameKeys
 import be.catvert.pc.Log
 import be.catvert.pc.PCGame
 import be.catvert.pc.PCGame.Companion.soundVolume
-import be.catvert.pc.containers.Level
+import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.i18n.MenusText
 import be.catvert.pc.managers.MusicManager
 import be.catvert.pc.utility.Constants
@@ -25,7 +25,7 @@ import kotlin.collections.set
  * Scène du menu principal
  */
 class MainMenuScene(applyMusicTransition: Boolean) : Scene(PCGame.mainBackground) {
-    private val logo = PCGame.generateLogo(gameObjectContainer)
+    private val logo = PCGame.generateLogo(entityContainer)
 
     private class LevelItem(val dir: FileHandle) {
         override fun toString(): String = dir.name()

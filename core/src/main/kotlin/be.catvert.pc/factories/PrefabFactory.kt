@@ -1,14 +1,14 @@
 package be.catvert.pc.factories
 
 import be.catvert.pc.GameKeys
-import be.catvert.pc.Prefab
-import be.catvert.pc.Tags
-import be.catvert.pc.actions.*
-import be.catvert.pc.builders.GameObjectBuilder
-import be.catvert.pc.components.basics.SoundComponent
-import be.catvert.pc.components.graphics.AtlasComponent
-import be.catvert.pc.components.graphics.AtlasRegion
-import be.catvert.pc.components.logics.*
+import be.catvert.pc.builders.EntityBuilder
+import be.catvert.pc.eca.Prefab
+import be.catvert.pc.eca.Tags
+import be.catvert.pc.eca.actions.*
+import be.catvert.pc.eca.components.basics.SoundComponent
+import be.catvert.pc.eca.components.graphics.AtlasComponent
+import be.catvert.pc.eca.components.graphics.AtlasRegion
+import be.catvert.pc.eca.components.logics.*
 import be.catvert.pc.tweens.ResizeTween
 import be.catvert.pc.utility.BoxSide
 import be.catvert.pc.utility.Constants
@@ -25,13 +25,13 @@ enum class PrefabType {
  * Objet permettant la création de prefab préfait
  */
 object PrefabSetup {
-    fun setupSprite(region: AtlasRegion, size: Size) = Prefab("sprite", GameObjectBuilder(Tags.Sprite.tag, size)
+    fun setupSprite(region: AtlasRegion, size: Size) = Prefab("sprite", EntityBuilder(Tags.Sprite.tag, size)
             .withDefaultState {
                 withComponent(AtlasComponent(0, AtlasComponent.AtlasData("default", region)))
             }
             .build())
 
-    fun setupPhysicsSprite(region: AtlasRegion, size: Size) = Prefab("sprite", GameObjectBuilder(Tags.Sprite.tag, size)
+    fun setupPhysicsSprite(region: AtlasRegion, size: Size) = Prefab("sprite", EntityBuilder(Tags.Sprite.tag, size)
             .withDefaultState {
                 withComponent(AtlasComponent(0, AtlasComponent.AtlasData("default", region)))
 
@@ -49,11 +49,11 @@ object PrefabSetup {
  */
 enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     Empty(PrefabType.All, Prefab("empty",
-            GameObjectBuilder(Tags.Empty.tag, Size(50, 50))
+            EntityBuilder(Tags.Empty.tag, Size(50, 50))
                     .build())),
 
     BlockEnemy(PrefabType.All, Prefab("block enemy",
-            GameObjectBuilder(Tags.Special.tag, Size(20, 20))
+            EntityBuilder(Tags.Special.tag, Size(20, 20))
                     .withDefaultState {
                         withComponent(PhysicsComponent(true, ignoreTags = arrayListOf(Tags.Player.tag, Tags.Special.tag)))
                     }
@@ -61,7 +61,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     )),
 
     EndLevel(PrefabType.All, Prefab("end level",
-            GameObjectBuilder(Tags.Special.tag, Size(20, 20))
+            EntityBuilder(Tags.Special.tag, Size(20, 20))
                     .withDefaultState {
                         withComponent(SensorComponent(SensorComponent.TagSensorData(Tags.Player.tag, LevelAction(LevelAction.LevelActions.SUCCESS_EXIT))))
                     }
@@ -74,7 +74,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
 
     //region Kenney
     Player_Kenney(PrefabType.Kenney, Prefab("player",
-            GameObjectBuilder(Tags.Player.tag, Size(48, 98))
+            EntityBuilder(Tags.Player.tag, Size(48, 98))
                     .withDefaultState {
                         val pack = Constants.packsKenneyDirPath.child("aliens.atlas").toFileWrapper()
 
@@ -112,7 +112,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     )),
 
     Spider_Kenney(PrefabType.Kenney, Prefab("spider",
-            GameObjectBuilder(Tags.Enemy.tag, Size(48, 48))
+            EntityBuilder(Tags.Enemy.tag, Size(48, 48))
                     .withDefaultState {
                         withComponent(AtlasComponent(0, AtlasComponent.AtlasData("walk", Constants.packsKenneyDirPath.child("enemies.atlas").toFileWrapper(), "spider_walk", 0.33f)))
 
@@ -131,7 +131,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     )),
 
     SnakeSlime_Kenney(PrefabType.Kenney, Prefab("snake slime",
-            GameObjectBuilder(Tags.Enemy.tag, Size(35, 120))
+            EntityBuilder(Tags.Enemy.tag, Size(35, 120))
                     .withDefaultState {
                         withComponent(AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.packsKenneyDirPath.child("enemies.atlas").toFileWrapper(), "snakeSlime", 0.33f)))
 
@@ -145,7 +145,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     )),
 
     Bee_Kenney(PrefabType.Kenney, Prefab("bee",
-            GameObjectBuilder(Tags.Enemy.tag, Size(35, 35))
+            EntityBuilder(Tags.Enemy.tag, Size(35, 35))
                     .withDefaultState {
                         withComponent(AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.packsKenneyDirPath.child("enemies.atlas").toFileWrapper() to "bee")))
 
@@ -164,7 +164,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     )),
 
     GoldCoin_Kenney(PrefabType.Kenney, Prefab("gold coin",
-            GameObjectBuilder(Tags.Special.tag, Size(35, 35))
+            EntityBuilder(Tags.Special.tag, Size(35, 35))
                     .withDefaultState {
                         withComponent(AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.packsKenneyDirPath.child("jumper.atlas").toFileWrapper() to "coin_gold")))
 
@@ -179,7 +179,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     //region SMC
 
     FireBall_Left_SMC(PrefabType.SMC, Prefab("fireball left",
-            GameObjectBuilder(Tags.Special.tag, Size(35, 35))
+            EntityBuilder(Tags.Special.tag, Size(35, 35))
                     .withDefaultState {
                         withComponent(AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.packsSMCDirPath.child("animations.atlas").toFileWrapper() to "fireball/fireball")))
 
@@ -193,7 +193,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                     .build())),
 
     FireBall_Right_SMC(PrefabType.SMC, Prefab("fireball right",
-            GameObjectBuilder(Tags.Special.tag, Size(35, 35))
+            EntityBuilder(Tags.Special.tag, Size(35, 35))
                     .withDefaultState {
                         withComponent(AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.packsSMCDirPath.child("animations.atlas").toFileWrapper() to "fireball/fireball")))
 
@@ -207,7 +207,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                     .build())),
 
     Player_SMC(PrefabType.SMC, Prefab("player",
-            GameObjectBuilder(Tags.Player.tag, Size(48, 78))
+            EntityBuilder(Tags.Player.tag, Size(48, 78))
                     // Small state
                     .withDefaultState {
                         val pack = Constants.packsSMCDirPath.child("maryo.atlas").toFileWrapper()
@@ -297,7 +297,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                                 InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_UP.key, true, PhysicsAction(PhysicsAction.PhysicsActions.GO_UP)),
                                 InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_DOWN.key, true, PhysicsAction(PhysicsAction.PhysicsActions.GO_DOWN)),
                                 InputComponent.InputData(GameKeys.GAME_PLAYER_JUMP.key, false, PhysicsAction(PhysicsAction.PhysicsActions.JUMP)),
-                                InputComponent.InputData(Input.Keys.E, false, AtlasFlipSwitcherAction(unFlipXAction = SpawnSideAction(PrefabFactory.FireBall_Right_SMC.prefab, BoxSide.Right, false), flipXAction = SpawnSideAction(PrefabFactory.FireBall_Left_SMC.prefab, BoxSide.Left, false))))
+                                InputComponent.InputData(Input.Keys.E, false, AtlasFlipSwitcherAction(unFlipXAction = SpawnSideAction(FireBall_Right_SMC.prefab, BoxSide.Right, false), flipXAction = SpawnSideAction(FireBall_Left_SMC.prefab, BoxSide.Left, false))))
                         )
 
                         withComponent(PhysicsComponent(false, 10, MovementType.SMOOTH, jumpHeight = 200).apply {
@@ -319,7 +319,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     )),
 
     Furball_SMC(PrefabType.SMC, Prefab("furball",
-            GameObjectBuilder(Tags.Enemy.tag, Size(48, 48))
+            EntityBuilder(Tags.Enemy.tag, Size(48, 48))
                     .withDefaultState {
                         withComponent(AtlasComponent(0, AtlasComponent.AtlasData("walk", Constants.packsSMCDirPath.child("enemies.atlas").toFileWrapper(), "furball/brown/walk", 0.1f)))
 
@@ -338,7 +338,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     )),
 
     Turtle_SMC(PrefabType.SMC, Prefab("turtle",
-            GameObjectBuilder(Tags.Enemy.tag, Size(48, 98))
+            EntityBuilder(Tags.Enemy.tag, Size(48, 98))
                     .withDefaultState {
                         withComponent(AtlasComponent(0, AtlasComponent.AtlasData("walk", Constants.packsSMCDirPath.child("enemies.atlas").toFileWrapper(), "turtle/green/walk", 0.33f)))
 
@@ -372,7 +372,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     )),
 
     Eato_SMC(PrefabType.SMC, Prefab("eato",
-            GameObjectBuilder(Tags.Enemy.tag, Size(45, 45))
+            EntityBuilder(Tags.Enemy.tag, Size(45, 45))
                     .withDefaultState {
                         withComponent(AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.packsSMCDirPath.child("enemies.atlas").toFileWrapper(), "eato/green/eato", 0.15f, Animation.PlayMode.LOOP_PINGPONG)))
 
@@ -386,7 +386,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     )),
 
     MushroomRed_SMC(PrefabType.SMC, Prefab("mushroom red",
-            GameObjectBuilder(Tags.Special.tag, Size(45, 45))
+            EntityBuilder(Tags.Special.tag, Size(45, 45))
                     .withDefaultState {
                         withComponent(AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.packsSMCDirPath.child("items.atlas").toFileWrapper() to "mushroom_red")))
 
@@ -400,7 +400,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     )),
 
     FirePlant_SMC(PrefabType.SMC, Prefab("fire plant",
-            GameObjectBuilder(Tags.Special.tag, Size(45, 45))
+            EntityBuilder(Tags.Special.tag, Size(45, 45))
                     .withDefaultState {
                         withComponent(AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.packsSMCDirPath.child("items.atlas").toFileWrapper() to "fireplant")))
 
@@ -412,7 +412,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     )),
 
     BoxSpawner_SMC(PrefabType.SMC,
-            Prefab("box spawner", GameObjectBuilder(Tags.Special.tag, Size(48, 48))
+            Prefab("box spawner", EntityBuilder(Tags.Special.tag, Size(48, 48))
                     .withDefaultState {
                         withComponent(AtlasComponent(0, AtlasComponent.AtlasData("default", Constants.packsSMCDirPath.child("box.atlas").toFileWrapper() to "yellow/default")))
 
@@ -421,7 +421,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         ))
                     }
                     .withState("pop") {
-                        withStartAction(SpawnSideAction(PrefabFactory.MushroomRed_SMC.prefab, BoxSide.Up, true))
+                        withStartAction(SpawnSideAction(MushroomRed_SMC.prefab, BoxSide.Up, true))
 
                         withComponent(AtlasComponent(0, AtlasComponent.AtlasData("pop", Constants.packsSMCDirPath.child("box.atlas").toFileWrapper() to "brown1_1")))
                         withComponent(PhysicsComponent(true))

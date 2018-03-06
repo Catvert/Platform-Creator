@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Shape2D
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
+import com.esotericsoftware.reflectasm.ClassAccess
 import ktx.assets.Asset
 import ktx.assets.loadOnDemand
 import java.lang.reflect.Constructor
@@ -94,14 +95,11 @@ object Utility {
 
 object ReflectionUtility {
     /**
-     * Permet d'obtenir le constructeur sans arguments d'une classe
+     * Permet de créer un object dynamiquement
      */
-    inline fun <reified T : Any> findNoArgConstructor(klass: KClass<out T>): Constructor<T>? {
-        klass.constructors.forEach {
-            if (it.parameters.isEmpty())
-                return it.javaConstructor.apply { it.isAccessible = true }
-        }
-        return null
+    fun<T> createInstance(type: Class<T>, vararg args: Any): T {
+        val access = ClassAccess.access(type)
+        return access.newInstance(*args) as T
     }
 
     /**

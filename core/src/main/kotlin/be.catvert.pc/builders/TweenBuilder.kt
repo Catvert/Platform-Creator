@@ -1,7 +1,7 @@
 package be.catvert.pc.builders
 
-import be.catvert.pc.actions.Action
-import be.catvert.pc.actions.EmptyAction
+import be.catvert.pc.eca.actions.Action
+import be.catvert.pc.eca.actions.EmptyAction
 import be.catvert.pc.tweens.Tween
 
 /**
