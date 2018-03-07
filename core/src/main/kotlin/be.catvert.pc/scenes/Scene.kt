@@ -40,10 +40,6 @@ abstract class Scene(protected var background: Background?,
 
     protected open fun postBatchRender() {}
 
-    fun calcIsUIHover() {
-        isUIHover = imgui.findHoveredWindow() != null || ImGui.isAnyItemActive || ImGui.isAnyItemHovered
-    }
-
     override fun render(batch: Batch) {
         batch.projectionMatrix = PCGame.defaultProjection
         batch.use {
@@ -60,6 +56,8 @@ abstract class Scene(protected var background: Background?,
         entityContainer.update()
 
         background.cast<ParallaxBackground>()?.updateOffsets(camera)
+
+        isUIHover = imgui.findHoveredWindow() != null || ImGui.isAnyItemActive || ImGui.isAnyItemHovered
     }
 
     override fun resize(size: Size) {

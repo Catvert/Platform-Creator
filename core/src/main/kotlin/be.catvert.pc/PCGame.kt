@@ -17,6 +17,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Matrix4
 import glm_.c
+import glm_.vec4.Vec4
 import imgui.*
 import imgui.impl.LwjglGL3
 import ktx.app.KtxApplicationAdapter
@@ -36,7 +37,7 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         PCGame.darkUI = initialConfig.darkUI
 
         val fontBytes = Constants.imguiFontPath.readBytes()
-        imguiDefaultFont = imgui.g.io.fonts.addFontFromMemoryTTF(CharArray(fontBytes.size, { fontBytes[it].c }), 20f, FontConfig(), glyphRanges = imgui.g.io.fonts.glyphRangesDefault)
+        imguiDefaultFont = imgui.g.io.fonts.addFontFromMemoryTTF(CharArray(fontBytes.size, { fontBytes[it].c }), 21f, FontConfig(), glyphRanges = imgui.g.io.fonts.glyphRangesDefault)
         imguiBigFont = imgui.g.io.fonts.addFontFromMemoryTTF(CharArray(fontBytes.size, { fontBytes[it].c }), 32f, FontConfig(), glyphRanges = imgui.g.io.fonts.glyphRangesDefault)
     }
 
@@ -110,8 +111,6 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         MusicManager.update()
 
         sceneManager.render(mainBatch)
-
-        sceneManager.currentScene().calcIsUIHover()
     }
 
     override fun resize(width: Int, height: Int) {
@@ -196,17 +195,54 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         var darkUI = false
             set(value) {
                 field = value
-                if (value)
-                    ImGui.styleColorsDark()
+                if (value) {
+                    with(ImGui.style) {
+                        colors[Col.WindowBg] = Vec4.fromColor(40, 44, 52, 240)
+                        colors[Col.PopupBg] = Vec4.fromColor(34, 42, 53, 250)
+
+                        colors[Col.MenuBarBg] = Vec4.fromColor(34, 42, 53, 240)
+
+                        colors[Col.TitleBg] = Vec4.fromColor(39, 47, 58, 240)
+                        colors[Col.TitleBgActive] = Vec4.fromColor(39, 47, 58, 245)
+                        colors[Col.TitleBgCollapsed] = Vec4.fromColor(39, 47, 58, 240)
+
+                        colors[Col.Button] = Vec4.fromColor(50, 77, 109, 200)
+                        colors[Col.ButtonActive] = Vec4.fromColor(58, 68, 86, 255)
+                        colors[Col.ButtonHovered] = Vec4.fromColor(49, 59, 76, 255)
+
+                        colors[Col.FrameBg] = Vec4.fromColor(58, 68, 86)
+                        colors[Col.FrameBgActive] = Vec4.fromColor(58, 68, 86)
+                        colors[Col.FrameBgHovered] = Vec4.fromColor(49, 59, 76)
+
+                        colors[Col.Header] = Vec4.fromColor(58, 68, 86)
+                        colors[Col.HeaderActive] = Vec4.fromColor(58, 68, 86)
+                        colors[Col.HeaderHovered] = Vec4.fromColor(49, 59, 76)
+
+                        colors[Col.ScrollbarBg] = Vec4.fromColor(58, 68, 86, 240)
+                        colors[Col.ScrollbarGrab] = Vec4.fromColor(40, 44, 52, 200)
+                        colors[Col.ScrollbarGrabActive] = Vec4.fromColor(40, 44, 52, 255)
+                        colors[Col.ScrollbarGrabHovered] = Vec4.fromColor(34, 42, 53, 255)
+
+                        colors[Col.ResizeGrip] = Vec4.fromColor(40, 44, 52, 200)
+                        colors[Col.ResizeGripActive] = Vec4.fromColor(34, 42, 53, 255)
+                        colors[Col.ResizeGripHovered] = Vec4.fromColor(40, 44, 52, 255)
+
+                        colors[Col.CheckMark] = Vec4.fromColor(66, 150, 250)
+
+                        colors[Col.CloseButton] = Vec4.fromColor(50, 77, 109, 200)
+                        colors[Col.CloseButtonActive] = Vec4.fromColor(58, 68, 86, 255)
+                        colors[Col.CloseButtonHovered] = Vec4.fromColor(49, 59, 76, 255)
+
+                        colors[Col.SliderGrab] = Vec4.fromColor(66, 150, 250)
+                        colors[Col.SliderGrabActive] = Vec4.fromColor(66, 160, 255)
+
+                        colors[Col.Text] = Vec4(1)
+                    }
+                }
                 else
                     ImGui.styleColorsLight()
 
-                ImGui.pushStyleColor(Col.WindowBg, ImGui.getStyleColorVec4(Col.WindowBg).apply { a = 0.9f })
-                ImGui.pushStyleColor(Col.PopupBg, ImGui.getStyleColorVec4(Col.PopupBg).apply { a = 0.9f })
-                ImGui.pushStyleColor(Col.TitleBg, ImGui.getStyleColorVec4(Col.TitleBg).apply { a = 0.8f })
-                ImGui.pushStyleColor(Col.TitleBgActive, ImGui.getStyleColorVec4(Col.TitleBgActive).apply { a = 0.8f })
-                ImGui.pushStyleColor(Col.TitleBgCollapsed, ImGui.getStyleColorVec4(Col.TitleBgCollapsed).apply { a = 0.8f })
-                ImGui.pushStyleVar(StyleVar.FrameRounding, 3f)
+                ImGui.style.frameRounding = 5f
             }
 
         val availableLocales = mutableListOf<Locale>(Locale.FRENCH)

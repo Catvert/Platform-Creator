@@ -117,6 +117,10 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
                     it.copyTo(levelSounds.first)
                     levelSounds.second.add(levelSounds.first.child(it.name()))
                 }
+                Constants.levelScriptExtension.contains(it.extension()) -> {
+                    it.copyTo(levelScripts.first)
+                    levelScripts.second.add(Script(it, ScriptManager.compile(it)))
+                }
             }
         }
     }

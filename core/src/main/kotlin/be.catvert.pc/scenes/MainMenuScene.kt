@@ -96,7 +96,7 @@ class MainMenuScene(applyMusicTransition: Boolean) : Scene(PCGame.mainBackground
 
     private fun drawSelectLevelWindow() {
         with(ImGui) {
-            ImGuiHelper.withCenteredWindow(MenusText.MM_SELECT_LEVEL_WINDOW_TITLE(), ::showSelectLevelWindow, Vec2(215f, 165f), WindowFlags.NoResize.i or WindowFlags.NoCollapse.i) {
+            ImGuiHelper.withCenteredWindow(MenusText.MM_SELECT_LEVEL_WINDOW_TITLE(), ::showSelectLevelWindow, Vec2(215f, 170f), WindowFlags.NoResize.i or WindowFlags.NoCollapse.i) {
                 var openCopyPopup = false
 
                 pushItemFlag(ItemFlags.Disabled.i, levels.isEmpty())
@@ -198,7 +198,7 @@ class MainMenuScene(applyMusicTransition: Boolean) : Scene(PCGame.mainBackground
 
     private fun drawSettingsWindow() {
         with(ImGui) {
-            ImGuiHelper.withCenteredWindow(MenusText.MM_SETTINGS_WINDOW_TITLE(), ::showSettingsWindow, Vec2(425f, 435f), WindowFlags.NoResize.i) {
+            ImGuiHelper.withCenteredWindow(MenusText.MM_SETTINGS_WINDOW_TITLE(), ::showSettingsWindow, Vec2(435f, 440f), WindowFlags.NoResize.i) {
                 functionalProgramming.withGroup {
                     functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                         sliderFloat(MenusText.MM_SETTINGS_SOUND(), ::soundVolume, 0f, 1f, "%.1f")
@@ -213,11 +213,11 @@ class MainMenuScene(applyMusicTransition: Boolean) : Scene(PCGame.mainBackground
                 }
 
                 separator()
-                functionalProgramming.withChild("game keys", size = Vec2(400f, 265f)) {
+                functionalProgramming.withChild("game keys", size = Vec2(420f, 265f)) {
                     settingsKeys.forEach { keyValue ->
                         text(keyValue.key.description)
                         sameLine()
-                        cursorPosX = 300f
+                        cursorPosX = 320f
                         functionalProgramming.withId(keyValue.key.name) {
                             if (button(if (keyValue.value) MenusText.MM_SETTINGS_PRESSKEY() else Input.Keys.toString(keyValue.key.key), Vec2(75f, 0))) {
                                 if (!keyValue.value) {

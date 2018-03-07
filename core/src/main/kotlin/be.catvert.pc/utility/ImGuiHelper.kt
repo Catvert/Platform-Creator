@@ -43,13 +43,13 @@ object ImGuiHelper {
     private val descriptionCache = AnnotationCache(Description::class.java)
     private val requiredComponentCache = AnnotationCache(RequiredComponent::class.java)
 
-    fun <T : Any> addImguiWidgetsArray(label: String, array: ArrayList<T>, itemLabel: (item: T) -> String, createItem: () -> T, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI, itemExposeEditor: ExposeEditor = ExposeEditorFactory.empty, endBlock: () -> Unit = {}) {
+    inline fun <T : Any> addImguiWidgetsArray(label: String, array: ArrayList<T>, itemLabel: (item: T) -> String, createItem: () -> T, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI, itemExposeEditor: ExposeEditor = ExposeEditorFactory.empty, endBlock: () -> Unit = {}) {
         addImguiWidgetsArray(label, array, itemLabel, createItem, {
             addImguiWidget(itemLabel(it.obj), it, entity, level, itemExposeEditor, editorSceneUI)
         }, endBlock)
     }
 
-    fun <T : Any> addImguiWidgetsArray(label: String, array: ArrayList<T>, itemLabel: (item: T) -> String, createItem: () -> T, itemBlock: (item: Item<T>) -> Unit, endBlock: () -> Unit = {}) {
+    inline fun <T : Any> addImguiWidgetsArray(label: String, array: ArrayList<T>, itemLabel: (item: T) -> String, createItem: () -> T, itemBlock: (item: Item<T>) -> Unit, endBlock: () -> Unit = {}) {
         with(ImGui) {
             var removeItem: T? = null
 
@@ -93,13 +93,6 @@ object ImGuiHelper {
 
             endBlock()
         }
-    }
-
-    fun <T : Any> addImguiWidget(label: String, item: KMutableProperty0<T>, entity: Entity, level: Level, exposeEditor: ExposeEditor, editorSceneUI: EditorScene.EditorSceneUI) {
-        val value = Item(item.get())
-
-        addImguiWidget(label, value, entity, level, exposeEditor, editorSceneUI)
-        item.set(value.obj)
     }
 
     fun <T : Any> addImguiWidget(label: String, item: Item<T>, entity: Entity, level: Level, exposeEditor: ExposeEditor, editorSceneUI: EditorScene.EditorSceneUI) {
@@ -225,7 +218,7 @@ object ImGuiHelper {
         }
     }
 
-    fun comboWithSettingsButton(label: String, currentItem: IntArray, items: List<String>, popupBlock: () -> Unit, settingsBtnDisabled: Boolean = false, onSettingsBtnDisabled: () -> Unit = {}, searchBar: Boolean = false): Boolean {
+    inline fun comboWithSettingsButton(label: String, currentItem: IntArray, items: List<String>, popupBlock: () -> Unit, settingsBtnDisabled: Boolean = false, onSettingsBtnDisabled: () -> Unit = {}, searchBar: Boolean = false): Boolean {
         val popupTitle = "popup settings $label"
 
         var comboChanged = false
@@ -263,7 +256,7 @@ object ImGuiHelper {
         return comboChanged
     }
 
-    fun comboWithSettingsButton(label: String, currentItem: KMutableProperty0<Int>, items: List<String>, popupBlock: () -> Unit, settingsBtnDisabled: Boolean = false, onSettingsBtnDisabled: () -> Unit = {}, searchBar: Boolean = false) {
+    inline fun comboWithSettingsButton(label: String, currentItem: KMutableProperty0<Int>, items: List<String>, popupBlock: () -> Unit, settingsBtnDisabled: Boolean = false, onSettingsBtnDisabled: () -> Unit = {}, searchBar: Boolean = false) {
         val item = intArrayOf(currentItem.get())
         comboWithSettingsButton(label, item, items, popupBlock, settingsBtnDisabled, onSettingsBtnDisabled, searchBar)
         currentItem.set(item[0])
@@ -305,8 +298,8 @@ object ImGuiHelper {
         return changed
     }
 
-    fun settingsButton(size: Vec2 = Vec2(g.fontSize)) = ImGui.imageButton(settingsBtnIconHandle, size, uv1 = Vec2(1, 1))
-    fun favButton(size: Vec2 = Vec2(g.fontSize), tintColor: Vec4 = Vec4(1)) = ImGui.imageButton(favBtnIconHandle, size, uv1 = Vec2(1, 1), tintCol = tintColor)
+    fun settingsButton(size: Vec2 = Vec2(g.fontSize)) = ImGui.imageButton(settingsBtnIconHandle, size, uv1 = Vec2(1))
+    fun favButton(size: Vec2 = Vec2(g.fontSize), tintColor: Vec4 = Vec4(1)) = ImGui.imageButton(favBtnIconHandle, size, uv1 = Vec2(1), tintCol = tintColor)
 
     fun entityTag(tag: Item<EntityTag>, level: Level, label: String = "tag") {
         val selectedIndex = intArrayOf(level.tags.indexOfFirst { it == tag.obj })
@@ -475,7 +468,7 @@ object ImGuiHelper {
         }
     }
 
-    fun enumWithSettingsButton(label: String, enum: Item<Enum<*>>, popupBlock: () -> Unit, settingsBtnDisabled: Boolean = false, onSettingsBtnDisabled: () -> Unit = {}) {
+    inline fun enumWithSettingsButton(label: String, enum: Item<Enum<*>>, popupBlock: () -> Unit, settingsBtnDisabled: Boolean = false, onSettingsBtnDisabled: () -> Unit = {}) {
         val enumConstants = enum.obj.javaClass.enumConstants
         val selectedIndex = intArrayOf(enumConstants.indexOfFirst { it == enum.obj })
 
@@ -494,7 +487,7 @@ object ImGuiHelper {
         }
     }
 
-    fun withCenteredWindow(name: String, open: KMutableProperty0<Boolean>? = null, size: Vec2, flags: Int = 0, centerCond: Cond = Cond.Once, block: () -> Unit) {
+    inline fun withCenteredWindow(name: String, open: KMutableProperty0<Boolean>? = null, size: Vec2, flags: Int = 0, centerCond: Cond = Cond.Once, block: () -> Unit) {
         ImGui.setNextWindowSize(size, centerCond)
         ImGui.setNextWindowPos(Vec2(Gdx.graphics.width / 2f - size.x / 2f, Gdx.graphics.height / 2f - size.y / 2f), centerCond)
         functionalProgramming.withWindow(name, open, flags) {
@@ -528,11 +521,9 @@ object ImGuiHelper {
         return pressed
     }
 
-    fun withMenuButtonsStyle(block: () -> Unit) {
+    inline fun withMenuButtonsStyle(block: () -> Unit) {
         with(ImGui) {
             pushStyleColor(Col.WindowBg, ImGui.getStyleColorVec4(Col.WindowBg).apply { a = 0f })
-            pushStyleColor(Col.Button, Vec4(0.2f, 0.5f, 0.9f, 1f))
-            pushStyleColor(Col.Text, Vec4(1f))
             pushStyleColor(Col.Border, ImGui.getStyleColorVec4(Col.Border).apply { a = 0f })
             pushStyleVar(StyleVar.FrameRounding, 10f)
             pushStyleVar(StyleVar.FramePadding, Vec2(10f))
@@ -540,7 +531,7 @@ object ImGuiHelper {
 
             block()
 
-            ImGui.popStyleColor(4)
+            ImGui.popStyleColor(2)
             ImGui.popStyleVar(2)
             popFont()
         }

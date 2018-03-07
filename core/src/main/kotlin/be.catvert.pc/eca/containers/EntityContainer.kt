@@ -24,7 +24,6 @@ abstract class EntityContainer : Renderable, Updeatable, PostDeserialization, Re
 
     private val removeEntities = mutableSetOf<Entity>()
 
-
     @JsonIgnore
     fun getEntitiesData() = entities.toSet()
 
@@ -32,7 +31,6 @@ abstract class EntityContainer : Renderable, Updeatable, PostDeserialization, Re
 
     open fun removeEntity(entity: Entity) {
         removeEntities.add(entity)
-
     }
 
     open fun addEntity(entity: Entity): Entity {

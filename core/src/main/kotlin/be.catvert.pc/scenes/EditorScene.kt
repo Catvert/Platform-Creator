@@ -136,7 +136,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
         var showEntitiesWindow = true
         var entitiesTypeIndex = 0
-        var entitiesShowUser = false
+        var entitiesShowOnlyUser = false
         var entitiesSpritePackIndex = 0
         var entitiesSpritePackTypeIndex = 0
         var entitiesSpritePhysics = true
@@ -154,6 +154,8 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
             when (background?.type) {
                 BackgroundType.Standard -> settingsLevelStandardBackgroundIndex[0] = PCGame.standardBackgrounds().indexOfFirst { it.backgroundFile == (background as StandardBackground).backgroundFile }
                 BackgroundType.Parallax -> settingsLevelParallaxBackgroundIndex[0] = PCGame.parallaxBackgrounds().indexOfFirst { it.parallaxDataFile == (background as ParallaxBackground).parallaxDataFile }
+                BackgroundType.None -> {
+                }
             }
         }
     }
@@ -221,7 +223,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         PCInputProcessor.scrolledSignal.register {
             if (isUIHover)
                 return@register
-            targetCameraZoom = (targetCameraZoom + (it * targetCameraZoom * 0.05f)).clamp(0.5f, level.matrixRect.width / camera.viewportWidth)
+            targetCameraZoom = (targetCameraZoom + (it * targetCameraZoom * 0.05f)).clamp(0.5f, level.matrixRect.width / camera.viewportWidth).clamp(0.5f, level.matrixRect.height / camera.viewportHeight)
         }
     }
 
@@ -272,11 +274,12 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                 if (selectRectangleData.rectangleStarted) {
                     val rect = selectRectangleData.getRect()
                     shapeRenderer.set(ShapeRenderer.ShapeType.Filled)
-                    shapeRenderer.withColor(Color.FIREBRICK.apply { a = 0.5f }) {
+
+                    shapeRenderer.withColor(Color(34/255f, 42/255f, 53/255f, 0.3f)) {
                         rect(rect)
                     }
                     shapeRenderer.set(ShapeRenderer.ShapeType.Line)
-                    shapeRenderer.withColor(Color.RED) {
+                    shapeRenderer.withColor(Color(40/255f, 44/255f, 52/255f, 1f)) {
                         rect(rect)
                     }
                 }
@@ -286,7 +289,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                  * Dessine un rectangle autour des entités sélectionnées
                  */
                 selectEntities.forEach {
-                    shapeRenderer.withColor(if (it === selectEntity) Color.CORAL else Color.RED) {
+                    shapeRenderer.withColor(if (it === selectEntity) Color(40/255f, 44/255f, 52/255f, 1f) else Color(34/255f, 42/255f, 53/255f, 0.3f)) {
                         rect(it.box)
                     }
                 }
@@ -816,6 +819,22 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         var moveCameraX = 0f
         var moveCameraY = 0f
 
+        if (targetCameraZoom != camera.zoom) {
+            val px = camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f))
+
+            camera.zoom = MathUtils.lerp(camera.zoom, targetCameraZoom, 0.1f)
+
+            camera.update()
+
+            val nextPX = camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f))
+
+            camera.position.add(px.x - nextPX.x, px.y - nextPX.y, 0f)
+        }
+
+        if (camera.zoom > level.matrixRect.width / camera.viewportWidth || camera.zoom > level.matrixRect.height / camera.viewportHeight) {
+            targetCameraZoom = camera.zoom.clamp(0.5f, level.matrixRect.width / camera.viewportWidth).clamp(0.5f, level.matrixRect.height / camera.viewportHeight)
+        }
+
         if (editorSceneUI.editorMode == EditorSceneUI.EditorMode.TRY_LEVEL) {
             entityContainer.cast<Level>()?.updateCamera(camera, true)
         } else if (!isUIHover) {
@@ -831,18 +850,6 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
             if (Gdx.input.isKeyPressed(GameKeys.CAMERA_ZOOM_RESET.key))
                 targetCameraZoom = 1f
 
-            if (targetCameraZoom != camera.zoom) {
-                val px = camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f))
-
-                camera.zoom = MathUtils.lerp(camera.zoom, targetCameraZoom, 0.1f)
-
-                camera.update()
-
-                val nextPX = camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f))
-
-                camera.position.add(px.x - nextPX.x, px.y - nextPX.y, 0f)
-            }
-
             val minCameraX = camera.zoom * (camera.viewportWidth / 2)
             val maxCameraX = level.matrixRect.width - minCameraX
             val minCameraY = camera.zoom * (camera.viewportHeight / 2)
@@ -853,6 +860,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
             camera.position.set(MathUtils.clamp(x, minCameraX, maxCameraX), MathUtils.clamp(y, minCameraY, maxCameraY), 0f)
         }
+
         camera.update()
     }
 
@@ -1054,9 +1062,9 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                         menuItem("Importer une ressource..") {
                             try {
                                 stackPush().also { stack ->
-                                    val aFilterPatterns = stack.mallocPointer(Constants.levelTextureExtension.size + Constants.levelAtlasExtension.size + Constants.levelSoundExtension.size)
+                                    val aFilterPatterns = stack.mallocPointer(Constants.levelTextureExtension.size + Constants.levelAtlasExtension.size + Constants.levelSoundExtension.size + Constants.levelScriptExtension.size)
 
-                                    val extensions = Constants.levelTextureExtension + Constants.levelAtlasExtension + Constants.levelSoundExtension
+                                    val extensions = Constants.levelTextureExtension + Constants.levelAtlasExtension + Constants.levelSoundExtension + Constants.levelScriptExtension
                                     extensions.forEach {
                                         aFilterPatterns.put(stack.UTF8("*.$it"))
                                     }
@@ -1231,11 +1239,25 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     }
                     ImGui.cursorPosX = Gdx.graphics.width.toFloat() - 175f
 
-                    if (smallButton("Sauvegarder"))
-                        saveLevelToFile()
-                    sameLine()
-                    if (smallButton("Essayer"))
-                        launchTryLevel()
+                    val btns = {
+                        if (smallButton("Sauvegarder"))
+                            saveLevelToFile()
+
+                        sameLine(0f, style.itemInnerSpacing.x)
+                        functionalProgramming.withStyleColor(Col.Text, Vec4.fromColor(102, 255, 147, 255)) {
+                            if (smallButton("Essayer"))
+                                launchTryLevel()
+                        }
+                    }
+
+                    if(PCGame.darkUI) {
+                        functionalProgramming.withStyleColor(Col.Button, Vec4.fromColor(49, 54, 62, 200), Col.ButtonHovered, Vec4.fromColor(49, 54, 62, 255), Col.ButtonActive, Vec4.fromColor(49, 54, 62, 255)) {
+                            btns()
+                        }
+                    }
+                    else
+                        btns()
+
                 } else {
                     menuItem("Arrêter l'essai") {
                         finishTryLevel()
@@ -1278,7 +1300,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
                 ImGuiHelper.comboWithSettingsButton("type", editorSceneUI::entitiesTypeIndex, level.tags.apply { remove(Tags.Empty.tag) }, {
                     val tag = tags.elementAtOrElse(editorSceneUI.entitiesTypeIndex, { Tags.Sprite.tag })
-                    checkbox(if (tag == Tags.Sprite.tag) "pack importés" else "afficher les préfabs créés", editorSceneUI::entitiesShowUser)
+                    checkbox(if (tag == Tags.Sprite.tag) "pack importés" else "afficher seulement les préfabs créés", editorSceneUI::entitiesShowOnlyUser)
                 })
 
                 val tag = tags.elementAtOrElse(editorSceneUI.entitiesTypeIndex, { Tags.Sprite.tag })
@@ -1299,11 +1321,11 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     Tags.Sprite.tag -> {
                         functionalProgramming.withGroup {
                             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                                if (!editorSceneUI.entitiesShowUser) {
+                                if (!editorSceneUI.entitiesShowOnlyUser) {
                                     combo("dossier", editorSceneUI::entitiesSpritePackTypeIndex, PCGame.gameAtlas.map { it.key.name() })
                                 }
                                 combo("pack", editorSceneUI::entitiesSpritePackIndex,
-                                        if (editorSceneUI.entitiesShowUser) level.resourcesAtlas().map { it.nameWithoutExtension() }
+                                        if (editorSceneUI.entitiesShowOnlyUser) level.resourcesAtlas().map { it.nameWithoutExtension() }
                                         else PCGame.gameAtlas.entries.elementAtOrNull(editorSceneUI.entitiesSpritePackTypeIndex)?.value?.map { it.nameWithoutExtension() }
                                                 ?: arrayListOf())
                                 if (!editorSceneUI.entitiesSpriteRealSize)
@@ -1313,7 +1335,8 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                             }
                         }
                         separator()
-                        (if (editorSceneUI.entitiesShowUser) level.resourcesAtlas().getOrNull(editorSceneUI.entitiesSpritePackIndex) else PCGame.gameAtlas.entries.elementAtOrNull(editorSceneUI.entitiesSpritePackTypeIndex)?.value?.getOrNull(editorSceneUI.entitiesSpritePackIndex))?.also { atlasPath ->
+
+                        (if (editorSceneUI.entitiesShowOnlyUser) level.resourcesAtlas().getOrNull(editorSceneUI.entitiesSpritePackIndex) else PCGame.gameAtlas.entries.elementAtOrNull(editorSceneUI.entitiesSpritePackTypeIndex)?.value?.getOrNull(editorSceneUI.entitiesSpritePackIndex))?.also { atlasPath ->
                             val atlas = ResourceManager.getPack(atlasPath)
                             atlas.regions.sortedBy { it.name }.forEachIndexed { index, region ->
                                 val atlasRegion = atlasPath.toFileWrapper() to region.name
@@ -1328,7 +1351,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     }
                     else -> {
                         var index = 0
-                        val prefabs = if (editorSceneUI.entitiesShowUser) level.resourcesPrefabs() else PrefabFactory.values().map { it.prefab }
+                        val prefabs = level.resourcesPrefabs() + if (editorSceneUI.entitiesShowOnlyUser) listOf() else PrefabFactory.values().map { it.prefab }
                         prefabs.filter { it.prefabGO.tag == tag }.forEach {
                             it.prefabGO.loadResources()
 
