@@ -9,7 +9,7 @@ import be.catvert.pc.eca.components.graphics.AtlasComponent
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.managers.ResourceManager
 import be.catvert.pc.managers.ScriptManager
-import be.catvert.pc.scenes.EndLevelScene
+import be.catvert.pc.scenes.GameScene
 import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.files.FileHandle
@@ -41,7 +41,7 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
     @JsonIgnore
     var exit: (success: Boolean) -> Unit = {
         ResourceManager.getSound(if (it) Constants.gameDirPath.child("game-over-success.wav") else Constants.gameDirPath.child("game-over-fail.wav"))?.play(PCGame.soundVolume)
-        PCGame.sceneManager.loadScene(EndLevelScene(this))
+        PCGame.sceneManager.loadScene(GameScene(SerializationFactory.deserializeFromFile(levelPath.toLocalFile())))
     }
 
     @JsonIgnore

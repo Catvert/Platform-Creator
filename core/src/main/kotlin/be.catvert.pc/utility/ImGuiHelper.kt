@@ -82,7 +82,7 @@ object ImGuiHelper {
                 }
             }
 
-            if(removeItem != null)
+            if (removeItem != null)
                 array.remove(removeItem!!)
 
             functionalProgramming.withId("$label add btn") {
@@ -423,7 +423,7 @@ object ImGuiHelper {
                 }
             }
 
-            if(isItemHovered()) {
+            if (isItemHovered()) {
                 functionalProgramming.withTooltip {
                     text("Sélectionner un point")
                 }

@@ -46,8 +46,6 @@ enum class GameKeys(var key: Int, val description: String) {
 
     GAME_EDIT_LEVEL(Input.Keys.F2, "[Jeu] Éditer le niveau"),
 
-    CAMERA_ZOOM_UP(Input.Keys.P, "[Caméra] Zoom +"),
-    CAMERA_ZOOM_DOWN(Input.Keys.M, "[Caméra] Zoom -"),
     CAMERA_ZOOM_RESET(Input.Keys.L, "[Caméra] Zoom réinitialiser"),
 
     DEBUG_MODE(Input.Keys.F12, "Mode débug");

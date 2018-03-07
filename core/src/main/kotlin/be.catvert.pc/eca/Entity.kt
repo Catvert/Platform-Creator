@@ -106,7 +106,6 @@ class Entity(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: EntityTa
         set(value) {
             field = value
             if (value != null) {
-                states.forEach { it.onAddToContainer(this) }
                 setState(initialState, true)
             }
         }
@@ -132,8 +131,6 @@ class Entity(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: EntityTa
     }
 
     fun addState(state: EntityState): Int {
-        if (container != null)
-            state.onAddToContainer(this)
         states.add(state)
         return states.size - 1
     }
@@ -153,8 +150,7 @@ class Entity(@ExposeEditor(customType = CustomType.TAG_STRING) var tag: EntityTa
             getCurrentState().disabled()
             currentState = stateIndex
 
-            if (container != null)
-                getCurrentState().active(container!!, triggerStartAction)
+            getCurrentState().active(this, container!!, triggerStartAction)
         }
     }
 

@@ -11,6 +11,7 @@ import org.lwjgl.glfw.GLFW
  */
 object PCInputProcessor : InputAdapter() {
     val keyDownSignal = Signal<Int>()
+    val scrolledSignal = Signal<Int>()
 
     private val gdxGLFWKeyMap = mutableMapOf<Int, Int>()
 
@@ -54,6 +55,7 @@ object PCInputProcessor : InputAdapter() {
     }
 
     override fun scrolled(amount: Int): Boolean {
+        scrolledSignal(amount)
         LwjglGL3.scrollCallback(Vec2d(0f, -amount))
         return false
     }

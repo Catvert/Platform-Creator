@@ -15,12 +15,8 @@ import com.badlogic.gdx.math.Vector3
 import com.esotericsoftware.reflectasm.ClassAccess
 import ktx.assets.Asset
 import ktx.assets.loadOnDemand
-import java.lang.reflect.Constructor
 import java.lang.reflect.Field
 import kotlin.math.roundToInt
-import kotlin.reflect.KClass
-import kotlin.reflect.jvm.isAccessible
-import kotlin.reflect.jvm.javaConstructor
 
 /**
  * Extension permettant de dessiner facilement une texture avec un Rect
@@ -97,7 +93,7 @@ object ReflectionUtility {
     /**
      * Permet de créer un object dynamiquement
      */
-    fun<T> createInstance(type: Class<T>, vararg args: Any): T {
+    fun <T> createInstance(type: Class<T>, vararg args: Any): T {
         val access = ClassAccess.access(type)
         return access.newInstance(*args) as T
     }

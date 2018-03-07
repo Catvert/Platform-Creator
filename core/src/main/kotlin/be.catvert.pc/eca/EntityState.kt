@@ -41,15 +41,13 @@ class EntityState(var name: String, components: MutableSet<Component> = mutableS
     @JsonIgnore
     fun getComponents() = components.toSet()
 
-    fun onAddToContainer(entity: Entity) {
-        this.entity = entity
-    }
-
     /**
      * Permet d'activer cet état.
      * @param triggerStartAction Permet de spécifier si l'action de départ doit être appelée.
      */
-    fun active(container: EntityContainer, triggerStartAction: Boolean) {
+    fun active(entity: Entity, container: EntityContainer, triggerStartAction: Boolean) {
+        this.entity = entity
+
         components.forEach { it.onStateActive(entity, this, container) }
 
         if (triggerStartAction)

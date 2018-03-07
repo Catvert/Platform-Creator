@@ -205,6 +205,8 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
     private val editorSceneUI = EditorSceneUI(level.background)
 
+    private var targetCameraZoom = 1f
+
     init {
         entityContainer.allowUpdatingGO = false
         level.updateCamera(camera, false)
@@ -215,6 +217,12 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
         if (applyMusicTransition)
             MusicManager.startMusic(Constants.menuMusicPath, true)
+
+        PCInputProcessor.scrolledSignal.register {
+            if (isUIHover)
+                return@register
+            targetCameraZoom = (targetCameraZoom + (it * targetCameraZoom * 0.05f)).clamp(0.5f, level.matrixRect.width / camera.viewportWidth)
+        }
     }
 
     override fun postBatchRender() {
@@ -819,16 +827,21 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                 moveCameraY += cameraMoveSpeed
             if (Gdx.input.isKeyPressed(GameKeys.EDITOR_CAMERA_DOWN.key))
                 moveCameraY -= cameraMoveSpeed
-            if (Gdx.input.isKeyPressed(GameKeys.CAMERA_ZOOM_UP.key)) {
-                if (camera.zoom > 0.5f)
-                    camera.zoom -= 0.01f
-            }
-            if (Gdx.input.isKeyPressed(GameKeys.CAMERA_ZOOM_DOWN.key)) {
-                if (level.matrixRect.width > camera.zoom * (camera.viewportWidth))
-                    camera.zoom += 0.01f
-            }
+
             if (Gdx.input.isKeyPressed(GameKeys.CAMERA_ZOOM_RESET.key))
-                camera.zoom = 1f
+                targetCameraZoom = 1f
+
+            if (targetCameraZoom != camera.zoom) {
+                val px = camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f))
+
+                camera.zoom = MathUtils.lerp(camera.zoom, targetCameraZoom, 0.1f)
+
+                camera.update()
+
+                val nextPX = camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f))
+
+                camera.position.add(px.x - nextPX.x, px.y - nextPX.y, 0f)
+            }
 
             val minCameraX = camera.zoom * (camera.viewportWidth / 2)
             val maxCameraX = level.matrixRect.width - minCameraX
@@ -997,7 +1010,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     ImGuiHelper.textPropertyColored(Color.ORANGE, "Couche sélectionnée :", selectLayer)
                     ImGuiHelper.textPropertyColored(Color.ORANGE, "Redimensionnement :", resizeEntityMode.resizeName)
                     ImGuiHelper.textPropertyColored(Color.ORANGE, "Mode de l'éditeur :", editorSceneUI.editorMode.modeName)
-
+                    ImGuiHelper.textPropertyColored(Color.ORANGE, "Niveau de zoom :", Math.round(camera.zoom * 100f) / 100f)
                     functionalProgramming.collapsingHeader("Paramètres de l'éditeur") {
                         checkbox("Afficher la fenêtre Fabrique d'entités", editorSceneUI::showEntitiesWindow)
                         checkbox("Afficher la grille", gridMode::active)
@@ -1490,13 +1503,13 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
             functionalProgramming.withWindow("Réglages de l'entité", editorSceneUI::showInfoEntityWindow, WindowFlags.AlwaysAutoResize.i) {
                 val favChecked = booleanArrayOf(level.favoris.contains(entity))
 
-                if(ImGuiHelper.favButton(tintColor = Vec4(1f, 1f, 1f, if(favChecked[0]) 1f else 0.2f))) {
+                if (ImGuiHelper.favButton(tintColor = Vec4(1f, 1f, 1f, if (favChecked[0]) 1f else 0.2f))) {
                     if (!favChecked[0])
                         level.favoris.add(entity)
                     else
                         level.favoris.remove(entity)
                 }
-                if(isItemHovered()) {
+                if (isItemHovered()) {
                     functionalProgramming.withTooltip {
                         text("Favoris")
                     }

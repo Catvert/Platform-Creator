@@ -79,17 +79,6 @@ class GameScene(private val level: Level) : Scene(level.background, level.backgr
     }
 
     private fun updateCamera(lerp: Boolean) {
-        if (Gdx.input.isKeyPressed(GameKeys.CAMERA_ZOOM_UP.key)) {
-            if (camera.zoom > 1f)
-                camera.zoom -= 0.02f
-        }
-        if (Gdx.input.isKeyPressed(GameKeys.CAMERA_ZOOM_DOWN.key)) {
-            if (level.matrixRect.width > camera.zoom * (camera.viewportWidth))
-                camera.zoom += 0.02f
-        }
-        if (Gdx.input.isKeyPressed(GameKeys.CAMERA_ZOOM_RESET.key))
-            camera.zoom = 1f
-
         level.updateCamera(camera, lerp)
 
         camera.update()

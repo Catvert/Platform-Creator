@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.utils.JsonReader
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import ktx.math.div
 import java.io.FileReader
 import kotlin.math.roundToInt
 
@@ -62,9 +63,9 @@ class ParallaxBackground(val parallaxDataFile: FileWrapper) : Background(Backgro
     }
 
     fun updateOffsets(camera: OrthographicCamera) {
-        if (lastCameraPos != camera.position) {
-            val deltaX = camera.position.x - lastCameraPos.x
-            val deltaY = (camera.position.y - lastCameraPos.y) / 2
+        if (lastCameraPos != camera.position.cpy() / camera.zoom) {
+            val deltaX = (camera.position.x / camera.zoom) - lastCameraPos.x
+            val deltaY = ((camera.position.y / camera.zoom) - lastCameraPos.y) / 2
             yOffset = Math.min(0f, yOffset - deltaY)
 
             layers.forEach {
@@ -73,7 +74,7 @@ class ParallaxBackground(val parallaxDataFile: FileWrapper) : Background(Backgro
                 updateXOffset(move.roundToInt())
             }
         }
-        lastCameraPos = camera.position.cpy()
+        lastCameraPos = camera.position.cpy() / camera.zoom
     }
 
     override fun render(batch: Batch) {
