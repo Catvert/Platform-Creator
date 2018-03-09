@@ -1,7 +1,7 @@
 package be.catvert.pc
 
 import be.catvert.pc.builders.EntityBuilder
-import be.catvert.pc.eca.components.graphics.AtlasComponent
+import be.catvert.pc.eca.components.graphics.TextureComponent
 import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.i18n.Locales
 import be.catvert.pc.managers.MusicManager
@@ -77,16 +77,16 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
 
         mainBackground = StandardBackground(Constants.gameBackgroundMenuPath.toFileWrapper())
 
-        gameAtlas = let {
-            val atlas = mutableMapOf<FileHandle, List<FileHandle>>()
+        gamePacks = let {
+            val packs = mutableMapOf<FileHandle, List<FileHandle>>()
 
             Constants.packsDirPath.list().forEach {
                 if (it.isDirectory) {
-                    atlas[it] = Utility.getFilesRecursivly(it, *Constants.levelAtlasExtension)
+                    packs[it] = Utility.getFilesRecursivly(it, *Constants.levelPackExtension)
                 }
             }
 
-            atlas
+            packs
         }
         gameTextures = Utility.getFilesRecursivly(Constants.texturesDirPath, *Constants.levelTextureExtension)
         gameSounds = Utility.getFilesRecursivly(Constants.soundsDirPath, *Constants.levelSoundExtension)
@@ -174,7 +174,7 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         lateinit var defaultProjection: Matrix4
             private set
 
-        lateinit var gameAtlas: Map<FileHandle, List<FileHandle>>
+        lateinit var gamePacks: Map<FileHandle, List<FileHandle>>
             private set
         lateinit var gameTextures: List<FileHandle>
             private set
@@ -238,8 +238,7 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
 
                         colors[Col.Text] = Vec4(1)
                     }
-                }
-                else
+                } else
                     ImGui.styleColorsLight()
 
                 ImGui.style.frameRounding = 5f
@@ -255,7 +254,7 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
          */
         fun generateLogo(container: EntityContainer) = EntityBuilder("logo", getLogoSize())
                 .withDefaultState {
-                    withComponent(AtlasComponent(0, AtlasComponent.AtlasData("logo", Constants.gameLogoPath.toFileWrapper())))
+                    withComponent(TextureComponent(0, TextureComponent.TextureData("logo", Constants.gameLogoPath.toFileWrapper())))
                 }
                 .build(getLogoRect().position, container)
 

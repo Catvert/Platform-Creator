@@ -34,8 +34,8 @@ enum class GameKeys(var key: Int, val description: String) {
     EDITOR_MOVE_ENTITY_RIGHT(Input.Keys.RIGHT, "[Éditeur] Déplacer l'entité vers la droite"),
     EDITOR_MOVE_ENTITY_UP(Input.Keys.UP, "[Éditeur] Déplacer l'entité vers le haut"),
     EDITOR_MOVE_ENTITY_DOWN(Input.Keys.DOWN, "[Éditeur] Déplacer l'entité vers le bas"),
-    EDITOR_ATLAS_PREVIOUS_FRAME(Input.Keys.LEFT, "[Éditeur] Atlas région précédente"),
-    EDITOR_ATLAS_NEXT_FRAME(Input.Keys.RIGHT, "[Éditeur] Atlas région suivante"),
+    EDITOR_TEXTURE_PREVIOUS_FRAME(Input.Keys.LEFT, "[Éditeur] Texture région précédente"),
+    EDITOR_TEXTURE_NEXT_FRAME(Input.Keys.RIGHT, "[Éditeur] Texture région suivante"),
     EDITOR_TRY_LEVEL(Input.Keys.F2, "[Éditeur] Essayer le niveau"),
 
     GAME_PLAYER_LEFT(Input.Keys.Q, "[Jeu] Déplacer le joueur vers le gauche"),
@@ -48,7 +48,8 @@ enum class GameKeys(var key: Int, val description: String) {
 
     CAMERA_ZOOM_RESET(Input.Keys.L, "[Caméra] Zoom réinitialiser"),
 
-    DEBUG_MODE(Input.Keys.F12, "Mode débug");
+    DEBUG_MODE(Input.Keys.F12, "Mode débug"),
+    SCREENSHOT(Input.Keys.F11, "Prendre une capture d'écran");
 
     companion object {
         /**

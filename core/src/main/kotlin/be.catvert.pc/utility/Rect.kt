@@ -3,8 +3,8 @@ package be.catvert.pc.utility
 import be.catvert.pc.eca.Entity
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.scenes.EditorScene
-import be.catvert.pc.ui.UIImpl
 import be.catvert.pc.ui.ImGuiHelper
+import be.catvert.pc.ui.UIImpl
 import com.fasterxml.jackson.annotation.JsonIgnore
 import imgui.ImGui
 import kotlin.math.roundToInt

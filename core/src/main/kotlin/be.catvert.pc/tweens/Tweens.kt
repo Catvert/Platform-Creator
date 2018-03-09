@@ -4,13 +4,13 @@ import be.catvert.pc.eca.Entity
 import be.catvert.pc.eca.actions.Action
 import be.catvert.pc.eca.actions.EmptyAction
 import be.catvert.pc.eca.components.Component
-import be.catvert.pc.eca.components.graphics.AtlasComponent
+import be.catvert.pc.eca.components.graphics.TextureComponent
 import be.catvert.pc.eca.components.logics.LifeComponent
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.serialization.PostDeserialization
-import be.catvert.pc.ui.UIImpl
 import be.catvert.pc.ui.ImGuiHelper
+import be.catvert.pc.ui.UIImpl
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.utils.reflect.ClassReflection
@@ -23,7 +23,7 @@ import kotlin.reflect.KClass
 enum class Tweens(val tween: KClass<out Tween>) {
     Empty(EmptyTween::class),
     Move(MoveTween::class),
-    AlphaAtlas(AlphaAtlasTween::class),
+    AlphaTexture(AlphaTextureTween::class),
     RepeatAction(RepeatActionTween::class),
     Resize(ResizeTween::class),
     DisableComponent(DisableComponentTween::class)
@@ -77,7 +77,7 @@ abstract class Tween(var duration: Float = 1f, var interpolationName: String, va
 
                 if (isItemHovered()) {
                     functionalProgramming.withTooltip {
-                        text("Permet d'utiliser un état spécial dans lequel seulement l'atlas est gardé")
+                        text("Permet d'utiliser un état spécial dans lequel seulement la texture est gardée")
                     }
                 }
             }
@@ -125,17 +125,17 @@ class MoveTween(duration: Float = 0f, var moveX: Int = 0, var moveY: Int = 0) : 
     }
 }
 
-class AlphaAtlasTween(duration: Float = 0f, var targetAlpha: Float = 0f) : Tween(duration, linearInterpolation) {
+class AlphaTextureTween(duration: Float = 0f, var targetAlpha: Float = 0f) : Tween(duration, linearInterpolation) {
     private var initialAlpha = 0f
 
     override fun init(entity: Entity) {
         super.init(entity)
 
-        initialAlpha = entity.getCurrentState().getComponent<AtlasComponent>()?.alpha ?: 0f
+        initialAlpha = entity.getCurrentState().getComponent<TextureComponent>()?.alpha ?: 0f
     }
 
     override fun perform(entity: Entity) {
-        entity.getCurrentState().getComponent<AtlasComponent>()?.apply {
+        entity.getCurrentState().getComponent<TextureComponent>()?.apply {
             alpha = interpolation.apply(initialAlpha, targetAlpha, progress)
         }
     }

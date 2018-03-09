@@ -9,9 +9,6 @@ import kotlin.reflect.KClass
  * Liste des différentes actions disponibles en jeu
  */
 enum class Actions(val action: KClass<out Action>) {
-    Atlas(AtlasAction::class),
-    AtlasFlip(AtlasFlipAction::class),
-    AtlasFlipSwitcher(AtlasFlipSwitcherAction::class),
     Empty(EmptyAction::class),
     Entity(EntityAction::class),
     Gravity(GravityAction::class),
@@ -32,6 +29,9 @@ enum class Actions(val action: KClass<out Action>) {
     Tag(TagAction::class),
     Teleport(TeleportAction::class),
     TeleportSide(TeleportSideAction::class),
+    Texture(TextureAction::class),
+    TextureFlip(TextureFlipAction::class),
+    TextureFlipSwitcher(TextureFlipSwitcherAction::class),
     Tween(TweenAction::class),
     Zoom(ZoomAction::class)
 }

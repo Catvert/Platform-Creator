@@ -5,9 +5,9 @@ import be.catvert.pc.eca.Entity
 import be.catvert.pc.eca.Prefab
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.tweens.MoveTween
-import be.catvert.pc.utility.BoxSide
 import be.catvert.pc.ui.Description
 import be.catvert.pc.ui.UI
+import be.catvert.pc.utility.BoxSide
 import com.fasterxml.jackson.annotation.JsonCreator
 
 @Description("Permet de faire apparaître une entité sur un côté de cette entité")

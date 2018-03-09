@@ -6,9 +6,9 @@ import be.catvert.pc.eca.components.RequiredComponent
 import be.catvert.pc.eca.components.basics.SoundComponent
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.scenes.EditorScene
-import be.catvert.pc.utility.Constants
-import be.catvert.pc.ui.UIImpl
 import be.catvert.pc.ui.Description
+import be.catvert.pc.ui.UIImpl
+import be.catvert.pc.utility.Constants
 import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
 import imgui.functionalProgramming

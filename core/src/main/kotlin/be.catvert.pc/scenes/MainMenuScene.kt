@@ -7,8 +7,9 @@ import be.catvert.pc.PCGame.Companion.soundVolume
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.i18n.MenusText
 import be.catvert.pc.managers.MusicManager
-import be.catvert.pc.utility.Constants
+import be.catvert.pc.managers.ResourceManager
 import be.catvert.pc.ui.ImGuiHelper
+import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.PCInputProcessor
 import be.catvert.pc.utility.Size
 import com.badlogic.gdx.Gdx
@@ -16,7 +17,11 @@ import com.badlogic.gdx.Input
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.g2d.Batch
 import glm_.vec2.Vec2
-import imgui.*
+import imgui.Cond
+import imgui.ImGui
+import imgui.WindowFlags
+import imgui.functionalProgramming
+import imgui.internal.LayoutType
 import java.io.IOException
 import kotlin.collections.set
 
@@ -83,69 +88,121 @@ class MainMenuScene(applyMusicTransition: Boolean) : Scene(PCGame.mainBackground
         }
     }
 
-    private var currentLevelIndex = 0
-
     private val newLevelTitle = "Nouveau niveau"
     private var newLevelNameBuf = ""
     private var newLevelOpen = booleanArrayOf(true)
 
     private val copyLevelTitle = "Copier un niveau"
     private var copyLevelNameBuf = ""
+    private val copyLevelOpen = booleanArrayOf(true)
 
     private var errorInLevelTitle = "Impossible de charger le niveau !"
 
+    private var levelPopupTitle = "level popup"
+    private lateinit var levelPopupItem: LevelItem
+    private val levelPopupOpen = booleanArrayOf(true)
+
+    private val settingsLevelTitle = "settings level"
+
     private fun drawSelectLevelWindow() {
         with(ImGui) {
-            ImGuiHelper.withCenteredWindow(MenusText.MM_SELECT_LEVEL_WINDOW_TITLE(), ::showSelectLevelWindow, Vec2(215f, 170f), WindowFlags.NoResize.i or WindowFlags.NoCollapse.i) {
-                var openCopyPopup = false
-
-                pushItemFlag(ItemFlags.Disabled.i, levels.isEmpty())
-                ImGuiHelper.comboWithSettingsButton(MenusText.MM_SELECT_LEVEL_LEVEL_COMBO(), ::currentLevelIndex, levels.map { it.toString() }, {
-                    if (button(MenusText.MM_SELECT_LEVEL_COPY_BUTTON(), Vec2(Constants.defaultWidgetsWidth, 0))) {
-                        openCopyPopup = true
-                    }
-
-                    if (button(MenusText.MM_SELECT_LEVEL_DELETE_BUTTON(), Vec2(Constants.defaultWidgetsWidth, 0))) {
-                        if (currentLevelIndex in levels.indices) {
-                            try {
-                                levels[currentLevelIndex].dir.deleteDirectory()
-                                levels.removeAt(currentLevelIndex)
-                                closeCurrentPopup()
-                            } catch (e: IOException) {
-                                Log.error(e) { "Une erreur est survenue lors de la suppression de ${levels[currentLevelIndex]} !" }
+            ImGuiHelper.withCenteredWindow(MenusText.MM_SELECT_LEVEL_WINDOW_TITLE(), ::showSelectLevelWindow, Vec2(500f, 200f), WindowFlags.NoResize.i or WindowFlags.NoCollapse.i) {
+                functionalProgramming.withChild("levels", Vec2(500, 120)) {
+                    levels.forEachIndexed { index, it ->
+                        val preview = it.dir.child(Constants.levelPreviewFile)
+                        if (imageButton(ResourceManager.getTexture(preview).textureObjectHandle, Vec2(160, 90), uv1 = Vec2(1))) {
+                            levelPopupItem = it
+                            levelPopupOpen[0] = true
+                            levelPopupTitle = "Niveau $it"
+                            openPopup(levelPopupTitle)
+                        }
+                        if (isItemHovered()) {
+                            functionalProgramming.withTooltip {
+                                text(it.dir.name())
                             }
                         }
-                    }
-                }, levels.isEmpty(), searchBar = true)
-                popItemFlag()
 
-                if (openCopyPopup)
-                    openPopup(copyLevelTitle)
-
-                pushItemFlag(ItemFlags.Disabled.i, levels.isEmpty())
-                if (button(MenusText.MM_SELECT_LEVEL_PLAY_BUTTON(), Vec2(-1, 0))) {
-                    if (currentLevelIndex in levels.indices) {
-                        val level = Level.loadFromFile(levels[currentLevelIndex].dir)
-                        if (level != null)
-                            PCGame.sceneManager.loadScene(GameScene(level))
-                        else
-                            openPopup(errorInLevelTitle)
+                        if (index + 1 < levels.count())
+                            sameLine()
                     }
+
+                    functionalProgramming.popupModal(levelPopupTitle, levelPopupOpen) {
+                        val preview = levelPopupItem.dir.child(Constants.levelPreviewFile)
+                        image(ResourceManager.getTexture(preview).textureObjectHandle, Vec2(160, 90), uv1 = Vec2(1))
+                        separator()
+                        if (button(MenusText.MM_SELECT_LEVEL_PLAY_BUTTON(), Vec2(-1, 0))) {
+                            val level = Level.loadFromFile(levelPopupItem.dir)
+                            if (level != null)
+                                PCGame.sceneManager.loadScene(GameScene(level))
+                            else
+                                openPopup(errorInLevelTitle)
+                        }
+
+                        if (button(MenusText.MM_SELECT_LEVEL_EDIT_BUTTON(), Vec2(-1, 0))) {
+                            val level = Level.loadFromFile(levelPopupItem.dir)
+                            if (level != null)
+                                PCGame.sceneManager.loadScene(EditorScene(level, false))
+                            else
+                                openPopup(errorInLevelTitle)
+                        }
+
+                        if (button("...", Vec2(-1, 0))) {
+                            openPopup(settingsLevelTitle)
+                        }
+
+                        var openCopyPopup = false
+                        functionalProgramming.popup(settingsLevelTitle) {
+                            if (button(MenusText.MM_SELECT_LEVEL_COPY_BUTTON(), Vec2(Constants.defaultWidgetsWidth, 0))) {
+                                openCopyPopup = true
+                            }
+
+                            if (button(MenusText.MM_SELECT_LEVEL_DELETE_BUTTON(), Vec2(Constants.defaultWidgetsWidth, 0))) {
+                                try {
+                                    levelPopupItem.dir.deleteDirectory()
+                                    levels.remove(levelPopupItem)
+                                    closeCurrentPopup()
+                                } catch (e: IOException) {
+                                    Log.error(e) { "Une erreur est survenue lors de la suppression de $levelPopupItem !" }
+                                }
+                            }
+                        }
+
+                        if (openCopyPopup) {
+                            openPopup(copyLevelTitle)
+                            copyLevelOpen[0] = true
+                        }
+
+                        functionalProgramming.popupModal(copyLevelTitle, copyLevelOpen) {
+                            functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
+                                ImGuiHelper.inputText(MenusText.MM_NAME(), ::copyLevelNameBuf)
+                            }
+                            if (button(MenusText.MM_SELECT_LEVEL_COPY_BUTTON(), Vec2(-1, 0))) {
+                                if (copyLevelNameBuf.isNotBlank()) {
+                                    val copyLevelDir = levelPopupItem.dir.parent().child(copyLevelNameBuf)
+                                    levelPopupItem.dir.list().forEach {
+                                        try {
+                                            it.copyTo(copyLevelDir)
+                                        } catch (e: IOException) {
+                                            Log.error(e) { "Une erreur est survenue lors de la copie de $levelPopupItem !" }
+                                        }
+                                    }
+                                    levels.add(LevelItem(copyLevelDir))
+                                    closeCurrentPopup()
+                                }
+                            }
+                        }
+
+                        functionalProgramming.popupModal(errorInLevelTitle) {
+                            text(MenusText.MM_ERROR_LEVEL_POPUP(levelPopupItem.toString()))
+                            if (button(MenusText.MM_ERROR_LEVEL_CLOSE(), Vec2(-1, 0)))
+                                closeCurrentPopup()
+                        }
+                    }
+
+                    scrollbar(LayoutType.Horizontal)
                 }
 
-                if (button(MenusText.MM_SELECT_LEVEL_EDIT_BUTTON(), Vec2(-1, 0))) {
-                    if (currentLevelIndex in levels.indices) {
-                        val level = Level.loadFromFile(levels[currentLevelIndex].dir)
-                        if (level != null)
-                            PCGame.sceneManager.loadScene(EditorScene(level, false))
-                        else
-                            openPopup(errorInLevelTitle)
-                    }
-                }
-                popItemFlag()
-
-                separator()
-                if (button(MenusText.MM_SELECT_LEVEL_NEW_BUTTON(), Vec2(-1, 0))) {
+                if (button("Nouveau", Vec2(-1, 0))) {
                     openPopup(newLevelTitle)
                     newLevelOpen[0] = true
                 }
@@ -160,33 +217,6 @@ class MainMenuScene(applyMusicTransition: Boolean) : Scene(PCGame.mainBackground
                             PCGame.sceneManager.loadScene(EditorScene(level, false))
                         }
                     }
-                }
-
-                functionalProgramming.popup(copyLevelTitle) {
-                    functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                        ImGuiHelper.inputText(MenusText.MM_NAME(), ::copyLevelNameBuf)
-                    }
-                    if (button(MenusText.MM_SELECT_LEVEL_COPY_BUTTON(), Vec2(-1, 0))) {
-                        if (copyLevelNameBuf.isNotBlank()) {
-                            val levelDir = levels[currentLevelIndex].dir
-                            val copyLevelDir = levelDir.parent().child(copyLevelNameBuf)
-                            levelDir.list().forEach {
-                                try {
-                                    it.copyTo(copyLevelDir)
-                                } catch (e: IOException) {
-                                    Log.error(e) { "Une erreur est survenue lors de la copie de ${levels[currentLevelIndex]} !" }
-                                }
-                            }
-                            levels.add(LevelItem(copyLevelDir))
-                            closeCurrentPopup()
-                        }
-                    }
-                }
-
-                functionalProgramming.popupModal(errorInLevelTitle) {
-                    text(MenusText.MM_ERROR_LEVEL_POPUP(levels[currentLevelIndex].toString()))
-                    if (button(MenusText.MM_ERROR_LEVEL_CLOSE(), Vec2(-1, 0)))
-                        closeCurrentPopup()
                 }
             }
         }

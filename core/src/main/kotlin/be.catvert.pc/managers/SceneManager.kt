@@ -3,12 +3,14 @@ package be.catvert.pc.managers
 import be.catvert.pc.Log
 import be.catvert.pc.scenes.Scene
 import be.catvert.pc.utility.*
+import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.utils.Disposable
 import imgui.ImGui
 import imgui.impl.LwjglGL3
 import ktx.app.clearScreen
+import kotlin.math.roundToInt
 
 /**
  * Permet de gérer les scènes
@@ -28,6 +30,11 @@ class SceneManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Dis
     private val interpolation = Interpolation.linear
 
     private var elapsedTime = 0f
+
+    private var screenshotWithoutImGui: ((Pixmap) -> Unit)? = null
+    fun takeScreenshotWithoutImGui(result: (Pixmap) -> Unit) {
+        screenshotWithoutImGui = result
+    }
 
     fun loadScene(scene: Scene, applyTransition: Boolean = true, disposeCurrentScene: Boolean = true) {
         if (applyTransition) {
@@ -102,6 +109,11 @@ class SceneManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Dis
         batch.setColor(1f, 1f, 1f, currentScene.alpha)
         currentScene.viewport.apply()
         currentScene.render(batch)
+
+        if(screenshotWithoutImGui != null) {
+            screenshotWithoutImGui!!(Utility.getPixmapOfScreen())
+            screenshotWithoutImGui = null
+        }
 
         ImGui.render()
 

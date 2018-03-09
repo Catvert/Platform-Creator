@@ -65,11 +65,12 @@ object Constants {
     val levelExtension = "pclvl"
 
     val levelTextureExtension = arrayOf("jpg", "png")
-    val levelAtlasExtension = arrayOf("atlas")
+    val levelPackExtension = arrayOf("atlas")
     val levelSoundExtension = arrayOf("mp3", "wav", "ogg")
     val levelScriptExtension = arrayOf("js")
 
     val levelDataFile = "data.$levelExtension"
+    val levelPreviewFile = "preview.png"
 
     val defaultSoundPath = assetsDirPath.child("game/nosound.wav")
 }

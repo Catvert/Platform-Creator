@@ -6,11 +6,14 @@ import be.catvert.pc.eca.components.Component
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.managers.ResourceManager
 import be.catvert.pc.scenes.EditorScene
-import be.catvert.pc.ui.UIImpl
-import be.catvert.pc.ui.UITextImpl
 import be.catvert.pc.ui.Description
 import be.catvert.pc.ui.ImGuiHelper
-import be.catvert.pc.utility.*
+import be.catvert.pc.ui.UIImpl
+import be.catvert.pc.ui.UITextImpl
+import be.catvert.pc.utility.Constants
+import be.catvert.pc.utility.FileWrapper
+import be.catvert.pc.utility.ResourceLoader
+import be.catvert.pc.utility.toFileWrapper
 import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.graphics.Color
 import com.fasterxml.jackson.annotation.JsonCreator

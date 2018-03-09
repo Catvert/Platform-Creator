@@ -7,7 +7,7 @@ import be.catvert.pc.eca.Prefab
 import be.catvert.pc.eca.actions.Action
 import be.catvert.pc.eca.actions.Actions
 import be.catvert.pc.eca.components.RequiredComponent
-import be.catvert.pc.eca.components.graphics.AtlasComponent
+import be.catvert.pc.eca.components.graphics.TextureComponent
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.i18n.MenusText
@@ -356,7 +356,7 @@ object ImGuiHelper {
                         searchCombo("favoris", favoritesIndex.getOrPut(id, { intArrayOf(0) }), level.favoris.map { it.name }, {
                             val fav = level.favoris[it]
 
-                            atlasPreviewTooltip(fav)
+                            texturePreviewTooltip(fav)
                         })
                     }
 
@@ -372,12 +372,12 @@ object ImGuiHelper {
         return entity
     }
 
-    fun atlasPreviewTooltip(entity: Entity) {
-        val atlas = entity.getCurrentState().getComponent<AtlasComponent>()
-        if (atlas != null) {
+    fun texturePreviewTooltip(entity: Entity) {
+        val texture = entity.getCurrentState().getComponent<TextureComponent>()
+        if (texture != null) {
             functionalProgramming.withStyleColor(Col.PopupBg, ImGui.getStyleColorVec4(Col.PopupBg).apply { a = 0.5f }) {
                 functionalProgramming.withTooltip {
-                    val region = atlas.data[atlas.currentIndex].currentKeyFrame()
+                    val region = texture.data[texture.currentIndex].currentKeyFrame()
                     ImGui.image(region.texture.textureObjectHandle, Vec2(entity.box.width, entity.box.height), Vec2(region.u, region.v), Vec2(region.u2, region.v2))
                 }
             }

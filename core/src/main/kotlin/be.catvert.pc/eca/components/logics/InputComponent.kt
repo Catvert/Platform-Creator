@@ -7,7 +7,7 @@ import be.catvert.pc.eca.components.Component
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.ui.*
-import be.catvert.pc.utility.*
+import be.catvert.pc.utility.Updeatable
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Color

@@ -8,7 +8,7 @@ import be.catvert.pc.eca.Prefab
 import be.catvert.pc.eca.Tags
 import be.catvert.pc.eca.components.Components
 import be.catvert.pc.eca.components.RequiredComponent
-import be.catvert.pc.eca.components.graphics.AtlasComponent
+import be.catvert.pc.eca.components.graphics.TextureComponent
 import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.factories.PrefabFactory
@@ -22,9 +22,8 @@ import be.catvert.pc.ui.ImGuiHelper
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
+import com.badlogic.gdx.graphics.*
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.Cursor
-import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
@@ -211,6 +210,8 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
     private var targetCameraZoom = 1f
 
+    private var smartPositioning = true
+
     init {
         entityContainer.allowUpdatingGO = false
         level.updateCamera(camera, false)
@@ -243,6 +244,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
 
+
         shapeRenderer.withColor(Color.GOLDENROD) {
             rect(level.matrixRect)
         }
@@ -256,11 +258,11 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         }
 
         /**
-         * Dessine les entités qui n'ont pas d'AtlasComponent avec un rectangle noir
+         * Dessine les entités qui n'ont pas d'TextureComponent avec un rectangle noir
          */
         entityContainer.cast<Level>()?.apply {
             getAllEntitiesInCells(getActiveGridCells()).forEach {
-                if (it.getCurrentState().getComponent<AtlasComponent>()?.data?.isEmpty() != false) {
+                if (it.getCurrentState().getComponent<TextureComponent>()?.data?.isEmpty() != false) {
                     shapeRenderer.withColor(Color.GRAY) {
                         rect(it.box)
                     }
@@ -277,11 +279,11 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     val rect = selectRectangleData.getRect()
                     shapeRenderer.set(ShapeRenderer.ShapeType.Filled)
 
-                    shapeRenderer.withColor(Color(34/255f, 42/255f, 53/255f, 0.3f)) {
+                    shapeRenderer.withColor(Color(34 / 255f, 42 / 255f, 53 / 255f, 0.3f)) {
                         rect(rect)
                     }
                     shapeRenderer.set(ShapeRenderer.ShapeType.Line)
-                    shapeRenderer.withColor(Color(40/255f, 44/255f, 52/255f, 1f)) {
+                    shapeRenderer.withColor(Color(40 / 255f, 44 / 255f, 52 / 255f, 1f)) {
                         rect(rect)
                     }
                 }
@@ -291,7 +293,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                  * Dessine un rectangle autour des entités sélectionnées
                  */
                 selectEntities.forEach {
-                    shapeRenderer.withColor(if (it === selectEntity) Color(40/255f, 44/255f, 52/255f, 1f) else Color(34/255f, 42/255f, 53/255f, 0.3f)) {
+                    shapeRenderer.withColor(if (it === selectEntity) Color(40 / 255f, 44 / 255f, 52 / 255f, 1f) else Color(34 / 255f, 42 / 255f, 53 / 255f, 0.3f)) {
                         rect(it.box)
                     }
                 }
@@ -314,14 +316,36 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                                 ?: 0f)))
                         gridMode.getRectCellOf(level.activeRect, pos)
                     } else {
-                        val pos = if (go === selectEntity) Point(mousePosInWorld.x - go.size().width / 2, mousePosInWorld.y - go.size().height / 2) else Point(mousePosInWorld.x + (go.position().x - (selectEntity?.let { it.position().x + it.size().width / 2 }
-                                ?: 0f)), mousePosInWorld.y + (go.position().y - (selectEntity?.let { it.position().y + it.size().height / 2 }
-                                ?: 0f)))
+                        val pos = let {
+                            val freePosSelect = Point(mousePosInWorld.x - (selectEntity?.size()?.width?.div(2f)
+                                    ?: 0f), mousePosInWorld.y - (selectEntity?.size()?.height?.div(2f) ?: 0f))
+
+                            val selectPoint = if (smartPositioning) {
+                                val side = getSmartPositioningSide(mousePosInWorld)
+                                if (side == null)
+                                    freePosSelect
+                                else when (side.first) {
+                                    BoxSide.Left -> Point(side.second.box.left() - go.box.width, side.second.box.bottom())
+                                    BoxSide.Right -> Point(side.second.box.right(), side.second.box.bottom())
+                                    BoxSide.Up -> Point(side.second.box.left(), side.second.box.top())
+                                    BoxSide.Down -> Point(side.second.box.left(), side.second.box.bottom() - go.box.height)
+                                    BoxSide.All -> freePosSelect
+                                }
+                            } else
+                                freePosSelect
+
+                            if (go === selectEntity) {
+                                selectPoint
+                            } else Point(selectPoint.x + (go.position().x - (selectEntity?.position()?.x
+                                    ?: 0f)), selectPoint.y + (go.position().y - (selectEntity?.position()?.y
+                                    ?: 0f)))
+                        }
+
                         Rect(pos, go.box.size)
                     }
 
                     if (rect != null) {
-                        go.getCurrentState().getComponent<AtlasComponent>()?.apply {
+                        go.getCurrentState().getComponent<TextureComponent>()?.apply {
                             if (this.currentIndex in data.indices) {
                                 val data = this.data[currentIndex]
                                 PCGame.mainBatch.use {
@@ -390,372 +414,6 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                 resizeEntityMode = if (resizeEntityMode == ResizeMode.PROPORTIONAL) ResizeMode.FREE else ResizeMode.PROPORTIONAL
             }
 
-            val mousePosVec2 = Vector2(Gdx.input.x.toFloat(), Gdx.input.y.toFloat())
-            val mousePos = mousePosVec2.toPoint()
-            val mousePosInWorld = viewport.unproject(Vector3(mousePosVec2, 0f)).toPoint()
-            val latestMousePosInWorld = viewport.unproject(Vector3(latestMousePos.x, latestMousePos.y, 0f)).toPoint()
-
-            when (editorSceneUI.editorMode) {
-                EditorSceneUI.EditorMode.NO_MODE -> {
-                    if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-                        val roundMousePosInWorld = Point(mousePosInWorld.x.roundToInt().toFloat(), mousePosInWorld.y.roundToInt().toFloat())
-                        if (latestLeftButtonClick) { // Rectangle
-                            selectRectangleData.endPosition = roundMousePosInWorld
-                        } else { // Select
-                            val entity = findEntityUnderMouse(true)
-                            if (entity != null) {
-                                addSelectEntity(entity)
-                                editorSceneUI.editorMode = EditorSceneUI.EditorMode.SELECT
-                            } else { // Maybe box
-                                selectRectangleData.rectangleStarted = true
-                                selectRectangleData.startPosition = roundMousePosInWorld
-                                selectRectangleData.endPosition = selectRectangleData.startPosition
-                            }
-                        }
-                    } else if (latestLeftButtonClick && selectRectangleData.rectangleStarted) { // Bouton gauche de la souris relaché pendant cette frame
-                        selectRectangleData.rectangleStarted = false
-
-                        level.getAllEntitiesInCells(selectRectangleData.getRect()).forEach {
-                            if (selectRectangleData.getRect().contains(it.box, true)) {
-                                addSelectEntity(it)
-                                editorSceneUI.editorMode = EditorSceneUI.EditorMode.SELECT
-                            }
-                        }
-                    }
-
-                    if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_COPY_MODE.key)) {
-                        val entity = findEntityUnderMouse(true)
-                        if (entity != null) {
-                            addSelectEntity(entity)
-                            editorSceneUI.editorMode = EditorSceneUI.EditorMode.COPY
-                        }
-                    }
-
-                    if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_FLIPX.key)) {
-                        findEntityUnderMouse(true)?.getCurrentState()?.getComponent<AtlasComponent>()?.apply {
-                            flipX = !flipX
-                        }
-                    }
-                    if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_FLIPY.key)) {
-                        findEntityUnderMouse(true)?.getCurrentState()?.getComponent<AtlasComponent>()?.apply {
-                            flipY = !flipY
-                        }
-                    }
-                    if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_ATLAS_PREVIOUS_FRAME.key)) {
-                        findEntityUnderMouse(true)?.apply {
-                            if (getStates().size == 1) {
-                                getCurrentState().getComponent<AtlasComponent>()?.apply {
-                                    if (data.size == 1)
-                                        data.elementAt(0).previousFrameRegion(0)
-                                }
-                            }
-                        }
-                    }
-                    if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_ATLAS_NEXT_FRAME.key)) {
-                        findEntityUnderMouse(true)?.apply {
-                            if (getStates().size == 1) {
-                                getCurrentState().getComponent<AtlasComponent>()?.apply {
-                                    if (data.size == 1)
-                                        data.elementAt(0).nextFrameRegion(0)
-                                }
-                            }
-                        }
-                    }
-                }
-                EditorSceneUI.EditorMode.SELECT -> {
-                    if (selectEntities.isEmpty() || selectEntity == null) {
-                        editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
-                        return
-                    }
-
-                    /**
-                     * Permet de déplacer les entités sélectionnées
-                     */
-                    fun moveEntities(moveX: Int, moveY: Int) {
-                        val (canMoveX, canMoveY) = let {
-                            var canMoveX = true
-                            var canMoveY = true
-
-                            selectEntities.forEach {
-                                if ((it.box.x + moveX) !in 0..level.matrixRect.width - it.box.width)
-                                    canMoveX = false
-                                if ((it.box.y + moveY) !in 0..level.matrixRect.height - it.box.height)
-                                    canMoveY = false
-                            }
-
-                            canMoveX to canMoveY
-                        }
-
-                        selectEntities.forEach {
-                            it.box.move(if (canMoveX) moveX.toFloat() else 0f, if (canMoveY) moveY.toFloat() else 0f)
-                        }
-                    }
-
-                    val selectGORect = selectEntity!!.box
-
-                    if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !Gdx.input.isKeyPressed(GameKeys.EDITOR_APPEND_SELECT_ENTITIES.key)) {
-                        if (!latestLeftButtonClick) {
-                            if (selectEntityMode == SelectGOMode.NO_MODE) {
-                                val entity = findEntityUnderMouse(true)
-                                when {
-                                    entity == null -> { // Se produit lorsque le joueur clique dans le vide, dans ce cas on désélectionne les entités sélectionnées
-                                        clearSelectEntities()
-                                        editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
-                                    }
-                                    selectEntities.contains(entity) -> // Dans ce cas-ci, le joueur à sélectionné une autre entité dans celles qui sont sélectionnées
-                                        selectEntity = entity
-                                    else -> { // Dans ce cas-ci, il y a un groupe d'entité sélectionné ou aucun et le joueur en sélectionne un nouveau ou un en dehors de la sélection
-                                        clearSelectEntities()
-                                        addSelectEntity(entity)
-                                    }
-                                }
-                            }
-
-                        } else if (selectEntity != null) { // Le joueur maintient le clique gauche durant plusieurs frames et a bougé la souris {
-                            if (selectEntityMode == SelectGOMode.NO_MODE)
-                                selectEntityMode = SelectGOMode.MOVE
-
-                            val deltaMouseX = (latestMousePosInWorld.x - mousePosInWorld.x).roundToInt()
-                            val deltaMouseY = (latestMousePosInWorld.y - mousePosInWorld.y).roundToInt()
-
-                            when (selectEntityMode) {
-                                SelectGOMode.NO_MODE -> {
-                                }
-                                SelectGOMode.HORIZONTAL_RESIZE_RIGHT -> {
-                                    selectGORect.width = (selectGORect.width - deltaMouseX).clamp(1, Constants.maxEntitySize)
-                                }
-                                SelectGOMode.HORIZONTAL_RESIZE_LEFT -> {
-                                    selectGORect.width = (selectGORect.width + deltaMouseX).clamp(1, Constants.maxEntitySize)
-                                    selectGORect.x = (selectGORect.x - deltaMouseX).clamp(0f, level.matrixRect.width.toFloat() - selectGORect.width)
-                                }
-                                SelectGOMode.VERTICAL_RESIZE_BOTTOM -> {
-                                    selectGORect.height = (selectGORect.height + deltaMouseY).clamp(1, Constants.maxEntitySize)
-                                    selectGORect.y = (selectGORect.y - deltaMouseY).clamp(0f, level.matrixRect.height.toFloat() - selectGORect.height)
-                                }
-                                SelectGOMode.VERTICAL_RESIZE_TOP -> {
-                                    selectGORect.height = (selectGORect.height - deltaMouseY).clamp(1, Constants.maxEntitySize)
-                                }
-                                SelectGOMode.DIAGONALE_RESIZE -> {
-                                    var deltaX = deltaMouseX
-                                    var deltaY = deltaMouseY
-
-                                    if (resizeEntityMode == ResizeMode.PROPORTIONAL) {
-                                        if (Math.abs(deltaX) > Math.abs(deltaY))
-                                            deltaY = deltaX
-                                        else
-                                            deltaX = deltaY
-                                    }
-
-                                    selectGORect.width = (selectGORect.width - deltaX).clamp(1, Constants.maxEntitySize)
-                                    selectGORect.height = (selectGORect.height - deltaY).clamp(1, Constants.maxEntitySize)
-                                }
-                                SelectGOMode.MOVE -> {
-                                    val moveX = -deltaMouseX + (camera.position.x - latestCameraPos.x)
-                                    val moveY = -deltaMouseY + (camera.position.y - latestCameraPos.y)
-
-                                    moveEntities(moveX.roundToInt(), moveY.roundToInt())
-                                }
-                            }
-                        }
-                        // Le bouton gauche n'est pas appuyé pendant cette frame
-                    } else {
-                        when {
-                        // Diagonale resize
-                            Circle(selectGORect.right(), selectGORect.top(), 10f).contains(mousePosInWorld) -> {
-                                selectEntityMode = SelectGOMode.DIAGONALE_RESIZE
-                            }
-                        // Horizontal right resize
-                            mousePosInWorld.x in selectGORect.right() - 1..selectGORect.right() + 1 && mousePosInWorld.y in selectGORect.y..selectGORect.top() -> {
-                                selectEntityMode = SelectGOMode.HORIZONTAL_RESIZE_RIGHT
-                                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.HorizontalResize)
-                            }
-                        // Horizontal left resize
-                            mousePosInWorld.x in selectGORect.left() - 1..selectGORect.left() + 1 && mousePosInWorld.y in selectGORect.y..selectGORect.top() -> {
-                                selectEntityMode = SelectGOMode.HORIZONTAL_RESIZE_LEFT
-                                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.HorizontalResize)
-                            }
-                        // Vertical top resize
-                            mousePosInWorld.y in selectGORect.top() - 1..selectGORect.top() + 1 && mousePosInWorld.x in selectGORect.x..selectGORect.right() -> {
-                                selectEntityMode = SelectGOMode.VERTICAL_RESIZE_TOP
-                                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.VerticalResize)
-                            }
-                        // Vertical bottom resize
-                            mousePosInWorld.y in selectGORect.bottom() - 1..selectGORect.bottom() + 1 && mousePosInWorld.x in selectGORect.x..selectGORect.right() -> {
-                                selectEntityMode = SelectGOMode.VERTICAL_RESIZE_BOTTOM
-                                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.VerticalResize)
-                            }
-                            else -> {
-                                selectEntityMode = SelectGOMode.NO_MODE
-                                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow)
-                            }
-                        }
-
-                        if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && !latestRightButtonClick) {
-                            if (findEntityUnderMouse(false) == null) {
-                                clearSelectEntities()
-                                editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
-                            } else {
-                                editorSceneUI.showInfoEntityWindow = true
-                            }
-                        }
-                        if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_MOVE_ENTITY_LEFT.key)) {
-                            moveEntities(-1, 0)
-                        }
-                        if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_MOVE_ENTITY_RIGHT.key)) {
-                            moveEntities(1, 0)
-                        }
-                        if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_MOVE_ENTITY_UP.key)) {
-                            moveEntities(0, 1)
-                        }
-                        if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_MOVE_ENTITY_DOWN.key)) {
-                            moveEntities(0, -1)
-                        }
-
-                        if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_COPY_MODE.key))
-                            editorSceneUI.editorMode = EditorSceneUI.EditorMode.COPY
-                    }
-                }
-                EditorSceneUI.EditorMode.COPY -> {
-                    if (selectEntities.isEmpty() && selectEntity == null /* Permet de vérifier si on est pas entrain d'ajouter une nouvelle entité */) {
-                        editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
-                        return
-                    }
-
-                    if ((Gdx.input.isButtonPressed(Input.Buttons.LEFT) || Gdx.input.isKeyJustPressed(GameKeys.EDITOR_COPY_MODE.key))
-                            && !Gdx.input.isKeyPressed(GameKeys.EDITOR_APPEND_SELECT_ENTITIES.key)) {
-                        val underMouseGO = findEntityUnderMouse(true)
-                        if (underMouseGO != null) {
-                            if (selectEntities.contains(underMouseGO))
-                                selectEntity = underMouseGO
-                            else {
-                                clearSelectEntities()
-                                addSelectEntity(underMouseGO)
-                            }
-                        } else {
-                            clearSelectEntities()
-                            editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
-                        }
-                    }
-
-                    if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && (!latestRightButtonClick || gridMode.active)) {
-                        val copySelectGO = SerializationFactory.copy(selectEntity!!)
-
-                        var posX = copySelectGO.position().x
-                        var posY = copySelectGO.position().y
-
-                        val width = copySelectGO.size().width
-                        val height = copySelectGO.size().height
-
-                        var moveToCopyGO = true
-
-                        var useMousePos = false
-                        if (selectEntity!!.container != null) {
-                            when {
-                                Gdx.input.isKeyPressed(GameKeys.EDITOR_SMARTCOPY_LEFT.key) -> {
-                                    val minXPos = let {
-                                        var x = selectEntity!!.position().x
-                                        selectEntities.forEach {
-                                            x = Math.min(x, it.position().x)
-                                        }
-                                        x
-                                    }
-                                    posX = minXPos - width
-                                }
-                                Gdx.input.isKeyPressed(GameKeys.EDITOR_SMARTCOPY_RIGHT.key) -> {
-                                    val maxXPos = let {
-                                        var x = selectEntity!!.position().x
-                                        selectEntities.forEach {
-                                            x = Math.max(x, it.position().x)
-                                        }
-                                        x
-                                    }
-                                    posX = maxXPos + width
-                                }
-                                Gdx.input.isKeyPressed(GameKeys.EDITOR_SMARTCOPY_DOWN.key) -> {
-                                    val minYPos = let {
-                                        var y = selectEntity!!.position().y
-                                        selectEntities.forEach {
-                                            y = Math.min(y, it.position().y)
-                                        }
-                                        y
-                                    }
-                                    posY = minYPos - height
-                                }
-                                Gdx.input.isKeyPressed(GameKeys.EDITOR_SMARTCOPY_UP.key) -> {
-                                    val maxYPos = let {
-                                        var y = selectEntity!!.position().y
-                                        selectEntities.forEach {
-                                            y = Math.max(y, it.position().y)
-                                        }
-                                        y
-                                    }
-                                    posY = maxYPos + height
-                                }
-                                else -> useMousePos = true
-                            }
-                        } else
-                            useMousePos = true
-
-                        if (useMousePos) {
-                            posX = mousePosInWorld.x - width / 2
-                            posY = mousePosInWorld.y - height / 2
-
-                            // Permet de vérifier si l'entité copiée est nouvelle ou pas (si elle est nouvelle, ça veut dire qu'elle n'a pas encore de conteneur)
-                            if (selectEntity!!.container != null)
-                                moveToCopyGO = false
-                        }
-
-                        posX = posX.clamp(0f, level.matrixRect.width.toFloat() - width).roundToInt().toFloat()
-                        posY = posY.clamp(0f, level.matrixRect.height.toFloat() - height).roundToInt().toFloat()
-
-                        var putSuccessful = true
-                        if (gridMode.active && useMousePos && selectEntities.size == 1) {
-                            putSuccessful = gridMode.putEntity(level.activeRect, Point(mousePosInWorld.x, mousePosInWorld.y), copySelectGO, level)
-                        } else
-                            copySelectGO.box.position = Point(posX, posY)
-
-                        val copyEntities = mutableListOf<Entity>()
-
-                        if (putSuccessful) {
-                            level.addEntity(copySelectGO)
-                            copyEntities.add(copySelectGO)
-                        } else
-                            moveToCopyGO = false
-
-                        selectEntities.filter { it !== selectEntity }.forEach {
-                            val deltaX = it.position().x - selectEntity!!.position().x
-                            val deltaY = it.position().y - selectEntity!!.position().y
-
-                            level.addEntity(SerializationFactory.copy(it).apply {
-                                val pos = Point((copySelectGO.position().x + deltaX).clamp(0f, level.matrixRect.width.toFloat() - this.size().width), (copySelectGO.position().y + deltaY).clamp(0f, level.matrixRect.height.toFloat() - this.size().height))
-
-                                this.box.position = pos
-
-                                copyEntities += this
-                            })
-                        }
-
-                        if (moveToCopyGO) {
-                            clearSelectEntities()
-                            copyEntities.forEach { addSelectEntity(it) }
-                        }
-                    }
-                }
-                EditorSceneUI.EditorMode.SELECT_POINT -> {
-                    if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !latestLeftButtonClick) {
-                        editorSceneUI.onSelectPoint(mousePosInWorld)
-                        editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
-                    }
-                }
-                EditorSceneUI.EditorMode.SELECT_GO -> {
-                    if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !latestLeftButtonClick) {
-                        val go = findEntityUnderMouse(false)
-                        editorSceneUI.onSelectGO(go)
-                        editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
-                    }
-                }
-            }
-
             if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_REMOVE_ENTITY.key)) {
                 val entity = findEntityUnderMouse(false)
                 if (entity != null) {
@@ -783,15 +441,12 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                 }
             }
 
-            latestLeftButtonClick = Gdx.input.isButtonPressed(Input.Buttons.LEFT)
-            latestRightButtonClick = Gdx.input.isButtonPressed(Input.Buttons.RIGHT)
-            latestMousePos = mousePos
-            latestCameraPos = camera.position.cpy()
+            updateMode()
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             if (editorSceneUI.editorMode == EditorSceneUI.EditorMode.TRY_LEVEL)
-                finishTryLevel()
+                stopTryLevel()
             else
                 editorSceneUI.showExitWindow = true
         }
@@ -804,7 +459,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
             if (editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL)
                 launchTryLevel()
             else
-                finishTryLevel()
+                stopTryLevel()
         }
     }
 
@@ -815,6 +470,395 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         if (!level.levelPath.toLocalFile().exists()) {
             level.deleteFiles()
         }
+    }
+
+    private fun updateMode() {
+        val mousePosVec2 = Vector2(Gdx.input.x.toFloat(), Gdx.input.y.toFloat())
+        val mousePosInWorld = viewport.unproject(Vector3(mousePosVec2, 0f)).toPoint()
+        val latestMousePosInWorld = viewport.unproject(Vector3(latestMousePos.x, latestMousePos.y, 0f)).toPoint()
+
+        when (editorSceneUI.editorMode) {
+            EditorSceneUI.EditorMode.NO_MODE -> {
+                if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+                    val roundMousePosInWorld = Point(mousePosInWorld.x.roundToInt().toFloat(), mousePosInWorld.y.roundToInt().toFloat())
+                    if (latestLeftButtonClick) { // Rectangle
+                        selectRectangleData.endPosition = roundMousePosInWorld
+                    } else { // Select
+                        val entity = findEntityUnderMouse(true)
+                        if (entity != null) {
+                            addSelectEntity(entity)
+                            editorSceneUI.editorMode = EditorSceneUI.EditorMode.SELECT
+                        } else { // Maybe box
+                            selectRectangleData.rectangleStarted = true
+                            selectRectangleData.startPosition = roundMousePosInWorld
+                            selectRectangleData.endPosition = selectRectangleData.startPosition
+                        }
+                    }
+                } else if (latestLeftButtonClick && selectRectangleData.rectangleStarted) { // Bouton gauche de la souris relaché pendant cette frame
+                    selectRectangleData.rectangleStarted = false
+
+                    level.getAllEntitiesInCells(selectRectangleData.getRect()).forEach {
+                        if (selectRectangleData.getRect().contains(it.box, true)) {
+                            addSelectEntity(it)
+                            editorSceneUI.editorMode = EditorSceneUI.EditorMode.SELECT
+                        }
+                    }
+                }
+
+                if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_COPY_MODE.key)) {
+                    val entity = findEntityUnderMouse(true)
+                    if (entity != null) {
+                        addSelectEntity(entity)
+                        editorSceneUI.editorMode = EditorSceneUI.EditorMode.COPY
+                    }
+                }
+
+                if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_FLIPX.key)) {
+                    findEntityUnderMouse(true)?.getCurrentState()?.getComponent<TextureComponent>()?.apply {
+                        flipX = !flipX
+                    }
+                }
+                if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_FLIPY.key)) {
+                    findEntityUnderMouse(true)?.getCurrentState()?.getComponent<TextureComponent>()?.apply {
+                        flipY = !flipY
+                    }
+                }
+                if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_TEXTURE_PREVIOUS_FRAME.key)) {
+                    findEntityUnderMouse(true)?.apply {
+                        if (getStates().size == 1) {
+                            getCurrentState().getComponent<TextureComponent>()?.apply {
+                                if (data.size == 1)
+                                    data.elementAt(0).previousFrameRegion(0)
+                            }
+                        }
+                    }
+                }
+                if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_TEXTURE_NEXT_FRAME.key)) {
+                    findEntityUnderMouse(true)?.apply {
+                        if (getStates().size == 1) {
+                            getCurrentState().getComponent<TextureComponent>()?.apply {
+                                if (data.size == 1)
+                                    data.elementAt(0).nextFrameRegion(0)
+                            }
+                        }
+                    }
+                }
+            }
+            EditorSceneUI.EditorMode.SELECT -> {
+                if (selectEntities.isEmpty() || selectEntity == null) {
+                    editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
+                    return
+                }
+
+                /**
+                 * Permet de déplacer les entités sélectionnées
+                 */
+                fun moveEntities(moveX: Int, moveY: Int) {
+                    val (canMoveX, canMoveY) = let {
+                        var canMoveX = true
+                        var canMoveY = true
+
+                        selectEntities.forEach {
+                            if ((it.box.x + moveX) !in 0..level.matrixRect.width - it.box.width)
+                                canMoveX = false
+                            if ((it.box.y + moveY) !in 0..level.matrixRect.height - it.box.height)
+                                canMoveY = false
+                        }
+
+                        canMoveX to canMoveY
+                    }
+
+                    selectEntities.forEach {
+                        it.box.move(if (canMoveX) moveX.toFloat() else 0f, if (canMoveY) moveY.toFloat() else 0f)
+                    }
+                }
+
+                val selectGORect = selectEntity!!.box
+
+                if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !Gdx.input.isKeyPressed(GameKeys.EDITOR_APPEND_SELECT_ENTITIES.key)) {
+                    if (!latestLeftButtonClick) {
+                        if (selectEntityMode == SelectGOMode.NO_MODE) {
+                            val entity = findEntityUnderMouse(true)
+                            when {
+                                entity == null -> { // Se produit lorsque le joueur clique dans le vide, dans ce cas on désélectionne les entités sélectionnées
+                                    clearSelectEntities()
+                                    editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
+                                }
+                                selectEntities.contains(entity) -> // Dans ce cas-ci, le joueur à sélectionné une autre entité dans celles qui sont sélectionnées
+                                    selectEntity = entity
+                                else -> { // Dans ce cas-ci, il y a un groupe d'entité sélectionné ou aucun et le joueur en sélectionne un nouveau ou un en dehors de la sélection
+                                    clearSelectEntities()
+                                    addSelectEntity(entity)
+                                }
+                            }
+                        }
+
+                    } else if (selectEntity != null) { // Le joueur maintient le clique gauche durant plusieurs frames et a bougé la souris {
+                        if (selectEntityMode == SelectGOMode.NO_MODE)
+                            selectEntityMode = SelectGOMode.MOVE
+
+                        val deltaMouseX = (latestMousePosInWorld.x - mousePosInWorld.x).roundToInt()
+                        val deltaMouseY = (latestMousePosInWorld.y - mousePosInWorld.y).roundToInt()
+
+                        when (selectEntityMode) {
+                            SelectGOMode.NO_MODE -> {
+                            }
+                            SelectGOMode.HORIZONTAL_RESIZE_RIGHT -> {
+                                selectGORect.width = (selectGORect.width - deltaMouseX).clamp(1, Constants.maxEntitySize)
+                            }
+                            SelectGOMode.HORIZONTAL_RESIZE_LEFT -> {
+                                selectGORect.width = (selectGORect.width + deltaMouseX).clamp(1, Constants.maxEntitySize)
+                                selectGORect.x = (selectGORect.x - deltaMouseX).clamp(0f, level.matrixRect.width.toFloat() - selectGORect.width)
+                            }
+                            SelectGOMode.VERTICAL_RESIZE_BOTTOM -> {
+                                selectGORect.height = (selectGORect.height + deltaMouseY).clamp(1, Constants.maxEntitySize)
+                                selectGORect.y = (selectGORect.y - deltaMouseY).clamp(0f, level.matrixRect.height.toFloat() - selectGORect.height)
+                            }
+                            SelectGOMode.VERTICAL_RESIZE_TOP -> {
+                                selectGORect.height = (selectGORect.height - deltaMouseY).clamp(1, Constants.maxEntitySize)
+                            }
+                            SelectGOMode.DIAGONALE_RESIZE -> {
+                                var deltaX = deltaMouseX
+                                var deltaY = deltaMouseY
+
+                                if (resizeEntityMode == ResizeMode.PROPORTIONAL) {
+                                    if (Math.abs(deltaX) > Math.abs(deltaY))
+                                        deltaY = deltaX
+                                    else
+                                        deltaX = deltaY
+                                }
+
+                                selectGORect.width = (selectGORect.width - deltaX).clamp(1, Constants.maxEntitySize)
+                                selectGORect.height = (selectGORect.height - deltaY).clamp(1, Constants.maxEntitySize)
+                            }
+                            SelectGOMode.MOVE -> {
+                                val moveX = -deltaMouseX + (camera.position.x - latestCameraPos.x)
+                                val moveY = -deltaMouseY + (camera.position.y - latestCameraPos.y)
+
+                                moveEntities(moveX.roundToInt(), moveY.roundToInt())
+                            }
+                        }
+                    }
+                    // Le bouton gauche n'est pas appuyé pendant cette frame
+                } else {
+                    when {
+                    // Diagonale resize
+                        Circle(selectGORect.right(), selectGORect.top(), 10f).contains(mousePosInWorld) -> {
+                            selectEntityMode = SelectGOMode.DIAGONALE_RESIZE
+                        }
+                    // Horizontal right resize
+                        mousePosInWorld.x in selectGORect.right() - 1..selectGORect.right() + 1 && mousePosInWorld.y in selectGORect.y..selectGORect.top() -> {
+                            selectEntityMode = SelectGOMode.HORIZONTAL_RESIZE_RIGHT
+                            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.HorizontalResize)
+                        }
+                    // Horizontal left resize
+                        mousePosInWorld.x in selectGORect.left() - 1..selectGORect.left() + 1 && mousePosInWorld.y in selectGORect.y..selectGORect.top() -> {
+                            selectEntityMode = SelectGOMode.HORIZONTAL_RESIZE_LEFT
+                            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.HorizontalResize)
+                        }
+                    // Vertical top resize
+                        mousePosInWorld.y in selectGORect.top() - 1..selectGORect.top() + 1 && mousePosInWorld.x in selectGORect.x..selectGORect.right() -> {
+                            selectEntityMode = SelectGOMode.VERTICAL_RESIZE_TOP
+                            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.VerticalResize)
+                        }
+                    // Vertical bottom resize
+                        mousePosInWorld.y in selectGORect.bottom() - 1..selectGORect.bottom() + 1 && mousePosInWorld.x in selectGORect.x..selectGORect.right() -> {
+                            selectEntityMode = SelectGOMode.VERTICAL_RESIZE_BOTTOM
+                            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.VerticalResize)
+                        }
+                        else -> {
+                            selectEntityMode = SelectGOMode.NO_MODE
+                            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow)
+                        }
+                    }
+
+                    if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && !latestRightButtonClick) {
+                        if (findEntityUnderMouse(false) == null) {
+                            clearSelectEntities()
+                            editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
+                        } else {
+                            editorSceneUI.showInfoEntityWindow = true
+                        }
+                    }
+                    if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_MOVE_ENTITY_LEFT.key)) {
+                        moveEntities(-1, 0)
+                    }
+                    if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_MOVE_ENTITY_RIGHT.key)) {
+                        moveEntities(1, 0)
+                    }
+                    if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_MOVE_ENTITY_UP.key)) {
+                        moveEntities(0, 1)
+                    }
+                    if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_MOVE_ENTITY_DOWN.key)) {
+                        moveEntities(0, -1)
+                    }
+
+                    if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_COPY_MODE.key))
+                        editorSceneUI.editorMode = EditorSceneUI.EditorMode.COPY
+                }
+            }
+            EditorSceneUI.EditorMode.COPY -> {
+                if (selectEntities.isEmpty() && selectEntity == null /* Permet de vérifier si on est pas entrain d'ajouter une nouvelle entité */) {
+                    editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
+                    return
+                }
+
+                if ((Gdx.input.isButtonPressed(Input.Buttons.LEFT) || Gdx.input.isKeyJustPressed(GameKeys.EDITOR_COPY_MODE.key))
+                        && !Gdx.input.isKeyPressed(GameKeys.EDITOR_APPEND_SELECT_ENTITIES.key)) {
+                    val underMouseGO = findEntityUnderMouse(true)
+                    if (underMouseGO != null) {
+                        if (selectEntities.contains(underMouseGO))
+                            selectEntity = underMouseGO
+                        else {
+                            clearSelectEntities()
+                            addSelectEntity(underMouseGO)
+                        }
+                    } else {
+                        clearSelectEntities()
+                        editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
+                    }
+                }
+
+                if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && (!latestRightButtonClick || gridMode.active)) {
+                    val copySelectEntity = SerializationFactory.copy(selectEntity!!)
+
+                    var posX = copySelectEntity.position().x
+                    var posY = copySelectEntity.position().y
+
+                    val width = copySelectEntity.size().width
+                    val height = copySelectEntity.size().height
+
+                    var moveToCopyEntity = true
+
+                    var useMousePos = false
+                    if (selectEntity!!.container != null) {
+                        when {
+                            Gdx.input.isKeyPressed(GameKeys.EDITOR_SMARTCOPY_LEFT.key) -> {
+                                val minXPos = let {
+                                    var x = selectEntity!!.position().x
+                                    selectEntities.forEach {
+                                        x = Math.min(x, it.position().x)
+                                    }
+                                    x
+                                }
+                                posX = minXPos - width
+                            }
+                            Gdx.input.isKeyPressed(GameKeys.EDITOR_SMARTCOPY_RIGHT.key) -> {
+                                val maxXPos = let {
+                                    var x = selectEntity!!.position().x
+                                    selectEntities.forEach {
+                                        x = Math.max(x, it.position().x)
+                                    }
+                                    x
+                                }
+                                posX = maxXPos + width
+                            }
+                            Gdx.input.isKeyPressed(GameKeys.EDITOR_SMARTCOPY_DOWN.key) -> {
+                                val minYPos = let {
+                                    var y = selectEntity!!.position().y
+                                    selectEntities.forEach {
+                                        y = Math.min(y, it.position().y)
+                                    }
+                                    y
+                                }
+                                posY = minYPos - height
+                            }
+                            Gdx.input.isKeyPressed(GameKeys.EDITOR_SMARTCOPY_UP.key) -> {
+                                val maxYPos = let {
+                                    var y = selectEntity!!.position().y
+                                    selectEntities.forEach {
+                                        y = Math.max(y, it.position().y)
+                                    }
+                                    y
+                                }
+                                posY = maxYPos + height
+                            }
+                            else -> useMousePos = true
+                        }
+                    } else
+                        useMousePos = true
+
+                    if (useMousePos) {
+                        val freePos = Point(mousePosInWorld.x - width / 2f, mousePosInWorld.y - height / 2f)
+                        val point = if (smartPositioning) {
+                            val side = getSmartPositioningSide(mousePosInWorld)
+                            if (side == null)
+                                freePos
+                            else when (side.first) {
+                                BoxSide.Left -> Point(side.second.box.left() - width, side.second.box.bottom())
+                                BoxSide.Right -> Point(side.second.box.right(), side.second.box.bottom())
+                                BoxSide.Up -> Point(side.second.box.left(), side.second.box.top())
+                                BoxSide.Down -> Point(side.second.box.left(), side.second.box.bottom() - height)
+                                BoxSide.All -> freePos
+                            }
+                        } else freePos
+
+                        posX = point.x
+                        posY = point.y
+
+                        // Permet de vérifier si l'entité copiée est nouvelle ou pas (si elle est nouvelle, ça veut dire qu'elle n'a pas encore de conteneur)
+                        if (selectEntity!!.container != null)
+                            moveToCopyEntity = false
+                    }
+
+                    posX = posX.clamp(0f, level.matrixRect.width.toFloat() - width).roundToInt().toFloat()
+                    posY = posY.clamp(0f, level.matrixRect.height.toFloat() - height).roundToInt().toFloat()
+
+                    // On vérifie si le clique droit viens juste d'être appuié si le gridMode est actif pour être sûr de ne pas placer trop de copie
+                    if ((useMousePos && (selectEntities.size == 1 || !latestRightButtonClick)) || (!gridMode.active || !latestRightButtonClick)) {
+                        var putSuccessful = true
+                        if (gridMode.active && useMousePos && selectEntities.size == 1) {
+                            putSuccessful = gridMode.putEntity(level.activeRect, Point(mousePosInWorld.x, mousePosInWorld.y), copySelectEntity, level)
+                        } else
+                            copySelectEntity.box.position = Point(posX, posY)
+
+                        val copyEntities = mutableListOf<Entity>()
+
+                        if (putSuccessful) {
+                            level.addEntity(copySelectEntity)
+                            copyEntities.add(copySelectEntity)
+                        } else
+                            moveToCopyEntity = false
+
+                        selectEntities.filter { it !== selectEntity }.forEach {
+                            val deltaX = it.position().x - selectEntity!!.position().x
+                            val deltaY = it.position().y - selectEntity!!.position().y
+
+                            level.addEntity(SerializationFactory.copy(it).apply {
+                                val pos = Point((copySelectEntity.position().x + deltaX).clamp(0f, level.matrixRect.width.toFloat() - this.size().width), (copySelectEntity.position().y + deltaY).clamp(0f, level.matrixRect.height.toFloat() - this.size().height))
+
+                                this.box.position = pos
+
+                                copyEntities += this
+                            })
+                        }
+
+                        if (moveToCopyEntity) {
+                            clearSelectEntities()
+                            copyEntities.forEach { addSelectEntity(it) }
+                        }
+                    }
+                }
+            }
+            EditorSceneUI.EditorMode.SELECT_POINT -> {
+                if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !latestLeftButtonClick) {
+                    editorSceneUI.onSelectPoint(mousePosInWorld)
+                    editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
+                }
+            }
+            EditorSceneUI.EditorMode.SELECT_GO -> {
+                if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !latestLeftButtonClick) {
+                    val go = findEntityUnderMouse(false)
+                    editorSceneUI.onSelectGO(go)
+                    editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
+                }
+            }
+        }
+
+        latestLeftButtonClick = Gdx.input.isButtonPressed(Input.Buttons.LEFT)
+        latestRightButtonClick = Gdx.input.isButtonPressed(Input.Buttons.RIGHT)
+        latestMousePos = mousePosVec2.toPoint()
+        latestCameraPos = camera.position.cpy()
     }
 
     private fun updateCamera() {
@@ -864,6 +908,40 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         }
 
         camera.update()
+    }
+
+    /**
+     * Permet de retourner le côté le plus proche d'une entité par rapport à la souris
+     *
+     * -----
+     * |GGHDD|
+     * |G***D|
+     * |GGBDD|
+     * -----
+     *
+     * G = Gauche
+     * R = Droite
+     * H = Haut
+     * B = Bas
+     * * = Rien
+     * @return Un côté de la box de l'entité le plus proche du point
+     */
+    private fun getSmartPositioningSide(point: Point): Pair<BoxSide, Entity>? {
+        findEntityUnderMouse(false)?.apply {
+            // Gauche
+            if (Rect(box.position, Size(box.width / 4, box.height)).contains(point))
+                return BoxSide.Left to this
+            // Droite
+            if (Rect(Point(box.right() - box.width / 4, box.bottom()), Size(box.width / 4, box.height)).contains(point))
+                return BoxSide.Right to this
+            // Haut
+            if (Rect(Point(box.left() + box.width / 4f, box.top() - box.height / 4f), Size(box.width - box.width / 4, box.height / 4)).contains(point))
+                return BoxSide.Up to this
+            // Bas
+            if (Rect(Point(box.left() + box.width / 4f, box.bottom()), Size(box.width - box.width / 4, box.height / 4)).contains(point))
+                return BoxSide.Down to this
+        }
+        return null
     }
 
     private fun setCopyEntity(entity: Entity) {
@@ -934,14 +1012,14 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
             MusicManager.startMusic(level.musicPath!!.get(), true)
 
         entityContainer = SerializationFactory.copy(level).apply {
-            this.exit = { if (!editorSceneUI.godModeTryMode) finishTryLevel() }
+            this.exit = { if (!editorSceneUI.godModeTryMode) stopTryLevel() }
             this.activeRect.position = level.activeRect.position
             this.drawDebugCells = level.drawDebugCells
             this.update()
         }
     }
 
-    private fun finishTryLevel() {
+    private fun stopTryLevel() {
         clearSelectEntities()
         editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
 
@@ -957,6 +1035,15 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
     private fun saveLevelToFile() {
         try {
             SerializationFactory.serializeToFile(level, level.levelPath.toLocalFile())
+            PCGame.sceneManager.takeScreenshotWithoutImGui {
+                val resizePixmap = Pixmap(Gdx.graphics.backBufferWidth, Gdx.graphics.backBufferHeight - editorSceneUI.menuBarHeight, Pixmap.Format.RGBA8888)
+                resizePixmap.drawPixmap(it, 0, -editorSceneUI.menuBarHeight)
+
+                PixmapIO.writePNG(level.levelPath.toLocalFile().parent().child(Constants.levelPreviewFile), resizePixmap)
+
+                resizePixmap.dispose()
+                it.dispose()
+            }
         } catch (e: Exception) {
             Log.error(e) { "Erreur lors de l'enregistrement du niveau !" }
         }
@@ -1024,6 +1111,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     functionalProgramming.collapsingHeader("Paramètres de l'éditeur") {
                         checkbox("Afficher la fenêtre Fabrique d'entités", editorSceneUI::showEntitiesWindow)
                         checkbox("Afficher la grille", gridMode::active)
+                        checkbox("Placement intelligent", ::smartPositioning)
                     }
                 } else {
                     ImGuiHelper.textColored(Color.ORANGE, "Test du niveau..")
@@ -1064,9 +1152,9 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                         menuItem("Importer une ressource..") {
                             try {
                                 stackPush().also { stack ->
-                                    val aFilterPatterns = stack.mallocPointer(Constants.levelTextureExtension.size + Constants.levelAtlasExtension.size + Constants.levelSoundExtension.size + Constants.levelScriptExtension.size)
+                                    val aFilterPatterns = stack.mallocPointer(Constants.levelTextureExtension.size + Constants.levelPackExtension.size + Constants.levelSoundExtension.size + Constants.levelScriptExtension.size)
 
-                                    val extensions = Constants.levelTextureExtension + Constants.levelAtlasExtension + Constants.levelSoundExtension + Constants.levelScriptExtension
+                                    val extensions = Constants.levelTextureExtension + Constants.levelPackExtension + Constants.levelSoundExtension + Constants.levelScriptExtension
                                     extensions.forEach {
                                         aFilterPatterns.put(stack.UTF8("*.$it"))
                                     }
@@ -1252,17 +1340,16 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                         }
                     }
 
-                    if(PCGame.darkUI) {
+                    if (PCGame.darkUI) {
                         functionalProgramming.withStyleColor(Col.Button, Vec4.fromColor(49, 54, 62, 200), Col.ButtonHovered, Vec4.fromColor(49, 54, 62, 255), Col.ButtonActive, Vec4.fromColor(49, 54, 62, 255)) {
                             btns()
                         }
-                    }
-                    else
+                    } else
                         btns()
 
                 } else {
                     menuItem("Arrêter l'essai") {
-                        finishTryLevel()
+                        stopTryLevel()
                     }
                 }
             }
@@ -1324,11 +1411,11 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                         functionalProgramming.withGroup {
                             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                                 if (!editorSceneUI.entitiesShowOnlyUser) {
-                                    combo("dossier", editorSceneUI::entitiesSpritePackTypeIndex, PCGame.gameAtlas.map { it.key.name() })
+                                    combo("dossier", editorSceneUI::entitiesSpritePackTypeIndex, PCGame.gamePacks.map { it.key.name() })
                                 }
                                 combo("pack", editorSceneUI::entitiesSpritePackIndex,
-                                        if (editorSceneUI.entitiesShowOnlyUser) level.resourcesAtlas().map { it.nameWithoutExtension() }
-                                        else PCGame.gameAtlas.entries.elementAtOrNull(editorSceneUI.entitiesSpritePackTypeIndex)?.value?.map { it.nameWithoutExtension() }
+                                        if (editorSceneUI.entitiesShowOnlyUser) level.resourcesPacks().map { it.nameWithoutExtension() }
+                                        else PCGame.gamePacks.entries.elementAtOrNull(editorSceneUI.entitiesSpritePackTypeIndex)?.value?.map { it.nameWithoutExtension() }
                                                 ?: arrayListOf())
                                 if (!editorSceneUI.entitiesSpriteRealSize)
                                     ImGuiHelper.size(editorSceneUI::entitiesSpriteCustomSize, Size(1), Size(Constants.maxEntitySize))
@@ -1338,12 +1425,12 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                         }
                         separator()
 
-                        (if (editorSceneUI.entitiesShowOnlyUser) level.resourcesAtlas().getOrNull(editorSceneUI.entitiesSpritePackIndex) else PCGame.gameAtlas.entries.elementAtOrNull(editorSceneUI.entitiesSpritePackTypeIndex)?.value?.getOrNull(editorSceneUI.entitiesSpritePackIndex))?.also { atlasPath ->
-                            val atlas = ResourceManager.getPack(atlasPath)
-                            atlas.regions.sortedBy { it.name }.forEachIndexed { index, region ->
-                                val atlasRegion = atlasPath.toFileWrapper() to region.name
+                        (if (editorSceneUI.entitiesShowOnlyUser) level.resourcesPacks().getOrNull(editorSceneUI.entitiesSpritePackIndex) else PCGame.gamePacks.entries.elementAtOrNull(editorSceneUI.entitiesSpritePackTypeIndex)?.value?.getOrNull(editorSceneUI.entitiesSpritePackIndex))?.also { packPath ->
+                            val pack = ResourceManager.getPack(packPath)
+                            pack.regions.sortedBy { it.name }.forEachIndexed { index, region ->
+                                val packRegion = packPath.toFileWrapper() to region.name
                                 val size = if (editorSceneUI.entitiesSpriteRealSize) region.let { Size(it.regionWidth, it.regionHeight) } else Size(50, 50)
-                                val prefab = if (editorSceneUI.entitiesSpritePhysics) PrefabSetup.setupPhysicsSprite(atlasRegion, size) else PrefabSetup.setupSprite(atlasRegion, size)
+                                val prefab = if (editorSceneUI.entitiesSpritePhysics) PrefabSetup.setupPhysicsSprite(packRegion, size) else PrefabSetup.setupSprite(packRegion, size)
                                 addImageBtn(region, prefab, false)
 
                                 if ((index + 1) % 3 != 0)
@@ -1357,7 +1444,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                         prefabs.filter { it.prefabGO.tag == tag }.forEach {
                             it.prefabGO.loadResources()
 
-                            it.prefabGO.getCurrentState().getComponent<AtlasComponent>()?.apply {
+                            it.prefabGO.getCurrentState().getComponent<TextureComponent>()?.apply {
                                 data.elementAtOrNull(currentIndex)?.apply {
                                     addImageBtn(currentKeyFrame(), it, true)
 

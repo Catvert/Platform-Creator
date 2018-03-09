@@ -8,9 +8,9 @@ import be.catvert.pc.tweens.EmptyTween
 import be.catvert.pc.tweens.Tween
 import be.catvert.pc.tweens.TweenSystem
 import be.catvert.pc.tweens.Tweens
-import be.catvert.pc.utility.Constants
-import be.catvert.pc.ui.UIImpl
 import be.catvert.pc.ui.Description
+import be.catvert.pc.ui.UIImpl
+import be.catvert.pc.utility.Constants
 import com.fasterxml.jackson.annotation.JsonCreator
 import glm_.vec2.Vec2
 import imgui.ImGui

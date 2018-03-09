@@ -2,9 +2,9 @@ package be.catvert.pc.eca.actions
 
 
 import be.catvert.pc.eca.Entity
-import be.catvert.pc.utility.Constants
 import be.catvert.pc.ui.Description
 import be.catvert.pc.ui.UI
+import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.Size
 import com.fasterxml.jackson.annotation.JsonCreator
 

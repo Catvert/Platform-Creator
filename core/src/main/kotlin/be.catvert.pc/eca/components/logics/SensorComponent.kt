@@ -11,7 +11,9 @@ import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.ui.*
-import be.catvert.pc.utility.*
+import be.catvert.pc.utility.Constants
+import be.catvert.pc.utility.Updeatable
+import be.catvert.pc.utility.cast
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import imgui.ImGui

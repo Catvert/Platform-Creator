@@ -2,7 +2,7 @@ package be.catvert.pc.tweens
 
 import be.catvert.pc.eca.Entity
 import be.catvert.pc.eca.actions.RemoveGOAction
-import be.catvert.pc.eca.components.graphics.AtlasComponent
+import be.catvert.pc.eca.components.graphics.TextureComponent
 import be.catvert.pc.utility.Updeatable
 
 object TweenSystem : Updeatable {
@@ -17,10 +17,10 @@ object TweenSystem : Updeatable {
         tween.init(entity)
 
         if (tween.useTweenState) {
-            val atlas = entity.getCurrentState().getComponent<AtlasComponent>()
+            val texture = entity.getCurrentState().getComponent<TextureComponent>()
             val state = entity.addState("tween-state") {
-                if (atlas != null)
-                    addComponent(atlas)
+                if (texture != null)
+                    addComponent(texture)
             }
             entity.setState(state, false)
         }

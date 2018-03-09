@@ -5,7 +5,7 @@ import be.catvert.pc.PCGame
 import be.catvert.pc.eca.Entity
 import be.catvert.pc.eca.Prefab
 import be.catvert.pc.eca.Tags
-import be.catvert.pc.eca.components.graphics.AtlasComponent
+import be.catvert.pc.eca.components.graphics.TextureComponent
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.managers.ResourceManager
 import be.catvert.pc.managers.ScriptManager
@@ -26,7 +26,7 @@ import kotlin.math.roundToInt
  */
 class Level(val levelPath: String, val gameVersion: Float, var background: Background?, var musicPath: FileWrapper?) : EntityMatrixContainer() {
     private val levelTextures = levelPath.toLocalFile().parent().child("textures") to mutableListOf<FileHandle>()
-    private val levelAtlas = levelPath.toLocalFile().parent().child("atlas") to mutableListOf<FileHandle>()
+    private val levelPacks = levelPath.toLocalFile().parent().child("packs") to mutableListOf<FileHandle>()
     private val levelSounds = levelPath.toLocalFile().parent().child("sounds") to mutableListOf<FileHandle>()
     private val levelPrefabs = levelPath.toLocalFile().parent().child("prefabs") to mutableListOf<Prefab>()
     private val levelScripts = levelPath.toLocalFile().parent().child("scripts") to mutableListOf<Script>()
@@ -64,10 +64,10 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
         else
             levelTextures.second.addAll(Utility.getFilesRecursivly(levelTextures.first, *Constants.levelTextureExtension))
 
-        if (!levelAtlas.first.exists())
-            levelAtlas.first.mkdirs()
+        if (!levelPacks.first.exists())
+            levelPacks.first.mkdirs()
         else
-            levelAtlas.second.addAll(Utility.getFilesRecursivly(levelAtlas.first, *Constants.levelAtlasExtension))
+            levelPacks.second.addAll(Utility.getFilesRecursivly(levelPacks.first, *Constants.levelPackExtension))
 
         if (!levelSounds.first.exists())
             levelSounds.first.mkdirs()
@@ -96,7 +96,7 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
     }
 
     fun resourcesTextures() = levelTextures.second.toList()
-    fun resourcesAtlas() = levelAtlas.second.toList()
+    fun resourcesPacks() = levelPacks.second.toList()
     fun resourcesSounds() = levelSounds.second.toList()
     fun resourcesPrefabs() = levelPrefabs.second.toList()
     fun resourcesScripts() = levelScripts.second.toList()
@@ -108,10 +108,10 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
                     it.copyTo(levelTextures.first)
                     levelTextures.second.add(levelTextures.first.child(it.name()))
                 }
-                Constants.levelAtlasExtension.contains(it.extension()) -> {
-                    it.copyTo(levelAtlas.first)
-                    it.parent().child(it.nameWithoutExtension() + ".png").copyTo(levelAtlas.first)
-                    levelAtlas.second.add(levelAtlas.first.child(it.name()))
+                Constants.levelPackExtension.contains(it.extension()) -> {
+                    it.copyTo(levelPacks.first)
+                    it.parent().child(it.nameWithoutExtension() + ".png").copyTo(levelPacks.first)
+                    levelPacks.second.add(levelPacks.first.child(it.name()))
                 }
                 Constants.levelSoundExtension.contains(it.extension()) -> {
                     it.copyTo(levelSounds.first)
@@ -191,7 +191,7 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
                     ?: PCGame.standardBackgrounds().elementAtOrNull(0), null)
 
             val ground = PrefabFactory.PhysicsSprite.prefab.create(Point(0f, 0f), level)
-            ground.getCurrentState().getComponent<AtlasComponent>()?.data?.elementAtOrNull(0)?.apply {
+            ground.getCurrentState().getComponent<TextureComponent>()?.data?.elementAtOrNull(0)?.apply {
                 repeatRegion = true
                 repeatRegionSize = Size(50)
             }

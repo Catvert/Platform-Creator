@@ -6,8 +6,8 @@ import be.catvert.pc.eca.components.Component
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.managers.ScriptManager
 import be.catvert.pc.scenes.EditorScene
-import be.catvert.pc.utility.Constants
 import be.catvert.pc.ui.UIImpl
+import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.Updeatable
 import be.catvert.pc.utility.cast
 import com.fasterxml.jackson.annotation.JsonCreator

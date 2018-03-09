@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
@@ -12,6 +13,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Shape2D
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
+import com.badlogic.gdx.utils.BufferUtils
+import com.badlogic.gdx.utils.ScreenUtils
 import com.esotericsoftware.reflectasm.ClassAccess
 import ktx.assets.Asset
 import ktx.assets.loadOnDemand
@@ -81,6 +84,25 @@ object Utility {
             }
         }
         return files
+    }
+
+    /**
+     * Inspiré de : https://github.com/libgdx/libgdx/wiki/Taking-a-Screenshot
+     */
+    fun getPixmapOfScreen(): Pixmap {
+        val pixels = ScreenUtils.getFrameBufferPixels(0, 0, Gdx.graphics.backBufferWidth, Gdx.graphics.backBufferHeight, true)
+
+        // Permet d'être sûr que l'entièreté du screenshot est opaque
+        var i = 4
+        while (i < pixels.size) {
+            pixels[i - 1] = 255.toByte()
+            i += 4
+        }
+
+        val pixmap = Pixmap(Gdx.graphics.backBufferWidth, Gdx.graphics.backBufferHeight, Pixmap.Format.RGBA8888)
+        BufferUtils.copy(pixels, 0, pixmap.pixels, pixels.size)
+
+        return pixmap
     }
 
     /**
