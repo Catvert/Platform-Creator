@@ -1,4 +1,4 @@
-package be.catvert.pc.utility
+package be.catvert.pc.ui
 
 import be.catvert.pc.PCGame
 import be.catvert.pc.eca.Entity
@@ -13,6 +13,7 @@ import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.i18n.MenusText
 import be.catvert.pc.managers.ResourceManager
 import be.catvert.pc.scenes.EditorScene
+import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.audio.Sound
@@ -39,13 +40,13 @@ object ImGuiHelper {
 
     private val searchBarBuffers = mutableMapOf<String, Item<String>>()
 
-    private val exposeEditorCache = AnnotationCache(ExposeEditor::class.java)
+    private val uiCache = AnnotationCache(UI::class.java)
     private val descriptionCache = AnnotationCache(Description::class.java)
     private val requiredComponentCache = AnnotationCache(RequiredComponent::class.java)
 
-    inline fun <T : Any> addImguiWidgetsArray(label: String, array: ArrayList<T>, itemLabel: (item: T) -> String, createItem: () -> T, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI, itemExposeEditor: ExposeEditor = ExposeEditorFactory.empty, endBlock: () -> Unit = {}) {
+    inline fun <T : Any> addImguiWidgetsArray(label: String, array: ArrayList<T>, itemLabel: (item: T) -> String, createItem: () -> T, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI, itemUI: UI = UIFactory.empty, endBlock: () -> Unit = {}) {
         addImguiWidgetsArray(label, array, itemLabel, createItem, {
-            addImguiWidget(itemLabel(it.obj), it, entity, level, itemExposeEditor, editorSceneUI)
+            addImguiWidget(itemLabel(it.obj), it, entity, level, itemUI, editorSceneUI)
         }, endBlock)
     }
 
@@ -95,7 +96,7 @@ object ImGuiHelper {
         }
     }
 
-    fun <T : Any> addImguiWidget(label: String, item: Item<T>, entity: Entity, level: Level, exposeEditor: ExposeEditor, editorSceneUI: EditorScene.EditorSceneUI) {
+    fun <T : Any> addImguiWidget(label: String, item: Item<T>, entity: Entity, level: Level, UI: UI, editorSceneUI: EditorScene.EditorSceneUI) {
         val value = item.obj
 
         with(ReflectionUtility) {
@@ -104,8 +105,8 @@ object ImGuiHelper {
                     is Action -> {
                         action(label, item.cast(), entity, level, editorSceneUI)
                     }
-                    is CustomEditorImpl -> {
-                        insertImguiExposeEditorFields(value, entity, level, editorSceneUI)
+                    is UIImpl -> {
+                        insertUIFields(value, entity, level, editorSceneUI)
                     }
                     is Boolean -> {
                         checkbox(label, item.cast<Boolean>()::obj)
@@ -114,24 +115,24 @@ object ImGuiHelper {
                         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                             val item = item.cast<Int>()
                             inputInt(label, item::obj)
-                            item.obj = item.obj.clamp(exposeEditor.min.roundToInt(), exposeEditor.max.roundToInt())
+                            item.obj = item.obj.clamp(UI.min.roundToInt(), UI.max.roundToInt())
                         }
                     }
                     is Float -> {
                         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                            sliderFloat(label, item.cast<Float>()::obj, exposeEditor.min, exposeEditor.max, "%.1f")
+                            sliderFloat(label, item.cast<Float>()::obj, UI.min, UI.max, "%.1f")
                         }
                     }
                     is Prefab -> {
                         prefab(item.cast(), level, label)
                     }
                     is Size -> {
-                        size(item.cast(), Size(exposeEditor.min.roundToInt(), exposeEditor.min.roundToInt()), Size(exposeEditor.max.roundToInt(), exposeEditor.max.roundToInt()))
+                        size(item.cast(), Size(UI.min.roundToInt(), UI.min.roundToInt()), Size(UI.max.roundToInt(), UI.max.roundToInt()))
                     }
                     is String -> {
-                        when (exposeEditor.customType) {
+                        when (UI.customType) {
                             CustomType.DEFAULT -> {
-                                ImGuiHelper.inputText(label, item.cast())
+                                inputText(label, item.cast())
                             }
                             CustomType.TAG_STRING -> {
                                 entityTag(item.cast(), level)
@@ -142,13 +143,13 @@ object ImGuiHelper {
                         enum(label, item.cast())
                     }
                     else -> {
-                        insertImguiExposeEditorFields(item.obj, entity, level, editorSceneUI)
+                        insertUIFields(item.obj, entity, level, editorSceneUI)
                     }
                 }
 
-                if (!exposeEditor.description.isBlank() && isItemHovered()) {
+                if (!UI.description.isBlank() && isItemHovered()) {
                     functionalProgramming.withTooltip {
-                        text(exposeEditor.description)
+                        text(UI.description)
                     }
                 }
             }
@@ -197,7 +198,7 @@ object ImGuiHelper {
                                 textColored(Color.RED, "\\!/ Il manque le component :")
                                 text("${requiredComponent!!.component.map { it.simpleName }}")
                             }
-                            insertImguiExposeEditorFields(action.obj, entity, level, editorSceneUI)
+                            insertUIFields(action.obj, entity, level, editorSceneUI)
                         }, searchBar = true)) {
                     action.obj = ReflectionUtility.createInstance(Actions.values()[index[0]].action.java)
                 }
@@ -409,7 +410,7 @@ object ImGuiHelper {
 
             sameLine(0f, 0f)
 
-            if (ImGuiHelper.settingsButton()) {
+            if (settingsButton()) {
                 editorSceneUI.editorMode = EditorScene.EditorSceneUI.EditorMode.SELECT_POINT
                 editorSceneUI.onSelectPoint.register(true) {
                     point.set(Point(it.x.clamp(minPoint.x, maxPoint.x), it.y.clamp(minPoint.y, maxPoint.y)))
@@ -472,7 +473,7 @@ object ImGuiHelper {
         val enumConstants = enum.obj.javaClass.enumConstants
         val selectedIndex = intArrayOf(enumConstants.indexOfFirst { it == enum.obj })
 
-        if (ImGuiHelper.comboWithSettingsButton(label, selectedIndex, enumConstants.map { (it as Enum<*>).name }, popupBlock, settingsBtnDisabled, onSettingsBtnDisabled))
+        if (comboWithSettingsButton(label, selectedIndex, enumConstants.map { (it as Enum<*>).name }, popupBlock, settingsBtnDisabled, onSettingsBtnDisabled))
             enum.obj = enumConstants[selectedIndex[0]]
     }
 
@@ -503,7 +504,7 @@ object ImGuiHelper {
         textColored(color, propertyName)
         ImGui.sameLine()
 
-        value.cast<CustomEditorTextImpl>()?.insertText() ?: ImGui.text(value.toString())
+        value.cast<UITextImpl>()?.insertText() ?: ImGui.text(value.toString())
     }
 
     fun tickSoundButton(label: String, size: Vec2): Boolean {
@@ -525,44 +526,47 @@ object ImGuiHelper {
         with(ImGui) {
             pushStyleColor(Col.WindowBg, ImGui.getStyleColorVec4(Col.WindowBg).apply { a = 0f })
             pushStyleColor(Col.Border, ImGui.getStyleColorVec4(Col.Border).apply { a = 0f })
-            pushStyleVar(StyleVar.FrameRounding, 10f)
+            pushStyleColor(Col.Button, Vec4.fromColor(29, 114, 249, 200))
+            pushStyleColor(Col.ButtonHovered, Vec4.fromColor(22, 85, 186, 200))
+            pushStyleColor(Col.ButtonActive, Vec4.fromColor(22, 85, 186, 255))
+            pushStyleColor(Col.Text, Vec4(1))
+            pushStyleVar(StyleVar.FrameRounding, 15f)
             pushStyleVar(StyleVar.FramePadding, Vec2(10f))
             pushFont(PCGame.imguiBigFont)
 
             block()
 
-            ImGui.popStyleColor(2)
+            ImGui.popStyleColor(6)
             ImGui.popStyleVar(2)
             popFont()
         }
     }
 
-    fun insertImguiExposeEditorFields(instance: Any, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        if (instance is CustomEditorImpl) {
-            instance.insertImgui(ReflectionUtility.simpleNameOf(instance), entity, level, editorSceneUI)
+    fun insertUIFields(instance: Any, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+        if (instance is UIImpl) {
+            instance.insertUI(ReflectionUtility.simpleNameOf(instance), entity, level, editorSceneUI)
         }
 
-        val t = System.nanoTime()
         val access = ClassAccess.access(instance.javaClass)
 
-        exposeEditorCache.getFieldsAnnotations(instance.javaClass).forEach { name, exposeEditor ->
+        uiCache.getFieldsAnnotations(instance.javaClass).forEach { name, ui ->
             val item = Item(access.get<Any>(instance, name))
-            addImguiWidget(if (exposeEditor.customName.isBlank()) name else exposeEditor.customName, item, entity, level, exposeEditor, editorSceneUI)
+            addImguiWidget(if (ui.customName.isBlank()) name else ui.customName, item, entity, level, ui, editorSceneUI)
             access.set<Any>(instance, name, item.obj)
         }
     }
 
-    fun insertImguiTextExposeEditorFields(instance: Any) {
+    fun insertUITextFields(instance: Any) {
         with(ImGui) {
-            instance.cast<CustomEditorTextImpl>()?.insertText()
+            instance.cast<UITextImpl>()?.insertText()
                     ?: if (instance.toString().isNotBlank()) text(instance.toString())
 
             val access = ClassAccess.access(instance.javaClass)
 
-            exposeEditorCache.getFieldsAnnotations(instance.javaClass).forEach { name, exposeEditor ->
+            uiCache.getFieldsAnnotations(instance.javaClass).forEach { name, ui ->
                 val value = access.get<Any>(instance, name)
 
-                textPropertyColored(Color.ORANGE, "${if (exposeEditor.customName.isBlank()) name else exposeEditor.customName} :", value)
+                textPropertyColored(Color.ORANGE, "${if (ui.customName.isBlank()) name else ui.customName} :", value)
             }
         }
     }

@@ -3,8 +3,8 @@ package be.catvert.pc.eca.actions
 
 import be.catvert.pc.eca.Entity
 import be.catvert.pc.eca.containers.Level
-import be.catvert.pc.utility.Description
-import be.catvert.pc.utility.ExposeEditor
+import be.catvert.pc.ui.Description
+import be.catvert.pc.ui.UI
 import be.catvert.pc.utility.cast
 import com.fasterxml.jackson.annotation.JsonCreator
 
@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
  * @see Level
  */
 @Description("Permet de quitter le niveau en spécifiant si le joueur à réussi ou non")
-class LevelAction(@ExposeEditor var action: LevelActions) : Action() {
+class LevelAction(@UI var action: LevelActions) : Action() {
     @JsonCreator private constructor() : this(LevelActions.FAIL_EXIT)
 
     enum class LevelActions {

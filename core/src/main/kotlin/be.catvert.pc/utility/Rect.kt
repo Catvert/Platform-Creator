@@ -3,6 +3,8 @@ package be.catvert.pc.utility
 import be.catvert.pc.eca.Entity
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.scenes.EditorScene
+import be.catvert.pc.ui.UIImpl
+import be.catvert.pc.ui.ImGuiHelper
 import com.fasterxml.jackson.annotation.JsonIgnore
 import imgui.ImGui
 import kotlin.math.roundToInt
@@ -12,7 +14,7 @@ import kotlin.math.roundToInt
  * @param position Position du rectangle dans l'espace
  * @param size Taille du rectangle
  */
-class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
+class Rect(position: Point = Point(), size: Size = Size()) : UIImpl {
     constructor(x: Float, y: Float, width: Int, height: Int) : this(Point(x, y), Size(width, height))
     constructor(rect: Rect) : this(rect.x, rect.y, rect.width, rect.height)
 
@@ -99,7 +101,7 @@ class Rect(position: Point = Point(), size: Size = Size()) : CustomEditorImpl {
         return Rect(x, y, width.roundToInt(), height.roundToInt())
     }
 
-    override fun insertImgui(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         with(ImGui) {
             ImGuiHelper.point(::position, Point(), Point(level.matrixRect.width.toFloat() - this@Rect.width, level.matrixRect.height.toFloat() - this@Rect.height), editorSceneUI)
             ImGuiHelper.size(::size, Size(1), Size(Constants.maxEntitySize))

@@ -5,7 +5,7 @@ import be.catvert.pc.PCGame
 import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.managers.MusicManager
-import be.catvert.pc.utility.ImGuiHelper
+import be.catvert.pc.ui.ImGuiHelper
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.g2d.Batch

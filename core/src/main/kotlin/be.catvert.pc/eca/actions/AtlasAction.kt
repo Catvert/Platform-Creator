@@ -6,8 +6,8 @@ import be.catvert.pc.eca.components.graphics.AtlasComponent
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.Constants
-import be.catvert.pc.utility.CustomEditorImpl
-import be.catvert.pc.utility.Description
+import be.catvert.pc.ui.UIImpl
+import be.catvert.pc.ui.Description
 import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
 import imgui.functionalProgramming
@@ -17,7 +17,7 @@ import imgui.functionalProgramming
  */
 @RequiredComponent(AtlasComponent::class)
 @Description("Permet de changer l'atlas actuel d'une entité")
-class AtlasAction(var atlasIndex: Int) : Action(), CustomEditorImpl {
+class AtlasAction(var atlasIndex: Int) : Action(), UIImpl {
     @JsonCreator private constructor() : this(-1)
 
     override fun invoke(entity: Entity) {
@@ -26,7 +26,7 @@ class AtlasAction(var atlasIndex: Int) : Action(), CustomEditorImpl {
         }
     }
 
-    override fun insertImgui(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         with(ImGui) {
             val atlasData = entity.getCurrentState().getComponent<AtlasComponent>()?.data ?: arrayListOf()
 

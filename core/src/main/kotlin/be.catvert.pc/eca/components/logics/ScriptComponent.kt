@@ -7,7 +7,7 @@ import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.managers.ScriptManager
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.Constants
-import be.catvert.pc.utility.CustomEditorImpl
+import be.catvert.pc.ui.UIImpl
 import be.catvert.pc.utility.Updeatable
 import be.catvert.pc.utility.cast
 import com.fasterxml.jackson.annotation.JsonCreator
@@ -15,7 +15,7 @@ import imgui.ImGui
 import imgui.functionalProgramming
 import javax.script.ScriptException
 
-class ScriptComponent(var scriptIndex: Int) : Component(), Updeatable, CustomEditorImpl {
+class ScriptComponent(var scriptIndex: Int) : Component(), Updeatable, UIImpl {
     @JsonCreator private constructor() : this(0)
 
     private var firstCall = true
@@ -45,7 +45,7 @@ class ScriptComponent(var scriptIndex: Int) : Component(), Updeatable, CustomEdi
         executeFunction("update", entity)
     }
 
-    override fun insertImgui(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
             ImGui.combo("script", ::scriptIndex, level.resourcesScripts().map { it.file.nameWithoutExtension() })
         }

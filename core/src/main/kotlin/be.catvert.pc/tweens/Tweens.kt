@@ -9,6 +9,8 @@ import be.catvert.pc.eca.components.logics.LifeComponent
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.serialization.PostDeserialization
+import be.catvert.pc.ui.UIImpl
+import be.catvert.pc.ui.ImGuiHelper
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.utils.reflect.ClassReflection
@@ -27,7 +29,7 @@ enum class Tweens(val tween: KClass<out Tween>) {
     DisableComponent(DisableComponentTween::class)
 }
 
-abstract class Tween(var duration: Float = 1f, var interpolationName: String, var authorizeTweenState: Boolean = true) : CustomEditorImpl, PostDeserialization {
+abstract class Tween(var duration: Float = 1f, var interpolationName: String, var authorizeTweenState: Boolean = true) : UIImpl, PostDeserialization {
     var nextTween: Tween? = null
     var endAction: Action = EmptyAction()
 
@@ -55,7 +57,7 @@ abstract class Tween(var duration: Float = 1f, var interpolationName: String, va
     abstract fun perform(entity: Entity)
 
     private var currentInterpolationIndex = 0
-    override fun insertImgui(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         with(ImGui) {
             text("type : ${ReflectionUtility.simpleNameOf(this@Tween).removeSuffix("Tween")}")
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
@@ -113,8 +115,8 @@ class MoveTween(duration: Float = 0f, var moveX: Int = 0, var moveY: Int = 0) : 
                 interpolation.apply(initialPosY, initialPosY + moveY, progress))
     }
 
-    override fun insertImgui(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        super.insertImgui(label, entity, level, editorSceneUI)
+    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+        super.insertUI(label, entity, level, editorSceneUI)
 
         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
             ImGui.inputInt("déplacement x", ::moveX)
@@ -138,8 +140,8 @@ class AlphaAtlasTween(duration: Float = 0f, var targetAlpha: Float = 0f) : Tween
         }
     }
 
-    override fun insertImgui(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        super.insertImgui(label, entity, level, editorSceneUI)
+    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+        super.insertUI(label, entity, level, editorSceneUI)
         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
             ImGui.sliderFloat("alpha ciblé", ::targetAlpha, 0f, 1f, "%.1f")
         }
@@ -155,8 +157,8 @@ class RepeatActionTween(duration: Float = 0f, var repeat: Int = 1, var repeatAct
         }
     }
 
-    override fun insertImgui(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        super.insertImgui(label, entity, level, editorSceneUI)
+    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+        super.insertUI(label, entity, level, editorSceneUI)
         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
             ImGui.sliderInt("répétition", ::repeat, 1, 100)
         }
@@ -180,8 +182,8 @@ class ResizeTween(duration: Float = 0f, var newWidth: Int = 1, var newHeight: In
                 interpolation.apply(initialHeight.toFloat(), newHeight.toFloat(), progress).roundToInt())
     }
 
-    override fun insertImgui(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        super.insertImgui(label, entity, level, editorSceneUI)
+    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+        super.insertUI(label, entity, level, editorSceneUI)
 
         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
             ImGui.inputInt("largeur ciblée", ::newWidth, 1, Constants.maxEntitySize)
@@ -206,8 +208,8 @@ class DisableComponentTween(var disableComponent: Class<out Component> = LifeCom
         }
     }
 
-    override fun insertImgui(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        super.insertImgui(label, entity, level, editorSceneUI)
+    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+        super.insertUI(label, entity, level, editorSceneUI)
 
         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
             val components = entity.getCurrentState().getComponents()

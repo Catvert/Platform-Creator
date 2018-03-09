@@ -17,6 +17,8 @@ import be.catvert.pc.factories.PrefabType
 import be.catvert.pc.managers.MusicManager
 import be.catvert.pc.managers.ResourceManager
 import be.catvert.pc.serialization.SerializationFactory
+import be.catvert.pc.ui.Description
+import be.catvert.pc.ui.ImGuiHelper
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
@@ -1405,7 +1407,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         val addComponentTitle = "Ajouter un component"
 
         with(ImGui) {
-            ImGuiHelper.insertImguiExposeEditorFields(entity, entity, level, editorSceneUI)
+            ImGuiHelper.insertUIFields(entity, entity, level, editorSceneUI)
 
             separator()
 
@@ -1463,7 +1465,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                         false
                     }
                     if (!incorrectComponent)
-                        ImGuiHelper.insertImguiExposeEditorFields(component, entity, level, editorSceneUI)
+                        ImGuiHelper.insertUIFields(component, entity, level, editorSceneUI)
                     else {
                         text("Il manque le(s) component(s) :")
                         functionalProgramming.withIndent {
@@ -1570,7 +1572,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         with(ImGui) {
             setNextWindowSizeConstraints(Vec2(), Vec2(500f, 500f))
             functionalProgramming.withWindow("Données de l'entité", editorSceneUI::showInfoEntityTextWindow, WindowFlags.AlwaysAutoResize.i) {
-                ImGuiHelper.insertImguiTextExposeEditorFields(entity)
+                ImGuiHelper.insertUITextFields(entity)
                 separator()
 
                 val components = entity.getCurrentState().getComponents()
@@ -1590,7 +1592,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                             false
                         }
                         if (!incorrectComponent)
-                            ImGuiHelper.insertImguiTextExposeEditorFields(component)
+                            ImGuiHelper.insertUITextFields(component)
                         else {
                             ImGuiHelper.textColored(Color.RED, "Il manque le(s) component(s) :")
                             functionalProgramming.withIndent {

@@ -5,8 +5,8 @@ import be.catvert.pc.eca.components.logics.MoverComponent
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.Constants
-import be.catvert.pc.utility.CustomEditorImpl
-import be.catvert.pc.utility.Description
+import be.catvert.pc.ui.UIImpl
+import be.catvert.pc.ui.Description
 import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
 import imgui.functionalProgramming
@@ -15,7 +15,7 @@ import imgui.functionalProgramming
  * Action permettant de changer l'état d'une entité
  */
 @Description("Permet de changer l'état d'une entité")
-class StateAction(var stateIndex: Int, var usePreviousMoverDirection: Boolean = false) : Action(), CustomEditorImpl {
+class StateAction(var stateIndex: Int, var usePreviousMoverDirection: Boolean = false) : Action(), UIImpl {
     @JsonCreator private constructor() : this(0)
 
     private fun checkHasMover(entity: Entity) = entity.getCurrentState().hasComponent<MoverComponent>() && entity.getStateOrDefault(stateIndex).hasComponent<MoverComponent>()
@@ -28,7 +28,7 @@ class StateAction(var stateIndex: Int, var usePreviousMoverDirection: Boolean = 
         entity.setState(stateIndex, true)
     }
 
-    override fun insertImgui(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         with(ImGui) {
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                 combo("state", ::stateIndex, entity.getStates().map { it.name })

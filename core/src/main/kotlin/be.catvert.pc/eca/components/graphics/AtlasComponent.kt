@@ -6,6 +6,7 @@ import be.catvert.pc.eca.components.Component
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.managers.ResourceManager
 import be.catvert.pc.scenes.EditorScene
+import be.catvert.pc.ui.*
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Animation
@@ -33,7 +34,7 @@ typealias AtlasRegion = Pair<FileWrapper, String>
  * @param data Les atlas disponibles pour l'entité
  */
 @Description("Permet d'ajouter une texture ou une animation à une entité")
-class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) : Component(), Renderable, ResourceLoader, CustomEditorImpl, CustomEditorTextImpl {
+class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) : Component(), Renderable, ResourceLoader, UIImpl, UITextImpl {
     enum class Rotation(val degree: Float) {
         Zero(0f), Quarter(90f), Half(180f), ThreeQuarter(270f)
     }
@@ -41,12 +42,12 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
     constructor(currentIndex: Int = 0, vararg data: AtlasData) : this(currentIndex, arrayListOf(*data))
     @JsonCreator private constructor() : this(0, arrayListOf())
 
-    @ExposeEditor
+    @UI
     var rotation: Rotation = Rotation.Zero
 
-    @ExposeEditor(customName = "miroir x")
+    @UI(customName = "miroir x")
     var flipX: Boolean = false
-    @ExposeEditor(customName = "miroir y")
+    @UI(customName = "miroir y")
     var flipY: Boolean = false
 
     @JsonIgnore
@@ -215,7 +216,7 @@ class AtlasComponent(var currentIndex: Int = 0, var data: ArrayList<AtlasData>) 
     private var addAtlasName = "Nouveau atlas"
     private var ressourcesCollapsing = false
 
-    override fun insertImgui(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         with(ImGui) {
             if (button("Éditer", Vec2(Constants.defaultWidgetsWidth, 0))) {
                 showEditAtlasWindow = true

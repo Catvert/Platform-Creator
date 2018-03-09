@@ -10,10 +10,10 @@ import be.catvert.pc.eca.components.Component
 import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.scenes.EditorScene
-import be.catvert.pc.utility.CustomEditorImpl
-import be.catvert.pc.utility.CustomEditorTextImpl
-import be.catvert.pc.utility.Description
-import be.catvert.pc.utility.ImGuiHelper
+import be.catvert.pc.ui.UIImpl
+import be.catvert.pc.ui.UITextImpl
+import be.catvert.pc.ui.Description
+import be.catvert.pc.ui.ImGuiHelper
 import com.badlogic.gdx.graphics.Color
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -24,7 +24,7 @@ import glm_.func.common.max
  * Chaque point de vie à une action quand celui-ci devient actif et inactif
  */
 @Description("Ajoute la possibilité d'ajouter des points de vie à une entité")
-class LifeComponent(onDeathAction: Action, lifePointActions: ArrayList<Action> = arrayListOf()) : Component(), CustomEditorImpl, CustomEditorTextImpl {
+class LifeComponent(onDeathAction: Action, lifePointActions: ArrayList<Action> = arrayListOf()) : Component(), UIImpl, UITextImpl {
     @JsonCreator private constructor() : this(RemoveGOAction(), arrayListOf())
 
     @JsonProperty("lpActions")
@@ -65,7 +65,7 @@ class LifeComponent(onDeathAction: Action, lifePointActions: ArrayList<Action> =
         this.entity = entity
     }
 
-    override fun insertImgui(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         ImGuiHelper.addImguiWidgetsArray("life points actions", lpActions, { "vie ${lpActions.indexOf(it) + 1}" }, { EmptyAction() }, entity, level, editorSceneUI)
     }
 

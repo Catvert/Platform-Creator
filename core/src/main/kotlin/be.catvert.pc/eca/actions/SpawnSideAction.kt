@@ -6,12 +6,12 @@ import be.catvert.pc.eca.Prefab
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.tweens.MoveTween
 import be.catvert.pc.utility.BoxSide
-import be.catvert.pc.utility.Description
-import be.catvert.pc.utility.ExposeEditor
+import be.catvert.pc.ui.Description
+import be.catvert.pc.ui.UI
 import com.fasterxml.jackson.annotation.JsonCreator
 
 @Description("Permet de faire apparaître une entité sur un côté de cette entité")
-class SpawnSideAction(@ExposeEditor var prefab: Prefab, @ExposeEditor var spawnSide: BoxSide, @ExposeEditor var tweenMove: Boolean) : Action() {
+class SpawnSideAction(@UI var prefab: Prefab, @UI var spawnSide: BoxSide, @UI var tweenMove: Boolean) : Action() {
     @JsonCreator private constructor() : this(PrefabFactory.MushroomRed_SMC.prefab, BoxSide.Up, true)
 
     override fun invoke(entity: Entity) {

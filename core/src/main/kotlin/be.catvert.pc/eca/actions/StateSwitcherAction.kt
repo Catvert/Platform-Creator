@@ -4,9 +4,9 @@ import be.catvert.pc.eca.Entity
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.Constants
-import be.catvert.pc.utility.CustomEditorImpl
-import be.catvert.pc.utility.Description
-import be.catvert.pc.utility.ImGuiHelper
+import be.catvert.pc.ui.UIImpl
+import be.catvert.pc.ui.Description
+import be.catvert.pc.ui.ImGuiHelper
 import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
 import imgui.functionalProgramming
@@ -17,7 +17,7 @@ typealias StateSwitchAction = Pair<Int, Action>
  * Permet d'effectuer une action sur une entité selon l'état actuel de l'entité
  */
 @Description("Permet d'effectuer une action sur une entité selon son état.")
-class StateSwitcherAction(var stateSwitchActions: ArrayList<StateSwitchAction>) : Action(), CustomEditorImpl {
+class StateSwitcherAction(var stateSwitchActions: ArrayList<StateSwitchAction>) : Action(), UIImpl {
     constructor(vararg stateSwitchActions: StateSwitchAction) : this(arrayListOf(*stateSwitchActions))
     @JsonCreator private constructor() : this(arrayListOf())
 
@@ -27,7 +27,7 @@ class StateSwitcherAction(var stateSwitchActions: ArrayList<StateSwitchAction>) 
         }
     }
 
-    override fun insertImgui(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         ImGuiHelper.addImguiWidgetsArray("state actions", stateSwitchActions, { item: StateSwitchAction -> entity.getStateOrDefault(item.first).name }, { 0 to EmptyAction() }, {
             val stateIndex = intArrayOf(it.obj.first)
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {

@@ -10,6 +10,7 @@ import be.catvert.pc.eca.components.Component
 import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.scenes.EditorScene
+import be.catvert.pc.ui.*
 import be.catvert.pc.utility.*
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonTypeInfo
@@ -17,20 +18,20 @@ import imgui.ImGui
 import imgui.functionalProgramming
 
 @Description("Permet d'effectuer une action quand une entité précise est au-dessus d'une autre entité (couche)")
-class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeatable, CustomEditorImpl {
+class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeatable, UIImpl {
     constructor(vararg sensors: SensorData) : this(arrayListOf(*sensors))
     @JsonCreator private constructor() : this(arrayListOf())
 
     private var level: Level? = null
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
-    abstract class SensorData(@ExposeEditor(description = "Action appelée quand l'entité ciblée passe devant/derrière(overlaps) cette entité") var sensorIn: Action = EmptyAction(), @ExposeEditor(description = "Action appelée quand l'entité ciblée quitte cette entité") var sensorOut: Action = EmptyAction()) {
+    abstract class SensorData(@UI(description = "Action appelée quand l'entité ciblée passe devant/derrière(overlaps) cette entité") var sensorIn: Action = EmptyAction(), @UI(description = "Action appelée quand l'entité ciblée quitte cette entité") var sensorOut: Action = EmptyAction()) {
         protected val sensorOverlaps: MutableSet<Entity> = mutableSetOf()
 
         abstract fun checkSensorOverlaps(entity: Entity, level: Level)
     }
 
-    class TagSensorData(@ExposeEditor(customType = CustomType.TAG_STRING) var target: EntityTag = Tags.Player.tag, sensorIn: Action = EmptyAction(), sensorOut: Action = EmptyAction()) : SensorData(sensorIn, sensorOut) {
+    class TagSensorData(@UI(customType = CustomType.TAG_STRING) var target: EntityTag = Tags.Player.tag, sensorIn: Action = EmptyAction(), sensorOut: Action = EmptyAction()) : SensorData(sensorIn, sensorOut) {
         override fun checkSensorOverlaps(entity: Entity, level: Level) {
             val checkedEntities = mutableSetOf<Entity>()
 
@@ -52,7 +53,7 @@ class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeata
         override fun toString(): String = ""
     }
 
-    class EntitySensorData(var target: Entity?, sensorIn: Action = EmptyAction(), sensorOut: Action = EmptyAction()) : SensorData(sensorIn, sensorOut), CustomEditorImpl {
+    class EntitySensorData(var target: Entity?, sensorIn: Action = EmptyAction(), sensorOut: Action = EmptyAction()) : SensorData(sensorIn, sensorOut), UIImpl {
         override fun checkSensorOverlaps(entity: Entity, level: Level) {
             if (target != null) {
                 val target = target!!
@@ -69,7 +70,7 @@ class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeata
             }
         }
 
-        override fun insertImgui(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+        override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
             ImGuiHelper.entity(::target, level, editorSceneUI, "cible")
         }
     }
@@ -88,7 +89,7 @@ class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeata
         }
     }
 
-    override fun insertImgui(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         ImGuiHelper.addImguiWidgetsArray("sensors", sensors, { "sensor" }, { EntitySensorData(null) }, {
             val typeIndex = intArrayOf(if (it.obj is EntitySensorData) 0 else 1)
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
@@ -100,7 +101,7 @@ class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeata
                 }
             }
             ImGui.separator()
-            ImGuiHelper.insertImguiExposeEditorFields(it.obj, entity, level, editorSceneUI)
+            ImGuiHelper.insertUIFields(it.obj, entity, level, editorSceneUI)
         })
     }
 }

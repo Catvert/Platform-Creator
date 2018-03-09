@@ -4,8 +4,8 @@ package be.catvert.pc.eca.actions
 import be.catvert.pc.eca.Entity
 import be.catvert.pc.eca.components.RequiredComponent
 import be.catvert.pc.eca.components.logics.LifeComponent
-import be.catvert.pc.utility.Description
-import be.catvert.pc.utility.ExposeEditor
+import be.catvert.pc.ui.Description
+import be.catvert.pc.ui.UI
 import com.fasterxml.jackson.annotation.JsonCreator
 
 
@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
  */
 @RequiredComponent(LifeComponent::class)
 @Description("Permet d'ajouter/supprimer des points de vie à une entité")
-class LifeAction(@ExposeEditor var action: LifeActions) : Action() {
+class LifeAction(@UI var action: LifeActions) : Action() {
     @JsonCreator private constructor() : this(LifeActions.REMOVE_LP)
 
     /**

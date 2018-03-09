@@ -1,4 +1,4 @@
-package be.catvert.pc.utility
+package be.catvert.pc.ui
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)

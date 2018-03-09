@@ -9,6 +9,8 @@ import be.catvert.pc.eca.components.Component
 import be.catvert.pc.eca.components.RequiredComponent
 import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.eca.containers.EntityMatrixContainer
+import be.catvert.pc.ui.Description
+import be.catvert.pc.ui.UI
 import be.catvert.pc.utility.*
 import com.fasterxml.jackson.annotation.JsonCreator
 
@@ -21,12 +23,12 @@ import com.fasterxml.jackson.annotation.JsonCreator
  */
 @RequiredComponent(PhysicsComponent::class)
 @Description("Permet de déplacer automatiquement une entité sur un axe")
-class MoverComponent(@ExposeEditor(max = 100f) var moveSpeedX: Int, @ExposeEditor(max = 100f) var moveSpeedY: Int, @ExposeEditor var reverse: Boolean = false, @ExposeEditor var holdEntities: Boolean = false) : Component(), Updeatable {
+class MoverComponent(@UI(max = 100f) var moveSpeedX: Int, @UI(max = 100f) var moveSpeedY: Int, @UI var reverse: Boolean = false, @UI var holdEntities: Boolean = false) : Component(), Updeatable {
     @JsonCreator private constructor() : this(0, 0)
 
-    @ExposeEditor
+    @UI
     var onUnReverseAction: Action = EmptyAction()
-    @ExposeEditor
+    @UI
     var onReverseAction: Action = EmptyAction()
 
     private fun reverse() {

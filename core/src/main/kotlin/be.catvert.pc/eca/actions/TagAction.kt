@@ -7,6 +7,7 @@ import be.catvert.pc.eca.Tags
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.scenes.EditorScene
+import be.catvert.pc.ui.*
 import be.catvert.pc.utility.*
 import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
@@ -15,7 +16,7 @@ import imgui.ImGui
  * Permet d'effectuer une action sur toutes les entités ayant un tag précis présents dans l'active rect
  */
 @Description("[Expérimental] Permet d'effectuer une action sur toutes les entités ayant un tag précis")
-class TagAction(@ExposeEditor(customType = CustomType.TAG_STRING) val tag: EntityTag, var action: Action) : Action(), CustomEditorImpl {
+class TagAction(@UI(customType = CustomType.TAG_STRING) val tag: EntityTag, var action: Action) : Action(), UIImpl {
     @JsonCreator private constructor() : this(Tags.Player.tag, EmptyAction())
 
     override fun invoke(entity: Entity) {
@@ -24,7 +25,7 @@ class TagAction(@ExposeEditor(customType = CustomType.TAG_STRING) val tag: Entit
         }
     }
 
-    override fun insertImgui(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         entity.container?.findEntitiesByTag(tag)?.firstOrNull()?.apply {
             ImGuiHelper.action("action", ::action, this, level, editorSceneUI)
         } ?: PrefabFactory.values().firstOrNull { it.prefab.prefabGO.tag == tag }?.apply {

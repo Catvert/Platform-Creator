@@ -11,6 +11,7 @@ import be.catvert.pc.eca.components.Component
 import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.scenes.EditorScene
+import be.catvert.pc.ui.*
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.MathUtils
@@ -43,10 +44,10 @@ private data class JumpData(var isJumping: Boolean = false, var targetHeight: In
 data class CollisionListener(val entity: Entity, val collideEntity: Entity, val side: BoxSide, val triggerCallCount: Int)
 
 
-data class CollisionAction(@ExposeEditor(customName = "côté") var side: BoxSide = BoxSide.Left,
-                           @ExposeEditor(customName = "cible", customType = CustomType.TAG_STRING) var target: EntityTag = Tags.Player.tag,
-                           @ExposeEditor var action: Action = EmptyAction(),
-                           @ExposeEditor(customName = "appliquer l'action sur la cible") var applyActionOnCollider: Boolean = false)
+data class CollisionAction(@UI(customName = "côté") var side: BoxSide = BoxSide.Left,
+                           @UI(customName = "cible", customType = CustomType.TAG_STRING) var target: EntityTag = Tags.Player.tag,
+                           @UI var action: Action = EmptyAction(),
+                           @UI(customName = "appliquer l'action sur la cible") var applyActionOnCollider: Boolean = false)
 
 /**
  * Ce component permet d'ajouter à l'entité des propriétés physique tel que la gravité, vitesse de déplacement ...
@@ -61,20 +62,20 @@ data class CollisionAction(@ExposeEditor(customName = "côté") var side: BoxSid
  * @param onNothingAction Action appelée quand le entity ne subit aucune action physique
  */
 @Description("Ajoute des propriétés physique à une entité")
-class PhysicsComponent(@ExposeEditor(customName = "figée") var isStatic: Boolean,
-                       @ExposeEditor(customName = "vitesse", max = 100f) var moveSpeed: Int = 0,
-                       @ExposeEditor(customName = "déplacement", description = "Défini si le déplacement doit être \"fluide\" ou non.") var movementType: MovementType = MovementType.SMOOTH,
-                       @ExposeEditor(customName = "gravité") var gravity: Boolean = !isStatic,
-                       @ExposeEditor(customName = "est une plateforme") var isPlatform: Boolean = false,
+class PhysicsComponent(@UI(customName = "figée") var isStatic: Boolean,
+                       @UI(customName = "vitesse", max = 100f) var moveSpeed: Int = 0,
+                       @UI(customName = "déplacement", description = "Défini si le déplacement doit être \"fluide\" ou non.") var movementType: MovementType = MovementType.SMOOTH,
+                       @UI(customName = "gravité") var gravity: Boolean = !isStatic,
+                       @UI(customName = "est une plateforme") var isPlatform: Boolean = false,
                        val ignoreTags: ArrayList<EntityTag> = arrayListOf(),
                        val collisionsActions: ArrayList<CollisionAction> = arrayListOf(),
-                       @ExposeEditor(customName = "hauteur du saut", max = 1000f) var jumpHeight: Int = 0,
+                       @UI(customName = "hauteur du saut", max = 1000f) var jumpHeight: Int = 0,
                        var onLeftAction: Action = EmptyAction(),
                        var onRightAction: Action = EmptyAction(),
                        var onUpAction: Action = EmptyAction(),
                        var onDownAction: Action = EmptyAction(),
                        var onJumpAction: Action = EmptyAction(),
-                       var onNothingAction: Action = EmptyAction()) : Component(), Updeatable, CustomEditorImpl, CustomEditorTextImpl {
+                       var onNothingAction: Action = EmptyAction()) : Component(), Updeatable, UIImpl, UITextImpl {
     @JsonCreator private constructor() : this(true)
 
     /**
@@ -357,7 +358,7 @@ class PhysicsComponent(@ExposeEditor(customName = "figée") var isStatic: Boolea
         return collideEntities
     }
 
-    override fun insertImgui(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         ImGui.pushItemFlag(ItemFlags.Disabled.i, isStatic)
         functionalProgramming.collapsingHeader("actions de déplacement") {
             functionalProgramming.withIndent {
@@ -379,7 +380,7 @@ class PhysicsComponent(@ExposeEditor(customName = "figée") var isStatic: Boolea
 
         functionalProgramming.collapsingHeader("tags ignorés") {
             functionalProgramming.withIndent {
-                ImGuiHelper.addImguiWidgetsArray("tags ignorés", ignoreTags, { it }, { Tags.Player.tag }, entity, level, editorSceneUI, ExposeEditorFactory.createExposeEditor(customType = CustomType.TAG_STRING))
+                ImGuiHelper.addImguiWidgetsArray("tags ignorés", ignoreTags, { it }, { Tags.Player.tag }, entity, level, editorSceneUI, UIFactory.createUI(customType = CustomType.TAG_STRING))
             }
         }
 
