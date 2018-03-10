@@ -16,7 +16,7 @@ import com.badlogic.gdx.utils.I18NBundle
 /**
  * Permet de gérer les ressources
  */
-object ResourceManager : Disposable {
+object ResourcesManager : Disposable {
     private val assetManager = AssetManager()
 
     lateinit var defaultTexture: Texture

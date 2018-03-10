@@ -125,10 +125,10 @@ class PhysicsComponent(@UI(customName = "figée") var isStatic: Boolean,
 
         physicsActions.forEach actions@{
             when (it) {
-                PhysicsActions.GO_LEFT -> moveSpeedX -= moveSpeed
-                PhysicsActions.GO_RIGHT -> moveSpeedX += moveSpeed
-                PhysicsActions.GO_UP -> moveSpeedY += moveSpeed
-                PhysicsActions.GO_DOWN -> moveSpeedY -= moveSpeed
+                PhysicsActions.MOVE_LEFT -> moveSpeedX -= moveSpeed
+                PhysicsActions.MOVE_RIGHT -> moveSpeedX += moveSpeed
+                PhysicsActions.MOVE_UP -> moveSpeedY += moveSpeed
+                PhysicsActions.MOVE_DOWN -> moveSpeedY -= moveSpeed
                 PhysicsActions.JUMP, PhysicsActions.FORCE_JUMP -> {
                     if (level.applyGravity) {
                         if (!jumpData.isJumping) {
@@ -150,7 +150,7 @@ class PhysicsComponent(@UI(customName = "figée") var isStatic: Boolean,
                                 onJumpAction(entity)
                             }
                         } else {
-                            // Vérifie si le go est arrivé à la bonne hauteur de saut ou s'il rencontre un obstacle au dessus de lui
+                            // Vérifie si l'entité est arrivé à la bonne hauteur de saut ou si elle rencontre un obstacle au dessus d'elle
                             if (entity.box.y >= jumpData.targetHeight || move(false, 0f, 1f) || entity.box.top() == level.matrixRect.top()) {
                                 gravity = true
                                 jumpData.isJumping = false

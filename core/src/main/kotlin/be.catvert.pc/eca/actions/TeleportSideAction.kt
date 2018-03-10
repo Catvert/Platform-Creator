@@ -2,13 +2,10 @@ package be.catvert.pc.eca.actions
 
 import be.catvert.pc.builders.TweenBuilder
 import be.catvert.pc.eca.Entity
-import be.catvert.pc.eca.containers.Level
-import be.catvert.pc.scenes.EditorScene
+import be.catvert.pc.eca.EntityChecker
 import be.catvert.pc.tweens.MoveTween
 import be.catvert.pc.ui.Description
-import be.catvert.pc.ui.ImGuiHelper
 import be.catvert.pc.ui.UI
-import be.catvert.pc.ui.UIImpl
 import be.catvert.pc.utility.BoxSide
 import com.fasterxml.jackson.annotation.JsonCreator
 
@@ -16,14 +13,14 @@ import com.fasterxml.jackson.annotation.JsonCreator
  * Action permettant de téléporter une entité sur un des côtés d'une autre entité (centré au centre)
  */
 @Description("Permet de téléporter une entité sur un des côtés d'une autre entité")
-class TeleportSideAction(var teleportTo: Entity?, @UI var spawnSide: BoxSide, @UI var tweenMove: Boolean) : Action(), UIImpl {
-    @JsonCreator private constructor() : this(null, BoxSide.Up, true)
+class TeleportSideAction(@UI var teleportTo: EntityChecker, @UI var spawnSide: BoxSide, @UI var tweenMove: Boolean) : Action() {
+    @JsonCreator private constructor() : this(EntityChecker(), BoxSide.Up, true)
 
     override fun invoke(entity: Entity) {
-        if (teleportTo == null)
+        if (teleportTo.entity == null)
             return
 
-        val teleportTo = teleportTo!!
+        val teleportTo = teleportTo.entity!!
 
         entity.container?.apply {
             fun centerX() {
@@ -87,9 +84,5 @@ class TeleportSideAction(var teleportTo: Entity?, @UI var spawnSide: BoxSide, @U
                 }
             }
         }
-    }
-
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        ImGuiHelper.entity(::teleportTo, level, editorSceneUI)
     }
 }

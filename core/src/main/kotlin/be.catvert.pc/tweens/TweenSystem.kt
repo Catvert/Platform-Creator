@@ -1,7 +1,7 @@
 package be.catvert.pc.tweens
 
 import be.catvert.pc.eca.Entity
-import be.catvert.pc.eca.actions.RemoveGOAction
+import be.catvert.pc.eca.actions.RemoveEntityAction
 import be.catvert.pc.eca.components.graphics.TextureComponent
 import be.catvert.pc.utility.Updeatable
 
@@ -35,7 +35,7 @@ object TweenSystem : Updeatable {
             val loopTween = it.loopTween
 
             if (tween.update(entity)) {
-                if (tween.endAction !is RemoveGOAction && tween.useTweenState) // TODO workaround?
+                if (tween.endAction !is RemoveEntityAction && tween.useTweenState) // TODO workaround?
                     entity.setState(backupStateIndex, false)
 
                 tween.endAction.invoke(entity)

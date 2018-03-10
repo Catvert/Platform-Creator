@@ -2,6 +2,7 @@ package be.catvert.pc.ui
 
 import be.catvert.pc.PCGame
 import be.catvert.pc.eca.Entity
+import be.catvert.pc.eca.EntityChecker
 import be.catvert.pc.eca.EntityTag
 import be.catvert.pc.eca.Prefab
 import be.catvert.pc.eca.actions.Action
@@ -11,7 +12,7 @@ import be.catvert.pc.eca.components.graphics.TextureComponent
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.i18n.MenusText
-import be.catvert.pc.managers.ResourceManager
+import be.catvert.pc.managers.ResourcesManager
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
@@ -32,9 +33,9 @@ object ImGuiHelper {
         inline fun <reified T : Any> cast() = this as Item<T>
     }
 
-    private val settingsBtnIconHandle: Int = ResourceManager.getTexture(Constants.uiDirPath.child("settings.png")).textureObjectHandle
-    private val favBtnIconHandle: Int = ResourceManager.getTexture(Constants.uiDirPath.child("fav.png")).textureObjectHandle
-    private val tickButtonSound: Sound? = ResourceManager.getSound(Constants.gameDirPath.child("tick.mp3"))
+    private fun getSettingsBtnIconHandle(): Int = ResourcesManager.getTexture(Constants.uiDirPath.child("settings.png")).textureObjectHandle
+    private fun getFavBtnIconHandle(): Int = ResourcesManager.getTexture(Constants.uiDirPath.child("fav.png")).textureObjectHandle
+    private fun getTickButtonSound(): Sound? = ResourcesManager.getSound(Constants.gameDirPath.child("tick.mp3"))
 
     private val hoveredTickButtons = mutableSetOf<Int>()
 
@@ -156,17 +157,17 @@ object ImGuiHelper {
         }
     }
 
-    fun inputText(label: String, text: Item<String>) {
+    fun inputText(label: String, text: Item<String>, width: Float = Constants.defaultWidgetsWidth) {
         val buf = text.obj.toCharArray(CharArray(32))
-        functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
+        functionalProgramming.withItemWidth(width) {
             if (ImGui.inputText(label, buf))
                 text.obj = String(buf.filter { it.isPrintable }.toCharArray())
         }
     }
 
-    fun inputText(label: String, value: KMutableProperty0<String>) {
+    fun inputText(label: String, value: KMutableProperty0<String>, width: Float = Constants.defaultWidgetsWidth) {
         val item = Item(value())
-        inputText(label, item)
+        inputText(label, item, width)
         value.set(item.obj)
     }
 
@@ -299,8 +300,8 @@ object ImGuiHelper {
         return changed
     }
 
-    fun settingsButton(size: Vec2 = Vec2(g.fontSize)) = ImGui.imageButton(settingsBtnIconHandle, size, uv1 = Vec2(1))
-    fun favButton(size: Vec2 = Vec2(g.fontSize), tintColor: Vec4 = Vec4(1)) = ImGui.imageButton(favBtnIconHandle, size, uv1 = Vec2(1), tintCol = tintColor)
+    fun settingsButton(size: Vec2 = Vec2(g.fontSize)) = ImGui.imageButton(getSettingsBtnIconHandle(), size, uv1 = Vec2(1))
+    fun favButton(size: Vec2 = Vec2(g.fontSize), tintColor: Vec4 = Vec4(1)) = ImGui.imageButton(getFavBtnIconHandle(), size, uv1 = Vec2(1), tintCol = tintColor)
 
     fun entityTag(tag: Item<EntityTag>, level: Level, label: String = "tag") {
         val selectedIndex = intArrayOf(level.tags.indexOfFirst { it == tag.obj })
@@ -311,24 +312,23 @@ object ImGuiHelper {
         }
     }
 
-    fun entity(entity: KMutableProperty0<Entity?>, level: Level, editorSceneUI: EditorScene.EditorSceneUI, label: String = "entité") {
+    fun entity(entityChecker: EntityChecker, level: Level, editorSceneUI: EditorScene.EditorSceneUI, label: String = "entité") {
         val favTitle = "set entity fav"
 
         with(ImGui) {
             if (button("Sélect. $label", Vec2(Constants.defaultWidgetsWidth - g.fontSize - g.style.itemInnerSpacing.x * 3f, 0))) {
-                editorSceneUI.editorMode = EditorScene.EditorSceneUI.EditorMode.SELECT_GO
-                editorSceneUI.onSelectGO.register(true) {
-                    entity.set(it)
+                editorSceneUI.editorMode = EditorScene.EditorSceneUI.EditorMode.SELECT_ENTITY
+                editorSceneUI.onSelectEntity.register(true) {
+                    entityChecker.entity = it
                 }
             }
 
             if (isItemHovered()) {
                 functionalProgramming.withTooltip {
-                    val go = entity.get()
-                    if (go == null)
+                    if (entityChecker.entity == null)
                         textColored(Color.RED, "aucune entité sélectionnée")
                     else
-                        textPropertyColored(Color.ORANGE, "entité actuelle :", go.name)
+                        textPropertyColored(Color.ORANGE, "entité actuelle :", entityChecker.entity!!.name)
                 }
             }
 
@@ -340,7 +340,7 @@ object ImGuiHelper {
             val fav = favoritesPopup(favTitle, level)
 
             if (fav != null) {
-                entity.set(fav)
+                entityChecker.entity = fav
             }
         }
     }
@@ -348,20 +348,19 @@ object ImGuiHelper {
     private val favoritesIndex = mutableMapOf<String, IntArray>()
     fun favoritesPopup(id: String, level: Level): Entity? {
         var entity: Entity? = null
+        val favoris = level.favoris
 
         with(ImGui) {
             functionalProgramming.popup(id) {
-                if (level.favoris.isNotEmpty()) {
+                if (favoris.isNotEmpty()) {
                     functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                        searchCombo("favoris", favoritesIndex.getOrPut(id, { intArrayOf(0) }), level.favoris.map { it.name }, {
-                            val fav = level.favoris[it]
-
-                            texturePreviewTooltip(fav)
+                        searchCombo("favoris", favoritesIndex.getOrPut(id, { intArrayOf(0) }), favoris.map { it.name }, {
+                            texturePreviewTooltip(favoris[it])
                         })
                     }
 
                     if (button("Sélectionner", Vec2(-1, 0))) {
-                        entity = level.favoris[favoritesIndex[id]!![0]]
+                        entity = favoris[favoritesIndex[id]!![0]]
                         closeCurrentPopup()
                     }
                 } else {
@@ -369,6 +368,7 @@ object ImGuiHelper {
                 }
             }
         }
+
         return entity
     }
 
@@ -500,11 +500,23 @@ object ImGuiHelper {
         ImGui.textColored(Vec4(color.r, color.g, color.b, 1f), content.toString())
     }
 
-    fun textPropertyColored(color: Color, propertyName: String, value: Any) {
+    fun textPropertyColored(color: Color, propertyName: String, content: Any) {
         textColored(color, propertyName)
         ImGui.sameLine()
 
-        value.cast<UITextImpl>()?.insertText() ?: ImGui.text(value.toString())
+        content.cast<UITextImpl>()?.insertText() ?: ImGui.text(content.toString())
+    }
+
+    fun centeredTextColored(containerWidth: Float, color: Color, content: Any) {
+        ImGui.cursorPosX += containerWidth / 2 - ImGui.calcTextSize(content.toString()).x / 2
+        textColored(color, content)
+    }
+
+    fun centeredTextPropertyColored(containerWidth: Float, color: Color, propertyName: String, content: Any) {
+        ImGui.cursorPosX += containerWidth / 2f - ImGui.calcTextSize(propertyName + content.toString()).x / 2f - 0.5f
+        textColored(color, propertyName)
+        ImGui.sameLine(0f, 1f)
+        ImGui.text(content.toString())
     }
 
     fun tickSoundButton(label: String, size: Vec2): Boolean {
@@ -514,7 +526,7 @@ object ImGuiHelper {
 
         if (ImGui.isItemHovered()) {
             if (!hoveredTickButtons.contains(id)) {
-                tickButtonSound?.play(PCGame.soundVolume)
+                getTickButtonSound()?.play(PCGame.soundVolume)
                 hoveredTickButtons.add(id)
             }
         } else hoveredTickButtons.remove(id)
@@ -526,8 +538,8 @@ object ImGuiHelper {
         with(ImGui) {
             pushStyleColor(Col.WindowBg, ImGui.getStyleColorVec4(Col.WindowBg).apply { a = 0f })
             pushStyleColor(Col.Border, ImGui.getStyleColorVec4(Col.Border).apply { a = 0f })
-            pushStyleColor(Col.Button, Vec4.fromColor(29, 114, 249, 200))
-            pushStyleColor(Col.ButtonHovered, Vec4.fromColor(22, 85, 186, 200))
+            pushStyleColor(Col.Button, Vec4.fromColor(29, 114, 249, 255))
+            pushStyleColor(Col.ButtonHovered, Vec4.fromColor(22, 85, 186, 255))
             pushStyleColor(Col.ButtonActive, Vec4.fromColor(22, 85, 186, 255))
             pushStyleColor(Col.Text, Vec4(1))
             pushStyleVar(StyleVar.FrameRounding, 15f)

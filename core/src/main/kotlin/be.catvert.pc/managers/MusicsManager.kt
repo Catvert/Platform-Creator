@@ -14,7 +14,7 @@ import com.badlogic.gdx.utils.GdxRuntimeException
 /**
  * Permet de gérer la musique
  */
-object MusicManager : Updeatable, Disposable {
+object MusicsManager : Updeatable, Disposable {
     private var musics = mutableMapOf<FileHandle, Music>()
 
     private var music: Music? = null

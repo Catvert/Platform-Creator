@@ -7,8 +7,8 @@ import be.catvert.pc.eca.Prefab
 import be.catvert.pc.eca.Tags
 import be.catvert.pc.eca.components.graphics.TextureComponent
 import be.catvert.pc.factories.PrefabFactory
-import be.catvert.pc.managers.ResourceManager
-import be.catvert.pc.managers.ScriptManager
+import be.catvert.pc.managers.ResourcesManager
+import be.catvert.pc.managers.ScriptsManager
 import be.catvert.pc.scenes.GameScene
 import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.*
@@ -40,8 +40,8 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
 
     @JsonIgnore
     var exit: (success: Boolean) -> Unit = {
-        ResourceManager.getSound(if (it) Constants.gameDirPath.child("game-over-success.wav") else Constants.gameDirPath.child("game-over-fail.wav"))?.play(PCGame.soundVolume)
-        PCGame.sceneManager.loadScene(GameScene(SerializationFactory.deserializeFromFile(levelPath.toLocalFile())))
+        ResourcesManager.getSound(if (it) Constants.gameDirPath.child("game-over-success.wav") else Constants.gameDirPath.child("game-over-fail.wav"))?.play(PCGame.soundVolume)
+        PCGame.scenesManager.loadScene(GameScene(SerializationFactory.deserializeFromFile(levelPath.toLocalFile())))
     }
 
     @JsonIgnore
@@ -87,7 +87,7 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
         else {
             Utility.getFilesRecursivly(levelScripts.first, *Constants.levelScriptExtension).forEach {
                 try {
-                    levelScripts.second.add(Script(it, ScriptManager.compile(it)))
+                    levelScripts.second.add(Script(it, ScriptsManager.compile(it)))
                 } catch (e: ScriptException) {
                     Log.error(e) { "Impossible de charger le script : $it" }
                 }
@@ -119,7 +119,7 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
                 }
                 Constants.levelScriptExtension.contains(it.extension()) -> {
                     it.copyTo(levelScripts.first)
-                    levelScripts.second.add(Script(it, ScriptManager.compile(it)))
+                    levelScripts.second.add(Script(it, ScriptsManager.compile(it)))
                 }
             }
         }
@@ -143,11 +143,9 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
 
         activeRect.size = Size((viewportWidth * 1.5f).roundToInt(), (viewportHeight * 1.5f).roundToInt())
 
-        if (followEntity != null) {
-            val go = followEntity!!
-
-            val posX = MathUtils.clamp(go.position().x + go.size().width / 2f, viewportWidth / 2f, matrixRect.width - viewportWidth / 2f)
-            val posY = MathUtils.clamp(go.position().y + go.size().height / 2f, viewportHeight / 2f, matrixRect.height - viewportHeight / 2f)
+        if (followEntity.entity != null) {
+            val posX = MathUtils.clamp(followEntity.entity!!.box.center().x, viewportWidth / 2f, matrixRect.width - viewportWidth / 2f)
+            val posY = MathUtils.clamp(followEntity.entity!!.box.center().y, viewportHeight / 2f, matrixRect.height - viewportHeight / 2f)
 
             val lerpX = MathUtils.lerp(camera.position.x, posX, 0.1f).clamp(viewportWidth / 2f, matrixRect.width - viewportWidth / 2f)
             val lerpY = MathUtils.lerp(camera.position.y, posY, 0.1f).clamp(viewportHeight / 2f, matrixRect.height - viewportHeight / 2f)
@@ -170,12 +168,13 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
     override fun onPostDeserialization() {
         super.onPostDeserialization()
         zoom = initialZoom
+
     }
 
     override fun update() {
         super.update()
 
-        if (allowUpdatingGO)
+        if (allowUpdating)
             timer.update()
     }
 
@@ -187,8 +186,8 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
                 levelDir.deleteDirectory()
             }
             levelDir.mkdirs()
-            val level = Level(levelDir.child(Constants.levelDataFile).path(), Constants.gameVersion, PCGame.parallaxBackgrounds().elementAtOrNull(0)
-                    ?: PCGame.standardBackgrounds().elementAtOrNull(0), null)
+            val level = Level(levelDir.child(Constants.levelDataFile).path(), Constants.gameVersion, PCGame.getParallaxBackgrounds().elementAtOrNull(0)
+                    ?: PCGame.getStandardBackgrounds().elementAtOrNull(0), null)
 
             val ground = PrefabFactory.PhysicsSprite.prefab.create(Point(0f, 0f), level)
             ground.getCurrentState().getComponent<TextureComponent>()?.data?.elementAtOrNull(0)?.apply {
@@ -199,7 +198,7 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
 
             val player = PrefabFactory.Player_Kenney.prefab.create(Point(100f, 50f), level)
 
-            level.followEntity = player
+            level.followEntity.entity = player
 
             level.favoris.add(player)
 
@@ -209,6 +208,7 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
         }
 
         fun loadFromFile(levelDir: FileHandle): Level? {
+            Log.info { "Chargement du niveau : $levelDir" }
             try {
                 val level = SerializationFactory.deserializeFromFile<Level>(levelDir.child(Constants.levelDataFile))
 

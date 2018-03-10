@@ -18,8 +18,14 @@ import com.badlogic.gdx.utils.ScreenUtils
 import com.esotericsoftware.reflectasm.ClassAccess
 import ktx.assets.Asset
 import ktx.assets.loadOnDemand
+import java.io.File
+import java.io.FileOutputStream
 import java.lang.reflect.Field
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
+import java.util.zip.ZipOutputStream
 import kotlin.math.roundToInt
+
 
 /**
  * Extension permettant de dessiner facilement une texture avec un Rect
@@ -106,7 +112,54 @@ object Utility {
     }
 
     /**
+     * Permet de zipper un dossier
+     */
+    fun zipFile(zipFile: FileHandle, fileName: String, zipOutputStream: ZipOutputStream) {
+        if (zipFile.isDirectory) {
+            zipFile.list().forEach {
+                Utility.zipFile(it, "$fileName/${it.name()}", zipOutputStream)
+            }
+            return
+        }
+
+        zipOutputStream.putNextEntry(ZipEntry(fileName))
+        zipOutputStream.write(zipFile.readBytes())
+        zipOutputStream.closeEntry()
+    }
+
+    /**
+     * Permet de dé-zipper un fichier
+     */
+    fun unzipFile(zipFile: FileHandle, destinationDir: FileHandle) {
+        if (!destinationDir.exists())
+            destinationDir.mkdirs()
+
+        val fis = zipFile.read()
+        val zipInputStream = ZipInputStream(fis)
+        var entry: ZipEntry? = zipInputStream.nextEntry
+
+        while (entry != null) {
+            val fileName = entry.name
+
+            val newFile = FileHandle("$destinationDir/$fileName")
+
+            newFile.parent().mkdirs()
+
+            val fos = newFile.write(false)
+            fos.write(zipInputStream.readBytes())
+            fos.close()
+            zipInputStream.closeEntry()
+            entry = zipInputStream.nextEntry
+        }
+
+        zipInputStream.closeEntry()
+        zipInputStream.close()
+        fis.close()
+    }
+
+    /**
      * Permet de retourné l'écart de temps entre 2 rafraîchissement de l'écran en évitant la spirale de la mort
+     * Plus d'info : https://gafferongames.com/post/fix_your_timestep/
      */
     fun getDeltaTime() = Math.min(Gdx.graphics.deltaTime, 0.1f)
 }

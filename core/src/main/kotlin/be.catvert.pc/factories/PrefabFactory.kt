@@ -39,7 +39,7 @@ object PrefabSetup {
             }
             .build())
 
-    val killActionTween = MultiplexerAction(TweenAction(TweenFactory.RemoveGO(), false), TweenAction(TweenFactory.ReduceSize(), false))
+    val killActionTween = MultiplexerAction(TweenAction(TweenFactory.RemoveEntity(), false), TweenAction(TweenFactory.ReduceSize(), false))
 
     fun playerAction(action: Action) = TagAction(Tags.Player.tag, action)
 }
@@ -86,10 +86,10 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         )
 
                         withComponent(InputComponent(
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_LEFT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_LEFT), TextureFlipAction(true, false))),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_RIGHT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_RIGHT), TextureFlipAction(false, false))),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_UP.key, true, PhysicsAction(PhysicsAction.PhysicsActions.GO_UP)),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_DOWN.key, true, PhysicsAction(PhysicsAction.PhysicsActions.GO_DOWN)),
+                                InputComponent.InputData(GameKeys.GAME_PLAYER_LEFT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.MOVE_LEFT), TextureFlipAction(true, false))),
+                                InputComponent.InputData(GameKeys.GAME_PLAYER_RIGHT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.MOVE_RIGHT), TextureFlipAction(false, false))),
+                                InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_UP.key, true, PhysicsAction(PhysicsAction.PhysicsActions.MOVE_UP)),
+                                InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_DOWN.key, true, PhysicsAction(PhysicsAction.PhysicsActions.MOVE_DOWN)),
                                 InputComponent.InputData(GameKeys.GAME_PLAYER_JUMP.key, false, PhysicsAction(PhysicsAction.PhysicsActions.JUMP)))
                         )
 
@@ -170,7 +170,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
 
                         withComponent(SoundComponent(SoundComponent.SoundData(Constants.soundsDirPath.child("coin.wav").toFileWrapper())))
 
-                        withComponent(SensorComponent(SensorComponent.TagSensorData(sensorIn = MultiplexerAction(SoundAction(0), ScoreAction(1), TweenAction(TweenFactory.RemoveGO(), false)))))
+                        withComponent(SensorComponent(SensorComponent.TagSensorData(sensorIn = MultiplexerAction(SoundAction(0), ScoreAction(1), TweenAction(TweenFactory.RemoveEntity(), false)))))
                     }
                     .build()
     )),
@@ -188,7 +188,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                                 CollisionAction(BoxSide.All, Tags.Enemy.tag, LifeAction(LifeAction.LifeActions.REMOVE_LP), true)
                         ), ignoreTags = arrayListOf(Tags.Player.tag)))
 
-                        withComponent(MoverComponent(15, 0, true).apply { this.onUnReverseAction = RemoveGOAction() })
+                        withComponent(MoverComponent(15, 0, true).apply { this.onUnReverseAction = RemoveEntityAction() })
                     }
                     .build())),
 
@@ -202,7 +202,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                                 CollisionAction(BoxSide.All, Tags.Enemy.tag, LifeAction(LifeAction.LifeActions.REMOVE_LP), true)
                         ), ignoreTags = arrayListOf(Tags.Player.tag)))
 
-                        withComponent(MoverComponent(15, 0).apply { this.onReverseAction = RemoveGOAction() })
+                        withComponent(MoverComponent(15, 0).apply { this.onReverseAction = RemoveEntityAction() })
                     }
                     .build())),
 
@@ -222,10 +222,10 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         )
 
                         withComponent(InputComponent(
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_LEFT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_LEFT), TextureFlipAction(true, false))),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_RIGHT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_RIGHT), TextureFlipAction(false, false))),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_UP.key, true, PhysicsAction(PhysicsAction.PhysicsActions.GO_UP)),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_DOWN.key, true, PhysicsAction(PhysicsAction.PhysicsActions.GO_DOWN)),
+                                InputComponent.InputData(GameKeys.GAME_PLAYER_LEFT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.MOVE_LEFT), TextureFlipAction(true, false))),
+                                InputComponent.InputData(GameKeys.GAME_PLAYER_RIGHT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.MOVE_RIGHT), TextureFlipAction(false, false))),
+                                InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_UP.key, true, PhysicsAction(PhysicsAction.PhysicsActions.MOVE_UP)),
+                                InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_DOWN.key, true, PhysicsAction(PhysicsAction.PhysicsActions.MOVE_DOWN)),
                                 InputComponent.InputData(GameKeys.GAME_PLAYER_JUMP.key, false, PhysicsAction(PhysicsAction.PhysicsActions.JUMP)))
                         )
 
@@ -257,10 +257,10 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         )
 
                         withComponent(InputComponent(
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_LEFT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_LEFT), TextureFlipAction(true, false))),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_RIGHT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_RIGHT), TextureFlipAction(false, false))),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_UP.key, true, PhysicsAction(PhysicsAction.PhysicsActions.GO_UP)),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_DOWN.key, true, PhysicsAction(PhysicsAction.PhysicsActions.GO_DOWN)),
+                                InputComponent.InputData(GameKeys.GAME_PLAYER_LEFT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.MOVE_LEFT), TextureFlipAction(true, false))),
+                                InputComponent.InputData(GameKeys.GAME_PLAYER_RIGHT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.MOVE_RIGHT), TextureFlipAction(false, false))),
+                                InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_UP.key, true, PhysicsAction(PhysicsAction.PhysicsActions.MOVE_UP)),
+                                InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_DOWN.key, true, PhysicsAction(PhysicsAction.PhysicsActions.MOVE_DOWN)),
                                 InputComponent.InputData(GameKeys.GAME_PLAYER_JUMP.key, false, PhysicsAction(PhysicsAction.PhysicsActions.JUMP)))
                         )
 
@@ -292,10 +292,10 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         )
 
                         withComponent(InputComponent(
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_LEFT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_LEFT), TextureFlipAction(true, false))),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_RIGHT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.GO_RIGHT), TextureFlipAction(false, false))),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_UP.key, true, PhysicsAction(PhysicsAction.PhysicsActions.GO_UP)),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_DOWN.key, true, PhysicsAction(PhysicsAction.PhysicsActions.GO_DOWN)),
+                                InputComponent.InputData(GameKeys.GAME_PLAYER_LEFT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.MOVE_LEFT), TextureFlipAction(true, false))),
+                                InputComponent.InputData(GameKeys.GAME_PLAYER_RIGHT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.MOVE_RIGHT), TextureFlipAction(false, false))),
+                                InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_UP.key, true, PhysicsAction(PhysicsAction.PhysicsActions.MOVE_UP)),
+                                InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_DOWN.key, true, PhysicsAction(PhysicsAction.PhysicsActions.MOVE_DOWN)),
                                 InputComponent.InputData(GameKeys.GAME_PLAYER_JUMP.key, false, PhysicsAction(PhysicsAction.PhysicsActions.JUMP)),
                                 InputComponent.InputData(Input.Keys.E, false, TextureFlipSwitcherAction(unFlipXAction = SpawnSideAction(FireBall_Right_SMC.prefab, BoxSide.Right, false), flipXAction = SpawnSideAction(FireBall_Left_SMC.prefab, BoxSide.Left, false))))
                         )
@@ -391,7 +391,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         withComponent(TextureComponent(0, TextureComponent.TextureData("default", Constants.packsSMCDirPath.child("items.atlas").toFileWrapper() to "mushroom_red")))
 
                         withComponent(PhysicsComponent(false, 5, collisionsActions = arrayListOf(
-                                CollisionAction(BoxSide.All, action = MultiplexerAction(PrefabSetup.playerAction(StateSwitcherAction(0 to StateAction(1))), TweenAction(TweenFactory.RemoveGO(), false))))
+                                CollisionAction(BoxSide.All, action = MultiplexerAction(PrefabSetup.playerAction(StateSwitcherAction(0 to StateAction(1))), TweenAction(TweenFactory.RemoveEntity(), false))))
                         ))
 
                         withComponent(MoverComponent(5, 0))
@@ -405,7 +405,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         withComponent(TextureComponent(0, TextureComponent.TextureData("default", Constants.packsSMCDirPath.child("items.atlas").toFileWrapper() to "fireplant")))
 
                         withComponent(PhysicsComponent(false, 0, collisionsActions = arrayListOf(
-                                CollisionAction(BoxSide.All, action = MultiplexerAction(PrefabSetup.playerAction(StateAction(2)), TweenAction(TweenFactory.RemoveGO(), false))))
+                                CollisionAction(BoxSide.All, action = MultiplexerAction(PrefabSetup.playerAction(StateAction(2)), TweenAction(TweenFactory.RemoveEntity(), false))))
                         ))
                     }
                     .build()

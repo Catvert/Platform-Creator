@@ -3,6 +3,7 @@ package be.catvert.pc.eca.containers
 import be.catvert.pc.GameKeys
 import be.catvert.pc.PCGame
 import be.catvert.pc.eca.Entity
+import be.catvert.pc.eca.EntityChecker
 import be.catvert.pc.eca.EntityTag
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
@@ -110,7 +111,7 @@ abstract class EntityMatrixContainer : EntityContainer() {
     @JsonIgnore
     var drawDebugCells = false
 
-    var followEntity: Entity? = null
+    var followEntity = EntityChecker()
 
     override val processEntities: Set<Entity>
         get() = getAllEntitiesInCells(activeGridCells)
@@ -123,10 +124,10 @@ abstract class EntityMatrixContainer : EntityContainer() {
         if (Gdx.input.isKeyJustPressed(GameKeys.DEBUG_MODE.key))
             drawDebugCells = !drawDebugCells
 
-        if (followEntity != null && allowUpdatingGO) {
+        if (followEntity.entity != null && allowUpdating) {
             activeRect.position = Point(
-                    (followEntity!!.box.center().x.roundToInt().toFloat() - activeRect.width / 2).clamp(matrixRect.left(), (matrixRect.right() - activeRect.width).max(0f)),
-                    ((followEntity!!.box.center().y.roundToInt().toFloat() - activeRect.height / 2)).clamp(matrixRect.bottom(), (matrixRect.top() - activeRect.height)).max(0f))
+                    (followEntity.entity!!.box.center().x.roundToInt().toFloat() - activeRect.width / 2).clamp(matrixRect.left(), (matrixRect.right() - activeRect.width).max(0f)),
+                    ((followEntity.entity!!.box.center().y.roundToInt().toFloat() - activeRect.height / 2)).clamp(matrixRect.bottom(), (matrixRect.top() - activeRect.height)).max(0f))
         }
 
         super.update()

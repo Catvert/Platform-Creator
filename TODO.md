@@ -9,10 +9,8 @@
 
 ## BUGS
 
-- Si le joueur est supprimé mais toujours en follow camera(ou autre genre en gameObjectAction) -> présent mais pas dans la matrix
-- Si hauteur > x ( haut a plus de 10 cell à mon avis ), possible crash depuis le TweenSystem.update si c'est des pièces par exemples.
-- Bug delta time trop grand (physics problem)
-
+- Si le joueur est supprimé mais toujours en follow camera(ou autre genre en gameObjectAction) -> présent mais pas dans la matrix -> check si l'entité est valide lors de la sérialisation
+- Bug select entity multiple select chelou 
 ## IDÉE
 
 - Place order pour l'expose editor 

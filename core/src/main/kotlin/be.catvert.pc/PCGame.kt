@@ -4,9 +4,9 @@ import be.catvert.pc.builders.EntityBuilder
 import be.catvert.pc.eca.components.graphics.TextureComponent
 import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.i18n.Locales
-import be.catvert.pc.managers.MusicManager
-import be.catvert.pc.managers.ResourceManager
-import be.catvert.pc.managers.SceneManager
+import be.catvert.pc.managers.MusicsManager
+import be.catvert.pc.managers.ResourcesManager
+import be.catvert.pc.managers.ScenesManager
 import be.catvert.pc.scenes.MainMenuScene
 import be.catvert.pc.tweens.TweenSystem
 import be.catvert.pc.utility.*
@@ -51,7 +51,7 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
 
         Log.info { "Initialisation en cours.. \n Taille : ${Gdx.graphics.width}x${Gdx.graphics.height}" }
 
-        ResourceManager.init()
+        ResourcesManager.init()
 
         Utility.getFilesRecursivly(Locales.menusPath.parent(), "properties").forEach {
             if (it.name().startsWith("bundle_"))
@@ -66,16 +66,6 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         PCGame.defaultProjection = mainBatch.projectionMatrix.cpy()
 
         PCGame.mainFont = BitmapFont(Constants.mainFontPath)
-
-        Utility.getFilesRecursivly(Constants.backgroundsDirPath.child("standard"), *Constants.levelTextureExtension).forEach {
-            standardBackgrounds.add(StandardBackground(it.toFileWrapper()))
-        }
-
-        Utility.getFilesRecursivly(Constants.backgroundsDirPath.child("parallax"), "data").forEach {
-            parallaxBackgrounds.add(ParallaxBackground(it.toFileWrapper()))
-        }
-
-        mainBackground = StandardBackground(Constants.gameBackgroundMenuPath.toFileWrapper())
 
         gamePacks = let {
             val packs = mutableMapOf<FileHandle, List<FileHandle>>()
@@ -96,7 +86,7 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
 
         initializeUI()
 
-        sceneManager = SceneManager(MainMenuScene(true))
+        scenesManager = ScenesManager(MainMenuScene(true))
     }
 
     override fun render() {
@@ -104,19 +94,19 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
 
         Gdx.graphics.setTitle(Constants.gameTitle + " - ${Gdx.graphics.framesPerSecond} FPS")
 
-        sceneManager.update()
+        scenesManager.update()
 
         TweenSystem.update()
 
-        MusicManager.update()
+        MusicsManager.update()
 
-        sceneManager.render(mainBatch)
+        scenesManager.render(mainBatch)
     }
 
     override fun resize(width: Int, height: Int) {
         super.resize(width, height)
 
-        sceneManager.resize(Size(width, height))
+        scenesManager.resize(Size(width, height))
         defaultProjection.setToOrtho2D(0f, 0f, width.toFloat(), height.toFloat())
     }
 
@@ -129,12 +119,12 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         mainBatch.dispose()
         hudBatch.dispose()
 
-        sceneManager.dispose()
+        scenesManager.dispose()
 
         mainFont.dispose()
 
-        ResourceManager.dispose()
-        MusicManager.dispose()
+        ResourcesManager.dispose()
+        MusicsManager.dispose()
 
         Log.dispose()
 
@@ -145,16 +135,13 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
     companion object {
         val imguiCtx = Context()
 
-        private val standardBackgrounds = mutableListOf<StandardBackground>()
-        private val parallaxBackgrounds = mutableListOf<ParallaxBackground>()
-
         lateinit var mainBatch: SpriteBatch
             private set
 
         lateinit var hudBatch: SpriteBatch
             private set
 
-        lateinit var sceneManager: SceneManager
+        lateinit var scenesManager: ScenesManager
             private set
 
         var locale = Locale.FRENCH
@@ -181,9 +168,6 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         lateinit var gameSounds: List<FileHandle>
             private set
         lateinit var gameMusics: List<FileHandle>
-            private set
-
-        lateinit var mainBackground: Background
             private set
 
         var soundVolume = 1f
@@ -246,8 +230,8 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
 
         val availableLocales = mutableListOf<Locale>(Locale.FRENCH)
 
-        fun standardBackgrounds() = standardBackgrounds.toList()
-        fun parallaxBackgrounds() = parallaxBackgrounds.toList()
+        fun getStandardBackgrounds() =   Utility.getFilesRecursivly(Constants.backgroundsDirPath.child("standard"), *Constants.levelTextureExtension).map { StandardBackground(it.toFileWrapper()) }
+        fun getParallaxBackgrounds() = Utility.getFilesRecursivly(Constants.backgroundsDirPath.child("parallax"), "data").map { ParallaxBackground(it.toFileWrapper()) }
 
         /**
          * Permet de retourner le logo du jeu

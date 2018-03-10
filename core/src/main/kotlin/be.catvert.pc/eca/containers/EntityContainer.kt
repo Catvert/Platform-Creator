@@ -18,9 +18,9 @@ abstract class EntityContainer : Renderable, Updeatable, PostDeserialization, Re
         get() = entities
 
     @JsonIgnore
-    var allowRenderingGO = true
+    var allowRendering = true
     @JsonIgnore
-    var allowUpdatingGO = true
+    var allowUpdating = true
 
     private val removeEntities = mutableSetOf<Entity>()
 
@@ -51,13 +51,13 @@ abstract class EntityContainer : Renderable, Updeatable, PostDeserialization, Re
     }
 
     override fun render(batch: Batch) {
-        if (allowRenderingGO)
+        if (allowRendering)
             processEntities.sortedBy { it.layer }.forEach { it.render(batch) }
     }
 
     override fun update() {
         processEntities.forEach {
-            if (allowUpdatingGO)
+            if (allowUpdating)
                 it.update()
 
             if (it.position().y < 0) {

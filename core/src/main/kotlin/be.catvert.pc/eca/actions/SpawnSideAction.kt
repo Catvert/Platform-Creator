@@ -16,14 +16,14 @@ class SpawnSideAction(@UI var prefab: Prefab, @UI var spawnSide: BoxSide, @UI va
 
     override fun invoke(entity: Entity) {
         entity.container?.apply {
-            val go = prefab.create(entity.box.position, this)
+            val entity = prefab.create(entity.box.position, this)
 
             fun centerX() {
-                go.box.x = entity.box.x + entity.box.width / 2 - go.box.width / 2
+                entity.box.x = entity.box.x + entity.box.width / 2 - entity.box.width / 2
             }
 
             fun centerY() {
-                go.box.y = entity.box.y + entity.box.height / 2 - go.box.height / 2
+                entity.box.y = entity.box.y + entity.box.height / 2 - entity.box.height / 2
             }
 
             if (tweenMove) {
@@ -32,46 +32,46 @@ class SpawnSideAction(@UI var prefab: Prefab, @UI var spawnSide: BoxSide, @UI va
 
                 when (spawnSide) {
                     BoxSide.Left -> {
-                        moveX = -go.box.width
-                        go.box.x = entity.box.x
+                        moveX = -entity.box.width
+                        entity.box.x = entity.box.x
                         centerY()
                     }
                     BoxSide.Right -> {
-                        moveX = go.box.width
-                        go.box.x = entity.box.right() - go.box.width
+                        moveX = entity.box.width
+                        entity.box.x = entity.box.right() - entity.box.width
                         centerY()
                     }
                     BoxSide.Up -> {
-                        moveY = go.box.height
-                        go.box.y = entity.box.top() - go.box.height
+                        moveY = entity.box.height
+                        entity.box.y = entity.box.top() - entity.box.height
                         centerX()
                     }
                     BoxSide.Down -> {
-                        moveY = -go.box.height
-                        go.box.y = entity.box.y
+                        moveY = -entity.box.height
+                        entity.box.y = entity.box.y
                         centerX()
                     }
                     BoxSide.All -> {
                     }
                 }
 
-                TweenAction(TweenBuilder(MoveTween(0.5f, moveX, moveY), true).build(), false).invoke(go)
+                TweenAction(TweenBuilder(MoveTween(0.5f, moveX, moveY), true).build(), false).invoke(entity)
             } else {
                 when (spawnSide) {
                     BoxSide.Left -> {
-                        go.box.x = entity.box.x - go.box.width
+                        entity.box.x = entity.box.x - entity.box.width
                         centerY()
                     }
                     BoxSide.Right -> {
-                        go.box.x = entity.box.right()
+                        entity.box.x = entity.box.right()
                         centerY()
                     }
                     BoxSide.Up -> {
-                        go.box.y = entity.box.top()
+                        entity.box.y = entity.box.top()
                         centerX()
                     }
                     BoxSide.Down -> {
-                        go.box.y = entity.box.y - go.box.height
+                        entity.box.y = entity.box.y - entity.box.height
                         centerX()
                     }
                     BoxSide.All -> {

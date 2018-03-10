@@ -1,7 +1,7 @@
 package be.catvert.pc.utility
 
 import be.catvert.pc.Log
-import be.catvert.pc.managers.ResourceManager
+import be.catvert.pc.managers.ResourcesManager
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
@@ -22,7 +22,7 @@ enum class BackgroundType {
 sealed class Background(val type: BackgroundType) : Renderable
 
 class StandardBackground(val backgroundFile: FileWrapper) : Background(BackgroundType.Standard) {
-    private val background = ResourceManager.getTexture(backgroundFile.get())
+    private val background = ResourcesManager.getTexture(backgroundFile.get())
 
     override fun render(batch: Batch) {
         batch.draw(background, 0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
@@ -47,7 +47,7 @@ class ParallaxBackground(val parallaxDataFile: FileWrapper) : Background(Backgro
                 val layerFile = it.getString("file")
                 val applyYOffset = it.getBoolean("applyYOffset")
                 val speed = it.getFloat("speed")
-                layers += Layer(TextureRegion(ResourceManager.getTexture(parallaxDataFile.get().parent().child(layerFile)).apply { setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat) }), applyYOffset, speed)
+                layers += Layer(TextureRegion(ResourcesManager.getTexture(parallaxDataFile.get().parent().child(layerFile)).apply { setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat) }), applyYOffset, speed)
             }
         } catch (e: Exception) {
             Log.error(e) { "Une erreur s'est produite lors du chargement d'un fond d'écran parallax !" }

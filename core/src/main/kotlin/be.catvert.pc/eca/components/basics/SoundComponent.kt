@@ -4,7 +4,7 @@ import be.catvert.pc.PCGame
 import be.catvert.pc.eca.Entity
 import be.catvert.pc.eca.components.Component
 import be.catvert.pc.eca.containers.Level
-import be.catvert.pc.managers.ResourceManager
+import be.catvert.pc.managers.ResourcesManager
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.ui.Description
 import be.catvert.pc.ui.ImGuiHelper
@@ -38,7 +38,7 @@ class SoundComponent(var sounds: ArrayList<SoundData>) : Component(), ResourceLo
         }
 
         override fun loadResources() {
-            sound = ResourceManager.getSound(soundFile.get())
+            sound = ResourcesManager.getSound(soundFile.get())
         }
 
         override fun toString(): String = soundFile.get().nameWithoutExtension()

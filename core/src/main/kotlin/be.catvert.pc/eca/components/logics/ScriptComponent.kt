@@ -4,7 +4,7 @@ import be.catvert.pc.Log
 import be.catvert.pc.eca.Entity
 import be.catvert.pc.eca.components.Component
 import be.catvert.pc.eca.containers.Level
-import be.catvert.pc.managers.ScriptManager
+import be.catvert.pc.managers.ScriptsManager
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.ui.UIImpl
 import be.catvert.pc.utility.Constants
@@ -23,10 +23,10 @@ class ScriptComponent(var scriptIndex: Int) : Component(), Updeatable, UIImpl {
     private fun executeFunction(name: String, vararg params: Any) {
         entity.container.cast<Level>()?.apply {
             resourcesScripts().elementAtOrNull(scriptIndex)?.apply {
-                compiledScript.eval(ScriptManager.bindings)
+                compiledScript.eval(ScriptsManager.bindings)
 
                 try {
-                    ScriptManager.invokeFunction(name, *params)
+                    ScriptsManager.invokeFunction(name, *params)
                 } catch (e: NoSuchMethodException) {
                     Log.error(e) { "Impossible de trouver la méthode $name dans le script : $file" }
                 } catch (e: ScriptException) {

@@ -11,7 +11,7 @@ import imgui.ImGui
  * Action permettant de supprimer une entité
  */
 @Description("Permet de supprimer une entité")
-class RemoveGOAction : Action(), UIImpl {
+class RemoveEntityAction : Action(), UIImpl {
     override fun invoke(entity: Entity) {
         entity.removeFromParent()
     }

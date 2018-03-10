@@ -4,7 +4,7 @@ import be.catvert.pc.PCGame
 import be.catvert.pc.eca.Entity
 import be.catvert.pc.eca.components.Component
 import be.catvert.pc.eca.containers.Level
-import be.catvert.pc.managers.ResourceManager
+import be.catvert.pc.managers.ResourcesManager
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.ui.*
 import be.catvert.pc.utility.*
@@ -123,7 +123,7 @@ class TextureComponent(var currentIndex: Int = 0, var data: ArrayList<TextureDat
         fun previousFrameRegion(regionIndex: Int) {
             this.regions.elementAtOrNull(regionIndex)?.apply {
                 if (this.second != textureIdentifier) {
-                    val pack = ResourceManager.getPack(this.first.get())
+                    val pack = ResourcesManager.getPack(this.first.get())
                     val region = loadRegion(this)
 
                     val packRegions = pack.regions.sortedBy { it.name }
@@ -144,7 +144,7 @@ class TextureComponent(var currentIndex: Int = 0, var data: ArrayList<TextureDat
         fun nextFrameRegion(regionIndex: Int) {
             this.regions.elementAtOrNull(regionIndex)?.apply {
                 if (this.second != textureIdentifier) {
-                    val pack = ResourceManager.getPack(this.first.get())
+                    val pack = ResourcesManager.getPack(this.first.get())
                     val region = loadRegion(this)
 
                     val packRegions = pack.regions.sortedBy { it.name }
@@ -170,7 +170,7 @@ class TextureComponent(var currentIndex: Int = 0, var data: ArrayList<TextureDat
             }
 
             if (frames.isEmpty())
-                frames.add(ResourceManager.defaultPackRegion)
+                frames.add(ResourcesManager.defaultPackRegion)
 
             return Animation(frameDuration, frames, animationPlayMode)
         }
@@ -182,9 +182,9 @@ class TextureComponent(var currentIndex: Int = 0, var data: ArrayList<TextureDat
              */
             fun loadRegion(region: TextureRegion): TextureAtlas.AtlasRegion {
                 return when {
-                    region.second == emptyRegionIdentifier -> ResourceManager.defaultPackRegion
-                    region.second == TextureComponent.textureIdentifier -> ResourceManager.getTexture(region.first.get()).toAtlasRegion()
-                    else -> ResourceManager.getPackRegion(region.first.get(), region.second)
+                    region.second == emptyRegionIdentifier -> ResourcesManager.defaultPackRegion
+                    region.second == TextureComponent.textureIdentifier -> ResourcesManager.getTexture(region.first.get()).toAtlasRegion()
+                    else -> ResourcesManager.getPackRegion(region.first.get(), region.second)
                 }
             }
         }
@@ -397,7 +397,7 @@ class TextureComponent(var currentIndex: Int = 0, var data: ArrayList<TextureDat
                     }
                     (if (showLevelTexture) level.resourcesPacks().getOrNull(selectedTextureIndex) else PCGame.gamePacks.entries.elementAtOrNull(packFolderIndex)?.value?.getOrNull(selectedTextureIndex))?.also { packPath ->
                         if (packPath.exists()) {
-                            val pack = ResourceManager.getPack(packPath)
+                            val pack = ResourcesManager.getPack(packPath)
                             when (editTextureType) {
                                 TextureComponent.EditTextureType.Pack -> {
                                     if (packPath.exists()) {
@@ -447,7 +447,7 @@ class TextureComponent(var currentIndex: Int = 0, var data: ArrayList<TextureDat
                     }
                 } else {
                     (PCGame.gameTextures + level.resourcesTextures()).filter { it.exists() }.forEach {
-                        val texture = ResourceManager.getTexture(it)
+                        val texture = ResourcesManager.getTexture(it)
 
                         if (imageButton(texture.textureObjectHandle, imgBtnSize, uv1 = Vec2(1))) {
                             data.elementAtOrNull(textureIndex)?.apply {
@@ -478,7 +478,7 @@ class TextureComponent(var currentIndex: Int = 0, var data: ArrayList<TextureDat
          * Permet de charger les différentes régions requise pour une animation prédéfinies dans un pack
          */
         private fun findAnimationRegions(packFile: FileWrapper, animation: String): Array<Pair<FileWrapper, String>> {
-            val pack = ResourceManager.getPack(packFile.get())
+            val pack = ResourcesManager.getPack(packFile.get())
             val regions = mutableListOf<String>()
 
             var i = 0

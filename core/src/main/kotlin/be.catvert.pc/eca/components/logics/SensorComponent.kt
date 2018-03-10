@@ -1,9 +1,6 @@
 package be.catvert.pc.eca.components.logics
 
-import be.catvert.pc.eca.Entity
-import be.catvert.pc.eca.EntityState
-import be.catvert.pc.eca.EntityTag
-import be.catvert.pc.eca.Tags
+import be.catvert.pc.eca.*
 import be.catvert.pc.eca.actions.Action
 import be.catvert.pc.eca.actions.EmptyAction
 import be.catvert.pc.eca.components.Component
@@ -55,10 +52,10 @@ class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeata
         override fun toString(): String = ""
     }
 
-    class EntitySensorData(var target: Entity?, sensorIn: Action = EmptyAction(), sensorOut: Action = EmptyAction()) : SensorData(sensorIn, sensorOut), UIImpl {
+    class EntitySensorData(@UI var target: EntityChecker = EntityChecker(), sensorIn: Action = EmptyAction(), sensorOut: Action = EmptyAction()) : SensorData(sensorIn, sensorOut) {
         override fun checkSensorOverlaps(entity: Entity, level: Level) {
-            if (target != null) {
-                val target = target!!
+            if (target.entity != null) {
+                val target = target.entity!!
 
                 if (entity.box.overlaps(target.box)) {
                     if (!sensorOverlaps.contains(target)) {
@@ -70,10 +67,6 @@ class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeata
                     sensorOverlaps.remove(target)
                 }
             }
-        }
-
-        override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-            ImGuiHelper.entity(::target, level, editorSceneUI, "cible")
         }
     }
 
@@ -92,12 +85,12 @@ class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeata
     }
 
     override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        ImGuiHelper.addImguiWidgetsArray("sensors", sensors, { "sensor" }, { EntitySensorData(null) }, {
+        ImGuiHelper.addImguiWidgetsArray("sensors", sensors, { "sensor" }, { EntitySensorData() }, {
             val typeIndex = intArrayOf(if (it.obj is EntitySensorData) 0 else 1)
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                 if (ImGui.combo("type de cible", typeIndex, listOf("Entité", "Tag"))) {
                     it.obj = when (typeIndex[0]) {
-                        0 -> EntitySensorData(null)
+                        0 -> EntitySensorData()
                         else -> TagSensorData(Tags.Player.tag)
                     }
                 }

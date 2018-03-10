@@ -1,7 +1,7 @@
 package be.catvert.pc.eca
 
 import be.catvert.pc.eca.actions.Action
-import be.catvert.pc.eca.actions.RemoveGOAction
+import be.catvert.pc.eca.actions.RemoveEntityAction
 import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.scenes.EditorScene
@@ -9,10 +9,7 @@ import be.catvert.pc.ui.*
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
-import com.fasterxml.jackson.annotation.JsonIdentityInfo
-import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.annotation.ObjectIdGenerators
+import com.fasterxml.jackson.annotation.*
 import imgui.ImGui
 import imgui.functionalProgramming
 
@@ -39,7 +36,7 @@ class Entity(@UI(customType = CustomType.TAG_STRING) var tag: EntityTag,
              @UI var box: Rect,
              defaultState: EntityState = EntityState("default"),
              container: EntityContainer? = null,
-             vararg otherStates: EntityState = arrayOf()) : Updeatable, Renderable, ResourceLoader, UIImpl, UITextImpl {
+             vararg otherStates: EntityState = arrayOf()) : Updeatable, Renderable, ResourceLoader, UIImpl, UITextImpl  {
 
     /**
      * Représente la "couche" à laquelle cette entité va être affichée
@@ -54,7 +51,7 @@ class Entity(@UI(customType = CustomType.TAG_STRING) var tag: EntityTag,
      * Action spéciale appelée quand l'entité sort de la carte verticalement
      */
     @UI(description = "Action appelée quand l'entité à une position y < 0", customName = "dehors de carte")
-    var onOutOfMapAction: Action = RemoveGOAction()
+    var onOutOfMapAction: Action = RemoveEntityAction()
 
     /**
      * Les différents états de l'entité

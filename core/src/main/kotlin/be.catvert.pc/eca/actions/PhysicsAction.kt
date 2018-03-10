@@ -15,13 +15,13 @@ import com.fasterxml.jackson.annotation.JsonCreator
 @RequiredComponent(PhysicsComponent::class)
 @Description("Permet d'effectuer une action physique sur une entité")
 class PhysicsAction(@UI var physicsAction: PhysicsActions) : Action() {
-    @JsonCreator private constructor() : this(PhysicsActions.GO_LEFT)
+    @JsonCreator private constructor() : this(PhysicsActions.MOVE_LEFT)
 
     /**
      * Représente les différentes actions physiques possible.
      */
     enum class PhysicsActions {
-        GO_LEFT, GO_RIGHT, GO_UP, GO_DOWN, JUMP, FORCE_JUMP;
+        MOVE_LEFT, MOVE_RIGHT, MOVE_UP, MOVE_DOWN, JUMP, FORCE_JUMP;
     }
 
     override fun invoke(entity: Entity) {

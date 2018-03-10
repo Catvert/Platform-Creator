@@ -10,7 +10,7 @@ import javax.script.ScriptEngineManager
 /**
  * Permet de gérer les scripts
  */
-object ScriptManager {
+object ScriptsManager {
     val scriptEngine = ScriptEngineManager().getEngineByName("nashorn") as NashornScriptEngine
 
     val bindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE).apply {

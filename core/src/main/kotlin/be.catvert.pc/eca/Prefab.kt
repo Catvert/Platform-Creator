@@ -11,11 +11,11 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators
  * Exemple de prefab : ennemis, joueurs, blocs spéciaux..
  */
 @JsonIdentityInfo(property = "id", generator = ObjectIdGenerators.IntSequenceGenerator::class)
-class Prefab(val name: String, val prefabGO: Entity) {
+class Prefab(val name: String, val prefabEntity: Entity) {
     /**
      * Permet de créer une nouvelle entité en copiant l'entité de base définie dans ce préfab
      */
-    fun create(position: Point, container: EntityContainer? = null) = SerializationFactory.copy(prefabGO).apply {
+    fun create(position: Point, container: EntityContainer? = null) = SerializationFactory.copy(prefabEntity).apply {
         this.box.position = position
         this.name = this@Prefab.name
         container?.addEntity(this)

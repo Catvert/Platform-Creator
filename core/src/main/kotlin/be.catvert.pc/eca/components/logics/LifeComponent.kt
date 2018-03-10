@@ -5,7 +5,7 @@ import be.catvert.pc.eca.EntityState
 import be.catvert.pc.eca.actions.Action
 import be.catvert.pc.eca.actions.EmptyAction
 import be.catvert.pc.eca.actions.LifeAction
-import be.catvert.pc.eca.actions.RemoveGOAction
+import be.catvert.pc.eca.actions.RemoveEntityAction
 import be.catvert.pc.eca.components.Component
 import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.eca.containers.Level
@@ -25,7 +25,7 @@ import glm_.func.common.max
  */
 @Description("Ajoute la possibilité d'ajouter des points de vie à une entité")
 class LifeComponent(onDeathAction: Action, lifePointActions: ArrayList<Action> = arrayListOf()) : Component(), UIImpl, UITextImpl {
-    @JsonCreator private constructor() : this(RemoveGOAction(), arrayListOf())
+    @JsonCreator private constructor() : this(RemoveEntityAction(), arrayListOf())
 
     @JsonProperty("lpActions")
     private var lpActions = arrayListOf(onDeathAction, *lifePointActions.toTypedArray())

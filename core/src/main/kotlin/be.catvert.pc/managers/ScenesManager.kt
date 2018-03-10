@@ -10,16 +10,13 @@ import com.badlogic.gdx.utils.Disposable
 import imgui.ImGui
 import imgui.impl.LwjglGL3
 import ktx.app.clearScreen
-import kotlin.math.roundToInt
 
 /**
  * Permet de gérer les scènes
  */
-class SceneManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Disposable {
+class ScenesManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Disposable {
     private var currentScene: Scene = initialScene
     private var nextScene: NextWaitingScene? = null
-
-    fun currentScene() = currentScene
 
     private var isTransitionRunning = false
 
@@ -82,7 +79,7 @@ class SceneManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Dis
             if (progress == 1f) {
                 setScene(nextScene, disposeCurrentScene)
 
-                this@SceneManager.nextScene = null
+                this@ScenesManager.nextScene = null
                 isTransitionRunning = false
 
                 if (waitingScene.isNotEmpty()) {

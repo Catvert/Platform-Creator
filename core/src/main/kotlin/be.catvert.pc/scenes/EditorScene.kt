@@ -14,8 +14,8 @@ import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.factories.PrefabSetup
 import be.catvert.pc.factories.PrefabType
-import be.catvert.pc.managers.MusicManager
-import be.catvert.pc.managers.ResourceManager
+import be.catvert.pc.managers.MusicsManager
+import be.catvert.pc.managers.ResourcesManager
 import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.ui.Description
 import be.catvert.pc.ui.ImGuiHelper
@@ -56,7 +56,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         FREE("Libre"), PROPORTIONAL("Proportionnel")
     }
 
-    private enum class SelectGOMode {
+    private enum class SelectEntityMode {
         NO_MODE, MOVE, HORIZONTAL_RESIZE_LEFT, HORIZONTAL_RESIZE_RIGHT, VERTICAL_RESIZE_BOTTOM, VERTICAL_RESIZE_TOP, DIAGONALE_RESIZE
     }
 
@@ -105,7 +105,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
     class EditorSceneUI(background: Background?) {
         enum class EditorMode(val modeName: String) {
-            NO_MODE("Aucun"), SELECT("Sélection"), COPY("Copie"), SELECT_POINT("Sélection d'un point"), SELECT_GO("Sélection d'une entité"), TRY_LEVEL("Essai du niveau")
+            NO_MODE("Aucun"), SELECT("Sélection"), COPY("Copie"), SELECT_POINT("Sélection d'un point"), SELECT_ENTITY("Sélection d'une entité"), TRY_LEVEL("Essai du niveau")
         }
 
         var editorMode = EditorMode.NO_MODE
@@ -113,7 +113,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         var entityAddComponentComboIndex = 0
 
         val onSelectPoint = Signal<Point>()
-        val onSelectGO = Signal<Entity?>()
+        val onSelectEntity = Signal<Entity?>()
 
         var entityCurrentStateIndex = 0
 
@@ -153,8 +153,8 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
         init {
             when (background?.type) {
-                BackgroundType.Standard -> settingsLevelStandardBackgroundIndex[0] = PCGame.standardBackgrounds().indexOfFirst { it.backgroundFile == (background as StandardBackground).backgroundFile }
-                BackgroundType.Parallax -> settingsLevelParallaxBackgroundIndex[0] = PCGame.parallaxBackgrounds().indexOfFirst { it.parallaxDataFile == (background as ParallaxBackground).parallaxDataFile }
+                BackgroundType.Standard -> settingsLevelStandardBackgroundIndex[0] = PCGame.getStandardBackgrounds().indexOfFirst { it.backgroundFile == (background as StandardBackground).backgroundFile }
+                BackgroundType.Parallax -> settingsLevelParallaxBackgroundIndex[0] = PCGame.getParallaxBackgrounds().indexOfFirst { it.parallaxDataFile == (background as ParallaxBackground).parallaxDataFile }
                 BackgroundType.None -> {
                 }
             }
@@ -171,7 +171,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
     private val gridMode = GridMode()
 
-    private var selectEntityMode = SelectGOMode.NO_MODE
+    private var selectEntityMode = SelectEntityMode.NO_MODE
     private var resizeEntityMode = ResizeMode.PROPORTIONAL
 
     private val selectEntities = mutableSetOf<Entity>()
@@ -213,7 +213,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
     private var smartPositioning = true
 
     init {
-        entityContainer.allowUpdatingGO = false
+        entityContainer.allowUpdating = false
         level.updateCamera(camera, false)
 
         // Permet de décaler le viewport vers le bas pour afficher la totalité du niveau avec la barre de menu.
@@ -221,7 +221,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         viewport.apply()
 
         if (applyMusicTransition)
-            MusicManager.startMusic(Constants.menuMusicPath, true)
+            MusicsManager.startMusic(Constants.menuMusicPath, true)
 
         PCInputProcessor.scrolledSignal.register {
             if (isUIHover)
@@ -298,21 +298,21 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     }
                 }
 
-                if (selectEntity != null && selectEntityMode == SelectGOMode.NO_MODE || selectEntityMode == SelectGOMode.DIAGONALE_RESIZE) {
+                if (selectEntity != null && selectEntityMode == SelectEntityMode.NO_MODE || selectEntityMode == SelectEntityMode.DIAGONALE_RESIZE) {
                     val rect = selectEntity!!.box
 
                     shapeRenderer.withColor(Color.RED) {
-                        circle(rect.right(), rect.top(), if (selectEntityMode == SelectGOMode.DIAGONALE_RESIZE) 12f else 10f)
+                        circle(rect.right(), rect.top(), if (selectEntityMode == SelectEntityMode.DIAGONALE_RESIZE) 12f else 10f)
                     }
                 }
             }
             EditorSceneUI.EditorMode.COPY -> {
                 val mousePosInWorld: Point = viewport.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)).let { Point(it.x, it.y) }
 
-                selectEntities.forEach { go ->
+                selectEntities.forEach { entity ->
                     val rect: Rect? = if (gridMode.active && selectEntities.size == 1) {
-                        val pos = if (go === selectEntity) Point(mousePosInWorld.x, mousePosInWorld.y) else Point(mousePosInWorld.x + (go.position().x - (selectEntity?.position()?.x
-                                ?: 0f)), mousePosInWorld.y + (go.position().y - (selectEntity?.position()?.y
+                        val pos = if (entity === selectEntity) Point(mousePosInWorld.x, mousePosInWorld.y) else Point(mousePosInWorld.x + (entity.position().x - (selectEntity?.position()?.x
+                                ?: 0f)), mousePosInWorld.y + (entity.position().y - (selectEntity?.position()?.y
                                 ?: 0f)))
                         gridMode.getRectCellOf(level.activeRect, pos)
                     } else {
@@ -325,27 +325,27 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                                 if (side == null)
                                     freePosSelect
                                 else when (side.first) {
-                                    BoxSide.Left -> Point(side.second.box.left() - go.box.width, side.second.box.bottom())
+                                    BoxSide.Left -> Point(side.second.box.left() - entity.box.width, side.second.box.bottom())
                                     BoxSide.Right -> Point(side.second.box.right(), side.second.box.bottom())
                                     BoxSide.Up -> Point(side.second.box.left(), side.second.box.top())
-                                    BoxSide.Down -> Point(side.second.box.left(), side.second.box.bottom() - go.box.height)
+                                    BoxSide.Down -> Point(side.second.box.left(), side.second.box.bottom() - entity.box.height)
                                     BoxSide.All -> freePosSelect
                                 }
                             } else
                                 freePosSelect
 
-                            if (go === selectEntity) {
+                            if (entity === selectEntity) {
                                 selectPoint
-                            } else Point(selectPoint.x + (go.position().x - (selectEntity?.position()?.x
-                                    ?: 0f)), selectPoint.y + (go.position().y - (selectEntity?.position()?.y
+                            } else Point(selectPoint.x + (entity.position().x - (selectEntity?.position()?.x
+                                    ?: 0f)), selectPoint.y + (entity.position().y - (selectEntity?.position()?.y
                                     ?: 0f)))
                         }
 
-                        Rect(pos, go.box.size)
+                        Rect(pos, entity.box.size)
                     }
 
                     if (rect != null) {
-                        go.getCurrentState().getComponent<TextureComponent>()?.apply {
+                        entity.getCurrentState().getComponent<TextureComponent>()?.apply {
                             if (this.currentIndex in data.indices) {
                                 val data = this.data[currentIndex]
                                 PCGame.mainBatch.use {
@@ -357,9 +357,9 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                         } ?: shapeRenderer.withColor(Color.GRAY) { rect(rect) }
                     }
 
-                    if (go.container != null) {
-                        shapeRenderer.withColor(if (go === selectEntity) Color.GREEN else Color.OLIVE) {
-                            rect(go.box)
+                    if (entity.container != null) {
+                        shapeRenderer.withColor(if (entity === selectEntity) Color.GREEN else Color.OLIVE) {
+                            rect(entity.box)
                         }
                     }
                 }
@@ -373,7 +373,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     editorFont.draw(it, layout, Gdx.graphics.width / 2f - layout.width / 2, Gdx.graphics.height - editorFont.lineHeight * 3)
                 }
             }
-            EditorSceneUI.EditorMode.SELECT_GO -> {
+            EditorSceneUI.EditorMode.SELECT_ENTITY -> {
                 PCGame.mainBatch.projectionMatrix = PCGame.defaultProjection
                 PCGame.mainBatch.use {
                     val layout = GlyphLayout(editorFont, "Sélectionner une entité")
@@ -429,14 +429,14 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
             if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !latestLeftButtonClick && Gdx.input.isKeyPressed(GameKeys.EDITOR_APPEND_SELECT_ENTITIES.key)) {
                 if (selectEntities.isNotEmpty()) {
-                    val underMouseGO = findEntityUnderMouse(true)
-                    if (underMouseGO != null) {
-                        if (selectEntities.contains(underMouseGO)) {
-                            selectEntities.remove(underMouseGO)
-                            if (selectEntity === underMouseGO)
+                    val underMouseEntity = findEntityUnderMouse(true)
+                    if (underMouseEntity != null) {
+                        if (selectEntities.contains(underMouseEntity)) {
+                            selectEntities.remove(underMouseEntity)
+                            if (selectEntity === underMouseEntity)
                                 selectEntity = null
                         } else
-                            addSelectEntity(underMouseGO)
+                            addSelectEntity(underMouseEntity)
                     }
                 }
             }
@@ -573,11 +573,11 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     }
                 }
 
-                val selectGORect = selectEntity!!.box
+                val selectEntityRect = selectEntity!!.box
 
                 if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !Gdx.input.isKeyPressed(GameKeys.EDITOR_APPEND_SELECT_ENTITIES.key)) {
                     if (!latestLeftButtonClick) {
-                        if (selectEntityMode == SelectGOMode.NO_MODE) {
+                        if (selectEntityMode == SelectEntityMode.NO_MODE) {
                             val entity = findEntityUnderMouse(true)
                             when {
                                 entity == null -> { // Se produit lorsque le joueur clique dans le vide, dans ce cas on désélectionne les entités sélectionnées
@@ -594,30 +594,30 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                         }
 
                     } else if (selectEntity != null) { // Le joueur maintient le clique gauche durant plusieurs frames et a bougé la souris {
-                        if (selectEntityMode == SelectGOMode.NO_MODE)
-                            selectEntityMode = SelectGOMode.MOVE
+                        if (selectEntityMode == SelectEntityMode.NO_MODE)
+                            selectEntityMode = SelectEntityMode.MOVE
 
                         val deltaMouseX = (latestMousePosInWorld.x - mousePosInWorld.x).roundToInt()
                         val deltaMouseY = (latestMousePosInWorld.y - mousePosInWorld.y).roundToInt()
 
                         when (selectEntityMode) {
-                            SelectGOMode.NO_MODE -> {
+                            SelectEntityMode.NO_MODE -> {
                             }
-                            SelectGOMode.HORIZONTAL_RESIZE_RIGHT -> {
-                                selectGORect.width = (selectGORect.width - deltaMouseX).clamp(1, Constants.maxEntitySize)
+                            SelectEntityMode.HORIZONTAL_RESIZE_RIGHT -> {
+                                selectEntityRect.width = (selectEntityRect.width - deltaMouseX).clamp(1, Constants.maxEntitySize)
                             }
-                            SelectGOMode.HORIZONTAL_RESIZE_LEFT -> {
-                                selectGORect.width = (selectGORect.width + deltaMouseX).clamp(1, Constants.maxEntitySize)
-                                selectGORect.x = (selectGORect.x - deltaMouseX).clamp(0f, level.matrixRect.width.toFloat() - selectGORect.width)
+                            SelectEntityMode.HORIZONTAL_RESIZE_LEFT -> {
+                                selectEntityRect.width = (selectEntityRect.width + deltaMouseX).clamp(1, Constants.maxEntitySize)
+                                selectEntityRect.x = (selectEntityRect.x - deltaMouseX).clamp(0f, level.matrixRect.width.toFloat() - selectEntityRect.width)
                             }
-                            SelectGOMode.VERTICAL_RESIZE_BOTTOM -> {
-                                selectGORect.height = (selectGORect.height + deltaMouseY).clamp(1, Constants.maxEntitySize)
-                                selectGORect.y = (selectGORect.y - deltaMouseY).clamp(0f, level.matrixRect.height.toFloat() - selectGORect.height)
+                            SelectEntityMode.VERTICAL_RESIZE_BOTTOM -> {
+                                selectEntityRect.height = (selectEntityRect.height + deltaMouseY).clamp(1, Constants.maxEntitySize)
+                                selectEntityRect.y = (selectEntityRect.y - deltaMouseY).clamp(0f, level.matrixRect.height.toFloat() - selectEntityRect.height)
                             }
-                            SelectGOMode.VERTICAL_RESIZE_TOP -> {
-                                selectGORect.height = (selectGORect.height - deltaMouseY).clamp(1, Constants.maxEntitySize)
+                            SelectEntityMode.VERTICAL_RESIZE_TOP -> {
+                                selectEntityRect.height = (selectEntityRect.height - deltaMouseY).clamp(1, Constants.maxEntitySize)
                             }
-                            SelectGOMode.DIAGONALE_RESIZE -> {
+                            SelectEntityMode.DIAGONALE_RESIZE -> {
                                 var deltaX = deltaMouseX
                                 var deltaY = deltaMouseY
 
@@ -628,10 +628,10 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                                         deltaX = deltaY
                                 }
 
-                                selectGORect.width = (selectGORect.width - deltaX).clamp(1, Constants.maxEntitySize)
-                                selectGORect.height = (selectGORect.height - deltaY).clamp(1, Constants.maxEntitySize)
+                                selectEntityRect.width = (selectEntityRect.width - deltaX).clamp(1, Constants.maxEntitySize)
+                                selectEntityRect.height = (selectEntityRect.height - deltaY).clamp(1, Constants.maxEntitySize)
                             }
-                            SelectGOMode.MOVE -> {
+                            SelectEntityMode.MOVE -> {
                                 val moveX = -deltaMouseX + (camera.position.x - latestCameraPos.x)
                                 val moveY = -deltaMouseY + (camera.position.y - latestCameraPos.y)
 
@@ -643,31 +643,31 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                 } else {
                     when {
                     // Diagonale resize
-                        Circle(selectGORect.right(), selectGORect.top(), 10f).contains(mousePosInWorld) -> {
-                            selectEntityMode = SelectGOMode.DIAGONALE_RESIZE
+                        Circle(selectEntityRect.right(), selectEntityRect.top(), 10f).contains(mousePosInWorld) -> {
+                            selectEntityMode = SelectEntityMode.DIAGONALE_RESIZE
                         }
                     // Horizontal right resize
-                        mousePosInWorld.x in selectGORect.right() - 1..selectGORect.right() + 1 && mousePosInWorld.y in selectGORect.y..selectGORect.top() -> {
-                            selectEntityMode = SelectGOMode.HORIZONTAL_RESIZE_RIGHT
+                        mousePosInWorld.x in selectEntityRect.right() - 1..selectEntityRect.right() + 1 && mousePosInWorld.y in selectEntityRect.y..selectEntityRect.top() -> {
+                            selectEntityMode = SelectEntityMode.HORIZONTAL_RESIZE_RIGHT
                             Gdx.graphics.setSystemCursor(Cursor.SystemCursor.HorizontalResize)
                         }
                     // Horizontal left resize
-                        mousePosInWorld.x in selectGORect.left() - 1..selectGORect.left() + 1 && mousePosInWorld.y in selectGORect.y..selectGORect.top() -> {
-                            selectEntityMode = SelectGOMode.HORIZONTAL_RESIZE_LEFT
+                        mousePosInWorld.x in selectEntityRect.left() - 1..selectEntityRect.left() + 1 && mousePosInWorld.y in selectEntityRect.y..selectEntityRect.top() -> {
+                            selectEntityMode = SelectEntityMode.HORIZONTAL_RESIZE_LEFT
                             Gdx.graphics.setSystemCursor(Cursor.SystemCursor.HorizontalResize)
                         }
                     // Vertical top resize
-                        mousePosInWorld.y in selectGORect.top() - 1..selectGORect.top() + 1 && mousePosInWorld.x in selectGORect.x..selectGORect.right() -> {
-                            selectEntityMode = SelectGOMode.VERTICAL_RESIZE_TOP
+                        mousePosInWorld.y in selectEntityRect.top() - 1..selectEntityRect.top() + 1 && mousePosInWorld.x in selectEntityRect.x..selectEntityRect.right() -> {
+                            selectEntityMode = SelectEntityMode.VERTICAL_RESIZE_TOP
                             Gdx.graphics.setSystemCursor(Cursor.SystemCursor.VerticalResize)
                         }
                     // Vertical bottom resize
-                        mousePosInWorld.y in selectGORect.bottom() - 1..selectGORect.bottom() + 1 && mousePosInWorld.x in selectGORect.x..selectGORect.right() -> {
-                            selectEntityMode = SelectGOMode.VERTICAL_RESIZE_BOTTOM
+                        mousePosInWorld.y in selectEntityRect.bottom() - 1..selectEntityRect.bottom() + 1 && mousePosInWorld.x in selectEntityRect.x..selectEntityRect.right() -> {
+                            selectEntityMode = SelectEntityMode.VERTICAL_RESIZE_BOTTOM
                             Gdx.graphics.setSystemCursor(Cursor.SystemCursor.VerticalResize)
                         }
                         else -> {
-                            selectEntityMode = SelectGOMode.NO_MODE
+                            selectEntityMode = SelectEntityMode.NO_MODE
                             Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow)
                         }
                     }
@@ -705,13 +705,13 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
                 if ((Gdx.input.isButtonPressed(Input.Buttons.LEFT) || Gdx.input.isKeyJustPressed(GameKeys.EDITOR_COPY_MODE.key))
                         && !Gdx.input.isKeyPressed(GameKeys.EDITOR_APPEND_SELECT_ENTITIES.key)) {
-                    val underMouseGO = findEntityUnderMouse(true)
-                    if (underMouseGO != null) {
-                        if (selectEntities.contains(underMouseGO))
-                            selectEntity = underMouseGO
+                    val entityUnderMouse = findEntityUnderMouse(true)
+                    if (entityUnderMouse != null) {
+                        if (selectEntities.contains(entityUnderMouse))
+                            selectEntity = entityUnderMouse
                         else {
                             clearSelectEntities()
-                            addSelectEntity(underMouseGO)
+                            addSelectEntity(entityUnderMouse)
                         }
                     } else {
                         clearSelectEntities()
@@ -846,10 +846,10 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
                 }
             }
-            EditorSceneUI.EditorMode.SELECT_GO -> {
+            EditorSceneUI.EditorMode.SELECT_ENTITY -> {
                 if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !latestLeftButtonClick) {
-                    val go = findEntityUnderMouse(false)
-                    editorSceneUI.onSelectGO(go)
+                    val entity = findEntityUnderMouse(false)
+                    editorSceneUI.onSelectEntity(entity)
                     editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
                 }
             }
@@ -1009,7 +1009,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         editorSceneUI.editorMode = EditorSceneUI.EditorMode.TRY_LEVEL
 
         if (level.musicPath != null)
-            MusicManager.startMusic(level.musicPath!!.get(), true)
+            MusicsManager.startMusic(level.musicPath!!.get(), true)
 
         entityContainer = SerializationFactory.copy(level).apply {
             this.exit = { if (!editorSceneUI.godModeTryMode) stopTryLevel() }
@@ -1027,7 +1027,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         camera.position.set(backupTryModeCameraPos)
         camera.zoom = backupTryModeCameraZoom
 
-        MusicManager.startMusic(Constants.menuMusicPath, true)
+        MusicsManager.startMusic(Constants.menuMusicPath, true)
 
         selectEntityTryMode = null
     }
@@ -1035,7 +1035,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
     private fun saveLevelToFile() {
         try {
             SerializationFactory.serializeToFile(level, level.levelPath.toLocalFile())
-            PCGame.sceneManager.takeScreenshotWithoutImGui {
+            PCGame.scenesManager.takeScreenshotWithoutImGui {
                 val resizePixmap = Pixmap(Gdx.graphics.backBufferWidth, Gdx.graphics.backBufferHeight - editorSceneUI.menuBarHeight, Pixmap.Format.RGBA8888)
                 resizePixmap.drawPixmap(it, 0, -editorSceneUI.menuBarHeight)
 
@@ -1066,19 +1066,19 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
             if (editorSceneUI.showInfoPrefabWindow && editorSceneUI.prefabInfoPrefabWindow != null && editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL)
                 drawInfoPrefabWindow(editorSceneUI.prefabInfoPrefabWindow!!)
 
-            val goUnderMouse = findEntityUnderMouse(false)
-            if (goUnderMouse != null && !isUIHover) {
+            val entityUnderMouse = findEntityUnderMouse(false)
+            if (entityUnderMouse != null && !isUIHover) {
                 functionalProgramming.withTooltip {
-                    ImGuiHelper.textColored(Color.RED, goUnderMouse.name)
-                    ImGuiHelper.textPropertyColored(Color.ORANGE, "couche :", goUnderMouse.layer)
+                    ImGuiHelper.textColored(Color.RED, entityUnderMouse.name)
+                    ImGuiHelper.textPropertyColored(Color.ORANGE, "couche :", entityUnderMouse.layer)
 
-                    ImGuiHelper.textPropertyColored(Color.ORANGE, "x :", goUnderMouse.box.x)
+                    ImGuiHelper.textPropertyColored(Color.ORANGE, "x :", entityUnderMouse.box.x)
                     sameLine()
-                    ImGuiHelper.textPropertyColored(Color.ORANGE, "y :", goUnderMouse.box.y)
+                    ImGuiHelper.textPropertyColored(Color.ORANGE, "y :", entityUnderMouse.box.y)
 
-                    ImGuiHelper.textPropertyColored(Color.ORANGE, "w :", goUnderMouse.box.width)
+                    ImGuiHelper.textPropertyColored(Color.ORANGE, "w :", entityUnderMouse.box.width)
                     sameLine()
-                    ImGuiHelper.textPropertyColored(Color.ORANGE, "h :", goUnderMouse.box.height)
+                    ImGuiHelper.textPropertyColored(Color.ORANGE, "h :", entityUnderMouse.box.height)
                 }
             }
 
@@ -1087,7 +1087,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
             }
 
             if (editorSceneUI.showInfoEntityWindow && selectEntity != null && selectEntity?.container != null
-                    && editorSceneUI.editorMode != EditorSceneUI.EditorMode.SELECT_POINT && editorSceneUI.editorMode != EditorSceneUI.EditorMode.SELECT_GO && editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL) {
+                    && editorSceneUI.editorMode != EditorSceneUI.EditorMode.SELECT_POINT && editorSceneUI.editorMode != EditorSceneUI.EditorMode.SELECT_ENTITY && editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL) {
                 drawInfoEntityWindow(selectEntity!!)
             }
 
@@ -1116,7 +1116,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                 } else {
                     ImGuiHelper.textColored(Color.ORANGE, "Test du niveau..")
                     checkbox("Mode dieu", editorSceneUI::godModeTryMode)
-                    checkbox("Mettre à jour", entityContainer::allowUpdatingGO)
+                    checkbox("Mettre à jour", entityContainer::allowUpdating)
                 }
             }
         }
@@ -1125,7 +1125,8 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
     private fun drawExitWindow() {
         ImGuiHelper.withCenteredWindow("Save level?", editorSceneUI::showExitWindow, Vec2(240f, 105f), WindowFlags.NoResize.i or WindowFlags.NoCollapse.i or WindowFlags.NoTitleBar.i) {
             fun showMainMenu() {
-                PCGame.sceneManager.loadScene(MainMenuScene(false))
+                ResourcesManager.unloadAssets()
+                PCGame.scenesManager.loadScene(MainMenuScene(false))
             }
 
             if (ImGui.button("Sauvegarder", Vec2(225f, 0))) {
@@ -1249,23 +1250,23 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                                     when (editorSceneUI.settingsLevelBackgroundType.obj.cast<BackgroundType>()) {
                                         BackgroundType.Standard -> {
                                             if (editorSceneUI.settingsLevelStandardBackgroundIndex[0] == -1) {
-                                                editorSceneUI.settingsLevelStandardBackgroundIndex[0] = PCGame.standardBackgrounds().indexOfFirst { it.backgroundFile == (level.background.cast<StandardBackground>())?.backgroundFile }
+                                                editorSceneUI.settingsLevelStandardBackgroundIndex[0] = PCGame.getStandardBackgrounds().indexOfFirst { it.backgroundFile == (level.background.cast<StandardBackground>())?.backgroundFile }
                                             }
 
                                             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                                                if (sliderInt("fond d'écran", editorSceneUI.settingsLevelStandardBackgroundIndex, 0, PCGame.standardBackgrounds().size - 1)) {
-                                                    updateBackground(PCGame.standardBackgrounds()[editorSceneUI.settingsLevelStandardBackgroundIndex[0]])
+                                                if (sliderInt("fond d'écran", editorSceneUI.settingsLevelStandardBackgroundIndex, 0, PCGame.getStandardBackgrounds().size - 1)) {
+                                                    updateBackground(PCGame.getStandardBackgrounds()[editorSceneUI.settingsLevelStandardBackgroundIndex[0]])
                                                 }
                                             }
                                         }
                                         BackgroundType.Parallax -> {
                                             if (editorSceneUI.settingsLevelParallaxBackgroundIndex[0] == -1) {
-                                                editorSceneUI.settingsLevelParallaxBackgroundIndex[0] = PCGame.parallaxBackgrounds().indexOfFirst { it.parallaxDataFile == (level.background.cast<ParallaxBackground>())?.parallaxDataFile }
+                                                editorSceneUI.settingsLevelParallaxBackgroundIndex[0] = PCGame.getParallaxBackgrounds().indexOfFirst { it.parallaxDataFile == (level.background.cast<ParallaxBackground>())?.parallaxDataFile }
                                             }
 
                                             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                                                if (sliderInt("fond d'écran", editorSceneUI.settingsLevelParallaxBackgroundIndex, 0, PCGame.parallaxBackgrounds().size - 1)) {
-                                                    updateBackground(PCGame.parallaxBackgrounds()[editorSceneUI.settingsLevelParallaxBackgroundIndex[0]])
+                                                if (sliderInt("fond d'écran", editorSceneUI.settingsLevelParallaxBackgroundIndex, 0, PCGame.getParallaxBackgrounds().size - 1)) {
+                                                    updateBackground(PCGame.getParallaxBackgrounds()[editorSceneUI.settingsLevelParallaxBackgroundIndex[0]])
                                                 }
                                             }
                                         }
@@ -1294,7 +1295,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                                 }
                             }
 
-                            ImGuiHelper.entity(level::followEntity, level, editorSceneUI, "entité suivie")
+                            ImGuiHelper.entity(level.followEntity, level, editorSceneUI, "entité suivie")
 
                             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                                 inputInt("gravité", level::gravitySpeed)
@@ -1305,7 +1306,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                         }
                     }
                     menu("Créer une entité") {
-                        fun createGO(prefab: Prefab) {
+                        fun createEntity(prefab: Prefab) {
                             val entity = prefab.create(Point()).apply { loadResources() }
                             setCopyEntity(entity)
                         }
@@ -1315,13 +1316,13 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                                 if (type == PrefabType.All) {
                                     level.resourcesPrefabs().forEach {
                                         menuItem(it.name) {
-                                            createGO(it)
+                                            createEntity(it)
                                         }
                                     }
                                 }
                                 PrefabFactory.values().filter { it.type == type }.forEach {
                                     menuItem(it.name.removeSuffix("_${type.name}")) {
-                                        createGO(it.prefab)
+                                        createEntity(it.prefab)
                                     }
                                 }
                             }
@@ -1426,7 +1427,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                         separator()
 
                         (if (editorSceneUI.entitiesShowOnlyUser) level.resourcesPacks().getOrNull(editorSceneUI.entitiesSpritePackIndex) else PCGame.gamePacks.entries.elementAtOrNull(editorSceneUI.entitiesSpritePackTypeIndex)?.value?.getOrNull(editorSceneUI.entitiesSpritePackIndex))?.also { packPath ->
-                            val pack = ResourceManager.getPack(packPath)
+                            val pack = ResourcesManager.getPack(packPath)
                             pack.regions.sortedBy { it.name }.forEachIndexed { index, region ->
                                 val packRegion = packPath.toFileWrapper() to region.name
                                 val size = if (editorSceneUI.entitiesSpriteRealSize) region.let { Size(it.regionWidth, it.regionHeight) } else Size(50, 50)
@@ -1441,10 +1442,10 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     else -> {
                         var index = 0
                         val prefabs = level.resourcesPrefabs() + if (editorSceneUI.entitiesShowOnlyUser) listOf() else PrefabFactory.values().map { it.prefab }
-                        prefabs.filter { it.prefabGO.tag == tag }.forEach {
-                            it.prefabGO.loadResources()
+                        prefabs.filter { it.prefabEntity.tag == tag }.forEach {
+                            it.prefabEntity.loadResources()
 
-                            it.prefabGO.getCurrentState().getComponent<TextureComponent>()?.apply {
+                            it.prefabEntity.getCurrentState().getComponent<TextureComponent>()?.apply {
                                 data.elementAtOrNull(currentIndex)?.apply {
                                     addImageBtn(currentKeyFrame(), it, true)
 
@@ -1484,7 +1485,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     }
                 }
 
-                drawInfoEntityProps(prefab.prefabGO)
+                drawInfoEntityProps(prefab.prefabEntity)
             }
         }
     }

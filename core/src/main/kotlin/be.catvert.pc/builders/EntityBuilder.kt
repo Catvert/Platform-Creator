@@ -4,7 +4,7 @@ import be.catvert.pc.eca.Entity
 import be.catvert.pc.eca.EntityState
 import be.catvert.pc.eca.EntityTag
 import be.catvert.pc.eca.actions.Action
-import be.catvert.pc.eca.actions.RemoveGOAction
+import be.catvert.pc.eca.actions.RemoveEntityAction
 import be.catvert.pc.eca.components.Component
 import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.utility.Point
@@ -19,7 +19,7 @@ class EntityBuilder(val tag: EntityTag, val defaultSize: Size, val name: String 
     private val defaultState = EntityState("default")
     private val states = mutableListOf<EntityState>()
 
-    private var outOfMapAction: Action = RemoveGOAction()
+    private var outOfMapAction: Action = RemoveEntityAction()
 
     private var layer = 0
 

@@ -4,7 +4,8 @@ import be.catvert.pc.GameKeys
 import be.catvert.pc.PCGame
 import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.eca.containers.Level
-import be.catvert.pc.managers.MusicManager
+import be.catvert.pc.managers.MusicsManager
+import be.catvert.pc.managers.ResourcesManager
 import be.catvert.pc.ui.ImGuiHelper
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
@@ -27,7 +28,7 @@ class GameScene(private val level: Level) : Scene(level.background, level.backgr
     init {
         level.updateCamera(camera, false)
         if (level.musicPath != null)
-            MusicManager.startMusic(level.musicPath!!.get(), true)
+            MusicsManager.startMusic(level.musicPath!!.get(), true)
     }
 
     override fun render(batch: Batch) {
@@ -38,15 +39,16 @@ class GameScene(private val level: Level) : Scene(level.background, level.backgr
                 ImGuiHelper.withCenteredWindow("pause", null, Vec2(200f, 105f), WindowFlags.NoResize.i or WindowFlags.NoCollapse.i or WindowFlags.NoTitleBar.i) {
                     if (button("Reprendre", Vec2(-1, 0))) {
                         pause = false
-                        entityContainer.allowUpdatingGO = true
+                        entityContainer.allowUpdating = true
                     }
                     if (button("Recommencer", Vec2(-1, 0))) {
                         val level = Level.loadFromFile(this@GameScene.level.levelPath.toLocalFile().parent())
                         if (level != null)
-                            PCGame.sceneManager.loadScene(GameScene(level))
+                            PCGame.scenesManager.loadScene(GameScene(level))
                     }
                     if (button("Quitter le niveau", Vec2(-1, 0))) {
-                        PCGame.sceneManager.loadScene(MainMenuScene(true))
+                        ResourcesManager.unloadAssets()
+                        PCGame.scenesManager.loadScene(MainMenuScene(true))
                     }
                 }
             }
@@ -72,10 +74,10 @@ class GameScene(private val level: Level) : Scene(level.background, level.backgr
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             pause = true
-            entityContainer.allowUpdatingGO = false
+            entityContainer.allowUpdating = false
         }
         if (Gdx.input.isKeyJustPressed(GameKeys.GAME_EDIT_LEVEL.key))
-            PCGame.sceneManager.loadScene(EditorScene(Level.loadFromFile(level.levelPath.toLocalFile().parent())!!, true))
+            PCGame.scenesManager.loadScene(EditorScene(Level.loadFromFile(level.levelPath.toLocalFile().parent())!!, true))
     }
 
     private fun updateCamera(lerp: Boolean) {
