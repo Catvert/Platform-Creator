@@ -2,6 +2,7 @@ package be.catvert.pc.eca.actions
 
 
 import be.catvert.pc.eca.Entity
+import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.ui.Description
@@ -21,9 +22,9 @@ class MultiplexerAction(var actions: ArrayList<Action>) : Action(), UIImpl, UITe
     constructor(vararg actions: Action) : this(arrayListOf(*actions))
     @JsonCreator private constructor() : this(arrayListOf())
 
-    override fun invoke(entity: Entity) {
+    override fun invoke(entity: Entity, container: EntityContainer) {
         actions.forEach {
-            it(entity)
+            it(entity, container)
         }
     }
 

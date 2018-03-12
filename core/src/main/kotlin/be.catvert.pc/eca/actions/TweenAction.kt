@@ -2,6 +2,7 @@ package be.catvert.pc.eca.actions
 
 
 import be.catvert.pc.eca.Entity
+import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.tweens.EmptyTween
@@ -26,7 +27,7 @@ import kotlin.reflect.full.createInstance
 class TweenAction(var tween: Tween, var loop: Boolean) : Action(), UIImpl {
     @JsonCreator private constructor() : this(EmptyTween(), false)
 
-    override fun invoke(entity: Entity) {
+    override fun invoke(entity: Entity, container: EntityContainer) {
         TweenSystem.startTween(tween, entity, if (loop) tween else null)
     }
 

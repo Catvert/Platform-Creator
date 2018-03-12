@@ -152,8 +152,8 @@ class RepeatActionTween(duration: Float = 0f, var repeat: Int = 1, var repeatAct
     override fun perform(entity: Entity) {
         val progress = Math.round(interpolation.apply(progress) * 100)
 
-        if (progress != 0 && progress % Math.round(100f / repeat) == 0) {
-            repeatAction(entity)
+        if (entity.container != null && progress != 0 && progress % Math.round(100f / repeat) == 0) {
+            repeatAction(entity, entity.container!!)
         }
     }
 

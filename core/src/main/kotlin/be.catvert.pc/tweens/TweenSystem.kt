@@ -22,7 +22,7 @@ object TweenSystem : Updeatable {
                 if (texture != null)
                     addComponent(texture)
             }
-            entity.setState(state, false)
+            entity.setState(state)
         }
     }
 
@@ -31,14 +31,15 @@ object TweenSystem : Updeatable {
 
         list.forEach {
             val entity = it.entity
+            val container = entity.container ?: return@forEach
             val (tween, backupStateIndex) = it.tweenData
             val loopTween = it.loopTween
 
             if (tween.update(entity)) {
                 if (tween.endAction !is RemoveEntityAction && tween.useTweenState) // TODO workaround?
-                    entity.setState(backupStateIndex, false)
+                    entity.setState(backupStateIndex)
 
-                tween.endAction.invoke(entity)
+                tween.endAction.invoke(entity, container)
 
                 val nextTween = tween.nextTween
 
@@ -46,7 +47,7 @@ object TweenSystem : Updeatable {
 
                 if (nextTween != null) {
                     if (tween.useTweenState)
-                        entity.setState(backupStateIndex, false)
+                        entity.setState(backupStateIndex)
 
                     startTween(nextTween, entity, null)
                 } else if (loopTween != null) {

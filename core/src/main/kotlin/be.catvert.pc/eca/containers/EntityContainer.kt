@@ -1,8 +1,10 @@
 package be.catvert.pc.eca.containers
 
 import be.catvert.pc.eca.Entity
+import be.catvert.pc.eca.EntityID
 import be.catvert.pc.eca.EntityTag
 import be.catvert.pc.serialization.PostDeserialization
+import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.Renderable
 import be.catvert.pc.utility.ResourceLoader
 import be.catvert.pc.utility.Updeatable
@@ -14,6 +16,8 @@ abstract class EntityContainer : Renderable, Updeatable, PostDeserialization, Re
     @JsonProperty("objects")
     protected val entities: MutableSet<Entity> = mutableSetOf()
 
+    private val entitiesByID = hashMapOf<Int, Entity>()
+
     protected open val processEntities: Set<Entity>
         get() = entities
 
@@ -22,12 +26,17 @@ abstract class EntityContainer : Renderable, Updeatable, PostDeserialization, Re
     @JsonIgnore
     var allowUpdating = true
 
+    @JsonProperty("lastID")
+    private var _lastGeneratedID = -1
+
     private val removeEntities = mutableSetOf<Entity>()
 
     @JsonIgnore
     fun getEntitiesData() = entities.toSet()
 
     open fun findEntitiesByTag(tag: EntityTag): List<Entity> = entities.filter { it.tag == tag }.toList()
+
+    fun findEntityByID(id: Int) = if (id == EntityID.INVALID_ID) null else entitiesByID[id]
 
     open fun removeEntity(entity: Entity) {
         removeEntities.add(entity)
@@ -38,9 +47,26 @@ abstract class EntityContainer : Renderable, Updeatable, PostDeserialization, Re
 
         entities.add(entity)
         entity.container = this
+        entitiesByID[entity.entityID.ID] = entity
 
         return entity
     }
+
+    fun copyEntity(entity: Entity): Entity {
+        val copyEntity = SerializationFactory.copy(entity)
+        copyEntity.container = this
+        copyEntity.entityID.ID = generateID()
+        return copyEntity
+    }
+
+    fun entitiesInitialStartActions() {
+        entities.forEach {
+            if(it.getCurrentState().isActive())
+                it.getCurrentState().startAction(it, this)
+        }
+    }
+
+    fun generateID() = ++_lastGeneratedID
 
     protected open fun onRemoveEntity(entity: Entity) {}
 
@@ -61,7 +87,7 @@ abstract class EntityContainer : Renderable, Updeatable, PostDeserialization, Re
                 it.update()
 
             if (it.position().y < 0) {
-                it.onOutOfMapAction(it)
+                it.onOutOfMapAction(it, this)
             }
         }
 
@@ -73,6 +99,7 @@ abstract class EntityContainer : Renderable, Updeatable, PostDeserialization, Re
             removeEntities.forEach {
                 onRemoveEntity(it)
                 entities.remove(it)
+                entitiesByID.remove(it.entityID.ID)
                 it.container = null
             }
             removeEntities.clear()
@@ -82,6 +109,7 @@ abstract class EntityContainer : Renderable, Updeatable, PostDeserialization, Re
     override fun onPostDeserialization() {
         entities.forEach {
             it.container = this
+            entitiesByID[it.entityID.ID] = it
             it.onRemoveFromParent.register {
                 removeEntities.add(it)
             }

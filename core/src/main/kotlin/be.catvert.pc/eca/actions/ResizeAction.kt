@@ -2,6 +2,7 @@ package be.catvert.pc.eca.actions
 
 
 import be.catvert.pc.eca.Entity
+import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.ui.Description
 import be.catvert.pc.ui.UI
 import be.catvert.pc.utility.Constants
@@ -15,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 class ResizeAction(@UI(min = 1f, max = Constants.maxEntitySize.toFloat()) var newSize: Size) : Action() {
     @JsonCreator private constructor() : this(Size(1, 1))
 
-    override fun invoke(entity: Entity) {
+    override fun invoke(entity: Entity, container: EntityContainer) {
         entity.box.size = newSize
     }
 

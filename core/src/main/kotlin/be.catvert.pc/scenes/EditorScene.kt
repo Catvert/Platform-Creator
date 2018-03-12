@@ -43,8 +43,6 @@ import imgui.functionalProgramming.menuItem
 import ktx.app.use
 import ktx.assets.toAbsoluteFile
 import ktx.assets.toLocalFile
-import org.lwjgl.system.MemoryStack.stackPush
-import org.lwjgl.util.tinyfd.TinyFileDialogs.tinyfd_openFileDialog
 import kotlin.math.roundToInt
 import kotlin.reflect.full.findAnnotation
 
@@ -109,6 +107,14 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         }
 
         var editorMode = EditorMode.NO_MODE
+            set(value) {
+                previousEditorMode = field
+                field = value
+            }
+
+        var previousEditorMode = EditorMode.NO_MODE
+            private set
+
         var entityAddStateComboIndex = 0
         var entityAddComponentComboIndex = 0
 
@@ -720,7 +726,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                 }
 
                 if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && (!latestRightButtonClick || gridMode.active)) {
-                    val copySelectEntity = SerializationFactory.copy(selectEntity!!)
+                    val copySelectEntity = level.copyEntity(selectEntity!!)
 
                     var posX = copySelectEntity.position().x
                     var posY = copySelectEntity.position().y
@@ -843,14 +849,14 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
             EditorSceneUI.EditorMode.SELECT_POINT -> {
                 if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !latestLeftButtonClick) {
                     editorSceneUI.onSelectPoint(mousePosInWorld)
-                    editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
+                    editorSceneUI.editorMode = editorSceneUI.previousEditorMode
                 }
             }
             EditorSceneUI.EditorMode.SELECT_ENTITY -> {
                 if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !latestLeftButtonClick) {
                     val entity = findEntityUnderMouse(false)
                     editorSceneUI.onSelectEntity(entity)
-                    editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
+                    editorSceneUI.editorMode = editorSceneUI.previousEditorMode
                 }
             }
         }
@@ -1012,11 +1018,16 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
             MusicsManager.startMusic(level.musicPath!!.get(), true)
 
         entityContainer = SerializationFactory.copy(level).apply {
-            this.exit = { if (!editorSceneUI.godModeTryMode) stopTryLevel() }
+            this.exit = {
+                if (!editorSceneUI.godModeTryMode) stopTryLevel()
+            }
             this.activeRect.position = level.activeRect.position
             this.drawDebugCells = level.drawDebugCells
+
             this.update()
         }
+
+        entityContainer.entitiesInitialStartActions()
     }
 
     private fun stopTryLevel() {
@@ -1069,7 +1080,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
             val entityUnderMouse = findEntityUnderMouse(false)
             if (entityUnderMouse != null && !isUIHover) {
                 functionalProgramming.withTooltip {
-                    ImGuiHelper.textColored(Color.RED, entityUnderMouse.name)
+                    ImGuiHelper.textColored(Color.RED, "${entityUnderMouse.name} #${entityUnderMouse.id()}")
                     ImGuiHelper.textPropertyColored(Color.ORANGE, "couche :", entityUnderMouse.layer)
 
                     ImGuiHelper.textPropertyColored(Color.ORANGE, "x :", entityUnderMouse.box.x)
@@ -1150,31 +1161,10 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
             mainMenuBar {
                 if (editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL) {
                     menu("Fichier") {
-                        menuItem("Importer une ressource..") {
+                        menuItem("Importer des ressources..") {
                             try {
-                                stackPush().also { stack ->
-                                    val aFilterPatterns = stack.mallocPointer(Constants.levelTextureExtension.size + Constants.levelPackExtension.size + Constants.levelSoundExtension.size + Constants.levelScriptExtension.size)
-
-                                    val extensions = Constants.levelTextureExtension + Constants.levelPackExtension + Constants.levelSoundExtension + Constants.levelScriptExtension
-                                    extensions.forEach {
-                                        aFilterPatterns.put(stack.UTF8("*.$it"))
-                                    }
-
-                                    aFilterPatterns.flip()
-
-                                    val extensionsStr = let {
-                                        var str = String()
-                                        extensions.forEach {
-                                            str += "*.$it "
-                                        }
-                                        str
-                                    }
-
-                                    val files = tinyfd_openFileDialog("Importer une ressource..", "", aFilterPatterns, "Ressources ($extensionsStr)", true)
-                                    if (files != null) {
-                                        level.addResources(*files.split("|").map { it.toAbsoluteFile() }.toTypedArray())
-                                    }
-                                }
+                                val files = Utility.openFileDialog("Importer des ressources", "Ressources", arrayOf(*Constants.levelTextureExtension, *Constants.levelPackExtension, *Constants.levelSoundExtension, *Constants.levelScriptExtension), true)
+                                level.addResources(*files.toTypedArray())
                             } catch (e: Exception) {
                                 Log.error(e) { "Erreur lors de l'importation d'une ressource !" }
                             }
@@ -1533,8 +1523,6 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
             ImGuiHelper.action("action de départ", entity.getStateOrDefault(editorSceneUI.entityCurrentStateIndex)::startAction, entity, level, editorSceneUI)
 
-            separator()
-
             val components = entity.getStateOrDefault(editorSceneUI.entityCurrentStateIndex).getComponents()
 
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
@@ -1614,13 +1602,13 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
         with(ImGui) {
             functionalProgramming.withWindow("Réglages de l'entité", editorSceneUI::showInfoEntityWindow, WindowFlags.AlwaysAutoResize.i) {
-                val favChecked = booleanArrayOf(level.favoris.contains(entity))
+                val favChecked = booleanArrayOf(level.favoris.contains(entity.id()))
 
                 if (ImGuiHelper.favButton(tintColor = Vec4(1f, 1f, 1f, if (favChecked[0]) 1f else 0.2f))) {
                     if (!favChecked[0])
-                        level.favoris.add(entity)
+                        level.favoris.add(entity.id())
                     else
-                        level.favoris.remove(entity)
+                        level.favoris.remove(entity.id())
                 }
                 if (isItemHovered()) {
                     functionalProgramming.withTooltip {

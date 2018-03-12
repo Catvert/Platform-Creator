@@ -18,8 +18,9 @@ import com.badlogic.gdx.utils.ScreenUtils
 import com.esotericsoftware.reflectasm.ClassAccess
 import ktx.assets.Asset
 import ktx.assets.loadOnDemand
-import java.io.File
-import java.io.FileOutputStream
+import ktx.assets.toAbsoluteFile
+import org.lwjgl.system.MemoryStack
+import org.lwjgl.util.tinyfd.TinyFileDialogs
 import java.lang.reflect.Field
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
@@ -156,6 +157,58 @@ object Utility {
         zipInputStream.close()
         fis.close()
     }
+
+    fun openFileDialog(title: String, description: String, extensions: Array<String>, allowMultipleSelects: Boolean): List<FileHandle> {
+        MemoryStack.stackPush().also { stack ->
+            val aFilterPatterns = stack.mallocPointer(extensions.size)
+
+            extensions.forEach {
+                aFilterPatterns.put(stack.UTF8("*.$it"))
+            }
+
+            aFilterPatterns.flip()
+
+            val extensionsStr = let {
+                var str = String()
+                extensions.forEach {
+                    str += "*.$it "
+                }
+                str
+            }
+
+            return TinyFileDialogs.tinyfd_openFileDialog(title, "", aFilterPatterns, "$description($extensionsStr)", allowMultipleSelects)
+                ?.split('|')?.map { it.toAbsoluteFile() } ?: listOf()
+        }
+
+        return listOf()
+    }
+
+    fun saveFileDialog(title: String, description: String, extensions: Array<String>): FileHandle? {
+        MemoryStack.stackPush().also { stack ->
+            val aFilterPatterns = stack.mallocPointer(extensions.size)
+
+            extensions.forEach {
+                aFilterPatterns.put(stack.UTF8("*.$it"))
+            }
+
+            aFilterPatterns.flip()
+
+            val extensionsStr = let {
+                var str = String()
+                extensions.forEach {
+                    str += "*.$it "
+                }
+                str
+            }
+
+            return TinyFileDialogs.tinyfd_saveFileDialog(title, "", aFilterPatterns, "$description($extensionsStr)")
+                    ?.toAbsoluteFile()
+        }
+
+        return null
+    }
+
+
 
     /**
      * Permet de retourné l'écart de temps entre 2 rafraîchissement de l'écran en évitant la spirale de la mort

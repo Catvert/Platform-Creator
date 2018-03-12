@@ -2,7 +2,7 @@ package be.catvert.pc.ui
 
 import be.catvert.pc.PCGame
 import be.catvert.pc.eca.Entity
-import be.catvert.pc.eca.EntityChecker
+import be.catvert.pc.eca.EntityID
 import be.catvert.pc.eca.EntityTag
 import be.catvert.pc.eca.Prefab
 import be.catvert.pc.eca.actions.Action
@@ -108,6 +108,9 @@ object ImGuiHelper {
                     }
                     is UIImpl -> {
                         insertUIFields(value, entity, level, editorSceneUI)
+                    }
+                    is EntityID -> {
+                        entity(value, level, editorSceneUI)
                     }
                     is Boolean -> {
                         checkbox(label, item.cast<Boolean>()::obj)
@@ -312,23 +315,25 @@ object ImGuiHelper {
         }
     }
 
-    fun entity(entityChecker: EntityChecker, level: Level, editorSceneUI: EditorScene.EditorSceneUI, label: String = "entité") {
+    fun entity(entityID: EntityID, level: Level, editorSceneUI: EditorScene.EditorSceneUI, label: String = "entité") {
         val favTitle = "set entity fav"
 
         with(ImGui) {
             if (button("Sélect. $label", Vec2(Constants.defaultWidgetsWidth - g.fontSize - g.style.itemInnerSpacing.x * 3f, 0))) {
                 editorSceneUI.editorMode = EditorScene.EditorSceneUI.EditorMode.SELECT_ENTITY
                 editorSceneUI.onSelectEntity.register(true) {
-                    entityChecker.entity = it
+                    if(it != null)
+                        entityID.ID = it.id()
                 }
             }
 
             if (isItemHovered()) {
                 functionalProgramming.withTooltip {
-                    if (entityChecker.entity == null)
+                    val entity = entityID.entity(level)
+                    if (entity == null)
                         textColored(Color.RED, "aucune entité sélectionnée")
                     else
-                        textPropertyColored(Color.ORANGE, "entité actuelle :", entityChecker.entity!!.name)
+                        textPropertyColored(Color.ORANGE, "entité actuelle :", entity.name)
                 }
             }
 
@@ -340,7 +345,7 @@ object ImGuiHelper {
             val fav = favoritesPopup(favTitle, level)
 
             if (fav != null) {
-                entityChecker.entity = fav
+                entityID.ID = fav.id()
             }
         }
     }
@@ -354,13 +359,14 @@ object ImGuiHelper {
             functionalProgramming.popup(id) {
                 if (favoris.isNotEmpty()) {
                     functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                        searchCombo("favoris", favoritesIndex.getOrPut(id, { intArrayOf(0) }), favoris.map { it.name }, {
-                            texturePreviewTooltip(favoris[it])
+                        val favorisEntities = favoris.mapNotNull { level.findEntityByID(it) }
+                        searchCombo("favoris", favoritesIndex.getOrPut(id, { intArrayOf(0) }), favorisEntities.map { it.name }, {
+                            texturePreviewTooltip(favorisEntities[it])
                         })
                     }
 
                     if (button("Sélectionner", Vec2(-1, 0))) {
-                        entity = favoris[favoritesIndex[id]!![0]]
+                        entity = level.findEntityByID(favoris[favoritesIndex[id]!![0]])
                         closeCurrentPopup()
                     }
                 } else {

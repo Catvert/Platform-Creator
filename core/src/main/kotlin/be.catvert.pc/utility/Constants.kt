@@ -53,7 +53,7 @@ object Constants {
 
     val texturesDirPath = assetsDirPath.child("textures")
     val soundsDirPath = assetsDirPath.child("sounds")
-    val musicsDirPath = soundsDirPath.child("music")
+    val musicsDirPath = assetsDirPath.child("musics")
     val backgroundsDirPath = assetsDirPath.child("backgrounds")
     val levelDirPath = assetsDirPath.child("levels")
 
@@ -68,6 +68,8 @@ object Constants {
     val levelPackExtension = arrayOf("atlas")
     val levelSoundExtension = arrayOf("mp3", "wav", "ogg")
     val levelScriptExtension = arrayOf("js")
+
+    val exportLevelExtension = arrayOf("zip")
 
     val levelDataFile = "data.$levelExtension"
     val levelPreviewFile = "preview.png"

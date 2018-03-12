@@ -147,7 +147,8 @@ class PhysicsComponent(@UI(customName = "figée") var isStatic: Boolean,
                                 moveSpeedY = level.gravitySpeed.toFloat()
                                 addJumpAfterClear = true
 
-                                onJumpAction(entity)
+                                if(entity.container != null)
+                                onJumpAction(entity, entity.container!!)
                             }
                         } else {
                             // Vérifie si l'entité est arrivé à la bonne hauteur de saut ou si elle rencontre un obstacle au dessus d'elle
@@ -182,8 +183,8 @@ class PhysicsComponent(@UI(customName = "figée") var isStatic: Boolean,
 
         move(true, moveSpeedX, moveSpeedY)
 
-        if (entity.position().x.equalsEpsilon(lastPos.x, Constants.physicsEpsilon) && entity.position().y.equalsEpsilon(lastPos.y, Constants.physicsEpsilon))
-            onNothingAction(entity)
+        if (entity.position().x.equalsEpsilon(lastPos.x, Constants.physicsEpsilon) && entity.position().y.equalsEpsilon(lastPos.y, Constants.physicsEpsilon) && entity.container != null)
+            onNothingAction(entity, entity.container!!)
 
         if (addJumpAfterClear)
             physicsActions += PhysicsActions.JUMP
@@ -192,14 +193,18 @@ class PhysicsComponent(@UI(customName = "figée") var isStatic: Boolean,
     private fun triggerCollisionEvent(entity: Entity, collideEntity: Entity, side: BoxSide, collideIndex: Int) {
         entity.getCurrentState().getComponent<PhysicsComponent>()?.apply {
             this.collisionsActions.firstOrNull { collisionAction -> (collisionAction.side == side || collisionAction.side == BoxSide.All) && collisionAction.target == collideEntity.tag }?.apply {
-                action(if (this.applyActionOnCollider) collideEntity else entity)
+                val entity = if(applyActionOnCollider) collideEntity else entity
+                if(entity.container != null)
+                    action(entity, entity.container!!)
             }
             onCollisionWith.invoke(CollisionListener(entity, collideEntity, side, collideIndex))
         }
 
         collideEntity.getCurrentState().getComponent<PhysicsComponent>()?.apply {
             this.collisionsActions.firstOrNull { collisionAction -> (collisionAction.side == -side || collisionAction.side == BoxSide.All) && collisionAction.target == entity.tag }?.apply {
-                action(if (this.applyActionOnCollider) entity else collideEntity)
+                val entity = if(applyActionOnCollider) entity else collideEntity
+                if(entity.container != null)
+                    action(entity, entity.container!!)
             }
             onCollisionWith.invoke(CollisionListener(collideEntity, entity, -side, collideIndex))
         }
@@ -250,11 +255,11 @@ class PhysicsComponent(@UI(customName = "figée") var isStatic: Boolean,
             if (!collide && Math.abs(moveY - targetMoveY) > Constants.physicsEpsilon)
                 moveY += Math.signum(targetMoveY) * Constants.physicsEpsilon
             else {
-                if (!collide) {
+                if (!collide && entity.container != null) {
                     if (moveY > 0 && entity.box.top() != level.matrixRect.top())
-                        onUpAction(entity)
+                        onUpAction(entity, entity.container!!)
                     else if (moveY < 0)
-                        onDownAction(entity)
+                        onDownAction(entity, entity.container!!)
                 } else
                     returnCollide = true
 
@@ -289,11 +294,11 @@ class PhysicsComponent(@UI(customName = "figée") var isStatic: Boolean,
             if (!collide && Math.abs(moveX - targetMoveX) > Constants.physicsEpsilon)
                 moveX += Math.signum(targetMoveX) * Constants.physicsEpsilon
             else {
-                if (!collide) {
+                if (!collide && entity.container != null) {
                     if (moveX > 0 && entity.box.right() != level.matrixRect.right())
-                        onRightAction(entity)
+                        onRightAction(entity, entity.container!!)
                     else if (moveX < 0 && entity.box.left() != level.matrixRect.left())
-                        onLeftAction(entity)
+                        onLeftAction(entity, entity.container!!)
                 } else
                     returnCollide = true
 

@@ -4,6 +4,7 @@ package be.catvert.pc.eca.actions
 import be.catvert.pc.eca.Entity
 import be.catvert.pc.eca.components.RequiredComponent
 import be.catvert.pc.eca.components.logics.LifeComponent
+import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.ui.Description
 import be.catvert.pc.ui.UI
 import com.fasterxml.jackson.annotation.JsonCreator
@@ -25,7 +26,7 @@ class LifeAction(@UI var action: LifeActions) : Action() {
         ADD_LP, REMOVE_LP, ONE_SHOT
     }
 
-    override fun invoke(entity: Entity) {
+    override fun invoke(entity: Entity, container: EntityContainer) {
         entity.getCurrentState().getComponent<LifeComponent>()?.lifeAction(action)
     }
 

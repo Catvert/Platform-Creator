@@ -1,6 +1,7 @@
 package be.catvert.pc.eca.actions
 
 import be.catvert.pc.eca.Entity
+import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.ui.Description
@@ -21,9 +22,9 @@ class StateSwitcherAction(var stateSwitchActions: ArrayList<StateSwitchAction>) 
     constructor(vararg stateSwitchActions: StateSwitchAction) : this(arrayListOf(*stateSwitchActions))
     @JsonCreator private constructor() : this(arrayListOf())
 
-    override fun invoke(entity: Entity) {
+    override fun invoke(entity: Entity, container: EntityContainer) {
         stateSwitchActions.filter { it.first == entity.getCurrentStateIndex() }.forEach {
-            it.second(entity)
+            it.second(entity, container)
         }
     }
 

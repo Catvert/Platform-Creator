@@ -2,6 +2,7 @@ package be.catvert.pc.eca.actions
 
 import be.catvert.pc.eca.Entity
 import be.catvert.pc.eca.Prefab
+import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.scenes.EditorScene
@@ -20,10 +21,8 @@ import com.fasterxml.jackson.annotation.JsonCreator
 class SpawnPositionAction(@UI var prefab: Prefab, var position: Point) : Action(), UIImpl {
     @JsonCreator private constructor() : this(PrefabFactory.MushroomRed_SMC.prefab, Point(0f, 0f))
 
-    override fun invoke(entity: Entity) {
-        entity.container?.apply {
-            prefab.create(position, this)
-        }
+    override fun invoke(entity: Entity, container: EntityContainer) {
+        prefab.create(position, container)
     }
 
     override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {

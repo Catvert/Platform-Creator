@@ -28,7 +28,8 @@ class TimerComponent(interval: Float, @UI var action: Action) : Component(), Upd
 
     private val timer = Timer(interval).apply {
         onIncrement.register {
-            action(entity)
+            if(entity.container != null)
+                action(entity, entity.container!!)
         }
     }
 

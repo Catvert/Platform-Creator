@@ -33,7 +33,7 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
 
     val tags = arrayListOf(*Tags.values().map { it.tag }.toTypedArray())
 
-    val favoris = arrayListOf<Entity>()
+    val favoris = arrayListOf<Int>()
 
     @JsonIgnore
     var applyGravity = true
@@ -143,9 +143,10 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
 
         activeRect.size = Size((viewportWidth * 1.5f).roundToInt(), (viewportHeight * 1.5f).roundToInt())
 
-        if (followEntity.entity != null) {
-            val posX = MathUtils.clamp(followEntity.entity!!.box.center().x, viewportWidth / 2f, matrixRect.width - viewportWidth / 2f)
-            val posY = MathUtils.clamp(followEntity.entity!!.box.center().y, viewportHeight / 2f, matrixRect.height - viewportHeight / 2f)
+        val followEntity = followEntity.entity(this)
+        if (followEntity != null) {
+            val posX = MathUtils.clamp(followEntity.box.center().x, viewportWidth / 2f, matrixRect.width - viewportWidth / 2f)
+            val posY = MathUtils.clamp(followEntity.box.center().y, viewportHeight / 2f, matrixRect.height - viewportHeight / 2f)
 
             val lerpX = MathUtils.lerp(camera.position.x, posX, 0.1f).clamp(viewportWidth / 2f, matrixRect.width - viewportWidth / 2f)
             val lerpY = MathUtils.lerp(camera.position.y, posY, 0.1f).clamp(viewportHeight / 2f, matrixRect.height - viewportHeight / 2f)
@@ -168,7 +169,6 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
     override fun onPostDeserialization() {
         super.onPostDeserialization()
         zoom = initialZoom
-
     }
 
     override fun update() {
@@ -176,6 +176,12 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
 
         if (allowUpdating)
             timer.update()
+    }
+
+    override fun onRemoveEntity(entity: Entity) {
+        super.onRemoveEntity(entity)
+
+        favoris.remove(entity.id())
     }
 
     companion object {
@@ -198,9 +204,8 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
 
             val player = PrefabFactory.Player_Kenney.prefab.create(Point(100f, 50f), level)
 
-            level.followEntity.entity = player
-
-            level.favoris.add(player)
+            level.followEntity.ID = player.id()
+            level.favoris.add(player.id())
 
             level.loadResources()
 

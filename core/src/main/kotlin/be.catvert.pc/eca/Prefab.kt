@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators
  * Représente une entité "préfaite", permettant "d'enregistrer" l'état d'une entité avec ses components et ses propriétés et de réutiliser cette entité à plusieurs endroits dans le niveau en copiant celle-ci.
  * Exemple de prefab : ennemis, joueurs, blocs spéciaux..
  */
-@JsonIdentityInfo(property = "id", generator = ObjectIdGenerators.IntSequenceGenerator::class)
+@JsonIdentityInfo(property = "entityID", generator = ObjectIdGenerators.IntSequenceGenerator::class)
 class Prefab(val name: String, val prefabEntity: Entity) {
     /**
      * Permet de créer une nouvelle entité en copiant l'entité de base définie dans ce préfab

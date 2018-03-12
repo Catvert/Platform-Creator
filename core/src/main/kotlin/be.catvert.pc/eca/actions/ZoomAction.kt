@@ -1,6 +1,7 @@
 package be.catvert.pc.eca.actions
 
 import be.catvert.pc.eca.Entity
+import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.ui.Description
 import be.catvert.pc.ui.UI
@@ -15,8 +16,8 @@ import com.fasterxml.jackson.annotation.JsonCreator
 class ZoomAction(@UI(max = 2f) var zoom: Float) : Action() {
     @JsonCreator private constructor() : this(1f)
 
-    override fun invoke(entity: Entity) {
-        entity.container.cast<Level>()?.zoom = zoom
+    override fun invoke(entity: Entity, container: EntityContainer) {
+       container.cast<Level>()?.zoom = zoom
     }
 
     override fun toString() = super.toString() + " - $zoom"

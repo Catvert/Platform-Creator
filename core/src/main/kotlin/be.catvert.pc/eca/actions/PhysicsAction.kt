@@ -4,6 +4,7 @@ package be.catvert.pc.eca.actions
 import be.catvert.pc.eca.Entity
 import be.catvert.pc.eca.components.RequiredComponent
 import be.catvert.pc.eca.components.logics.PhysicsComponent
+import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.ui.Description
 import be.catvert.pc.ui.UI
 import com.fasterxml.jackson.annotation.JsonCreator
@@ -24,7 +25,7 @@ class PhysicsAction(@UI var physicsAction: PhysicsActions) : Action() {
         MOVE_LEFT, MOVE_RIGHT, MOVE_UP, MOVE_DOWN, JUMP, FORCE_JUMP;
     }
 
-    override fun invoke(entity: Entity) {
+    override fun invoke(entity: Entity, container: EntityContainer) {
         entity.getCurrentState().getComponent<PhysicsComponent>()?.physicsActions?.add(physicsAction)
     }
 

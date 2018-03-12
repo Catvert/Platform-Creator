@@ -39,12 +39,14 @@ class InputComponent(var inputs: ArrayList<InputData>) : Component(), Updeatable
         }
 
         fun update(entity: Entity) {
-            if (pressed) {
-                if (Gdx.input.isKeyPressed(key))
-                    action(entity)
-            } else {
-                if (Gdx.input.isKeyJustPressed(key))
-                    action(entity)
+            if(entity.container != null) {
+                if (pressed) {
+                    if (Gdx.input.isKeyPressed(key))
+                        action(entity, entity.container!!)
+                } else {
+                    if (Gdx.input.isKeyJustPressed(key))
+                        action(entity, entity.container!!)
+                }
             }
         }
     }

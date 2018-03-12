@@ -30,13 +30,15 @@ import imgui.functionalProgramming
  * @param container Le conteneur "contenant" cette entité
  * @param otherStates Les autres états de l'entité
  */
-@JsonIdentityInfo(property = "id", generator = ObjectIdGenerators.IntSequenceGenerator::class)
+@JsonIdentityInfo(property = "ref", generator = ObjectIdGenerators.IntSequenceGenerator::class)
 class Entity(@UI(customType = CustomType.TAG_STRING) var tag: EntityTag,
              @UI(customName = "nom") var name: String,
              @UI var box: Rect,
              defaultState: EntityState = EntityState("default"),
              container: EntityContainer? = null,
              vararg otherStates: EntityState = arrayOf()) : Updeatable, Renderable, ResourceLoader, UIImpl, UITextImpl  {
+
+    val entityID = EntityID()
 
     /**
      * Représente la "couche" à laquelle cette entité va être affichée
@@ -104,9 +106,13 @@ class Entity(@UI(customType = CustomType.TAG_STRING) var tag: EntityTag,
         set(value) {
             field = value
             if (value != null) {
-                setState(initialState, true)
+                setState(initialState)
+                if(id() == EntityID.INVALID_ID)
+                    entityID.ID = value.generateID()
             }
         }
+
+    fun id() = entityID.ID
 
     @JsonIgnore
     fun getCurrentState() = states.elementAt(currentState)
@@ -143,12 +149,12 @@ class Entity(@UI(customType = CustomType.TAG_STRING) var tag: EntityTag,
         states.remove(states.elementAt(stateIndex))
     }
 
-    fun setState(stateIndex: Int, triggerStartAction: Boolean) {
+    fun setState(stateIndex: Int) {
         if (stateIndex in states.indices) {
             getCurrentState().disabled()
             currentState = stateIndex
 
-            getCurrentState().active(this, container!!, triggerStartAction)
+            getCurrentState().active(this, container!!)
         }
     }
 
@@ -173,7 +179,7 @@ class Entity(@UI(customType = CustomType.TAG_STRING) var tag: EntityTag,
         with(ImGui) {
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                 if (combo("état initial", ::initialState, getStates().map { it.name }))
-                    setState(initialState, false)
+                    setState(initialState)
             }
         }
     }

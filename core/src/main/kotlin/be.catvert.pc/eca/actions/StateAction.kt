@@ -2,6 +2,7 @@ package be.catvert.pc.eca.actions
 
 import be.catvert.pc.eca.Entity
 import be.catvert.pc.eca.components.logics.MoverComponent
+import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.ui.Description
@@ -20,12 +21,13 @@ class StateAction(var stateIndex: Int, var usePreviousMoverDirection: Boolean = 
 
     private fun checkHasMover(entity: Entity) = entity.getCurrentState().hasComponent<MoverComponent>() && entity.getStateOrDefault(stateIndex).hasComponent<MoverComponent>()
 
-    override fun invoke(entity: Entity) {
+    override fun invoke(entity: Entity, container: EntityContainer) {
         if (usePreviousMoverDirection && checkHasMover(entity)) {
             val previousMover = entity.getCurrentState().getComponent<MoverComponent>()!!
             entity.getStateOrDefault(stateIndex).getComponent<MoverComponent>()?.reverse = previousMover.reverse
         }
-        entity.setState(stateIndex, true)
+        entity.setState(stateIndex)
+        entity.getCurrentState().startAction(entity, container)
     }
 
     override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {

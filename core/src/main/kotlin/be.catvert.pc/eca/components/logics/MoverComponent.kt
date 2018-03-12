@@ -32,12 +32,12 @@ class MoverComponent(@UI(max = 100f) var moveSpeedX: Int, @UI(max = 100f) var mo
     var onReverseAction: Action = EmptyAction()
 
     private fun reverse() {
-        if (nextReverse != !reverse) {
+        if (nextReverse != !reverse && entity.container != null) {
             nextReverse = !reverse
             if (nextReverse)
-                onReverseAction(entity)
+                onReverseAction(entity, entity.container!!)
             else
-                onUnReverseAction(entity)
+                onUnReverseAction(entity, entity.container!!)
         }
     }
 
@@ -68,11 +68,11 @@ class MoverComponent(@UI(max = 100f) var moveSpeedX: Int, @UI(max = 100f) var mo
 
         physicsComp?.move(true, if (reverse) (-moveSpeedX * deltaMove) else (moveSpeedX * deltaMove), if (reverse) (-moveSpeedY * deltaMove) else (moveSpeedY * deltaMove))
 
-        if (holdEntities) {
+        if (holdEntities && entity.container != null) {
             physicsComp?.apply {
                 // On double l'epsilon pour être sûr de la précision et éviter les problèmes liés au deltatime
                 getCollideEntitiesOnSide(entity, BoxSide.Up, Constants.physicsEpsilon * 2f).forEach {
-                    MoveAction(if (reverse) -moveSpeedX else moveSpeedX, if (reverse) -moveSpeedY else moveSpeedY, true).invoke(it)
+                    MoveAction(if (reverse) -moveSpeedX else moveSpeedX, if (reverse) -moveSpeedY else moveSpeedY, true).invoke(it, entity.container!!)
                 }
             }
         }

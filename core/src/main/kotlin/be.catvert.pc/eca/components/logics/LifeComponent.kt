@@ -37,7 +37,7 @@ class LifeComponent(onDeathAction: Action, lifePointActions: ArrayList<Action> =
      * Permet de retirer un point de vie à un entity
      */
     fun lifeAction(action: LifeAction.LifeActions) {
-        if (!active)
+        if (!active || entity.container == null)
             return
 
         when (action) {
@@ -48,12 +48,12 @@ class LifeComponent(onDeathAction: Action, lifePointActions: ArrayList<Action> =
             }
             LifeAction.LifeActions.REMOVE_LP -> {
                 if (lifePoint >= 1) {
-                    lpActions.elementAt(lifePoint - 1).invoke(entity)
+                    lpActions.elementAt(lifePoint - 1).invoke(entity, entity.container!!)
                     lifePoint = (lifePoint - 1).max(1)
                 }
             }
             LifeAction.LifeActions.ONE_SHOT -> {
-                lpActions.elementAt(0).invoke(entity)
+                lpActions.elementAt(0).invoke(entity, entity.container!!)
                 lifePoint = 1
             }
         }

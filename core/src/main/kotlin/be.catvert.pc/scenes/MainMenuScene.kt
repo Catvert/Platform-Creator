@@ -19,9 +19,6 @@ import com.badlogic.gdx.utils.JsonReader
 import com.badlogic.gdx.utils.JsonWriter
 import glm_.vec2.Vec2
 import imgui.*
-import ktx.assets.toAbsoluteFile
-import org.lwjgl.system.MemoryStack
-import org.lwjgl.util.tinyfd.TinyFileDialogs
 import java.io.FileReader
 import java.io.FileWriter
 import java.io.IOException
@@ -59,7 +56,7 @@ class MainMenuScene(applyMusicTransition: Boolean) : Scene(StandardBackground(Co
     }
 
     private fun refreshLevels() {
-       levels = Constants.levelDirPath.list { dir -> dir.isDirectory && dir.list { _, s -> s == Constants.levelDataFile }.isNotEmpty() }.map { LevelItem(it) }
+        levels = Constants.levelDirPath.list { dir -> dir.isDirectory && dir.list { _, s -> s == Constants.levelDataFile }.isNotEmpty() }.map { LevelItem(it) }
     }
 
     private var showSelectLevelWindow = false
@@ -184,23 +181,17 @@ class MainMenuScene(applyMusicTransition: Boolean) : Scene(StandardBackground(Co
 
                         var openCopyPopup = false
                         functionalProgramming.popup(settingsLevelTitle) {
-                            if(button("Exporter", Vec2(Constants.defaultWidgetsWidth, 0))) {
+                            if (button("Exporter", Vec2(Constants.defaultWidgetsWidth, 0))) {
                                 try {
-                                    MemoryStack.stackPush().also { stack ->
-                                        val aFilterPatterns = stack.mallocPointer(1)
+                                    val file = Utility.saveFileDialog("Exporter le niveau $settingsLevelItem", "Niveau", Constants.exportLevelExtension)
+                                    if (file != null) {
+                                        val outStream = file.write(false)
+                                        val zipOutputStream = ZipOutputStream(outStream)
+                                        Utility.zipFile(settingsLevelItem.dir, settingsLevelItem.dir.name(), zipOutputStream)
+                                        zipOutputStream.close()
+                                        outStream.close()
 
-                                        aFilterPatterns.put(stack.UTF8("*.zip"))
-
-                                        val file = TinyFileDialogs.tinyfd_saveFileDialog("Exporter le niveau $settingsLevelItem", "", aFilterPatterns, "Niveau (zip)")
-                                        if (file != null) {
-                                            val outStream = file.toAbsoluteFile().write(false)
-                                            val zipOutputStream = ZipOutputStream(outStream)
-                                            Utility.zipFile(settingsLevelItem.dir, settingsLevelItem.dir.name(), zipOutputStream)
-                                            zipOutputStream.close()
-                                            outStream.close()
-
-                                            closeCurrentPopup()
-                                        }
+                                        closeCurrentPopup()
                                     }
                                 } catch (e: Exception) {
                                     Log.error(e) { "Une erreur est survenue lors de l'exportation du niveau $settingsLevelItem !" }
@@ -300,21 +291,14 @@ class MainMenuScene(applyMusicTransition: Boolean) : Scene(StandardBackground(Co
 
                     separator()
 
-                    if(button("Importer ..", Vec2(-1, 0))) {
+                    if (button("Importer ..", Vec2(-1, 0))) {
                         try {
-                            MemoryStack.stackPush().also { stack ->
-                                val aFilterPatterns = stack.mallocPointer(1)
+                            Utility.openFileDialog("Importer un niveau..", "Niveau", Constants.exportLevelExtension, false).firstOrNull()?.apply {
+                                Utility.unzipFile(this, Constants.levelDirPath)
 
-                                aFilterPatterns.put(stack.UTF8("*.zip"))
+                                refreshLevels()
 
-                                val file = TinyFileDialogs.tinyfd_openFileDialog("Importer un niveau..", "", aFilterPatterns, "Niveau (zip)", false)
-                                if (file != null) {
-                                    Utility.unzipFile(file.toAbsoluteFile(), Constants.levelDirPath)
-
-                                    refreshLevels()
-
-                                    closeCurrentPopup()
-                                }
+                                closeCurrentPopup()
                             }
                         } catch (e: Exception) {
                             Log.error(e) { "Une erreur est survenue lors de l'importation du niveau !" }

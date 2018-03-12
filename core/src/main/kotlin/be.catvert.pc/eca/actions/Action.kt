@@ -1,7 +1,7 @@
 package be.catvert.pc.eca.actions
 
 import be.catvert.pc.eca.Entity
-import be.catvert.pc.eca.EntityChecker
+import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.utility.ReflectionUtility
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import kotlin.reflect.KClass
@@ -46,11 +46,7 @@ abstract class Action {
     /**
      * Permet d'invoquer l'action sur un entity quelconque
      */
-    abstract operator fun invoke(entity: Entity)
-    operator fun invoke(entityChecker: EntityChecker) {
-        if(entityChecker.entity != null)
-            invoke(entityChecker.entity!!)
-    }
+    abstract operator fun invoke(entity: Entity, container: EntityContainer)
 
     override fun toString() = ReflectionUtility.simpleNameOf(this)
 }

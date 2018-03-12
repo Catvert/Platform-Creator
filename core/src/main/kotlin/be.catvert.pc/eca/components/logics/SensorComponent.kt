@@ -36,7 +36,7 @@ class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeata
 
             level.getAllEntitiesInCells(entity.box).filter { it !== entity && it.tag == target && entity.box.overlaps(it.box) }.forEach {
                 if (!sensorOverlaps.contains(it)) {
-                    sensorIn(entity)
+                    sensorIn(entity, level)
                     sensorOverlaps += it
                 }
 
@@ -44,7 +44,7 @@ class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeata
             }
 
             sensorOverlaps.filter { !checkedEntities.contains(it) }.forEach {
-                sensorOut(entity)
+                sensorOut(entity, level)
                 sensorOverlaps.remove(it)
             }
         }
@@ -52,18 +52,17 @@ class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeata
         override fun toString(): String = ""
     }
 
-    class EntitySensorData(@UI var target: EntityChecker = EntityChecker(), sensorIn: Action = EmptyAction(), sensorOut: Action = EmptyAction()) : SensorData(sensorIn, sensorOut) {
+    class EntitySensorData(@UI var target: EntityID = EntityID(), sensorIn: Action = EmptyAction(), sensorOut: Action = EmptyAction()) : SensorData(sensorIn, sensorOut) {
         override fun checkSensorOverlaps(entity: Entity, level: Level) {
-            if (target.entity != null) {
-                val target = target.entity!!
-
+            val target = target.entity(level)
+            if (target != null) {
                 if (entity.box.overlaps(target.box)) {
                     if (!sensorOverlaps.contains(target)) {
-                        sensorIn(entity)
+                        sensorIn(entity, level)
                         sensorOverlaps += target
                     }
                 } else if (sensorOverlaps.contains(target)) {
-                    sensorOut(entity)
+                    sensorOut(entity, level)
                     sensorOverlaps.remove(target)
                 }
             }

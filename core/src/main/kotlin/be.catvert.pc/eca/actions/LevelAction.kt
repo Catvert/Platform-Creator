@@ -2,6 +2,7 @@ package be.catvert.pc.eca.actions
 
 
 import be.catvert.pc.eca.Entity
+import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.ui.Description
 import be.catvert.pc.ui.UI
@@ -20,8 +21,8 @@ class LevelAction(@UI var action: LevelActions) : Action() {
         SUCCESS_EXIT, FAIL_EXIT
     }
 
-    override fun invoke(entity: Entity) {
-        entity.container?.cast<Level>()?.apply {
+    override fun invoke(entity: Entity, container: EntityContainer) {
+        container.cast<Level>()?.apply {
             when (action) {
                 LevelActions.SUCCESS_EXIT -> exit(true)
                 LevelActions.FAIL_EXIT -> exit(false)

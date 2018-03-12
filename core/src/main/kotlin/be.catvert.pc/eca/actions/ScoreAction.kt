@@ -2,6 +2,7 @@ package be.catvert.pc.eca.actions
 
 
 import be.catvert.pc.eca.Entity
+import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.ui.Description
 import be.catvert.pc.ui.UI
@@ -15,8 +16,8 @@ import com.fasterxml.jackson.annotation.JsonCreator
 class ScoreAction(@UI(max = 100f) var points: Int) : Action() {
     @JsonCreator private constructor() : this(0)
 
-    override fun invoke(entity: Entity) {
-        entity.container.cast<Level>()?.apply {
+    override fun invoke(entity: Entity, container: EntityContainer) {
+        container.cast<Level>()?.apply {
             scorePoints += points
         }
     }
