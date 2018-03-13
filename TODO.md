@@ -9,12 +9,9 @@
 
 ## BUGS
 
-- Si le joueur est supprimé mais toujours en follow camera(ou autre genre en gameObjectAction) -> présent mais pas dans la matrix -> check si l'entité est valide lors de la sérialisation
-- Bug select entity multiple select chelou 
 ## IDÉE
-
+- Editeur des couleurs imgui
 - Place order pour l'expose editor 
-- Sélecteur de skin basé sur la couleur (colorpicker)
 - Structure, permet de créer une structure prédéfinie ou créer. Un peu à la méthode des prefabs sauf que c'est plusieurs gameObjects placé a côté de l'autre
 - Ajout du pseudo de l'utilisateur au premier lancement
 - Ajouter la possibilité d'importer des atlas .xml

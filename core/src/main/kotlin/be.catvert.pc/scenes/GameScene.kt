@@ -10,6 +10,7 @@ import be.catvert.pc.ui.ImGuiHelper
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import glm_.vec2.Vec2
 import imgui.ImGui
 import imgui.WindowFlags
@@ -24,6 +25,8 @@ class GameScene(private val level: Level) : Scene(level.background, level.backgr
     override var entityContainer: EntityContainer = level
 
     private var pause = false
+
+    private val glyphTimer = GlyphLayout()
 
     init {
         level.entitiesInitialStartActions()
@@ -43,7 +46,7 @@ class GameScene(private val level: Level) : Scene(level.background, level.backgr
                         entityContainer.allowUpdating = true
                     }
                     if (button("Recommencer", Vec2(-1, 0))) {
-                        val level = Level.loadFromFile(this@GameScene.level.levelPath.toLocalFile().parent())
+                        val level = Level.loadFromFile(this@GameScene.level.levelPath.get().parent())
                         if (level != null)
                             PCGame.scenesManager.loadScene(GameScene(level))
                     }
@@ -60,11 +63,14 @@ class GameScene(private val level: Level) : Scene(level.background, level.backgr
         super.postBatchRender()
         level.drawDebug()
 
+        glyphTimer.setText(PCGame.mainFont, "Temps écoulé : ${level.getTimer()}")
+
         PCGame.hudBatch.projectionMatrix = PCGame.defaultProjection
         PCGame.hudBatch.use {
             PCGame.mainFont.color.a = alpha
-            PCGame.mainFont.draw(it, "Score : ${level.scorePoints}", 10f, Gdx.graphics.height - 10f)
-            PCGame.mainFont.draw(it, "Temps écoulé : ${level.getTimer()}", 10f, Gdx.graphics.height - 40f)
+            PCGame.mainFont.draw(it, "Score : ${level.scorePoints}", 10f, Gdx.graphics.height - PCGame.mainFont.lineHeight)
+
+            PCGame.mainFont.draw(it, glyphTimer, Gdx.graphics.width - glyphTimer.width - 10f, Gdx.graphics.height - glyphTimer.height)
         }
     }
 
@@ -78,7 +84,7 @@ class GameScene(private val level: Level) : Scene(level.background, level.backgr
             entityContainer.allowUpdating = false
         }
         if (Gdx.input.isKeyJustPressed(GameKeys.GAME_EDIT_LEVEL.key))
-            PCGame.scenesManager.loadScene(EditorScene(Level.loadFromFile(level.levelPath.toLocalFile().parent())!!, true))
+            PCGame.scenesManager.loadScene(EditorScene(Level.loadFromFile(level.levelPath.get().parent())!!, true))
     }
 
     private fun updateCamera(lerp: Boolean) {

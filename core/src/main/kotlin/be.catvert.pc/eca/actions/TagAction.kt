@@ -21,7 +21,7 @@ class TagAction(@UI(customType = CustomType.TAG_STRING) var tag: EntityTag, var 
     @JsonCreator private constructor() : this(Tags.Player.tag, EmptyAction())
 
     override fun invoke(entity: Entity, container: EntityContainer) {
-        container.cast<Level>()?.findEntitiesByTag(tag)?.forEach {
+        container.findEntitiesByTag(tag).forEach {
             action(it, container)
         }
     }

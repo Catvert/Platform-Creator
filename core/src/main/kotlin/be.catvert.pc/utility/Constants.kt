@@ -73,6 +73,7 @@ object Constants {
 
     val levelDataFile = "data.$levelExtension"
     val levelPreviewFile = "preview.png"
+    val levelCustomMusicFile = "music.mp3"
 
     val defaultSoundPath = assetsDirPath.child("game/nosound.wav")
 }

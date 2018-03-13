@@ -32,6 +32,7 @@ import com.badlogic.gdx.math.Circle
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
+import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const
 import glm_.func.common.clamp
 import glm_.func.common.min
 import glm_.vec2.Vec2
@@ -473,7 +474,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         super.dispose()
         editorFont.dispose()
 
-        if (!level.levelPath.toLocalFile().exists()) {
+        if (!level.levelPath.get().exists()) {
             level.deleteFiles()
         }
     }
@@ -1045,12 +1046,12 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
     private fun saveLevelToFile() {
         try {
-            SerializationFactory.serializeToFile(level, level.levelPath.toLocalFile())
+            SerializationFactory.serializeToFile(level, level.levelPath.get())
             PCGame.scenesManager.takeScreenshotWithoutImGui {
                 val resizePixmap = Pixmap(Gdx.graphics.backBufferWidth, Gdx.graphics.backBufferHeight - editorSceneUI.menuBarHeight, Pixmap.Format.RGBA8888)
                 resizePixmap.drawPixmap(it, 0, -editorSceneUI.menuBarHeight)
 
-                PixmapIO.writePNG(level.levelPath.toLocalFile().parent().child(Constants.levelPreviewFile), resizePixmap)
+                PixmapIO.writePNG(level.levelPath.get().parent().child(Constants.levelPreviewFile), resizePixmap)
 
                 resizePixmap.dispose()
                 it.dispose()
@@ -1145,7 +1146,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                 showMainMenu()
             }
             if (ImGui.button("Abandonner les modifications", Vec2(225f, 0))) {
-                if (!level.levelPath.toLocalFile().exists()) {
+                if (!level.levelPath.get().exists()) {
                     level.deleteFiles()
                 }
                 showMainMenu()
@@ -1273,16 +1274,28 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                                 }
                             }
 
+                            val musics = PCGame.gameMusics.toMutableList()
+                            val customMusic = level.levelPath.get().parent().child(Constants.levelCustomMusicFile)
+
+                            if(customMusic.exists())
+                                musics.add(customMusic)
+
                             val currentMusicIndex = let {
                                 if (level.musicPath != null)
-                                    intArrayOf(PCGame.gameMusics.indexOf(level.musicPath!!.get()))
+                                    intArrayOf(musics.indexOf(level.musicPath!!.get()))
                                 else
                                     intArrayOf(-1)
                             }
                             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                                if (combo("musique", currentMusicIndex, PCGame.gameMusics.map { it.nameWithoutExtension() })) {
-                                    level.musicPath = PCGame.gameMusics[currentMusicIndex[0]].toFileWrapper()
-                                }
+                                if(ImGuiHelper.comboWithSettingsButton("musique", currentMusicIndex, musics.map { it.nameWithoutExtension() }, {
+                                    if(button("Importer")) {
+                                        Utility.openFileDialog("Importer une musique", "Musique", arrayOf("mp3"), false)?.firstOrNull()?.apply {
+                                            this.copyTo(customMusic)
+                                            level.musicPath = customMusic.toFileWrapper()
+                                        }
+                                    }
+                                }, searchBar = true))
+                                    level.musicPath = musics[currentMusicIndex[0]].toFileWrapper()
                             }
 
                             ImGuiHelper.entity(level.followEntity, level, editorSceneUI, "entité suivie")

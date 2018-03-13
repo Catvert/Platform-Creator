@@ -24,12 +24,12 @@ import kotlin.math.roundToInt
 /**
  * Représente un niveau
  */
-class Level(val levelPath: String, val gameVersion: Float, var background: Background?, var musicPath: FileWrapper?) : EntityMatrixContainer() {
-    private val levelTextures = levelPath.toLocalFile().parent().child("textures") to mutableListOf<FileHandle>()
-    private val levelPacks = levelPath.toLocalFile().parent().child("packs") to mutableListOf<FileHandle>()
-    private val levelSounds = levelPath.toLocalFile().parent().child("sounds") to mutableListOf<FileHandle>()
-    private val levelPrefabs = levelPath.toLocalFile().parent().child("prefabs") to mutableListOf<Prefab>()
-    private val levelScripts = levelPath.toLocalFile().parent().child("scripts") to mutableListOf<Script>()
+class Level(val levelPath: FileWrapper, val gameVersion: Float, var background: Background?, var musicPath: FileWrapper?) : EntityMatrixContainer() {
+    private val levelTextures = levelPath.get().parent().child("textures") to mutableListOf<FileHandle>()
+    private val levelPacks = levelPath.get().parent().child("packs") to mutableListOf<FileHandle>()
+    private val levelSounds = levelPath.get().parent().child("sounds") to mutableListOf<FileHandle>()
+    private val levelPrefabs = levelPath.get().parent().child("prefabs") to mutableListOf<Prefab>()
+    private val levelScripts = levelPath.get().parent().child("scripts") to mutableListOf<Script>()
 
     val tags = arrayListOf(*Tags.values().map { it.tag }.toTypedArray())
 
@@ -41,7 +41,7 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
     @JsonIgnore
     var exit: (success: Boolean) -> Unit = {
         ResourcesManager.getSound(if (it) Constants.gameDirPath.child("game-over-success.wav") else Constants.gameDirPath.child("game-over-fail.wav"))?.play(PCGame.soundVolume)
-        PCGame.scenesManager.loadScene(GameScene(SerializationFactory.deserializeFromFile(levelPath.toLocalFile())))
+        PCGame.scenesManager.loadScene(GameScene(SerializationFactory.deserializeFromFile(levelPath.get())))
     }
 
     @JsonIgnore
@@ -161,8 +161,8 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
     fun getTimer() = timer.timer
 
     fun deleteFiles() {
-        if (!levelPath.toLocalFile().exists()) {
-            levelPath.toLocalFile().parent().deleteDirectory()
+        if (!levelPath.get().exists()) {
+            levelPath.get().parent().deleteDirectory()
         }
     }
 
@@ -192,7 +192,7 @@ class Level(val levelPath: String, val gameVersion: Float, var background: Backg
                 levelDir.deleteDirectory()
             }
             levelDir.mkdirs()
-            val level = Level(levelDir.child(Constants.levelDataFile).path(), Constants.gameVersion, PCGame.getParallaxBackgrounds().elementAtOrNull(0)
+            val level = Level(levelDir.child(Constants.levelDataFile).toFileWrapper(), Constants.gameVersion, PCGame.getParallaxBackgrounds().elementAtOrNull(0)
                     ?: PCGame.getStandardBackgrounds().elementAtOrNull(0), null)
 
             val ground = PrefabFactory.PhysicsSprite.prefab.create(Point(0f, 0f), level)
