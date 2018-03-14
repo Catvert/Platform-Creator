@@ -17,7 +17,7 @@ class ZoomAction(@UI(max = 2f) var zoom: Float) : Action() {
     @JsonCreator private constructor() : this(1f)
 
     override fun invoke(entity: Entity, container: EntityContainer) {
-       container.cast<Level>()?.zoom = zoom
+        container.cast<Level>()?.zoom = zoom
     }
 
     override fun toString() = super.toString() + " - $zoom"

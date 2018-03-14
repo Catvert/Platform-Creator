@@ -86,7 +86,7 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
 
         initializeUI()
 
-        scenesManager = ScenesManager(MainMenuScene(true))
+        scenesManager = ScenesManager(MainMenuScene(null, true))
     }
 
     override fun render() {
@@ -230,7 +230,7 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
 
         val availableLocales = mutableListOf<Locale>(Locale.FRENCH)
 
-        fun getStandardBackgrounds() =   Utility.getFilesRecursivly(Constants.backgroundsDirPath.child("standard"), *Constants.levelTextureExtension).map { StandardBackground(it.toFileWrapper()) }
+        fun getStandardBackgrounds() = Utility.getFilesRecursivly(Constants.backgroundsDirPath.child("standard"), *Constants.levelTextureExtension).map { StandardBackground(it.toFileWrapper()) }
         fun getParallaxBackgrounds() = Utility.getFilesRecursivly(Constants.backgroundsDirPath.child("parallax"), "data").map { ParallaxBackground(it.toFileWrapper()) }
 
         /**

@@ -61,7 +61,7 @@ abstract class EntityContainer : Renderable, Updeatable, PostDeserialization, Re
 
     fun entitiesInitialStartActions() {
         entities.forEach {
-            if(it.getCurrentState().isActive())
+            if (it.getCurrentState().isActive())
                 it.getCurrentState().startAction(it, this)
         }
     }

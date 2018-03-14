@@ -17,9 +17,9 @@ class EntityAction(@UI var target: EntityID, var action: Action) : Action(), UII
     @JsonCreator private constructor() : this(EntityID(), EmptyAction())
 
     override fun invoke(entity: Entity, container: EntityContainer) {
-       target.entity(container)?.apply {
-           action(this, container)
-       }
+        target.entity(container)?.apply {
+            action(this, container)
+        }
     }
 
     override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {

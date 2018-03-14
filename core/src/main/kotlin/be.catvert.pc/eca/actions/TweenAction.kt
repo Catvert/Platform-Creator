@@ -5,6 +5,7 @@ import be.catvert.pc.eca.Entity
 import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.scenes.EditorScene
+import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.tweens.EmptyTween
 import be.catvert.pc.tweens.Tween
 import be.catvert.pc.tweens.TweenSystem
@@ -18,6 +19,7 @@ import imgui.ImGui
 import imgui.functionalProgramming
 import kotlin.reflect.full.createInstance
 
+
 /**
  * Action permettant de lancer un Tween sur une entité
  * @see Tween
@@ -28,6 +30,7 @@ class TweenAction(var tween: Tween, var loop: Boolean) : Action(), UIImpl {
     @JsonCreator private constructor() : this(EmptyTween(), false)
 
     override fun invoke(entity: Entity, container: EntityContainer) {
+        val tween = SerializationFactory.copy(tween)
         TweenSystem.startTween(tween, entity, if (loop) tween else null)
     }
 

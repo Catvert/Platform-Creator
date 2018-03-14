@@ -147,8 +147,8 @@ class PhysicsComponent(@UI(customName = "figée") var isStatic: Boolean,
                                 moveSpeedY = level.gravitySpeed.toFloat()
                                 addJumpAfterClear = true
 
-                                if(entity.container != null)
-                                onJumpAction(entity, entity.container!!)
+                                if (entity.container != null)
+                                    onJumpAction(entity, entity.container!!)
                             }
                         } else {
                             // Vérifie si l'entité est arrivé à la bonne hauteur de saut ou si elle rencontre un obstacle au dessus d'elle
@@ -193,8 +193,8 @@ class PhysicsComponent(@UI(customName = "figée") var isStatic: Boolean,
     private fun triggerCollisionEvent(entity: Entity, collideEntity: Entity, side: BoxSide, collideIndex: Int) {
         entity.getCurrentState().getComponent<PhysicsComponent>()?.apply {
             this.collisionsActions.firstOrNull { collisionAction -> (collisionAction.side == side || collisionAction.side == BoxSide.All) && collisionAction.target == collideEntity.tag }?.apply {
-                val entity = if(applyActionOnCollider) collideEntity else entity
-                if(entity.container != null)
+                val entity = if (applyActionOnCollider) collideEntity else entity
+                if (entity.container != null)
                     action(entity, entity.container!!)
             }
             onCollisionWith.invoke(CollisionListener(entity, collideEntity, side, collideIndex))
@@ -202,8 +202,8 @@ class PhysicsComponent(@UI(customName = "figée") var isStatic: Boolean,
 
         collideEntity.getCurrentState().getComponent<PhysicsComponent>()?.apply {
             this.collisionsActions.firstOrNull { collisionAction -> (collisionAction.side == -side || collisionAction.side == BoxSide.All) && collisionAction.target == entity.tag }?.apply {
-                val entity = if(applyActionOnCollider) entity else collideEntity
-                if(entity.container != null)
+                val entity = if (applyActionOnCollider) entity else collideEntity
+                if (entity.container != null)
                     action(entity, entity.container!!)
             }
             onCollisionWith.invoke(CollisionListener(collideEntity, entity, -side, collideIndex))

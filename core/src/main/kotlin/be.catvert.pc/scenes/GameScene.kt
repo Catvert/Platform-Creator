@@ -4,9 +4,12 @@ import be.catvert.pc.GameKeys
 import be.catvert.pc.PCGame
 import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.eca.containers.Level
+import be.catvert.pc.eca.containers.LevelStats
 import be.catvert.pc.managers.MusicsManager
 import be.catvert.pc.managers.ResourcesManager
+import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.ui.ImGuiHelper
+import be.catvert.pc.utility.Constants
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -15,13 +18,12 @@ import glm_.vec2.Vec2
 import imgui.ImGui
 import imgui.WindowFlags
 import ktx.app.use
-import ktx.assets.toLocalFile
 
 
 /**
  * Scène du jeu
  */
-class GameScene(private val level: Level) : Scene(level.background, level.backgroundColor) {
+class GameScene(private val level: Level, private val levelNumberTries: Int = 1) : Scene(level.background, level.backgroundColor) {
     override var entityContainer: EntityContainer = level
 
     private var pause = false
@@ -30,9 +32,19 @@ class GameScene(private val level: Level) : Scene(level.background, level.backgr
 
     init {
         level.entitiesInitialStartActions()
+
         level.updateCamera(camera, false)
         if (level.musicPath != null)
             MusicsManager.startMusic(level.musicPath!!.get(), true)
+
+        level.exit = {
+            ResourcesManager.getSound(if (it) Constants.gameDirPath.child("game-over-success.wav") else Constants.gameDirPath.child("game-over-fail.wav"))?.play(PCGame.soundVolume)
+            if (it)
+                PCGame.scenesManager.loadScene(MainMenuScene(LevelStats(level.levelPath, level.getTimer(), levelNumberTries), true))
+            else {
+                PCGame.scenesManager.loadScene(GameScene(SerializationFactory.deserializeFromFile(level.levelPath.get()), levelNumberTries + 1))
+            }
+        }
     }
 
     override fun render(batch: Batch) {
@@ -52,7 +64,7 @@ class GameScene(private val level: Level) : Scene(level.background, level.backgr
                     }
                     if (button("Quitter le niveau", Vec2(-1, 0))) {
                         ResourcesManager.unloadAssets()
-                        PCGame.scenesManager.loadScene(MainMenuScene(true))
+                        PCGame.scenesManager.loadScene(MainMenuScene(null, true))
                     }
                 }
             }

@@ -7,9 +7,7 @@ import be.catvert.pc.eca.Prefab
 import be.catvert.pc.eca.Tags
 import be.catvert.pc.eca.components.graphics.TextureComponent
 import be.catvert.pc.factories.PrefabFactory
-import be.catvert.pc.managers.ResourcesManager
 import be.catvert.pc.managers.ScriptsManager
-import be.catvert.pc.scenes.GameScene
 import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.files.FileHandle
@@ -17,9 +15,12 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonIgnore
 import glm_.func.common.clamp
-import ktx.assets.toLocalFile
 import javax.script.ScriptException
 import kotlin.math.roundToInt
+
+class LevelStats(val levelPath: FileWrapper, val timer: Int, val numberOfTries: Int) {
+    override fun toString() = levelPath.get().parent().name()
+}
 
 /**
  * Représente un niveau
@@ -39,10 +40,7 @@ class Level(val levelPath: FileWrapper, val gameVersion: Float, var background: 
     var applyGravity = true
 
     @JsonIgnore
-    var exit: (success: Boolean) -> Unit = {
-        ResourcesManager.getSound(if (it) Constants.gameDirPath.child("game-over-success.wav") else Constants.gameDirPath.child("game-over-fail.wav"))?.play(PCGame.soundVolume)
-        PCGame.scenesManager.loadScene(GameScene(SerializationFactory.deserializeFromFile(levelPath.get())))
-    }
+    var exit: (success: Boolean) -> Unit = {}
 
     @JsonIgnore
     var scorePoints = 0
@@ -158,7 +156,7 @@ class Level(val levelPath: FileWrapper, val gameVersion: Float, var background: 
     }
 
     @JsonIgnore
-    fun getTimer() = timer.timer
+    fun getTimer(): Int = timer.timer
 
     fun deleteFiles() {
         if (!levelPath.get().exists()) {
@@ -183,6 +181,8 @@ class Level(val levelPath: FileWrapper, val gameVersion: Float, var background: 
 
         favoris.remove(entity.id())
     }
+
+    override fun toString() = levelPath.get().nameWithoutExtension()
 
     companion object {
         fun newLevel(levelName: String): Level {

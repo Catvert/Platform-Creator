@@ -10,12 +10,12 @@ import be.catvert.pc.utility.cast
 import com.fasterxml.jackson.annotation.JsonCreator
 
 @Description("Permet de changer la gravité du niveau")
-class GravityAction(@UI(min = 0f, max = 100f) var gravitySpeed: Int) : Action() {
+class GravityAction(@UI(min = 0f, max = 100f, customName = "gravité") var gravitySpeed: Int) : Action() {
     @JsonCreator private constructor() : this(Constants.defaultGravitySpeed)
 
     override fun invoke(entity: Entity, container: EntityContainer) {
         container.cast<Level>()?.gravitySpeed = gravitySpeed
     }
 
-    override fun toString() = super.toString() + " - gravity : $gravitySpeed"
+    override fun toString() = super.toString() + " - gravité : $gravitySpeed"
 }

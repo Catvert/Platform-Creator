@@ -322,7 +322,7 @@ object ImGuiHelper {
             if (button("Sélect. $label", Vec2(Constants.defaultWidgetsWidth - g.fontSize - g.style.itemInnerSpacing.x * 3f, 0))) {
                 editorSceneUI.editorMode = EditorScene.EditorSceneUI.EditorMode.SELECT_ENTITY
                 editorSceneUI.onSelectEntity.register(true) {
-                    if(it != null)
+                    if (it != null)
                         entityID.ID = it.id()
                 }
             }

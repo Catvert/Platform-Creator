@@ -9,7 +9,10 @@ import be.catvert.pc.ui.*
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
-import com.fasterxml.jackson.annotation.*
+import com.fasterxml.jackson.annotation.JsonIdentityInfo
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.ObjectIdGenerators
 import imgui.ImGui
 import imgui.functionalProgramming
 
@@ -36,7 +39,7 @@ class Entity(@UI(customType = CustomType.TAG_STRING) var tag: EntityTag,
              @UI var box: Rect,
              defaultState: EntityState = EntityState("default"),
              container: EntityContainer? = null,
-             vararg otherStates: EntityState = arrayOf()) : Updeatable, Renderable, ResourceLoader, UIImpl, UITextImpl  {
+             vararg otherStates: EntityState = arrayOf()) : Updeatable, Renderable, ResourceLoader, UIImpl, UITextImpl {
 
     val entityID = EntityID()
 
@@ -107,7 +110,7 @@ class Entity(@UI(customType = CustomType.TAG_STRING) var tag: EntityTag,
             field = value
             if (value != null) {
                 setState(initialState)
-                if(id() == EntityID.INVALID_ID)
+                if (id() == EntityID.INVALID_ID)
                     entityID.ID = value.generateID()
             }
         }

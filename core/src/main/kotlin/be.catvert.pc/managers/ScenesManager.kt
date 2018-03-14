@@ -107,7 +107,7 @@ class ScenesManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Di
         currentScene.viewport.apply()
         currentScene.render(batch)
 
-        if(screenshotWithoutImGui != null) {
+        if (screenshotWithoutImGui != null) {
             screenshotWithoutImGui!!(Utility.getPixmapOfScreen())
             screenshotWithoutImGui = null
         }

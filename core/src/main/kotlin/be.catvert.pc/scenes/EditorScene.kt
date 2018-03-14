@@ -32,7 +32,6 @@ import com.badlogic.gdx.math.Circle
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const
 import glm_.func.common.clamp
 import glm_.func.common.min
 import glm_.vec2.Vec2
@@ -42,8 +41,6 @@ import imgui.functionalProgramming.mainMenuBar
 import imgui.functionalProgramming.menu
 import imgui.functionalProgramming.menuItem
 import ktx.app.use
-import ktx.assets.toAbsoluteFile
-import ktx.assets.toLocalFile
 import kotlin.math.roundToInt
 import kotlin.reflect.full.findAnnotation
 
@@ -1135,10 +1132,10 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
     }
 
     private fun drawExitWindow() {
-        ImGuiHelper.withCenteredWindow("Save level?", editorSceneUI::showExitWindow, Vec2(240f, 105f), WindowFlags.NoResize.i or WindowFlags.NoCollapse.i or WindowFlags.NoTitleBar.i) {
+        ImGuiHelper.withCenteredWindow("Sauvegarder le niveau ?", editorSceneUI::showExitWindow, Vec2(240f, 105f), WindowFlags.NoResize.i or WindowFlags.NoCollapse.i or WindowFlags.NoTitleBar.i) {
             fun showMainMenu() {
                 ResourcesManager.unloadAssets()
-                PCGame.scenesManager.loadScene(MainMenuScene(false))
+                PCGame.scenesManager.loadScene(MainMenuScene(null, false))
             }
 
             if (ImGui.button("Sauvegarder", Vec2(225f, 0))) {
@@ -1277,7 +1274,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                             val musics = PCGame.gameMusics.toMutableList()
                             val customMusic = level.levelPath.get().parent().child(Constants.levelCustomMusicFile)
 
-                            if(customMusic.exists())
+                            if (customMusic.exists())
                                 musics.add(customMusic)
 
                             val currentMusicIndex = let {
@@ -1287,14 +1284,14 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                                     intArrayOf(-1)
                             }
                             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                                if(ImGuiHelper.comboWithSettingsButton("musique", currentMusicIndex, musics.map { it.nameWithoutExtension() }, {
-                                    if(button("Importer")) {
-                                        Utility.openFileDialog("Importer une musique", "Musique", arrayOf("mp3"), false)?.firstOrNull()?.apply {
-                                            this.copyTo(customMusic)
-                                            level.musicPath = customMusic.toFileWrapper()
-                                        }
-                                    }
-                                }, searchBar = true))
+                                if (ImGuiHelper.comboWithSettingsButton("musique", currentMusicIndex, musics.map { it.nameWithoutExtension() }, {
+                                            if (button("Importer")) {
+                                                Utility.openFileDialog("Importer une musique", "Musique", arrayOf("mp3"), false)?.firstOrNull()?.apply {
+                                                    this.copyTo(customMusic)
+                                                    level.musicPath = customMusic.toFileWrapper()
+                                                }
+                                            }
+                                        }, searchBar = true))
                                     level.musicPath = musics[currentMusicIndex[0]].toFileWrapper()
                             }
 

@@ -177,7 +177,7 @@ object Utility {
             }
 
             return TinyFileDialogs.tinyfd_openFileDialog(title, "", aFilterPatterns, "$description($extensionsStr)", allowMultipleSelects)
-                ?.split('|')?.map { it.toAbsoluteFile() } ?: listOf()
+                    ?.split('|')?.map { it.toAbsoluteFile() } ?: listOf()
         }
 
         return listOf()
@@ -207,7 +207,6 @@ object Utility {
 
         return null
     }
-
 
 
     /**

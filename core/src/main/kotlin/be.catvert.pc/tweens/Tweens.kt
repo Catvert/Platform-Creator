@@ -14,6 +14,7 @@ import be.catvert.pc.ui.UIImpl
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.utils.reflect.ClassReflection
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import imgui.ImGui
 import imgui.functionalProgramming
 import net.dermetfan.gdx.math.InterpolationUtils
@@ -29,6 +30,7 @@ enum class Tweens(val tween: KClass<out Tween>) {
     DisableComponent(DisableComponentTween::class)
 }
 
+@JsonTypeInfo(include = JsonTypeInfo.As.WRAPPER_ARRAY, use = JsonTypeInfo.Id.MINIMAL_CLASS)
 abstract class Tween(var duration: Float = 1f, var interpolationName: String, var authorizeTweenState: Boolean = true) : UIImpl, PostDeserialization {
     var nextTween: Tween? = null
     var endAction: Action = EmptyAction()

@@ -9,7 +9,6 @@ import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.ui.*
-import be.catvert.pc.utility.cast
 import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
 
@@ -30,7 +29,8 @@ class TagAction(@UI(customType = CustomType.TAG_STRING) var tag: EntityTag, var 
         level.findEntitiesByTag(tag).firstOrNull()?.apply {
             ImGuiHelper.action("action", ::action, this, level, editorSceneUI)
         } ?: let {
-            val prefab = PrefabFactory.values().map { it.prefab }.firstOrNull { it.prefabEntity.tag == tag }?: level.resourcesPrefabs().firstOrNull { it.prefabEntity.tag == tag }
+            val prefab = PrefabFactory.values().map { it.prefab }.firstOrNull { it.prefabEntity.tag == tag }
+                    ?: level.resourcesPrefabs().firstOrNull { it.prefabEntity.tag == tag }
             prefab?.apply {
                 ImGuiHelper.action("action", ::action, this.prefabEntity, level, editorSceneUI)
             }

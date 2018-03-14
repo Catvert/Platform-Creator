@@ -5,6 +5,7 @@ import be.catvert.pc.Log
 import be.catvert.pc.PCGame
 import be.catvert.pc.PCGame.Companion.soundVolume
 import be.catvert.pc.eca.containers.Level
+import be.catvert.pc.eca.containers.LevelStats
 import be.catvert.pc.i18n.MenusText
 import be.catvert.pc.managers.MusicsManager
 import be.catvert.pc.managers.ResourcesManager
@@ -29,7 +30,7 @@ import kotlin.collections.set
 /**
  * Scène du menu principal
  */
-class MainMenuScene(applyMusicTransition: Boolean) : Scene(StandardBackground(Constants.gameBackgroundMenuPath.toFileWrapper())) {
+class MainMenuScene(val levelStats: LevelStats?, applyMusicTransition: Boolean) : Scene(StandardBackground(Constants.gameBackgroundMenuPath.toFileWrapper())) {
     private val logo = PCGame.generateLogo(entityContainer)
 
     private class LevelItem(val dir: FileHandle) {
@@ -59,16 +60,59 @@ class MainMenuScene(applyMusicTransition: Boolean) : Scene(StandardBackground(Co
         levels = Constants.levelDirPath.list { dir -> dir.isDirectory && dir.list { _, s -> s == Constants.levelDataFile }.isNotEmpty() }.map { LevelItem(it) }
     }
 
+    private fun launchLevel(levelDir: FileHandle, editor: Boolean): Boolean {
+        val level = Level.loadFromFile(levelDir)
+        if (level != null) {
+            if (editor)
+                PCGame.scenesManager.loadScene(EditorScene(level, false))
+            else
+                PCGame.scenesManager.loadScene(GameScene(level))
+            return true
+        }
+        return false
+    }
+
     private var showSelectLevelWindow = false
     private var showSettingsWindow = false
+    private var showLevelStatsWindow = true
+
     private fun drawUI() {
         drawMainMenu()
+
+        if (levelStats != null && showLevelStatsWindow)
+            drawLevelStats()
 
         if (showSelectLevelWindow)
             drawSelectLevelWindow()
 
         if (showSettingsWindow)
             drawSettingsWindow()
+    }
+
+    private fun drawLevelStats() {
+        if (levelStats == null)
+            return
+        with(ImGui) {
+            ImGuiHelper.withCenteredWindow("Niveau $levelStats terminé !", ::showLevelStatsWindow, Vec2(280f, 245f), WindowFlags.NoCollapse.i or WindowFlags.NoResize.i) {
+                functionalProgramming.withIndent(30f) {
+                    if (imageButton(ResourcesManager.getTexture(levelStats.levelPath.get().parent().child(Constants.levelPreviewFile)).textureObjectHandle, Vec2(200f, 112.5f), uv1 = Vec2(1))) {
+                        launchLevel(levelStats.levelPath.get().parent(), false)
+                    }
+                    if (isItemHovered()) {
+                        functionalProgramming.withTooltip {
+                            text("Recommencer le niveau")
+                        }
+                    }
+                }
+
+                ImGuiHelper.centeredTextPropertyColored(280f, Color.ORANGE, "Temps écoulé(sec) : ", levelStats.timer)
+                ImGuiHelper.centeredTextPropertyColored(280f, Color.ORANGE, "Nombre d'essais : ", levelStats.numberOfTries)
+
+                if (button("Fermer", Vec2(-1, 0))) {
+                    showLevelStatsWindow = false
+                }
+            }
+        }
     }
 
     private fun drawMainMenu() {
@@ -134,18 +178,12 @@ class MainMenuScene(applyMusicTransition: Boolean) : Scene(StandardBackground(Co
                     pushItemFlag(ItemFlags.Disabled.i, levelItem == null)
 
                     if (button(MenusText.MM_SELECT_LEVEL_PLAY_BUTTON(), Vec2(-1, 0))) {
-                        val level = Level.loadFromFile(levelItem!!.dir)
-                        if (level != null)
-                            PCGame.scenesManager.loadScene(GameScene(level))
-                        else
+                        if (!launchLevel(levelItem!!.dir, false))
                             openPopup(errorInLevelTitle)
                     }
 
                     if (button(MenusText.MM_SELECT_LEVEL_EDIT_BUTTON(), Vec2(-1, 0))) {
-                        val level = Level.loadFromFile(levelItem!!.dir)
-                        if (level != null)
-                            PCGame.scenesManager.loadScene(EditorScene(level, false))
-                        else
+                        if (!launchLevel(levelItem!!.dir, true))
                             openPopup(errorInLevelTitle)
                     }
 

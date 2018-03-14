@@ -13,15 +13,15 @@ object Log : Disposable {
 
     private fun prefix() = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
 
-    fun info(info: () -> String) = write("Info.", info())
+    inline fun info(info: () -> String) = write("Info.", info())
 
-    fun error(error: () -> String) = write("Erreur", error())
+    inline fun error(error: () -> String) = write("Erreur", error())
 
-    fun error(e: Exception, message: () -> String) = write("Erreur", message() + " -> ${e.message}")
+    inline fun error(e: Exception, message: () -> String) = write("Erreur", message() + " -> ${e.message}")
 
-    fun warn(warn: () -> String) = write("Attention", warn())
+    inline fun warn(warn: () -> String) = write("Attention", warn())
 
-    private fun write(type: String, content: String) {
+    fun write(type: String, content: String) {
         val str = "${prefix()}  -> $type : $content\n"
 
         writer.write(str)

@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 class MoveAction(@UI(min = -100f, max = 100f) var moveX: Int, @UI(min = -100f, max = 100f) var moveY: Int, @UI var physics: Boolean) : Action() {
     @JsonCreator private constructor() : this(0, 0, true)
 
-    override fun invoke(entity: Entity,  container: EntityContainer) {
+    override fun invoke(entity: Entity, container: EntityContainer) {
         val moveX = moveX * Utility.getDeltaTime() * Constants.physicsDeltaSpeed
         val moveY = moveY * Utility.getDeltaTime() * Constants.physicsDeltaSpeed
 
