@@ -10,7 +10,7 @@
 ## BUGS
 
 - fireball right
-- teleportside bottom -> teleport au dessus
+- SpawnSideAction <-- refactor
 - camera ? 
 
 ## IDÉE
