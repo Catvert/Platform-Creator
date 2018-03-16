@@ -218,9 +218,9 @@ class PhysicsComponent(@UI(customName = "figée") var isStatic: Boolean,
 
         val potentialCollideEntities = level.getAllEntitiesInCells(entity.box.merge(Rect(entity.box).apply { move(targetMoveX, targetMoveY) })).filter { filter ->
             filter !== entity && filter.getCurrentState().hasComponent<PhysicsComponent>() && let {
-                filter.getCurrentState().getComponent<PhysicsComponent>()?.apply {
-                    return@let ignoreTags.contains(entity.tag) == false
-                            && if (isPlatform) {
+                filter.getCurrentState().getComponent<PhysicsComponent>()?.also { filterComp ->
+                    return@let filterComp.ignoreTags.contains(entity.tag) == false
+                            && if (filterComp.isPlatform) {
                         entity.position().y >= filter.position().y + filter.size().height
                     } else true
                 }
