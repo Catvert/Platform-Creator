@@ -9,7 +9,6 @@
 
 ## BUGS
 
-- blockenemy bug fly
 - fireball right
 - teleportside bottom -> teleport au dessus
 - camera ? 
