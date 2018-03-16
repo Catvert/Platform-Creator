@@ -9,6 +9,11 @@
 
 ## BUGS
 
+- blockenemy bug fly
+- fireball right
+- teleportside bottom -> teleport au dessus
+- camera ? 
+
 ## IDÉE
 - Editeur des couleurs imgui
 - Place order pour l'expose editor 
