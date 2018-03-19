@@ -219,7 +219,7 @@ class PhysicsComponent(@UI(customName = "figée") var isStatic: Boolean,
         val potentialCollideEntities = level.getAllEntitiesInCells(entity.box.merge(Rect(entity.box).apply { move(targetMoveX, targetMoveY) })).filter { filter ->
             filter !== entity && filter.getCurrentState().hasComponent<PhysicsComponent>() && let {
                 filter.getCurrentState().getComponent<PhysicsComponent>()?.also { filterComp ->
-                    return@let filterComp.ignoreTags.contains(entity.tag) == false
+                    return@let (!filterComp.ignoreTags.contains(entity.tag) || !this.ignoreTags.contains(filter.tag))
                             && if (filterComp.isPlatform) {
                         entity.position().y >= filter.position().y + filter.size().height
                     } else true
@@ -241,6 +241,7 @@ class PhysicsComponent(@UI(customName = "figée") var isStatic: Boolean,
                         moveY > 0 -> BoxSide.Up
                         moveY < 0 -> BoxSide.Down
                         else -> {
+
                             entity.box.y = (it.box.top() + Constants.physicsEpsilon).min(level.matrixRect.top() - entity.box.height)
                             return@forEach
                         }

@@ -228,7 +228,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
             MusicsManager.startMusic(Constants.menuMusicPath, true)
 
         PCInputProcessor.scrolledSignal.register {
-            if (isUIHover)
+            if (isUIHover || editorSceneUI.editorMode == EditorSceneUI.EditorMode.TRY_LEVEL)
                 return@register
             targetCameraZoom = (targetCameraZoom + (it * targetCameraZoom * 0.05f)).clamp(0.5f, level.matrixRect.width / camera.viewportWidth).clamp(0.5f, level.matrixRect.height / camera.viewportHeight)
         }
@@ -866,50 +866,52 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
     }
 
     private fun updateCamera() {
-        var moveCameraX = 0f
-        var moveCameraY = 0f
+        if(editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL) {
+            var moveCameraX = 0f
+            var moveCameraY = 0f
 
-        if (targetCameraZoom != camera.zoom) {
-            val px = camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f))
+            if (targetCameraZoom != camera.zoom) {
+                val px = camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f))
 
-            camera.zoom = MathUtils.lerp(camera.zoom, targetCameraZoom, 0.1f)
+                camera.zoom = MathUtils.lerp(camera.zoom, targetCameraZoom, 0.1f)
 
-            camera.update()
+                camera.update()
 
-            val nextPX = camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f))
+                val nextPX = camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f))
 
-            camera.position.add(px.x - nextPX.x, px.y - nextPX.y, 0f)
+                camera.position.add(px.x - nextPX.x, px.y - nextPX.y, 0f)
+            }
+
+            if (camera.zoom > level.matrixRect.width / camera.viewportWidth || camera.zoom > level.matrixRect.height / camera.viewportHeight) {
+                targetCameraZoom = camera.zoom.clamp(0.5f, level.matrixRect.width / camera.viewportWidth).clamp(0.5f, level.matrixRect.height / camera.viewportHeight)
+            }
+
+            if (!isUIHover) {
+                if (Gdx.input.isKeyPressed(GameKeys.EDITOR_CAMERA_LEFT.key))
+                    moveCameraX -= cameraMoveSpeed
+                if (Gdx.input.isKeyPressed(GameKeys.EDITOR_CAMERA_RIGHT.key))
+                    moveCameraX += cameraMoveSpeed
+                if (Gdx.input.isKeyPressed(GameKeys.EDITOR_CAMERA_UP.key))
+                    moveCameraY += cameraMoveSpeed
+                if (Gdx.input.isKeyPressed(GameKeys.EDITOR_CAMERA_DOWN.key))
+                    moveCameraY -= cameraMoveSpeed
+
+                if (Gdx.input.isKeyPressed(GameKeys.CAMERA_ZOOM_RESET.key))
+                    targetCameraZoom = 1f
+
+                val minCameraX = camera.zoom * (camera.viewportWidth / 2)
+                val maxCameraX = level.matrixRect.width - minCameraX
+                val minCameraY = camera.zoom * (camera.viewportHeight / 2)
+                val maxCameraY = level.matrixRect.height - minCameraY
+
+                val x = MathUtils.lerp(camera.position.x, camera.position.x + moveCameraX, 0.5f)
+                val y = MathUtils.lerp(camera.position.y, camera.position.y + moveCameraY, 0.5f)
+
+                camera.position.set(MathUtils.clamp(x, minCameraX, maxCameraX), MathUtils.clamp(y, minCameraY, maxCameraY), 0f)
+            }
         }
-
-        if (camera.zoom > level.matrixRect.width / camera.viewportWidth || camera.zoom > level.matrixRect.height / camera.viewportHeight) {
-            targetCameraZoom = camera.zoom.clamp(0.5f, level.matrixRect.width / camera.viewportWidth).clamp(0.5f, level.matrixRect.height / camera.viewportHeight)
-        }
-
-        if (editorSceneUI.editorMode == EditorSceneUI.EditorMode.TRY_LEVEL) {
+        else
             entityContainer.cast<Level>()?.updateCamera(camera, true)
-        } else if (!isUIHover) {
-            if (Gdx.input.isKeyPressed(GameKeys.EDITOR_CAMERA_LEFT.key))
-                moveCameraX -= cameraMoveSpeed
-            if (Gdx.input.isKeyPressed(GameKeys.EDITOR_CAMERA_RIGHT.key))
-                moveCameraX += cameraMoveSpeed
-            if (Gdx.input.isKeyPressed(GameKeys.EDITOR_CAMERA_UP.key))
-                moveCameraY += cameraMoveSpeed
-            if (Gdx.input.isKeyPressed(GameKeys.EDITOR_CAMERA_DOWN.key))
-                moveCameraY -= cameraMoveSpeed
-
-            if (Gdx.input.isKeyPressed(GameKeys.CAMERA_ZOOM_RESET.key))
-                targetCameraZoom = 1f
-
-            val minCameraX = camera.zoom * (camera.viewportWidth / 2)
-            val maxCameraX = level.matrixRect.width - minCameraX
-            val minCameraY = camera.zoom * (camera.viewportHeight / 2)
-            val maxCameraY = level.matrixRect.height - minCameraY
-
-            val x = MathUtils.lerp(camera.position.x, camera.position.x + moveCameraX, 0.5f)
-            val y = MathUtils.lerp(camera.position.y, camera.position.y + moveCameraY, 0.5f)
-
-            camera.position.set(MathUtils.clamp(x, minCameraX, maxCameraX), MathUtils.clamp(y, minCameraY, maxCameraY), 0f)
-        }
 
         camera.update()
     }
