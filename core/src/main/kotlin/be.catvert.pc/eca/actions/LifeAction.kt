@@ -23,7 +23,13 @@ class LifeAction(@UI var action: LifeActions) : Action() {
      * Représente les différentes actions possibles au niveau des points de vie.
      */
     enum class LifeActions {
-        ADD_LP, REMOVE_LP, ONE_SHOT
+        ADD_LP, REMOVE_LP, ONE_SHOT;
+
+        override fun toString() = when(this) {
+            LifeAction.LifeActions.ADD_LP -> "Ajouter"
+            LifeAction.LifeActions.REMOVE_LP -> "Retirer"
+            LifeAction.LifeActions.ONE_SHOT -> "One shot"
+        }
     }
 
     override fun invoke(entity: Entity, container: EntityContainer) {

@@ -16,4 +16,12 @@ enum class BoxSide {
         BoxSide.Down -> Up
         BoxSide.All -> All
     }
+
+    override fun toString() = when(this) {
+        BoxSide.Left -> "Gauche"
+        BoxSide.Right -> "Droite"
+        BoxSide.Up -> "Haut"
+        BoxSide.Down -> "Bas"
+        BoxSide.All -> "Tous"
+    }
 }

@@ -16,14 +16,14 @@ class SpawnSideAction(@UI var prefab: Prefab, @UI var spawnSide: BoxSide, @UI va
     @JsonCreator private constructor() : this(PrefabFactory.MushroomRed_SMC.prefab, BoxSide.Up, true)
 
     override fun invoke(entity: Entity, container: EntityContainer) {
-        val entity = prefab.create(entity.box.position, container)
+        val spawnEntity = prefab.create(entity.box.position, container)
 
         fun centerX() {
-            entity.box.x = entity.box.x + entity.box.width / 2 - entity.box.width / 2
+            spawnEntity.box.x = entity.box.x + entity.box.width / 2 - spawnEntity.box.width / 2
         }
 
         fun centerY() {
-            entity.box.y = entity.box.y + entity.box.height / 2 - entity.box.height / 2
+            spawnEntity.box.y = entity.box.y + entity.box.height / 2 - spawnEntity.box.height / 2
         }
 
         if (tweenMove) {
@@ -32,46 +32,46 @@ class SpawnSideAction(@UI var prefab: Prefab, @UI var spawnSide: BoxSide, @UI va
 
             when (spawnSide) {
                 BoxSide.Left -> {
-                    moveX = -entity.box.width
-                    entity.box.x = entity.box.x
+                    moveX = -spawnEntity.box.width
+                    spawnEntity.box.x = entity.box.x
                     centerY()
                 }
                 BoxSide.Right -> {
-                    moveX = entity.box.width
-                    entity.box.x = entity.box.right() - entity.box.width
+                    moveX = spawnEntity.box.width
+                    spawnEntity.box.x = entity.box.right() - spawnEntity.box.width
                     centerY()
                 }
                 BoxSide.Up -> {
-                    moveY = entity.box.height
-                    entity.box.y = entity.box.top() - entity.box.height
+                    moveY = spawnEntity.box.height
+                    spawnEntity.box.y = entity.box.top() - spawnEntity.box.height
                     centerX()
                 }
                 BoxSide.Down -> {
-                    moveY = -entity.box.height
-                    entity.box.y = entity.box.y
+                    moveY = -spawnEntity.box.height
+                    spawnEntity.box.y = entity.box.y
                     centerX()
                 }
                 BoxSide.All -> {
                 }
             }
 
-            TweenAction(TweenBuilder(MoveTween(0.5f, moveX, moveY), true).build(), false).invoke(entity, container)
+            TweenAction(TweenBuilder(MoveTween(0.5f, moveX, moveY), true).build(), false).invoke(spawnEntity, container)
         } else {
             when (spawnSide) {
                 BoxSide.Left -> {
-                    entity.box.x = entity.box.x - entity.box.width
+                    spawnEntity.box.x = entity.box.x - spawnEntity.box.width
                     centerY()
                 }
                 BoxSide.Right -> {
-                    entity.box.x = entity.box.right()
+                    spawnEntity.box.x = entity.box.right()
                     centerY()
                 }
                 BoxSide.Up -> {
-                    entity.box.y = entity.box.top()
+                    spawnEntity.box.y = entity.box.top()
                     centerX()
                 }
                 BoxSide.Down -> {
-                    entity.box.y = entity.box.y - entity.box.height
+                    spawnEntity.box.y = entity.box.y - spawnEntity.box.height
                     centerX()
                 }
                 BoxSide.All -> {

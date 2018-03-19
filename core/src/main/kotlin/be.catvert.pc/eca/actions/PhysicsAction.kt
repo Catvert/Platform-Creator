@@ -23,6 +23,15 @@ class PhysicsAction(@UI var physicsAction: PhysicsActions) : Action() {
      */
     enum class PhysicsActions {
         MOVE_LEFT, MOVE_RIGHT, MOVE_UP, MOVE_DOWN, JUMP, FORCE_JUMP;
+
+        override fun toString() = when(this) {
+            PhysicsAction.PhysicsActions.MOVE_LEFT -> "Déplacer à gauche"
+            PhysicsAction.PhysicsActions.MOVE_RIGHT -> "Déplacer à droite"
+            PhysicsAction.PhysicsActions.MOVE_UP -> "Déplacer vers le haut"
+            PhysicsAction.PhysicsActions.MOVE_DOWN -> "Déplacer vers le bas"
+            PhysicsAction.PhysicsActions.JUMP -> "Sauter"
+            PhysicsAction.PhysicsActions.FORCE_JUMP -> "Forcer le saut"
+        }
     }
 
     override fun invoke(entity: Entity, container: EntityContainer) {

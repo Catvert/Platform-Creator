@@ -479,7 +479,7 @@ object ImGuiHelper {
         val enumConstants = enum.obj.javaClass.enumConstants
         val selectedIndex = intArrayOf(enumConstants.indexOfFirst { it == enum.obj })
 
-        if (comboWithSettingsButton(label, selectedIndex, enumConstants.map { (it as Enum<*>).name }, popupBlock, settingsBtnDisabled, onSettingsBtnDisabled))
+        if (comboWithSettingsButton(label, selectedIndex, enumConstants.map { (it as Enum<*>).toString() }, popupBlock, settingsBtnDisabled, onSettingsBtnDisabled))
             enum.obj = enumConstants[selectedIndex[0]]
     }
 
@@ -488,7 +488,7 @@ object ImGuiHelper {
         val selectedIndex = intArrayOf(enumConstants.indexOfFirst { it == enum.obj })
 
         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-            if (ImGui.combo(label, selectedIndex, enumConstants.map { (it as Enum<*>).name })) {
+            if (ImGui.combo(label, selectedIndex, enumConstants.map { (it as Enum<*>).toString() })) {
                 enum.obj = enumConstants[selectedIndex[0]]
             }
         }

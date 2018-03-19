@@ -10,7 +10,6 @@
 ## BUGS
 
 - fireball right
-- SpawnSideAction <-- refactor
 - camera ? 
 
 ## IDÉE

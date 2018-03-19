@@ -33,7 +33,7 @@ class StateAction(var stateIndex: Int, var usePreviousMoverDirection: Boolean = 
     override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
         with(ImGui) {
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                combo("state", ::stateIndex, entity.getStates().map { it.name })
+                combo("état", ::stateIndex, entity.getStates().map { it.name })
             }
 
             if (checkHasMover(entity)) {
