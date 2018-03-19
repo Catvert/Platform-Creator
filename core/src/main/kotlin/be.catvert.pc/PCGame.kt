@@ -51,8 +51,6 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
 
         Log.info { "Initialisation en cours.. \n Taille : ${Gdx.graphics.width}x${Gdx.graphics.height}" }
 
-        ResourcesManager.init()
-
         Utility.getFilesRecursivly(Locales.menusPath.parent(), "properties").forEach {
             if (it.name().startsWith("bundle_"))
                 availableLocales.add(Locale.forLanguageTag(it.nameWithoutExtension().substringAfter('_')))

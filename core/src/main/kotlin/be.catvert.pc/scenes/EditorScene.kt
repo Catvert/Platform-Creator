@@ -653,26 +653,26 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     // Horizontal right resize
                         mousePosInWorld.x in selectEntityRect.right() - 1..selectEntityRect.right() + 1 && mousePosInWorld.y in selectEntityRect.y..selectEntityRect.top() -> {
                             selectEntityMode = SelectEntityMode.HORIZONTAL_RESIZE_RIGHT
-                            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.HorizontalResize)
+                            ImGui.mouseCursor = MouseCursor.ResizeEW
                         }
                     // Horizontal left resize
                         mousePosInWorld.x in selectEntityRect.left() - 1..selectEntityRect.left() + 1 && mousePosInWorld.y in selectEntityRect.y..selectEntityRect.top() -> {
                             selectEntityMode = SelectEntityMode.HORIZONTAL_RESIZE_LEFT
-                            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.HorizontalResize)
+                            ImGui.mouseCursor = MouseCursor.ResizeEW
                         }
                     // Vertical top resize
                         mousePosInWorld.y in selectEntityRect.top() - 1..selectEntityRect.top() + 1 && mousePosInWorld.x in selectEntityRect.x..selectEntityRect.right() -> {
                             selectEntityMode = SelectEntityMode.VERTICAL_RESIZE_TOP
-                            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.VerticalResize)
+                            ImGui.mouseCursor = MouseCursor.ResizeNS
                         }
                     // Vertical bottom resize
                         mousePosInWorld.y in selectEntityRect.bottom() - 1..selectEntityRect.bottom() + 1 && mousePosInWorld.x in selectEntityRect.x..selectEntityRect.right() -> {
                             selectEntityMode = SelectEntityMode.VERTICAL_RESIZE_BOTTOM
-                            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.VerticalResize)
+                            ImGui.mouseCursor = MouseCursor.ResizeNS
                         }
                         else -> {
                             selectEntityMode = SelectEntityMode.NO_MODE
-                            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow)
+                            ImGui.mouseCursor = MouseCursor.Arrow
                         }
                     }
 

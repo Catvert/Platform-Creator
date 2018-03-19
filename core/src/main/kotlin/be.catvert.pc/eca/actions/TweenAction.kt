@@ -15,7 +15,9 @@ import be.catvert.pc.ui.UIImpl
 import be.catvert.pc.utility.Constants
 import com.fasterxml.jackson.annotation.JsonCreator
 import glm_.vec2.Vec2
+import imgui.Cond
 import imgui.ImGui
+import imgui.ItemFlags
 import imgui.functionalProgramming
 import kotlin.reflect.full.createInstance
 
@@ -26,12 +28,12 @@ import kotlin.reflect.full.createInstance
  * @see TweenSystem
  */
 @Description("Permet d'appliquer un/des tween(s) précis sur une entité")
-class TweenAction(var tween: Tween, var loop: Boolean) : Action(), UIImpl {
+class TweenAction(var tween: Tween, var loop: Boolean = false) : Action(), UIImpl {
     @JsonCreator private constructor() : this(EmptyTween(), false)
 
     override fun invoke(entity: Entity, container: EntityContainer) {
         val tween = SerializationFactory.copy(tween)
-        TweenSystem.startTween(tween, entity, if (loop) tween else null)
+        TweenSystem.startTween(tween, entity, if(loop) tween else null)
     }
 
     private var addTweenTitle = "Ajouter un tween"
@@ -66,6 +68,10 @@ class TweenAction(var tween: Tween, var loop: Boolean) : Action(), UIImpl {
                 functionalProgramming.withGroup {
                     functionalProgramming.withId("tween $counter") {
                         currentTween!!.insertUI("tween", entity, level, editorSceneUI)
+                    }
+
+                    if (currentTween!!.nextTween == null) {
+                        checkbox("boucle", ::loop)
                     }
                 }
                 sameLine()

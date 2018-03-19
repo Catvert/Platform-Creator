@@ -28,6 +28,9 @@ class ScenesManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Di
 
     private var elapsedTime = 0f
 
+    // Temps de transition en sec
+    private val duration = 1f
+
     private var screenshotWithoutImGui: ((Pixmap) -> Unit)? = null
     fun takeScreenshotWithoutImGui(result: (Pixmap) -> Unit) {
         screenshotWithoutImGui = result
@@ -69,7 +72,7 @@ class ScenesManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Di
             val (nextScene, _, disposeCurrentScene) = nextScene!!
 
             elapsedTime += Utility.getDeltaTime()
-            val progress = Math.min(1f, elapsedTime / 1f)
+            val progress = Math.min(1f, elapsedTime / duration)
 
             currentScene.alpha = interpolation.apply(1f, 0f, progress)
             nextScene.alpha = interpolation.apply(0f, 1f, progress)
@@ -95,10 +98,10 @@ class ScenesManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Di
 
     override fun render(batch: Batch) {
         // Permet d'effacer l'écran avec la couleur de la prochaine scène(si on est en transition) pour améliorer la cohérence de la transition.
-        if (nextScene != null)
-            clearScreen(nextScene!!.scene.backgroundColors[0], nextScene!!.scene.backgroundColors[1], nextScene!!.scene.backgroundColors[2])
-        else
-            clearScreen(currentScene.backgroundColors[0], currentScene.backgroundColors[1], currentScene.backgroundColors[2])
+         if (nextScene != null)
+             clearScreen(nextScene!!.scene.backgroundColors[0], nextScene!!.scene.backgroundColors[1], nextScene!!.scene.backgroundColors[2])
+         else
+             clearScreen(currentScene.backgroundColors[0], currentScene.backgroundColors[1], currentScene.backgroundColors[2])
 
         LwjglGL3.newFrame()
 

@@ -16,6 +16,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import glm_.vec2.Vec2
 import imgui.ImGui
+import imgui.MouseCursor
 import imgui.WindowFlags
 import ktx.app.use
 

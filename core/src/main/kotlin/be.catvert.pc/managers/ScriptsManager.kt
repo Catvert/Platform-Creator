@@ -13,13 +13,22 @@ import javax.script.ScriptEngineManager
 object ScriptsManager {
     val scriptEngine = ScriptEngineManager().getEngineByName("nashorn") as NashornScriptEngine
 
+    /**
+     * Permet de donner à javascript l'accès aux components et actions
+     */
     val bindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE).apply {
         putAll(Components.values().map { (it.component.simpleName ?: "undefined") to it.component.java })
         putAll(Actions.values().map { (it.action.simpleName ?: "undefined") to it.action.java })
     }
 
+    /**
+     * Permet de compiler un script, dans le but de rendre l'exécution de celui-ci plus rapide
+     */
     fun compile(file: FileHandle) = scriptEngine.compile(file.reader())
 
+    /**
+     * Permet d'invoquer une fonction javascript
+     */
     fun invokeFunction(name: String, vararg params: Any) {
         scriptEngine.invokeFunction(name, *params)
     }

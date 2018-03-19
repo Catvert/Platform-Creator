@@ -35,8 +35,8 @@ object TweenSystem : Updeatable {
             val (tween, backupStateIndex) = it.tweenData
             val loopTween = it.loopTween
 
-            if (tween.update(entity)) {
-                if (tween.endAction !is RemoveEntityAction && tween.useTweenState) // TODO workaround?
+            if (container.allowUpdating && tween.update(entity)) {
+                if (tween.useTweenState)
                     entity.setState(backupStateIndex)
 
                 tween.endAction.invoke(entity, container)
@@ -49,7 +49,7 @@ object TweenSystem : Updeatable {
                     if (tween.useTweenState)
                         entity.setState(backupStateIndex)
 
-                    startTween(nextTween, entity, null)
+                    startTween(nextTween, entity, loopTween)
                 } else if (loopTween != null) {
                     startTween(loopTween, entity, loopTween)
                 }

@@ -14,19 +14,17 @@ import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.I18NBundle
 
 /**
- * Permet de gérer les ressources
+ * Permet de gérer les ressources graphiques et sonores
  */
 object ResourcesManager : Disposable {
     private val assetManager = AssetManager()
 
-    lateinit var defaultTexture: Texture
-        private set
-    lateinit var defaultPack: TextureAtlas
-        private set
-    lateinit var defaultPackRegion: TextureAtlas.AtlasRegion
-        private set
+    val defaultTexture: Texture
+    val defaultPack: TextureAtlas
+    val defaultPackRegion: TextureAtlas.AtlasRegion
 
-    fun init() {
+    init {
+        // Création d'une texture noir de 64x64 pixels
         defaultTexture = let {
             val pixmap = Pixmap(64, 64, Pixmap.Format.RGBA8888)
             for (x in 0..64) {
@@ -42,21 +40,39 @@ object ResourcesManager : Disposable {
         defaultPackRegion = TextureAtlas.AtlasRegion(defaultTexture, 0, 0, 64, 64)
     }
 
+    /**
+     * Permet de désallouer les ressources chargées
+     */
     fun unloadAssets() {
         assetManager.clear()
     }
 
+    /**
+     * Permet d'obtenir une texture
+     */
     fun getTexture(file: FileHandle): Texture = tryLoad(file)
             ?: defaultTexture
 
+    /**
+     * Permet d'obtenir un pack
+     */
     fun getPack(file: FileHandle): TextureAtlas = tryLoad(file)
             ?: defaultPack
 
+    /**
+     * Permet d'obtenir une région précise d'un pack
+     */
     fun getPackRegion(file: FileHandle, region: String): TextureAtlas.AtlasRegion = tryLoad<TextureAtlas>(file)?.findRegion(region)
             ?: defaultPackRegion
 
+    /**
+     * Permet d'obtenir un son
+     */
     fun getSound(file: FileHandle): Sound? = tryLoad(file)
 
+    /**
+     * Permet d'essayer le chargement d'une ressource si elle n'est déjà pas chargée, dans le cas contraire, elle renvoi la-dite ressource chargée
+     */
     private inline fun <reified T : Any> tryLoad(file: FileHandle): T? {
         try {
             return if (assetManager.isLoaded(file.path()))
