@@ -2,6 +2,8 @@ package be.catvert.pc
 
 import be.catvert.pc.builders.EntityBuilder
 import be.catvert.pc.eca.components.graphics.TextureComponent
+import be.catvert.pc.eca.components.graphics.TextureData
+import be.catvert.pc.eca.components.graphics.TextureGroup
 import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.i18n.Locales
 import be.catvert.pc.managers.MusicsManager
@@ -11,10 +13,14 @@ import be.catvert.pc.scenes.MainMenuScene
 import be.catvert.pc.tweens.TweenSystem
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.audio.Music
+import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics
 import com.badlogic.gdx.files.FileHandle
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.Matrix4
 import glm_.c
 import glm_.vec4.Vec4
@@ -66,19 +72,21 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         PCGame.mainFont = BitmapFont(Constants.mainFontPath)
 
         gamePacks = let {
-            val packs = mutableMapOf<FileHandle, List<FileHandle>>()
+            val packs = mutableMapOf<FileHandle, List<ResourceWrapper<TextureAtlas>>>()
 
             Constants.packsDirPath.list().forEach {
                 if (it.isDirectory) {
-                    packs[it] = Utility.getFilesRecursivly(it, *Constants.levelPackExtension)
+                    packs[it] = Utility.getFilesRecursivly(it, *Constants.levelPackExtension).map { resourceWrapperOf<TextureAtlas>(it.toFileWrapper()) }
                 }
             }
 
             packs
         }
-        gameTextures = Utility.getFilesRecursivly(Constants.texturesDirPath, *Constants.levelTextureExtension)
-        gameSounds = Utility.getFilesRecursivly(Constants.soundsDirPath, *Constants.levelSoundExtension)
-        gameMusics = Utility.getFilesRecursivly(Constants.musicsDirPath, *Constants.levelSoundExtension)
+        gameTextures = Utility.getFilesRecursivly(Constants.texturesDirPath, *Constants.levelTextureExtension).map { resourceWrapperOf<Texture>(it.toFileWrapper()) }
+        gameSounds = Utility.getFilesRecursivly(Constants.soundsDirPath, *Constants.levelSoundExtension).map { resourceWrapperOf<Sound>(it.toFileWrapper()) }
+        gameMusics = Utility.getFilesRecursivly(Constants.musicsDirPath, *Constants.levelSoundExtension).map { resourceWrapperOf<Music>(it.toFileWrapper()) }
+
+        menuMusic = Gdx.audio.newMusic(Constants.menuMusicPath)
 
         Gdx.input.inputProcessor = PCInputProcessor
 
@@ -121,8 +129,9 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
 
         mainFont.dispose()
 
+        menuMusic.dispose()
+
         ResourcesManager.dispose()
-        MusicsManager.dispose()
 
         Log.dispose()
 
@@ -159,14 +168,16 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         lateinit var defaultProjection: Matrix4
             private set
 
-        lateinit var gamePacks: Map<FileHandle, List<FileHandle>>
+        lateinit var gamePacks: Map<FileHandle, List<ResourceWrapper<TextureAtlas>>>
             private set
-        lateinit var gameTextures: List<FileHandle>
+        lateinit var gameTextures: List<ResourceWrapper<Texture>>
             private set
-        lateinit var gameSounds: List<FileHandle>
+        lateinit var gameSounds: List<ResourceWrapper<Sound>>
             private set
-        lateinit var gameMusics: List<FileHandle>
+        lateinit var gameMusics: List<ResourceWrapper<Music>>
             private set
+
+        lateinit var menuMusic: Music
 
         var soundVolume = 1f
             set(value) {
@@ -236,7 +247,7 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
          */
         fun generateLogo(container: EntityContainer) = EntityBuilder("logo", getLogoSize())
                 .withDefaultState {
-                    withComponent(TextureComponent(0, TextureComponent.TextureData("logo", Constants.gameLogoPath.toFileWrapper())))
+                    withComponent(TextureComponent(0, TextureGroup("logo", TextureData(resourceWrapperOf(Constants.gameLogoPath.toFileWrapper())))))
                 }
                 .build(getLogoRect().position, container)
 

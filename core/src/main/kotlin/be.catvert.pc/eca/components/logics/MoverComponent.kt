@@ -23,12 +23,12 @@ import com.fasterxml.jackson.annotation.JsonCreator
  */
 @RequiredComponent(PhysicsComponent::class)
 @Description("Permet de déplacer automatiquement une entité sur un axe")
-class MoverComponent(@UI(max = 100f) var moveSpeedX: Int, @UI(max = 100f) var moveSpeedY: Int, @UI var reverse: Boolean = false, @UI var holdEntities: Boolean = false) : Component(), Updeatable {
+class MoverComponent(@UI(max = 100f, customName = "vitesse x") var moveSpeedX: Int, @UI(max = 100f, customName = "vitesse y") var moveSpeedY: Int, @UI(customName = "retourné") var reverse: Boolean = false, @UI(customName = "retenir les entités") var holdEntities: Boolean = false) : Component(), Updeatable {
     @JsonCreator private constructor() : this(0, 0)
 
-    @UI
+    @UI(customName = "quand non inversé")
     var onUnReverseAction: Action = EmptyAction()
-    @UI
+    @UI(customName = "quand inversé")
     var onReverseAction: Action = EmptyAction()
 
     private fun reverse() {

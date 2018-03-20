@@ -28,8 +28,8 @@ class MultiplexerAction(var actions: ArrayList<Action>) : Action(), UIImpl, UITe
         }
     }
 
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        ImGuiHelper.addImguiWidgetsArray(label, actions, { "action" }, { EmptyAction() }, entity, level, editorSceneUI)
+    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
+        ImGuiHelper.addImguiWidgetsArray(label, actions, { "action" }, { EmptyAction() }, entity, level, editorUI)
     }
 
     override fun insertText() {

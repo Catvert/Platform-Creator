@@ -45,7 +45,7 @@ class ScriptComponent(var scriptIndex: Int) : Component(), Updeatable, UIImpl {
         executeFunction("update", entity)
     }
 
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
             ImGui.combo("script", ::scriptIndex, level.resourcesScripts().map { it.file.nameWithoutExtension() })
         }

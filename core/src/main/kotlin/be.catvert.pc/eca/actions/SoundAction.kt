@@ -31,7 +31,7 @@ class SoundAction(var soundIndex: Int) : Action(), UIImpl {
         entity.getCurrentState().getComponent<SoundComponent>()?.playSound(soundIndex)
     }
 
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
         with(ImGui) {
             val sounds = entity.getCurrentState().getComponent<SoundComponent>()?.sounds ?: arrayListOf()
 

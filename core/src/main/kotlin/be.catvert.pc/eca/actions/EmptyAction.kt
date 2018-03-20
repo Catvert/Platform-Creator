@@ -15,7 +15,7 @@ import imgui.ImGui
 class EmptyAction : Action(), UIImpl {
     override fun invoke(entity: Entity, container: EntityContainer) {}
 
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
         ImGui.text("Il n'y a rien à faire par ici..")
     }
 }

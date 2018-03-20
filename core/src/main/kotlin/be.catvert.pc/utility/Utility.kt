@@ -43,6 +43,10 @@ fun Batch.draw(textureRegion: TextureRegion, rect: Rect, flipX: Boolean = false,
     this.draw(textureRegion, rect.x.roundToInt().toFloat(), rect.y.roundToInt().toFloat(), rect.width / 2f, rect.height / 2f, rect.width.toFloat(), rect.height.toFloat(), 1f, 1f, rotation)
 }
 
+fun Batch.draw(texture: Texture, rect: Rect, flipX: Boolean = false, flipY: Boolean = false, rotation: Float = 0f) {
+    draw(TextureRegion(texture), rect, flipX, flipY, rotation)
+}
+
 fun ShapeRenderer.rect(rect: Rect) = this.rect(rect.x, rect.y, rect.width.toFloat(), rect.height.toFloat())
 
 fun Vector2.toPoint() = Point(this.x, this.y)

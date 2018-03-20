@@ -25,9 +25,9 @@ class SpawnPositionAction(@UI var prefab: Prefab, var position: Point) : Action(
         prefab.create(position, container)
     }
 
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
         entity.container.cast<Level>()?.matrixRect?.apply {
-            ImGuiHelper.point(this@SpawnPositionAction::position, Point(0f, 0f), Point(this.width - entity.size().width.toFloat(), this.height - entity.size().height.toFloat()), editorSceneUI)
+            ImGuiHelper.point(this@SpawnPositionAction::position, Point(0f, 0f), Point(this.width - entity.size().width.toFloat(), this.height - entity.size().height.toFloat()), editorUI)
         }
     }
 

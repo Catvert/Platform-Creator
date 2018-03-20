@@ -65,8 +65,8 @@ class LifeComponent(onDeathAction: Action, lifePointActions: ArrayList<Action> =
         this.entity = entity
     }
 
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        ImGuiHelper.addImguiWidgetsArray("life points actions", lpActions, { "vie ${lpActions.indexOf(it) + 1}" }, { EmptyAction() }, entity, level, editorSceneUI)
+    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
+        ImGuiHelper.addImguiWidgetsArray("life points actions", lpActions, { "vie ${lpActions.indexOf(it) + 1}" }, { EmptyAction() }, entity, level, editorUI)
     }
 
     override fun insertText() {

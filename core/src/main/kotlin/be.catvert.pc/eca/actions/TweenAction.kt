@@ -15,9 +15,7 @@ import be.catvert.pc.ui.UIImpl
 import be.catvert.pc.utility.Constants
 import com.fasterxml.jackson.annotation.JsonCreator
 import glm_.vec2.Vec2
-import imgui.Cond
 import imgui.ImGui
-import imgui.ItemFlags
 import imgui.functionalProgramming
 import kotlin.reflect.full.createInstance
 
@@ -33,13 +31,13 @@ class TweenAction(var tween: Tween, var loop: Boolean = false) : Action(), UIImp
 
     override fun invoke(entity: Entity, container: EntityContainer) {
         val tween = SerializationFactory.copy(tween)
-        TweenSystem.startTween(tween, entity, if(loop) tween else null)
+        TweenSystem.startTween(tween, entity, if (loop) tween else null)
     }
 
     private var addTweenTitle = "Ajouter un tween"
     private var addTweenCurrentTween: Tween? = null
     private var addTweenComboIndex = 0
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
         fun addBtnAddTween(currentTween: Tween?, counter: Int) {
             var openPopup = false
             functionalProgramming.withId("tween add btn $counter") {
@@ -67,7 +65,7 @@ class TweenAction(var tween: Tween, var loop: Boolean = false) : Action(), UIImp
 
                 functionalProgramming.withGroup {
                     functionalProgramming.withId("tween $counter") {
-                        currentTween!!.insertUI("tween", entity, level, editorSceneUI)
+                        currentTween!!.insertUI("tween", entity, level, editorUI)
                     }
 
                     if (currentTween!!.nextTween == null) {

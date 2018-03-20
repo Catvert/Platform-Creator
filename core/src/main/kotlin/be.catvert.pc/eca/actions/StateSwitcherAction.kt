@@ -28,7 +28,7 @@ class StateSwitcherAction(var stateSwitchActions: ArrayList<StateSwitchAction>) 
         }
     }
 
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
         ImGuiHelper.addImguiWidgetsArray("états actions", stateSwitchActions, { item: StateSwitchAction -> entity.getStateOrDefault(item.first).name }, { 0 to EmptyAction() }, {
             val stateIndex = intArrayOf(it.obj.first)
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
@@ -36,7 +36,7 @@ class StateSwitcherAction(var stateSwitchActions: ArrayList<StateSwitchAction>) 
             }
 
             val actionItem = ImGuiHelper.Item(it.obj.second)
-            ImGuiHelper.action("", actionItem, entity, level, editorSceneUI)
+            ImGuiHelper.action("", actionItem, entity, level, editorUI)
 
             it.obj = stateIndex[0] to actionItem.obj
         })

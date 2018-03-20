@@ -2,21 +2,17 @@ package be.catvert.pc.managers
 
 import be.catvert.pc.Log
 import be.catvert.pc.PCGame
+import be.catvert.pc.utility.ResourceWrapper
 import be.catvert.pc.utility.Updeatable
 import be.catvert.pc.utility.Utility
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.audio.Music
-import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.math.Interpolation
-import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.GdxRuntimeException
 
 /**
  * Permet de gérer la musique
  */
-object MusicsManager : Updeatable, Disposable {
-    private var musics = mutableMapOf<FileHandle, Music>()
-
+object MusicsManager : Updeatable {
     private var music: Music? = null
 
     private val interpolation = Interpolation.fade
@@ -30,30 +26,26 @@ object MusicsManager : Updeatable, Disposable {
 
     private fun getMaxSoundVolume() = PCGame.soundVolume / 2f
 
-    fun startMusic(path: FileHandle, applyInterpolation: Boolean) {
-        if (music == null) {
-            try {
-                music = musics.getOrPut(path) { Gdx.audio.newMusic(path) }
-            } catch (e: GdxRuntimeException) {
-                Log.error(e) { "Impossible de charger la musique : $path" }
-            }
+    fun startMusic(music: Music, applyInterpolation: Boolean) {
+        if (MusicsManager.music == null) {
+            MusicsManager.music = music
 
             if (applyInterpolation) {
-                music?.volume = 0f
+                MusicsManager.music?.volume = 0f
                 startMusicInterpolation = MusicInterpolation()
             } else {
-                music?.volume = getMaxSoundVolume()
+                MusicsManager.music?.volume = getMaxSoundVolume()
             }
 
             try {
-                music?.play()
+                MusicsManager.music?.play()
             } catch (e: GdxRuntimeException) {
-                Log.error(e) { "Une erreur est survenue lors de la lecture de la musique : $path" }
+                Log.error(e) { "Une erreur est survenue lors de la lecture de la musique !" }
             }
         } else {
             fun launchMusic() {
-                music = null
-                startMusic(path, applyInterpolation)
+                MusicsManager.music = null
+                startMusic(music, applyInterpolation)
             }
 
             if (applyInterpolation) {
@@ -64,6 +56,12 @@ object MusicsManager : Updeatable, Disposable {
             } else {
                 launchMusic()
             }
+        }
+    }
+
+    fun startMusic(music: ResourceWrapper<Music>, applyInterpolation: Boolean) {
+        music.invoke()?.apply {
+            startMusic(this, applyInterpolation)
         }
     }
 
@@ -88,9 +86,5 @@ object MusicsManager : Updeatable, Disposable {
         } else {
             music?.volume = getMaxSoundVolume()
         }
-    }
-
-    override fun dispose() {
-        musics.forEach { it.value.dispose() }
     }
 }

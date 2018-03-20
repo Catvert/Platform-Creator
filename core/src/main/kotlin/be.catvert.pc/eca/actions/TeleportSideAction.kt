@@ -57,7 +57,7 @@ class TeleportSideAction(@UI var teleportTo: EntityID, @UI var spawnSide: BoxSid
                 }
             }
 
-            TweenAction(TweenBuilder(MoveTween(0.5f, moveX, moveY), true).build(), false).invoke(entity, container)
+            TweenAction(TweenBuilder(MoveTween(0.5f, moveX, moveY), true).build()).invoke(entity, container)
         } else {
             when (spawnSide) {
                 BoxSide.Left -> {

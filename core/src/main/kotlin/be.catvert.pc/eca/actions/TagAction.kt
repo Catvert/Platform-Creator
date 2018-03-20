@@ -25,14 +25,14 @@ class TagAction(@UI(customType = CustomType.TAG_STRING) var tag: EntityTag, var 
         }
     }
 
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
         level.findEntitiesByTag(tag).firstOrNull()?.apply {
-            ImGuiHelper.action("action", ::action, this, level, editorSceneUI)
+            ImGuiHelper.action("action", ::action, this, level, editorUI)
         } ?: let {
             val prefab = PrefabFactory.values().map { it.prefab }.firstOrNull { it.prefabEntity.tag == tag }
                     ?: level.resourcesPrefabs().firstOrNull { it.prefabEntity.tag == tag }
             prefab?.apply {
-                ImGuiHelper.action("action", ::action, this.prefabEntity, level, editorSceneUI)
+                ImGuiHelper.action("action", ::action, this.prefabEntity, level, editorUI)
             }
         } ?: ImGui.text("Aucune entité ou prefab\navec ce tag trouvé.")
     }

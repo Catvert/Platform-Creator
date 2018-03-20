@@ -3,44 +3,43 @@ package be.catvert.pc.eca.components.graphics
 import be.catvert.pc.PCGame
 import be.catvert.pc.eca.Entity
 import be.catvert.pc.eca.components.Component
+import be.catvert.pc.eca.components.graphics.PackRegionData.Companion.findAnimationRegions
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.managers.ResourcesManager
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.ui.*
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import glm_.vec2.Vec2
 import glm_.vec4.Vec4
 import imgui.ImGui
 import imgui.ItemFlags
 import imgui.WindowFlags
 import imgui.functionalProgramming
-import ktx.assets.toLocalFile
-import ktx.collections.gdxArrayOf
-import ktx.collections.isEmpty
-
-
-typealias TextureRegion = Pair<FileWrapper, String>
 
 /**
  * Component permettant d'ajouter des textures et animations a l'entité
  * @param currentIndex La texture actuelle à dessiner
- * @param data Les textures disponibles pour l'entité
+ * @param groups Les groupes disponibles pour l'entité
  */
 @Description("Permet d'ajouter une texture ou une animation à une entité")
-class TextureComponent(var currentIndex: Int = 0, var data: ArrayList<TextureData>) : Component(), Renderable, ResourceLoader, UIImpl, UITextImpl {
+class TextureComponent(var currentIndex: Int = 0, vararg groups: TextureGroup) : Component(), Renderable, UIImpl, UITextImpl {
+    @JsonCreator private constructor() : this(0)
+
     enum class Rotation(val degree: Float) {
         Zero(0f), Quarter(90f), Half(180f), ThreeQuarter(270f)
     }
 
-    constructor(currentIndex: Int = 0, vararg data: TextureData) : this(currentIndex, arrayListOf(*data))
-    @JsonCreator private constructor() : this(0, arrayListOf())
+    var groups = arrayListOf(*groups)
 
     @UI
     var rotation: Rotation = Rotation.Zero
@@ -53,156 +52,13 @@ class TextureComponent(var currentIndex: Int = 0, var data: ArrayList<TextureDat
     @JsonIgnore
     var alpha: Float = 1f
 
-    /**
-     * Représente une texture ou une animation
-     * @param name Le nom de la texture
-     * @param regions Les régions disponibles, une région représente une texture, en ajoutant plusieurs régions, on obtient une animation
-     * @param frameDuration Représente la vitesse de transition entre 2 régions. Si la frameDuration correspond à 1, il s'écoulera 1 seconde entre chaque region.
-     */
-    class TextureData(var name: String, vararg regions: TextureRegion, animationPlayMode: Animation.PlayMode = Animation.PlayMode.LOOP, frameDuration: Float = 1f / regions.size) {
-        @JsonCreator constructor() : this("default")
-        constructor(name: String, packFile: FileWrapper, animation: String, frameDuration: Float, animationPlayMode: Animation.PlayMode = Animation.PlayMode.LOOP) : this(name, *findAnimationRegions(packFile, animation), animationPlayMode = animationPlayMode, frameDuration = frameDuration)
-        constructor(name: String, textureFile: FileWrapper) : this(name, textureFile to textureIdentifier)
-
-        var regions = arrayListOf(*regions)
-
-        var animationPlayMode: Animation.PlayMode = animationPlayMode
-            set(value) {
-                field = value
-                if (::animation.isInitialized)
-                    animation.playMode = value
-            }
-
-        var frameDuration: Float = frameDuration
-            set(value) {
-                field = value
-                if (::animation.isInitialized)
-                    animation.frameDuration = value
-            }
-        var repeatRegion: Boolean = false
-        var repeatRegionSize = Size(50, 50)
-
-        private lateinit var animation: Animation<TextureAtlas.AtlasRegion>
-
-        /**
-         * Représente le temps écoulé depuis le début de l'affichage de la texture/animation, si le stateTime = 1.3f et que le frameDuration = 1f, la deuxième région sera dessiné.
-         */
-        private var stateTime = 0f
-
-        fun render(entity: Entity, flipX: Boolean, flipY: Boolean, rotation: Rotation, batch: Batch) {
-            /**
-             * Si le nombre de région est <= à 1, il n'y a pas besoin de mettre à jour le temps écoulé car de toute façon une seule région sera dessinée.
-             */
-            if (regions.size > 1)
-                stateTime += Utility.getDeltaTime()
-
-            val frame = currentKeyFrame()
-            if (repeatRegion && regions.size == 1) {
-                for (x in 0 until MathUtils.floor(entity.box.width / repeatRegionSize.width.toFloat())) {
-                    for (y in 0 until MathUtils.floor(entity.box.height / repeatRegionSize.height.toFloat())) {
-                        batch.draw(frame, entity.box.x + x * repeatRegionSize.width, entity.box.y + y * repeatRegionSize.height, repeatRegionSize.width.toFloat(), repeatRegionSize.height.toFloat())
-                    }
-                }
-            } else
-                batch.draw(frame, entity.box, flipX, flipY, rotation.degree)
-        }
-
-        fun currentKeyFrame(): TextureAtlas.AtlasRegion = animation.getKeyFrame(stateTime)
-
-        /**
-         * Permet de mettre à jour l'animation, si par exemple des régions sont modifiées.
-         */
-        fun updateRegions(frameDuration: Float = this.frameDuration) {
-            this.animation = loadAnimation()
-            this.frameDuration = frameDuration
-        }
-
-        /**
-         * Permet de changer la texture d'une région si celle-ci est un pack, dans ce cas, la région prendra la TextureRegion précédente du pack.
-         */
-        fun previousFrameRegion(regionIndex: Int) {
-            this.regions.elementAtOrNull(regionIndex)?.apply {
-                if (this.second != textureIdentifier) {
-                    val pack = ResourcesManager.getPack(this.first.get())
-                    val region = loadRegion(this)
-
-                    val packRegions = pack.regions.sortedBy { it.name }
-
-                    val index = packRegions.indexOf(region)
-
-                    if (index > 0) {
-                        this@TextureData.regions[regionIndex] = this.first to packRegions[index - 1].name
-                        updateRegions()
-                    }
-                }
-            }
-        }
-
-        /**
-         * Permet de changer la texture d'une région si celle-ci est un pack, dans ce cas, la région prendra la TextureRegion suivante du pack.
-         */
-        fun nextFrameRegion(regionIndex: Int) {
-            this.regions.elementAtOrNull(regionIndex)?.apply {
-                if (this.second != textureIdentifier) {
-                    val pack = ResourcesManager.getPack(this.first.get())
-                    val region = loadRegion(this)
-
-                    val packRegions = pack.regions.sortedBy { it.name }
-
-                    val index = packRegions.indexOf(region)
-
-                    if (index < pack.regions.size - 1) {
-                        this@TextureData.regions[regionIndex] = this.first to packRegions[index + 1].name
-                        updateRegions()
-                    }
-                }
-            }
-        }
-
-        /**
-         * Permet de charger l'animation responsable d'animer les différentes régions si il y en a plusieurs.
-         */
-        private fun loadAnimation(): Animation<TextureAtlas.AtlasRegion> {
-            val frames = gdxArrayOf<TextureAtlas.AtlasRegion>()
-
-            regions.filter { it.first.get().exists() }.forEach {
-                frames.add(loadRegion(it))
-            }
-
-            if (frames.isEmpty())
-                frames.add(ResourcesManager.defaultPackRegion)
-
-            return Animation(frameDuration, frames, animationPlayMode)
-        }
-
-        companion object {
-            const val emptyRegionIdentifier = "\$EMPTY"
-            /**
-             * Permet de charger une région depuis un pack ou une texture.
-             */
-            fun loadRegion(region: TextureRegion): TextureAtlas.AtlasRegion {
-                return when {
-                    region.second == emptyRegionIdentifier -> ResourcesManager.defaultPackRegion
-                    region.second == TextureComponent.textureIdentifier -> ResourcesManager.getTexture(region.first.get()).toAtlasRegion()
-                    else -> ResourcesManager.getPackRegion(region.first.get(), region.second)
-                }
-            }
-        }
-    }
-
-    override fun loadResources() {
-        data.forEach {
-            it.updateRegions()
-        }
-    }
-
     override fun render(batch: Batch) {
         batch.setColor(1f, 1f, 1f, alpha)
-        data.elementAtOrNull(currentIndex)?.render(entity, flipX, flipY, rotation, batch)
+        groups.elementAtOrNull(currentIndex)?.render(entity, flipX, flipY, rotation, batch)
         batch.setColor(1f, 1f, 1f, 1f)
     }
 
-    private var selectedTextureIndex = -1
+    private var selectedPackIndex = -1
     private var showLevelTexture = false
 
     private enum class EditTextureType {
@@ -211,22 +67,24 @@ class TextureComponent(var currentIndex: Int = 0, var data: ArrayList<TextureDat
 
     private var editTextureType: ImGuiHelper.Item<Enum<*>> = ImGuiHelper.Item(EditTextureType.Pack)
     private var packFolderIndex = 0
-    private var textureIndex = 0
+    private var groupIndex = 0
     private var selectRegionIndex = 0
-    private var addTextureName = "Nouvelle texture"
+    private var addGroupBuf = "Nouveau groupe"
     private var ressourcesCollapsing = false
 
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    private val addGroupTitle = "Ajouter un groupe"
+
+    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
         with(ImGui) {
             if (button("Éditer", Vec2(Constants.defaultWidgetsWidth, 0))) {
-                showEdiTextureWindow = true
+                showEditTextureWindow = true
             }
 
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                combo("texture initiale", ::currentIndex, data.map { it.name })
+                combo("groupe initial", ::currentIndex, groups.map { it.name })
             }
 
-            if (showEdiTextureWindow)
+            if (showEditTextureWindow)
                 drawEditWindow(level)
         }
     }
@@ -238,42 +96,40 @@ class TextureComponent(var currentIndex: Int = 0, var data: ArrayList<TextureDat
     private val editWindowWidth = 460f
     private fun drawEditWindow(level: Level) {
         with(ImGui) {
-            setNextWindowSizeConstraints(Vec2(editWindowWidth, 200f), Vec2(editWindowWidth, 500f))
-            functionalProgramming.withWindow("Éditer la texture", ::showEdiTextureWindow, flags = WindowFlags.AlwaysAutoResize.i) {
-                val addTextureTitle = "Ajouter une texture"
-
-                if (data.isEmpty()) {
-                    if (button("Ajouter une texture", Vec2(-1))) {
-                        openPopup(addTextureTitle)
+            setNextWindowSizeConstraints(Vec2(editWindowWidth, 170f), Vec2(editWindowWidth, 500f))
+            functionalProgramming.withWindow("Éditer la texture", ::showEditTextureWindow, flags = WindowFlags.AlwaysAutoResize.i) {
+                if (groups.isEmpty()) {
+                    if (button("Ajouter un groupe", Vec2(-1))) {
+                        openPopup(addGroupTitle)
                     }
-                } else if (textureIndex in data.indices) {
-                    var openAddTexturePopup = false
+                } else if (groupIndex in groups.indices) {
+                    var openAddGroupPopup = false
 
-                    ImGuiHelper.comboWithSettingsButton("texture", ::textureIndex, data.map { it.name }, {
-                        pushItemFlag(ItemFlags.Disabled.i, data.isEmpty())
-                        if (button("Supprimer ${data.elementAtOrNull(textureIndex)?.name
+                    ImGuiHelper.comboWithSettingsButton("groupe", ::groupIndex, groups.map { it.name }, {
+                        pushItemFlag(ItemFlags.Disabled.i, groups.isEmpty())
+                        if (button("Supprimer ${groups.elementAtOrNull(groupIndex)?.name
                                         ?: ""}", Vec2(Constants.defaultWidgetsWidth, 0f))) {
-                            data.removeAt(textureIndex)
-                            textureIndex = let {
-                                if (textureIndex > 0)
-                                    textureIndex - 1
+                            groups.removeAt(groupIndex)
+                            groupIndex = let {
+                                if (groupIndex > 0)
+                                    groupIndex - 1
                                 else
-                                    textureIndex
+                                    groupIndex
                             }
                         }
                         popItemFlag()
 
-                        if (button("Nouvelle texture", Vec2(Constants.defaultWidgetsWidth, 0f))) {
-                            openAddTexturePopup = true
+                        if (button("Nouveau groupe", Vec2(Constants.defaultWidgetsWidth, 0f))) {
+                            openAddGroupPopup = true
                         }
                     })
 
-                    if (openAddTexturePopup)
-                        openPopup(addTextureTitle)
+                    if (openAddGroupPopup)
+                        openPopup(addGroupTitle)
 
                     separator()
 
-                    data.elementAtOrNull(textureIndex)?.apply data@{
+                    groups.elementAtOrNull(groupIndex)?.apply data@{
                         val regionBtnSize = Vec2(50f, 50f)
 
                         val itRegions = this.regions.listIterator()
@@ -281,25 +137,33 @@ class TextureComponent(var currentIndex: Int = 0, var data: ArrayList<TextureDat
 
                         fun addPlusBtn() {
                             if (button("+", Vec2(20f, regionBtnSize.y + style.framePadding.y * 2f)))
-                                itRegions.add(TextureData.emptyRegionIdentifier.toLocalFile().toFileWrapper() to TextureData.emptyRegionIdentifier)
+                                itRegions.add(EmptyData())
                         }
 
                         while (itRegions.hasNext()) {
                             val it = itRegions.next()
 
-                            val region = TextureComponent.TextureData.loadRegion(it)
+                            val region = it.getTextureRegion()
+
                             val tintCol = if (selectRegionIndex != regionIndex) Vec4(1f, 1f, 1f, 0.3f) else Vec4(1f)
 
                             functionalProgramming.withGroup {
                                 functionalProgramming.withGroup {
                                     val btnSize = Vec2((regionBtnSize.x + style.itemInnerSpacing.x) / 2f)
-                                    if (button("<-", btnSize)) {
-                                        this.previousFrameRegion(regionIndex)
+
+                                    pushItemFlag(ItemFlags.Disabled.i, it !is PackRegionData)
+                                    functionalProgramming.withId("previous frame $regionIndex") {
+                                        if (button("<-", btnSize)) {
+                                            it.cast<PackRegionData>()?.previousFrameRegion()
+                                        }
                                     }
                                     sameLine(0f, style.itemInnerSpacing.x)
-                                    if (button("->", btnSize)) {
-                                        this.nextFrameRegion(regionIndex)
+                                    functionalProgramming.withId("next frame $regionIndex") {
+                                        if (button("->", btnSize)) {
+                                            it.cast<PackRegionData>()?.nextFrameRegion()
+                                        }
                                     }
+                                    popItemFlag()
                                 }
 
                                 if (imageButton(region.texture.textureObjectHandle, regionBtnSize, Vec2(region.u, region.v), Vec2(region.u2, region.v2), tintCol = tintCol)) {
@@ -314,7 +178,6 @@ class TextureComponent(var currentIndex: Int = 0, var data: ArrayList<TextureDat
                                 functionalProgramming.withId("suppr region $regionIndex") {
                                     if (button("Suppr.", Vec2(regionBtnSize.x + style.framePadding.x * 2f, 0))) {
                                         itRegions.remove()
-                                        updateRegions()
                                         regionIndex -= 1
                                     }
                                 }
@@ -332,11 +195,11 @@ class TextureComponent(var currentIndex: Int = 0, var data: ArrayList<TextureDat
 
                         if (this.regions.size > 1) {
                             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                                sliderFloat("vitesse", ::frameDuration, 0f, 1f)
+                                sliderFloat("vitesse", ::frameDuration, 0f, 2f)
                             }
-                            val playModeItem = ImGuiHelper.Item(animationPlayMode)
+                            val playModeItem = ImGuiHelper.Item(playMode)
                             ImGuiHelper.enum("mode", playModeItem.cast())
-                            animationPlayMode = playModeItem.obj
+                            playMode = playModeItem.obj
                         } else if (this.regions.size == 1) {
                             checkbox("répéter la région", ::repeatRegion)
                             if (repeatRegion) {
@@ -347,25 +210,33 @@ class TextureComponent(var currentIndex: Int = 0, var data: ArrayList<TextureDat
                         separator()
                     }
 
-                    if (selectedTextureIndex == -1) {
-                        val searchRegion = data.elementAtOrNull(textureIndex)?.regions?.elementAtOrNull(0)?.first?.get()
-                        selectedTextureIndex = PCGame.gamePacks.entries.elementAtOrNull(packFolderIndex)?.value?.indexOfFirst { it == searchRegion } ?: -1
-                        if (selectedTextureIndex == -1) {
-                            selectedTextureIndex = level.resourcesPacks().indexOfFirst { it == searchRegion }
-                            if (selectedTextureIndex == -1)
-                                selectedTextureIndex = 0
-                            else
-                                showLevelTexture = true
+                    if (selectedPackIndex == -1) {
+                        groups.elementAtOrNull(groupIndex)?.regions?.elementAtOrNull(0)?.apply {
+                            when (this) {
+                                is PackRegionData -> {
+                                    selectedPackIndex = PCGame.gamePacks.entries.elementAtOrNull(packFolderIndex)?.value?.indexOfFirst { it.path == pack.path } ?: -1
+                                    if (selectedPackIndex == -1) {
+                                        selectedPackIndex = level.resourcesPacks().indexOfFirst { it.path == pack.path }
+                                        if (selectedPackIndex == -1)
+                                            selectedPackIndex = 0
+                                        else
+                                            showLevelTexture = true
+                                    }
+                                }
+                                is TextureData -> {
+                                    // TODO
+                                }
+                            }
                         }
                     }
 
-                    drawRessources(level)
+                    drawResources(level)
                 }
 
-                functionalProgramming.popupModal(addTextureTitle, extraFlags = WindowFlags.AlwaysAutoResize.i) {
-                    ImGuiHelper.inputText("nom", ::addTextureName)
+                functionalProgramming.popupModal(addGroupTitle, extraFlags = WindowFlags.AlwaysAutoResize.i) {
+                    ImGuiHelper.inputText("nom", ::addGroupBuf)
                     if (button("Ajouter", Vec2(-1, 0))) {
-                        data.add(TextureData(addTextureName).apply { updateRegions() })
+                        groups.add(TextureGroup(addGroupBuf))
                         closeCurrentPopup()
                     }
                     if (button("Fermer", Vec2(-1, 0)))
@@ -375,7 +246,7 @@ class TextureComponent(var currentIndex: Int = 0, var data: ArrayList<TextureDat
         }
     }
 
-    private fun drawRessources(level: Level) {
+    private fun drawResources(level: Level) {
         with(ImGui) {
             ressourcesCollapsing = false
             functionalProgramming.collapsingHeader("ressources") {
@@ -392,43 +263,38 @@ class TextureComponent(var currentIndex: Int = 0, var data: ArrayList<TextureDat
                         if (!showLevelTexture) {
                             combo("dossier", ::packFolderIndex, PCGame.gamePacks.map { it.key.name() })
                         }
-                        combo("pack", ::selectedTextureIndex, if (showLevelTexture) level.resourcesPacks().map { it.nameWithoutExtension() } else PCGame.gamePacks.entries.elementAtOrNull(packFolderIndex)?.value?.map { it.nameWithoutExtension() }
+                        combo("pack", ::selectedPackIndex, if (showLevelTexture) level.resourcesPacks().map { it.toString() } else PCGame.gamePacks.entries.elementAtOrNull(packFolderIndex)?.value?.map { it.toString() }
                                 ?: arrayListOf())
                     }
-                    (if (showLevelTexture) level.resourcesPacks().getOrNull(selectedTextureIndex) else PCGame.gamePacks.entries.elementAtOrNull(packFolderIndex)?.value?.getOrNull(selectedTextureIndex))?.also { packPath ->
-                        if (packPath.exists()) {
-                            val pack = ResourcesManager.getPack(packPath)
-                            when (editTextureType) {
-                                TextureComponent.EditTextureType.Pack -> {
-                                    if (packPath.exists()) {
-                                        pack.regions.sortedBy { it.name }.forEach { region ->
-                                            if (imageButton(region.texture.textureObjectHandle, imgBtnSize, Vec2(region.u, region.v), Vec2(region.u2, region.v2))) {
-                                                data.elementAtOrNull(textureIndex)?.apply {
-                                                    if (selectRegionIndex in this.regions.indices) {
-                                                        this.regions[selectRegionIndex] = packPath.toFileWrapper() to region.name
-                                                        updateRegions()
-                                                    }
-                                                }
+                    (if (showLevelTexture) level.resourcesPacks().getOrNull(selectedPackIndex) else PCGame.gamePacks.entries.elementAtOrNull(packFolderIndex)?.value?.getOrNull(selectedPackIndex))?.also { pack ->
+                        when (editTextureType) {
+                            TextureComponent.EditTextureType.Pack -> {
+                                pack()?.regions?.sortedBy { it.name }?.forEach { region ->
+                                    if (imageButton(region.texture.textureObjectHandle, imgBtnSize, Vec2(region.u, region.v), Vec2(region.u2, region.v2))) {
+                                        groups.elementAtOrNull(groupIndex)?.apply {
+                                            if (selectRegionIndex in this.regions.indices) {
+                                                this.regions[selectRegionIndex] = PackRegionData(pack, region.name)
                                             }
-
-                                            sumImgsWidth += imgBtnSize.x + style.itemInnerSpacing.x * 2f
-
-                                            if (sumImgsWidth + imgBtnSize.x + style.itemInnerSpacing.x * 2f < editWindowWidth)
-                                                sameLine(0f, style.itemInnerSpacing.x)
-                                            else
-                                                sumImgsWidth = 0f
                                         }
                                     }
+
+                                    sumImgsWidth += imgBtnSize.x + style.itemInnerSpacing.x * 2f
+
+                                    if (sumImgsWidth + imgBtnSize.x + style.itemInnerSpacing.x * 2f < editWindowWidth)
+                                        sameLine(0f, style.itemInnerSpacing.x)
+                                    else
+                                        sumImgsWidth = 0f
                                 }
-                                TextureComponent.EditTextureType.Animation -> {
-                                    findAnimationInPack(pack).forEach {
-                                        val region = pack.findRegion(it + "_0")
+                            }
+                            TextureComponent.EditTextureType.Animation -> {
+                                pack()?.apply {
+                                    findAnimationInPack(this).forEach {
+                                        val region = this.findRegion(it + "_0")
 
                                         if (imageButton(region.texture.textureObjectHandle, imgBtnSize, Vec2(region.u, region.v), Vec2(region.u2, region.v2))) {
-                                            data.elementAtOrNull(textureIndex)?.apply {
+                                            groups.elementAtOrNull(groupIndex)?.apply {
                                                 this.regions.clear()
-                                                this.regions.addAll(findAnimationRegions(packPath.toFileWrapper(), it))
-                                                this.updateRegions()
+                                                this.regions.addAll(PackRegionData.findAnimationRegions(pack.path, it))
                                             }
                                         }
 
@@ -440,55 +306,53 @@ class TextureComponent(var currentIndex: Int = 0, var data: ArrayList<TextureDat
                                             sumImgsWidth = 0f
                                     }
                                 }
-                                else -> {
-                                }
+                            }
+                            else -> {
                             }
                         }
                     }
                 } else {
-                    (PCGame.gameTextures + level.resourcesTextures()).filter { it.exists() }.forEach {
-                        val texture = ResourcesManager.getTexture(it)
-
-                        if (imageButton(texture.textureObjectHandle, imgBtnSize, uv1 = Vec2(1))) {
-                            data.elementAtOrNull(textureIndex)?.apply {
-                                if (selectRegionIndex in this.regions.indices) {
-                                    this.regions[selectRegionIndex] = it.toFileWrapper() to textureIdentifier
-                                    updateRegions()
+                    (PCGame.gameTextures + level.resourcesTextures()).forEach { wrapper ->
+                        wrapper()?.apply {
+                            if (imageButton(this.textureObjectHandle, imgBtnSize, uv1 = Vec2(1))) {
+                                groups.elementAtOrNull(groupIndex)?.apply {
+                                    if (selectRegionIndex in this.regions.indices) {
+                                        this.regions[selectRegionIndex] = TextureData(wrapper)
+                                    }
                                 }
                             }
+
+                            sumImgsWidth += imgBtnSize.x + style.itemInnerSpacing.x * 2f
+
+                            if (sumImgsWidth + imgBtnSize.x + style.itemInnerSpacing.x * 2f < editWindowWidth)
+                                sameLine(0f, style.itemInnerSpacing.x)
+                            else
+                                sumImgsWidth = 0f
                         }
-
-                        sumImgsWidth += imgBtnSize.x + style.itemInnerSpacing.x * 2f
-
-                        if (sumImgsWidth + imgBtnSize.x + style.itemInnerSpacing.x * 2f < editWindowWidth)
-                            sameLine(0f, style.itemInnerSpacing.x)
-                        else
-                            sumImgsWidth = 0f
                     }
                 }
             }
         }
     }
 
-    companion object {
-        private var showEdiTextureWindow = false
-        private val textureIdentifier = "\$texture_atlas"
-
-        /**
-         * Permet de charger les différentes régions requise pour une animation prédéfinies dans un pack
-         */
-        private fun findAnimationRegions(packFile: FileWrapper, animation: String): Array<Pair<FileWrapper, String>> {
-            val pack = ResourcesManager.getPack(packFile.get())
-            val regions = mutableListOf<String>()
-
-            var i = 0
-            while (pack.findRegion(animation + "_$i") != null) {
-                regions.add(animation + "_$i")
-                ++i
+    override fun insertText() {
+        ImGuiHelper.textPropertyColored(Color.ORANGE, "Groupe actuel :", groups.elementAtOrNull(currentIndex)?.name
+                ?: "/")
+        ImGuiHelper.textPropertyColored(Color.OLIVE, "alpha :", alpha)
+        groups.forEach {
+            ImGuiHelper.textColored(Color.RED, "<-->")
+            ImGuiHelper.textPropertyColored(Color.ORANGE, "nom :", it.name)
+            if (it.regions.size > 1)
+                ImGuiHelper.textPropertyColored(Color.ORANGE, "anim mode :", it.playMode.toString())
+            it.regions.forEach {
+                ImGuiHelper.textPropertyColored(Color.ORANGE, " - ", it)
             }
-
-            return regions.map { packFile to it }.toTypedArray()
+            ImGuiHelper.textColored(Color.RED, "<-->")
         }
+    }
+
+    companion object {
+        private var showEditTextureWindow = false
 
         /**
          * Permet de trouver les différentes animations prédéfinies dans un pack
@@ -505,20 +369,158 @@ class TextureComponent(var currentIndex: Int = 0, var data: ArrayList<TextureDat
             return animationRegionNames
         }
     }
+}
 
-    override fun insertText() {
-        ImGuiHelper.textPropertyColored(Color.ORANGE, "texture actuelle :", data.elementAtOrNull(currentIndex)?.name
-                ?: "/")
-        ImGuiHelper.textPropertyColored(Color.OLIVE, "alpha :", alpha)
-        data.forEach {
-            ImGuiHelper.textColored(Color.RED, "<-->")
-            ImGuiHelper.textPropertyColored(Color.ORANGE, "nom :", it.name)
-            if (it.regions.size > 1)
-                ImGuiHelper.textPropertyColored(Color.ORANGE, "anim mode :", it.animationPlayMode.toString())
-            it.regions.forEach {
-                ImGuiHelper.textPropertyColored(Color.ORANGE, " - ${it.first.get().nameWithoutExtension()} ->", it.second)
+class TextureGroup(var name: String, vararg regions: DrawableData, var playMode: Animation.PlayMode = Animation.PlayMode.LOOP, var frameDuration: Float = 1f / regions.size) {
+    constructor(name: String, packFile: FileWrapper, animation: String, frameDuration: Float, animationPlayMode: Animation.PlayMode = Animation.PlayMode.LOOP) : this(name, *findAnimationRegions(packFile, animation).toTypedArray(), playMode = animationPlayMode, frameDuration = frameDuration)
+    @JsonCreator private constructor() : this("default")
+
+    var regions = arrayListOf(*regions)
+
+    var repeatRegion: Boolean = false
+    var repeatRegionSize = Size(50, 50)
+
+    /**
+     * Représente le temps écoulé depuis le début de l'affichage de la texture/animation, si le stateTime = 1.3f et que le frameDuration = 1f, la deuxième région sera dessiné.
+     */
+    private var stateTime = 0f
+    private var lastStateTime = 0f
+    private var lastFrameNumber = 0
+
+    fun render(entity: Entity, flipX: Boolean, flipY: Boolean, rotation: TextureComponent.Rotation, batch: Batch) {
+        /**
+         * Si le nombre de région est <= à 1, il n'y a pas besoin de mettre à jour le temps écoulé car de toute façon une seule région sera dessinée.
+         */
+        if (regions.size > 1)
+            stateTime += Utility.getDeltaTime()
+
+        val frame = currentFrame()
+
+        if (repeatRegion && regions.size == 1) {
+            for (x in 0 until MathUtils.floor(entity.box.width / repeatRegionSize.width.toFloat())) {
+                for (y in 0 until MathUtils.floor(entity.box.height / repeatRegionSize.height.toFloat())) {
+                    frame.render(Rect(entity.box.x + x * repeatRegionSize.width, entity.box.y + y * repeatRegionSize.height, repeatRegionSize.width, repeatRegionSize.height), flipX, flipY, rotation, batch)
+                }
             }
-            ImGuiHelper.textColored(Color.RED, "<-->")
+        } else
+            frame.render(entity.box, flipX, flipY, rotation, batch)
+    }
+
+    /**
+     * Inspiré du code source de libGDX
+     * @see Animation
+     */
+    fun currentFrame(): DrawableData {
+        if (regions.isEmpty())
+            return EmptyData()
+        else if (regions.size == 1)
+            return regions[0]
+
+        var frameNumber = (stateTime / frameDuration).toInt()
+        when (playMode) {
+            Animation.PlayMode.NORMAL -> frameNumber = Math.min(regions.size - 1, frameNumber)
+            Animation.PlayMode.LOOP -> frameNumber %= regions.size
+            Animation.PlayMode.LOOP_PINGPONG -> {
+                frameNumber %= (regions.size * 2 - 2)
+                if (frameNumber >= regions.size) frameNumber = regions.size - 2 - (frameNumber - regions.size)
+            }
+            Animation.PlayMode.LOOP_RANDOM -> {
+                val lastFrameNumber = (lastStateTime / frameDuration).toInt()
+                if (lastFrameNumber != frameNumber) {
+                    frameNumber = MathUtils.random(regions.size - 1)
+                } else {
+                    frameNumber = this.lastFrameNumber
+                }
+            }
+            Animation.PlayMode.REVERSED -> frameNumber = Math.max(regions.size - frameNumber - 1, 0)
+            Animation.PlayMode.LOOP_REVERSED -> {
+                frameNumber %= regions.size
+                frameNumber = regions.size - frameNumber - 1
+            }
+        }
+
+        lastFrameNumber = frameNumber
+        lastStateTime = stateTime
+
+        return regions[frameNumber]
+    }
+}
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
+abstract class DrawableData {
+    fun render(rect: Rect, flipX: Boolean, flipY: Boolean, rotation: TextureComponent.Rotation, batch: Batch) {
+        batch.draw(getTextureRegion(), rect, flipX, flipY, rotation.degree)
+    }
+
+    @JsonIgnore
+    abstract fun getTextureRegion(): TextureRegion
+}
+
+class EmptyData : DrawableData() {
+    override fun getTextureRegion() = ResourcesManager.defaultPackRegion
+
+    override fun toString() = "vide"
+}
+
+class TextureData(val texture: ResourceWrapper<Texture>) : DrawableData() {
+    override fun getTextureRegion(): TextureRegion {
+        val texture = texture()
+        if (texture != null)
+            return TextureRegion(texture)
+        else
+            return ResourcesManager.defaultPackRegion
+    }
+
+    override fun toString() = texture.toString()
+}
+
+/**
+ * Représente une région
+ */
+class PackRegionData(val pack: ResourceWrapper<TextureAtlas>, var region: String) : DrawableData() {
+    override fun toString() = "${pack.path} -> $region"
+
+    override fun getTextureRegion(): TextureRegion = pack()?.findRegion(region) ?: ResourcesManager.defaultPackRegion
+
+    fun previousFrameRegion() {
+        pack()?.apply {
+            val regions = regions.sortedBy { it.name }
+
+            val index = regions.indexOfFirst { it.name == region }
+
+            if (index > 0) {
+                region = regions[index - 1].name
+            }
+        }
+    }
+
+    fun nextFrameRegion() {
+        pack()?.apply {
+            val regions = regions.sortedBy { it.name }
+
+            val index = regions.indexOfFirst { it.name == region }
+
+            if (index < regions.size - 1) {
+                region = regions[index + 1].name
+            }
+        }
+    }
+
+    companion object {
+        /**
+         * Permet de charger les différentes régions requise pour une animation prédéfinies dans un pack
+         */
+        fun findAnimationRegions(packFile: FileWrapper, animation: String): List<PackRegionData> {
+            val pack = ResourcesManager.getPack(packFile.get())
+            val regions = mutableListOf<String>()
+
+            var i = 0
+            while (pack.findRegion(animation + "_$i") != null) {
+                regions.add(animation + "_$i")
+                ++i
+            }
+
+            return regions.map { PackRegionData(resourceWrapperOf(packFile), it) }
         }
     }
 }

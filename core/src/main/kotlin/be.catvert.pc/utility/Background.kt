@@ -17,7 +17,7 @@ import kotlin.math.roundToInt
 enum class BackgroundType {
     Standard, Parallax, None;
 
-    override fun toString() = when(this) {
+    override fun toString() = when (this) {
         BackgroundType.Standard -> "Standard"
         BackgroundType.Parallax -> "Parallaxe"
         BackgroundType.None -> "Aucun"

@@ -101,9 +101,9 @@ class Rect(position: Point = Point(), size: Size = Size()) : UIImpl {
         return Rect(x, y, width.roundToInt(), height.roundToInt())
     }
 
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
         with(ImGui) {
-            ImGuiHelper.point(::position, Point(), Point(level.matrixRect.width.toFloat() - this@Rect.width, level.matrixRect.height.toFloat() - this@Rect.height), editorSceneUI)
+            ImGuiHelper.point(::position, Point(), Point(level.matrixRect.width.toFloat() - this@Rect.width, level.matrixRect.height.toFloat() - this@Rect.height), editorUI)
             ImGuiHelper.size(::size, Size(1), Size(Constants.maxEntitySize))
         }
     }

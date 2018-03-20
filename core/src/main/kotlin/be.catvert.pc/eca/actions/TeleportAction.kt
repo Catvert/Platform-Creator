@@ -21,8 +21,8 @@ class TeleportAction(var teleportPoint: Point) : Action(), UIImpl {
         entity.box.position = teleportPoint
     }
 
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        ImGuiHelper.point(::teleportPoint, Point(), Point(level.matrixRect.width.toFloat(), level.matrixRect.height.toFloat()), editorSceneUI)
+    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
+        ImGuiHelper.point(::teleportPoint, Point(), Point(level.matrixRect.width.toFloat(), level.matrixRect.height.toFloat()), editorUI)
     }
 
     override fun toString() = super.toString() + " - $teleportPoint"

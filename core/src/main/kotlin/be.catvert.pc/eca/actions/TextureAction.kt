@@ -18,24 +18,24 @@ import imgui.functionalProgramming
  */
 @RequiredComponent(TextureComponent::class)
 @Description("Permet de changer la texture actuelle d'une entité")
-class TextureAction(var textureIndex: Int) : Action(), UIImpl {
+class TextureAction(var groupIndex: Int) : Action(), UIImpl {
     @JsonCreator private constructor() : this(-1)
 
     override fun invoke(entity: Entity, container: EntityContainer) {
         entity.getCurrentState().getComponent<TextureComponent>()?.also {
-            it.currentIndex = textureIndex
+            it.currentIndex = groupIndex
         }
     }
 
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
         with(ImGui) {
-            val textureData = entity.getCurrentState().getComponent<TextureComponent>()?.data ?: arrayListOf()
+            val groups = entity.getCurrentState().getComponent<TextureComponent>()?.groups ?: arrayListOf()
 
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                combo("texture", ::textureIndex, textureData.map { it.name })
+                combo("groupe", ::groupIndex, groups.map { it.name })
             }
         }
     }
 
-    override fun toString(): String = super.toString() + " - index : $textureIndex"
+    override fun toString(): String = super.toString() + " - index : $groupIndex"
 }

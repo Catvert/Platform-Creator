@@ -11,7 +11,7 @@ import ktx.assets.toLocalFile
  */
 class FileWrapper(file: FileHandle) {
     constructor(path: String) : this(path.toLocalFile())
-    @JsonCreator private constructor() : this("")
+    @JsonCreator private constructor() : this(INVALID.file)
 
     @JsonProperty("path")
     private var file: String = file.path()
@@ -21,7 +21,14 @@ class FileWrapper(file: FileHandle) {
         this.file = file.path()
     }
 
+    @JsonIgnore
     fun get() = file.toLocalFile()
 
     override fun equals(other: Any?) = other.cast<FileWrapper>()?.file == this.file
+
+    override fun toString() = get().nameWithoutExtension()
+
+    companion object {
+        val INVALID = FileWrapper("#INVALID")
+    }
 }

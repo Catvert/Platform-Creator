@@ -62,6 +62,7 @@ object Constants {
     val menuMusicPath = gameDirPath.child("main_music.ogg")
 
     val prefabExtension = "prefab"
+    val groupExtension = "group"
     val levelExtension = "pclvl"
 
     val levelTextureExtension = arrayOf("jpg", "png")

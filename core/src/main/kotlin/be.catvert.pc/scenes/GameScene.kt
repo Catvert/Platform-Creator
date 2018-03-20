@@ -16,7 +16,6 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import glm_.vec2.Vec2
 import imgui.ImGui
-import imgui.MouseCursor
 import imgui.WindowFlags
 import ktx.app.use
 
@@ -35,8 +34,8 @@ class GameScene(private val level: Level, private val levelNumberTries: Int = 1)
         level.entitiesInitialStartActions()
 
         level.updateCamera(camera, false)
-        if (level.musicPath != null)
-            MusicsManager.startMusic(level.musicPath!!.get(), true)
+        if (level.music != null)
+            MusicsManager.startMusic(level.music!!, true)
 
         level.exit = {
             ResourcesManager.getSound(if (it) Constants.gameDirPath.child("game-over-success.wav") else Constants.gameDirPath.child("game-over-fail.wav"))?.play(PCGame.soundVolume)

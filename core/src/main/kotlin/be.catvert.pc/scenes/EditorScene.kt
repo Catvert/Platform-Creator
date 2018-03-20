@@ -8,9 +8,11 @@ import be.catvert.pc.eca.Prefab
 import be.catvert.pc.eca.Tags
 import be.catvert.pc.eca.components.Components
 import be.catvert.pc.eca.components.RequiredComponent
+import be.catvert.pc.eca.components.graphics.PackRegionData
 import be.catvert.pc.eca.components.graphics.TextureComponent
 import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.eca.containers.Level
+import be.catvert.pc.factories.GroupFactory
 import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.factories.PrefabSetup
 import be.catvert.pc.factories.PrefabType
@@ -22,11 +24,13 @@ import be.catvert.pc.ui.ImGuiHelper
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
-import com.badlogic.gdx.graphics.*
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.GL20
+import com.badlogic.gdx.graphics.Pixmap
+import com.badlogic.gdx.graphics.PixmapIO
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
-import com.badlogic.gdx.graphics.g2d.TextureAtlas
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Circle
 import com.badlogic.gdx.math.MathUtils
@@ -99,7 +103,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         }
     }
 
-    class EditorSceneUI(background: Background?) {
+    class EditorUI(background: Background?) {
         enum class EditorMode(val modeName: String) {
             NO_MODE("Aucun"), SELECT("Sélection"), COPY("Copie"), SELECT_POINT("Sélection d'un point"), SELECT_ENTITY("Sélection d'une entité"), TRY_LEVEL("Essai du niveau")
         }
@@ -139,14 +143,25 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
         var addTagPopupNameBuffer = ""
 
-        var showEntitiesWindow = true
-        var entitiesTypeIndex = 0
-        var entitiesShowOnlyUser = false
-        var entitiesSpritePackIndex = 0
-        var entitiesSpritePackTypeIndex = 0
-        var entitiesSpritePhysics = true
-        var entitiesSpriteRealSize = false
-        var entitiesSpriteCustomSize = Size(50, 50)
+        enum class EntityFactoryMode {
+            Sprite, Tag, Group;
+
+            override fun toString() = when (this) {
+                EditorScene.EditorUI.EntityFactoryMode.Sprite -> "Création"
+                EditorScene.EditorUI.EntityFactoryMode.Tag -> "Inventaire"
+                EditorScene.EditorUI.EntityFactoryMode.Group -> "Groupes"
+            }
+        }
+
+        var showEntityFactoryWindow = true
+        var entityFactoryTagIndex = 0
+        val entityFactoryMode = ImGuiHelper.Item(EntityFactoryMode.Sprite)
+        var entityFactoryTagShowOnlyUser = false
+        var entityFactorySpritePackIndex = 0
+        var entityFactorySpritePackTypeIndex = 0
+        var entityFactorySpritePhysics = true
+        var entityFactorySpriteRealSize = false
+        var entityFactorySpriteCustomSize = Size(50, 50)
 
         var godModeTryMode = false
 
@@ -210,7 +225,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
     private var backupTryModeCameraPos = Vector3()
     private var backupTryModeCameraZoom = 1f
 
-    private val editorSceneUI = EditorSceneUI(level.background)
+    private val editorUI = EditorUI(level.background)
 
     private var targetCameraZoom = 1f
 
@@ -221,14 +236,15 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         level.updateCamera(camera, false)
 
         // Permet de décaler le viewport vers le bas pour afficher la totalité du niveau avec la barre de menu.
-        viewport.screenHeight -= editorSceneUI.menuBarHeight
+        viewport.screenHeight -= editorUI.menuBarHeight
         viewport.apply()
 
-        if (applyMusicTransition)
-            MusicsManager.startMusic(Constants.menuMusicPath, true)
+        if (applyMusicTransition) {
+            MusicsManager.startMusic(PCGame.menuMusic, true)
+        }
 
         PCInputProcessor.scrolledSignal.register {
-            if (isUIHover || editorSceneUI.editorMode == EditorSceneUI.EditorMode.TRY_LEVEL)
+            if (isUIHover || editorUI.editorMode == EditorUI.EditorMode.TRY_LEVEL)
                 return@register
             targetCameraZoom = (targetCameraZoom + (it * targetCameraZoom * 0.05f)).clamp(0.5f, level.matrixRect.width / camera.viewportWidth).clamp(0.5f, level.matrixRect.height / camera.viewportHeight)
         }
@@ -253,7 +269,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
             rect(level.matrixRect)
         }
 
-        if (gridMode.active && editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL) {
+        if (gridMode.active && editorUI.editorMode != EditorUI.EditorMode.TRY_LEVEL) {
             shapeRenderer.withColor(Color.DARK_GRAY) {
                 gridMode.walkCells(level.activeRect) {
                     rect(it)
@@ -266,7 +282,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
          */
         entityContainer.cast<Level>()?.apply {
             getAllEntitiesInCells(getActiveGridCells()).forEach {
-                if (it.getCurrentState().getComponent<TextureComponent>()?.data?.isEmpty() != false) {
+                if (it.getCurrentState().getComponent<TextureComponent>()?.groups?.isEmpty() != false) {
                     shapeRenderer.withColor(Color.GRAY) {
                         rect(it.box)
                     }
@@ -274,8 +290,8 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
             }
         }
 
-        when (editorSceneUI.editorMode) {
-            EditorSceneUI.EditorMode.NO_MODE -> {
+        when (editorUI.editorMode) {
+            EditorUI.EditorMode.NO_MODE -> {
                 /**
                  * Dessine le rectangle en cour de création
                  */
@@ -292,7 +308,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     }
                 }
             }
-            EditorSceneUI.EditorMode.SELECT -> {
+            EditorUI.EditorMode.SELECT -> {
                 /**
                  * Dessine un rectangle autour des entités sélectionnées
                  */
@@ -310,7 +326,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     }
                 }
             }
-            EditorSceneUI.EditorMode.COPY -> {
+            EditorUI.EditorMode.COPY -> {
                 val mousePosInWorld: Point = viewport.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)).let { Point(it.x, it.y) }
 
                 selectEntities.forEach { entity ->
@@ -350,11 +366,11 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
                     if (rect != null) {
                         entity.getCurrentState().getComponent<TextureComponent>()?.apply {
-                            if (this.currentIndex in data.indices) {
-                                val data = this.data[currentIndex]
+                            if (this.currentIndex in groups.indices) {
+                                val data = this.groups[currentIndex]
                                 PCGame.mainBatch.use {
                                     it.withColor(Color.WHITE.apply { a = 0.5f }) {
-                                        it.draw(data.currentKeyFrame(), rect)
+                                        it.draw(data.currentFrame().getTextureRegion(), rect)
                                     }
                                 }
                             }
@@ -368,16 +384,16 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     }
                 }
             }
-            EditorSceneUI.EditorMode.TRY_LEVEL -> {
+            EditorUI.EditorMode.TRY_LEVEL -> {
             }
-            EditorSceneUI.EditorMode.SELECT_POINT -> {
+            EditorUI.EditorMode.SELECT_POINT -> {
                 PCGame.mainBatch.projectionMatrix = PCGame.defaultProjection
                 PCGame.mainBatch.use {
                     val layout = GlyphLayout(editorFont, "Sélectionner un point")
                     editorFont.draw(it, layout, Gdx.graphics.width / 2f - layout.width / 2, Gdx.graphics.height - editorFont.lineHeight * 3)
                 }
             }
-            EditorSceneUI.EditorMode.SELECT_ENTITY -> {
+            EditorUI.EditorMode.SELECT_ENTITY -> {
                 PCGame.mainBatch.projectionMatrix = PCGame.defaultProjection
                 PCGame.mainBatch.use {
                     val layout = GlyphLayout(editorFont, "Sélectionner une entité")
@@ -394,17 +410,17 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         updateCamera()
 
         // TODO Refactor
-        if (!isUIHover && editorSceneUI.editorMode == EditorSceneUI.EditorMode.TRY_LEVEL) {
+        if (!isUIHover && editorUI.editorMode == EditorUI.EditorMode.TRY_LEVEL) {
             if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !latestLeftButtonClick) {
                 val entity = findEntityUnderMouse(false)
                 if (entity != null) {
                     selectEntityTryMode = entity
-                    editorSceneUI.showInfoEntityTextWindow = true
+                    editorUI.showInfoEntityTextWindow = true
                 }
             }
         }
 
-        if (!isUIHover && editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL) {
+        if (!isUIHover && editorUI.editorMode != EditorUI.EditorMode.TRY_LEVEL) {
             level.activeRect.set(Size((Constants.viewportRatioWidth * camera.zoom).roundToInt(), (camera.viewportHeight * camera.zoom).roundToInt()), Point(camera.position.x - ((Constants.viewportRatioWidth * camera.zoom) / 2f).roundToInt(), camera.position.y - ((Constants.viewportRatioHeight * camera.zoom) / 2f).roundToInt()))
 
             if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_UP_LAYER.key)) {
@@ -427,7 +443,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                 } else if (selectEntities.isNotEmpty()) {
                     selectEntities.forEach { removeEntity(it) }
                     clearSelectEntities()
-                    editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
+                    editorUI.editorMode = EditorUI.EditorMode.NO_MODE
                 }
             }
 
@@ -449,18 +465,18 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            if (editorSceneUI.editorMode == EditorSceneUI.EditorMode.TRY_LEVEL)
+            if (editorUI.editorMode == EditorUI.EditorMode.TRY_LEVEL)
                 stopTryLevel()
             else
-                editorSceneUI.showExitWindow = true
+                editorUI.showExitWindow = true
         }
 
-        if (!isUIHover && Gdx.input.isKeyJustPressed(GameKeys.EDITOR_GRID_MODE.key) && editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL) {
+        if (!isUIHover && Gdx.input.isKeyJustPressed(GameKeys.EDITOR_GRID_MODE.key) && editorUI.editorMode != EditorUI.EditorMode.TRY_LEVEL) {
             gridMode.active = !gridMode.active
         }
 
         if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_TRY_LEVEL.key)) {
-            if (editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL)
+            if (editorUI.editorMode != EditorUI.EditorMode.TRY_LEVEL)
                 launchTryLevel()
             else
                 stopTryLevel()
@@ -481,8 +497,8 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         val mousePosInWorld = viewport.unproject(Vector3(mousePosVec2, 0f)).toPoint()
         val latestMousePosInWorld = viewport.unproject(Vector3(latestMousePos.x, latestMousePos.y, 0f)).toPoint()
 
-        when (editorSceneUI.editorMode) {
-            EditorSceneUI.EditorMode.NO_MODE -> {
+        when (editorUI.editorMode) {
+            EditorUI.EditorMode.NO_MODE -> {
                 if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
                     val roundMousePosInWorld = Point(mousePosInWorld.x.roundToInt().toFloat(), mousePosInWorld.y.roundToInt().toFloat())
                     if (latestLeftButtonClick) { // Rectangle
@@ -491,7 +507,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                         val entity = findEntityUnderMouse(true)
                         if (entity != null) {
                             addSelectEntity(entity)
-                            editorSceneUI.editorMode = EditorSceneUI.EditorMode.SELECT
+                            editorUI.editorMode = EditorUI.EditorMode.SELECT
                         } else { // Maybe box
                             selectRectangleData.rectangleStarted = true
                             selectRectangleData.startPosition = roundMousePosInWorld
@@ -504,7 +520,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     level.getAllEntitiesInCells(selectRectangleData.getRect()).forEach {
                         if (selectRectangleData.getRect().contains(it.box, true)) {
                             addSelectEntity(it)
-                            editorSceneUI.editorMode = EditorSceneUI.EditorMode.SELECT
+                            editorUI.editorMode = EditorUI.EditorMode.SELECT
                         }
                     }
                 }
@@ -513,7 +529,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     val entity = findEntityUnderMouse(true)
                     if (entity != null) {
                         addSelectEntity(entity)
-                        editorSceneUI.editorMode = EditorSceneUI.EditorMode.COPY
+                        editorUI.editorMode = EditorUI.EditorMode.COPY
                     }
                 }
 
@@ -531,8 +547,8 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     findEntityUnderMouse(true)?.apply {
                         if (getStates().size == 1) {
                             getCurrentState().getComponent<TextureComponent>()?.apply {
-                                if (data.size == 1)
-                                    data.elementAt(0).previousFrameRegion(0)
+                                if (groups.size == 1)
+                                    groups.elementAt(0).regions.elementAt(0).cast<PackRegionData>()?.nextFrameRegion()
                             }
                         }
                     }
@@ -541,16 +557,16 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     findEntityUnderMouse(true)?.apply {
                         if (getStates().size == 1) {
                             getCurrentState().getComponent<TextureComponent>()?.apply {
-                                if (data.size == 1)
-                                    data.elementAt(0).nextFrameRegion(0)
+                                if (groups.size == 1)
+                                    groups.elementAt(0).regions.elementAt(0).cast<PackRegionData>()?.nextFrameRegion()
                             }
                         }
                     }
                 }
             }
-            EditorSceneUI.EditorMode.SELECT -> {
+            EditorUI.EditorMode.SELECT -> {
                 if (selectEntities.isEmpty() || selectEntity == null) {
-                    editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
+                    editorUI.editorMode = EditorUI.EditorMode.NO_MODE
                     return
                 }
 
@@ -586,7 +602,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                             when {
                                 entity == null -> { // Se produit lorsque le joueur clique dans le vide, dans ce cas on désélectionne les entités sélectionnées
                                     clearSelectEntities()
-                                    editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
+                                    editorUI.editorMode = EditorUI.EditorMode.NO_MODE
                                 }
                                 selectEntities.contains(entity) -> // Dans ce cas-ci, le joueur à sélectionné une autre entité dans celles qui sont sélectionnées
                                     selectEntity = entity
@@ -679,9 +695,9 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && !latestRightButtonClick) {
                         if (findEntityUnderMouse(false) == null) {
                             clearSelectEntities()
-                            editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
+                            editorUI.editorMode = EditorUI.EditorMode.NO_MODE
                         } else {
-                            editorSceneUI.showInfoEntityWindow = true
+                            editorUI.showInfoEntityWindow = true
                         }
                     }
                     if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_MOVE_ENTITY_LEFT.key)) {
@@ -698,12 +714,12 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     }
 
                     if (Gdx.input.isKeyJustPressed(GameKeys.EDITOR_COPY_MODE.key))
-                        editorSceneUI.editorMode = EditorSceneUI.EditorMode.COPY
+                        editorUI.editorMode = EditorUI.EditorMode.COPY
                 }
             }
-            EditorSceneUI.EditorMode.COPY -> {
+            EditorUI.EditorMode.COPY -> {
                 if (selectEntities.isEmpty() && selectEntity == null /* Permet de vérifier si on est pas entrain d'ajouter une nouvelle entité */) {
-                    editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
+                    editorUI.editorMode = EditorUI.EditorMode.NO_MODE
                     return
                 }
 
@@ -719,7 +735,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                         }
                     } else {
                         clearSelectEntities()
-                        editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
+                        editorUI.editorMode = EditorUI.EditorMode.NO_MODE
                     }
                 }
 
@@ -844,17 +860,17 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     }
                 }
             }
-            EditorSceneUI.EditorMode.SELECT_POINT -> {
+            EditorUI.EditorMode.SELECT_POINT -> {
                 if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !latestLeftButtonClick) {
-                    editorSceneUI.onSelectPoint(mousePosInWorld)
-                    editorSceneUI.editorMode = editorSceneUI.previousEditorMode
+                    editorUI.onSelectPoint(mousePosInWorld)
+                    editorUI.editorMode = editorUI.previousEditorMode
                 }
             }
-            EditorSceneUI.EditorMode.SELECT_ENTITY -> {
+            EditorUI.EditorMode.SELECT_ENTITY -> {
                 if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !latestLeftButtonClick) {
                     val entity = findEntityUnderMouse(false)
-                    editorSceneUI.onSelectEntity(entity)
-                    editorSceneUI.editorMode = editorSceneUI.previousEditorMode
+                    editorUI.onSelectEntity(entity)
+                    editorUI.editorMode = editorUI.previousEditorMode
                 }
             }
         }
@@ -866,7 +882,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
     }
 
     private fun updateCamera() {
-        if(editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL) {
+        if (editorUI.editorMode != EditorUI.EditorMode.TRY_LEVEL) {
             var moveCameraX = 0f
             var moveCameraY = 0f
 
@@ -909,8 +925,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
                 camera.position.set(MathUtils.clamp(x, minCameraX, maxCameraX), MathUtils.clamp(y, minCameraY, maxCameraY), 0f)
             }
-        }
-        else
+        } else
             entityContainer.cast<Level>()?.updateCamera(camera, true)
 
         camera.update()
@@ -953,7 +968,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
     private fun setCopyEntity(entity: Entity) {
         clearSelectEntities()
         addSelectEntity(entity)
-        editorSceneUI.editorMode = EditorSceneUI.EditorMode.COPY
+        editorUI.editorMode = EditorUI.EditorMode.COPY
     }
 
     /**
@@ -1012,14 +1027,15 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         backupTryModeCameraPos = camera.position.cpy()
         backupTryModeCameraZoom = camera.zoom
 
-        editorSceneUI.editorMode = EditorSceneUI.EditorMode.TRY_LEVEL
+        editorUI.editorMode = EditorUI.EditorMode.TRY_LEVEL
 
-        if (level.musicPath != null)
-            MusicsManager.startMusic(level.musicPath!!.get(), true)
+        if (level.music != null) {
+            MusicsManager.startMusic(level.music!!, true)
+        }
 
         entityContainer = SerializationFactory.copy(level).apply {
             this.exit = {
-                if (!editorSceneUI.godModeTryMode) stopTryLevel()
+                if (!editorUI.godModeTryMode) stopTryLevel()
             }
             this.activeRect.position = level.activeRect.position
             this.drawDebugCells = level.drawDebugCells
@@ -1032,13 +1048,13 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
     private fun stopTryLevel() {
         clearSelectEntities()
-        editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
+        editorUI.editorMode = EditorUI.EditorMode.NO_MODE
 
         entityContainer = level
         camera.position.set(backupTryModeCameraPos)
         camera.zoom = backupTryModeCameraZoom
 
-        MusicsManager.startMusic(Constants.menuMusicPath, true)
+        MusicsManager.startMusic(PCGame.menuMusic, true)
 
         selectEntityTryMode = null
     }
@@ -1047,8 +1063,8 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         try {
             SerializationFactory.serializeToFile(level, level.levelPath.get())
             PCGame.scenesManager.takeScreenshotWithoutImGui {
-                val resizePixmap = Pixmap(Gdx.graphics.backBufferWidth, Gdx.graphics.backBufferHeight - editorSceneUI.menuBarHeight, Pixmap.Format.RGBA8888)
-                resizePixmap.drawPixmap(it, 0, -editorSceneUI.menuBarHeight)
+                val resizePixmap = Pixmap(Gdx.graphics.backBufferWidth, Gdx.graphics.backBufferHeight - editorUI.menuBarHeight, Pixmap.Format.RGBA8888)
+                resizePixmap.drawPixmap(it, 0, -editorUI.menuBarHeight)
 
                 PixmapIO.writePNG(level.levelPath.get().parent().child(Constants.levelPreviewFile), resizePixmap)
 
@@ -1068,14 +1084,14 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
             drawInfoEditorWindow()
 
-            if (editorSceneUI.showEntitiesWindow && editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL)
-                drawEntitiesWindow()
+            if (editorUI.showEntityFactoryWindow && editorUI.editorMode != EditorUI.EditorMode.TRY_LEVEL)
+                drawEntityFactoryWindow()
 
-            if (gridMode.active && editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL)
+            if (gridMode.active && editorUI.editorMode != EditorUI.EditorMode.TRY_LEVEL)
                 drawGridSettingsWindow()
 
-            if (editorSceneUI.showInfoPrefabWindow && editorSceneUI.prefabInfoPrefabWindow != null && editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL)
-                drawInfoPrefabWindow(editorSceneUI.prefabInfoPrefabWindow!!)
+            if (editorUI.showInfoPrefabWindow && editorUI.prefabInfoPrefabWindow != null && editorUI.editorMode != EditorUI.EditorMode.TRY_LEVEL)
+                drawInfoPrefabWindow(editorUI.prefabInfoPrefabWindow!!)
 
             val entityUnderMouse = findEntityUnderMouse(false)
             if (entityUnderMouse != null && !isUIHover) {
@@ -1093,16 +1109,16 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                 }
             }
 
-            if (editorSceneUI.showInfoEntityTextWindow && selectEntityTryMode != null && editorSceneUI.editorMode == EditorSceneUI.EditorMode.TRY_LEVEL) {
+            if (editorUI.showInfoEntityTextWindow && selectEntityTryMode != null && editorUI.editorMode == EditorUI.EditorMode.TRY_LEVEL) {
                 drawInfoEntityTextWindow(selectEntityTryMode!!)
             }
 
-            if (editorSceneUI.showInfoEntityWindow && selectEntity != null && selectEntity?.container != null
-                    && editorSceneUI.editorMode != EditorSceneUI.EditorMode.SELECT_POINT && editorSceneUI.editorMode != EditorSceneUI.EditorMode.SELECT_ENTITY && editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL) {
+            if (editorUI.showInfoEntityWindow && selectEntity != null && selectEntity?.container != null
+                    && editorUI.editorMode != EditorUI.EditorMode.SELECT_POINT && editorUI.editorMode != EditorUI.EditorMode.SELECT_ENTITY && editorUI.editorMode != EditorUI.EditorMode.TRY_LEVEL) {
                 drawInfoEntityWindow(selectEntity!!)
             }
 
-            if (editorSceneUI.showExitWindow) {
+            if (editorUI.showExitWindow) {
                 drawExitWindow()
             }
         }
@@ -1114,19 +1130,19 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
             functionalProgramming.withWindow("editor info", null, WindowFlags.AlwaysAutoResize.i or WindowFlags.NoTitleBar.i or WindowFlags.NoBringToFrontOnFocus.i) {
                 ImGuiHelper.textPropertyColored(Color.ORANGE, "Nombre d'entités :", entityContainer.getEntitiesData().size)
 
-                if (editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL) {
+                if (editorUI.editorMode != EditorUI.EditorMode.TRY_LEVEL) {
                     ImGuiHelper.textPropertyColored(Color.ORANGE, "Couche sélectionnée :", selectLayer)
                     ImGuiHelper.textPropertyColored(Color.ORANGE, "Redimensionnement :", resizeEntityMode.resizeName)
-                    ImGuiHelper.textPropertyColored(Color.ORANGE, "Mode de l'éditeur :", editorSceneUI.editorMode.modeName)
+                    ImGuiHelper.textPropertyColored(Color.ORANGE, "Mode de l'éditeur :", editorUI.editorMode.modeName)
                     ImGuiHelper.textPropertyColored(Color.ORANGE, "Niveau de zoom :", Math.round(camera.zoom * 100f) / 100f)
                     functionalProgramming.collapsingHeader("Paramètres de l'éditeur") {
-                        checkbox("Afficher la fenêtre Fabrique d'entités", editorSceneUI::showEntitiesWindow)
+                        checkbox("Afficher la fenêtre Fabrique d'entités", editorUI::showEntityFactoryWindow)
                         checkbox("Afficher la grille", gridMode::active)
                         checkbox("Placement intelligent", ::smartPositioning)
                     }
                 } else {
                     ImGuiHelper.textColored(Color.ORANGE, "Test du niveau..")
-                    checkbox("Mode dieu", editorSceneUI::godModeTryMode)
+                    checkbox("Mode dieu", editorUI::godModeTryMode)
                     checkbox("Mettre à jour", entityContainer::allowUpdating)
                 }
             }
@@ -1134,7 +1150,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
     }
 
     private fun drawExitWindow() {
-        ImGuiHelper.withCenteredWindow("Sauvegarder le niveau ?", editorSceneUI::showExitWindow, Vec2(240f, 105f), WindowFlags.NoResize.i or WindowFlags.NoCollapse.i or WindowFlags.NoTitleBar.i) {
+        ImGuiHelper.withCenteredWindow("Sauvegarder le niveau ?", editorUI::showExitWindow, Vec2(240f, 105f), WindowFlags.NoResize.i or WindowFlags.NoCollapse.i or WindowFlags.NoTitleBar.i) {
             fun showMainMenu() {
                 ResourcesManager.unloadAssets()
                 PCGame.scenesManager.loadScene(MainMenuScene(null, false))
@@ -1151,7 +1167,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                 showMainMenu()
             }
             if (ImGui.button("Annuler", Vec2(225f, 0))) {
-                editorSceneUI.showExitWindow = false
+                editorUI.showExitWindow = false
             }
         }
     }
@@ -1159,7 +1175,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
     private fun drawMainMenuBar() {
         with(ImGui) {
             mainMenuBar {
-                if (editorSceneUI.editorMode != EditorSceneUI.EditorMode.TRY_LEVEL) {
+                if (editorUI.editorMode != EditorUI.EditorMode.TRY_LEVEL) {
                     menu("Fichier") {
                         menuItem("Importer des ressources..") {
                             try {
@@ -1178,7 +1194,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                         }
                         separator()
                         menuItem("Quitter") {
-                            editorSceneUI.showExitWindow = true
+                            editorUI.showExitWindow = true
                         }
                     }
 
@@ -1209,10 +1225,10 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                             }
 
                             functionalProgramming.popup(popupTitle) {
-                                ImGuiHelper.inputText("nom", editorSceneUI::addTagPopupNameBuffer)
+                                ImGuiHelper.inputText("nom", editorUI::addTagPopupNameBuffer)
                                 if (button("Ajouter", Vec2(-1, 0))) {
-                                    if (editorSceneUI.addTagPopupNameBuffer.isNotBlank() && level.tags.none { it == editorSceneUI.addTagPopupNameBuffer }) {
-                                        level.tags.add(editorSceneUI.addTagPopupNameBuffer)
+                                    if (editorUI.addTagPopupNameBuffer.isNotBlank() && level.tags.none { it == editorUI.addTagPopupNameBuffer }) {
+                                        level.tags.add(editorUI.addTagPopupNameBuffer)
                                         closeCurrentPopup()
                                     }
                                 }
@@ -1220,7 +1236,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                         }
                         menu("Options du niveau") {
                             fun updateBackground(newBackground: Background) {
-                                editorSceneUI.settingsLevelBackgroundType.obj = newBackground.type
+                                editorUI.settingsLevelBackgroundType.obj = newBackground.type
                                 level.background = newBackground
                                 background = newBackground
                             }
@@ -1235,28 +1251,28 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                                         openPopup(colorPopupTitle)
                                     }
 
-                                    ImGuiHelper.enum("type de fond d'écran", editorSceneUI.settingsLevelBackgroundType)
+                                    ImGuiHelper.enum("type de fond d'écran", editorUI.settingsLevelBackgroundType)
 
-                                    when (editorSceneUI.settingsLevelBackgroundType.obj.cast<BackgroundType>()) {
+                                    when (editorUI.settingsLevelBackgroundType.obj.cast<BackgroundType>()) {
                                         BackgroundType.Standard -> {
-                                            if (editorSceneUI.settingsLevelStandardBackgroundIndex[0] == -1) {
-                                                editorSceneUI.settingsLevelStandardBackgroundIndex[0] = PCGame.getStandardBackgrounds().indexOfFirst { it.backgroundFile == (level.background.cast<StandardBackground>())?.backgroundFile }
+                                            if (editorUI.settingsLevelStandardBackgroundIndex[0] == -1) {
+                                                editorUI.settingsLevelStandardBackgroundIndex[0] = PCGame.getStandardBackgrounds().indexOfFirst { it.backgroundFile == (level.background.cast<StandardBackground>())?.backgroundFile }
                                             }
 
                                             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                                                if (sliderInt("fond d'écran", editorSceneUI.settingsLevelStandardBackgroundIndex, 0, PCGame.getStandardBackgrounds().size - 1)) {
-                                                    updateBackground(PCGame.getStandardBackgrounds()[editorSceneUI.settingsLevelStandardBackgroundIndex[0]])
+                                                if (sliderInt("fond d'écran", editorUI.settingsLevelStandardBackgroundIndex, 0, PCGame.getStandardBackgrounds().size - 1)) {
+                                                    updateBackground(PCGame.getStandardBackgrounds()[editorUI.settingsLevelStandardBackgroundIndex[0]])
                                                 }
                                             }
                                         }
                                         BackgroundType.Parallax -> {
-                                            if (editorSceneUI.settingsLevelParallaxBackgroundIndex[0] == -1) {
-                                                editorSceneUI.settingsLevelParallaxBackgroundIndex[0] = PCGame.getParallaxBackgrounds().indexOfFirst { it.parallaxDataFile == (level.background.cast<ParallaxBackground>())?.parallaxDataFile }
+                                            if (editorUI.settingsLevelParallaxBackgroundIndex[0] == -1) {
+                                                editorUI.settingsLevelParallaxBackgroundIndex[0] = PCGame.getParallaxBackgrounds().indexOfFirst { it.parallaxDataFile == (level.background.cast<ParallaxBackground>())?.parallaxDataFile }
                                             }
 
                                             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                                                if (sliderInt("fond d'écran", editorSceneUI.settingsLevelParallaxBackgroundIndex, 0, PCGame.getParallaxBackgrounds().size - 1)) {
-                                                    updateBackground(PCGame.getParallaxBackgrounds()[editorSceneUI.settingsLevelParallaxBackgroundIndex[0]])
+                                                if (sliderInt("fond d'écran", editorUI.settingsLevelParallaxBackgroundIndex, 0, PCGame.getParallaxBackgrounds().size - 1)) {
+                                                    updateBackground(PCGame.getParallaxBackgrounds()[editorUI.settingsLevelParallaxBackgroundIndex[0]])
                                                 }
                                             }
                                         }
@@ -1272,32 +1288,27 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                                     }
                                 }
                             }
-
                             val musics = PCGame.gameMusics.toMutableList()
-                            val customMusic = level.levelPath.get().parent().child(Constants.levelCustomMusicFile)
 
-                            if (customMusic.exists())
-                                musics.add(customMusic)
+                            if (level.music != null && musics.none { it.path == level.music!!.path })
+                                musics.add(level.music!!)
 
-                            val currentMusicIndex = let {
-                                if (level.musicPath != null)
-                                    intArrayOf(musics.indexOf(level.musicPath!!.get()))
-                                else
-                                    intArrayOf(-1)
-                            }
+                            val currentMusicIndex = intArrayOf(musics.indexOfFirst { it.path == level.music?.path })
+
                             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                                if (ImGuiHelper.comboWithSettingsButton("musique", currentMusicIndex, musics.map { it.nameWithoutExtension() }, {
+                                if (ImGuiHelper.comboWithSettingsButton("musique", currentMusicIndex, musics.map { it.path.toString() }, {
                                             if (button("Importer")) {
-                                                Utility.openFileDialog("Importer une musique", "Musique", arrayOf("mp3"), false)?.firstOrNull()?.apply {
-                                                    this.copyTo(customMusic)
-                                                    level.musicPath = customMusic.toFileWrapper()
+                                                Utility.openFileDialog("Importer une musique", "Musique", arrayOf("mp3"), false).firstOrNull()?.apply {
+                                                    val dest = level.levelPath.get().parent().child(Constants.levelCustomMusicFile)
+                                                    this.copyTo(dest)
+                                                    level.music = resourceWrapperOf(dest.toFileWrapper())
                                                 }
                                             }
                                         }, searchBar = true))
-                                    level.musicPath = musics[currentMusicIndex[0]].toFileWrapper()
+                                    level.music = musics[currentMusicIndex[0]]
                             }
 
-                            ImGuiHelper.entity(level.followEntity, level, editorSceneUI, "entité suivie")
+                            ImGuiHelper.entity(level.followEntity, level, editorUI, "entité suivie")
 
                             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                                 inputInt("gravité", level::gravitySpeed)
@@ -1309,7 +1320,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     }
                     menu("Créer une entité") {
                         fun createEntity(prefab: Prefab) {
-                            val entity = prefab.create(Point()).apply { loadResources() }
+                            val entity = prefab.create(Point())
                             setCopyEntity(entity)
                         }
 
@@ -1381,25 +1392,20 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         }
     }
 
-    private fun drawEntitiesWindow() {
+    private fun drawEntityFactoryWindow() {
         with(ImGui) {
-            val nextWindowSize = Vec2(210f, Gdx.graphics.height - editorSceneUI.menuBarHeight)
+            val nextWindowSize = Vec2(210f, Gdx.graphics.height - editorUI.menuBarHeight)
             setNextWindowSize(nextWindowSize, Cond.Once)
-            setNextWindowPos(Vec2(Gdx.graphics.width - nextWindowSize.x, editorSceneUI.menuBarHeight), Cond.Once)
+            setNextWindowPos(Vec2(Gdx.graphics.width - nextWindowSize.x, editorUI.menuBarHeight), Cond.Once)
             setNextWindowSizeConstraints(Vec2(nextWindowSize.x, 250f), Vec2(nextWindowSize.x, Gdx.graphics.height))
-            functionalProgramming.withWindow("Fabrique d'entités", editorSceneUI::showEntitiesWindow) {
-                val tags = level.tags.apply { remove(Tags.Empty.tag) }
+            functionalProgramming.withWindow("Fabrique d'entités", editorUI::showEntityFactoryWindow) {
+                ImGuiHelper.enum("mode", editorUI.entityFactoryMode.cast())
 
-                ImGuiHelper.comboWithSettingsButton("type", editorSceneUI::entitiesTypeIndex, level.tags.apply { remove(Tags.Empty.tag) }, {
-                    val tag = tags.elementAtOrElse(editorSceneUI.entitiesTypeIndex, { Tags.Sprite.tag })
-                    checkbox(if (tag == Tags.Sprite.tag) "pack importés" else "afficher seulement les préfabs créés", editorSceneUI::entitiesShowOnlyUser)
-                })
+                separator()
 
-                val tag = tags.elementAtOrElse(editorSceneUI.entitiesTypeIndex, { Tags.Sprite.tag })
-
-                fun addImageBtn(region: TextureAtlas.AtlasRegion, prefab: Prefab, showTooltip: Boolean) {
+                fun addImageBtn(region: TextureRegion, prefab: Prefab, showTooltip: Boolean) {
                     if (imageButton(region.texture.textureObjectHandle, Vec2(50f, 50f), Vec2(region.u, region.v), Vec2(region.u2, region.v2))) {
-                        setCopyEntity(prefab.create(Point()).apply { loadResources() })
+                        setCopyEntity(prefab.create(Point()))
                     }
 
                     if (showTooltip && isItemHovered()) {
@@ -1409,31 +1415,30 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     }
                 }
 
-                when (tag) {
-                    Tags.Sprite.tag -> {
+                when (editorUI.entityFactoryMode.obj) {
+                    EditorScene.EditorUI.EntityFactoryMode.Sprite -> {
+                        var importedPacks = false
                         functionalProgramming.withGroup {
                             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                                if (!editorSceneUI.entitiesShowOnlyUser) {
-                                    combo("dossier", editorSceneUI::entitiesSpritePackTypeIndex, PCGame.gamePacks.map { it.key.name() })
-                                }
-                                combo("pack", editorSceneUI::entitiesSpritePackIndex,
-                                        if (editorSceneUI.entitiesShowOnlyUser) level.resourcesPacks().map { it.nameWithoutExtension() }
-                                        else PCGame.gamePacks.entries.elementAtOrNull(editorSceneUI.entitiesSpritePackTypeIndex)?.value?.map { it.nameWithoutExtension() }
+                                val types = PCGame.gamePacks.map { it.key.name() } + "packs importés"
+                                combo("type", editorUI::entityFactorySpritePackTypeIndex, types)
+                                importedPacks = editorUI.entityFactorySpritePackTypeIndex == types.lastIndex
+                                combo("pack", editorUI::entityFactorySpritePackIndex,
+                                        if (importedPacks) level.resourcesPacks().map { it.path.toString() }
+                                        else PCGame.gamePacks.entries.elementAtOrNull(editorUI.entityFactorySpritePackTypeIndex)?.value?.map { it.path.toString() }
                                                 ?: arrayListOf())
-                                if (!editorSceneUI.entitiesSpriteRealSize)
-                                    ImGuiHelper.size(editorSceneUI::entitiesSpriteCustomSize, Size(1), Size(Constants.maxEntitySize))
-                                checkbox("Physique", editorSceneUI::entitiesSpritePhysics)
-                                checkbox("Taille réelle", editorSceneUI::entitiesSpriteRealSize)
+                                if (!editorUI.entityFactorySpriteRealSize)
+                                    ImGuiHelper.size(editorUI::entityFactorySpriteCustomSize, Size(1), Size(Constants.maxEntitySize))
+
+                                checkbox("Taille réelle", editorUI::entityFactorySpriteRealSize)
+                                checkbox("Physique", editorUI::entityFactorySpritePhysics)
                             }
                         }
-                        separator()
 
-                        (if (editorSceneUI.entitiesShowOnlyUser) level.resourcesPacks().getOrNull(editorSceneUI.entitiesSpritePackIndex) else PCGame.gamePacks.entries.elementAtOrNull(editorSceneUI.entitiesSpritePackTypeIndex)?.value?.getOrNull(editorSceneUI.entitiesSpritePackIndex))?.also { packPath ->
-                            val pack = ResourcesManager.getPack(packPath)
-                            pack.regions.sortedBy { it.name }.forEachIndexed { index, region ->
-                                val packRegion = packPath.toFileWrapper() to region.name
-                                val size = if (editorSceneUI.entitiesSpriteRealSize) region.let { Size(it.regionWidth, it.regionHeight) } else Size(50, 50)
-                                val prefab = if (editorSceneUI.entitiesSpritePhysics) PrefabSetup.setupPhysicsSprite(packRegion, size) else PrefabSetup.setupSprite(packRegion, size)
+                        (if (importedPacks) level.resourcesPacks().getOrNull(editorUI.entityFactorySpritePackIndex) else PCGame.gamePacks.entries.elementAtOrNull(editorUI.entityFactorySpritePackTypeIndex)?.value?.getOrNull(editorUI.entityFactorySpritePackIndex))?.also { pack ->
+                            pack()?.regions?.sortedBy { it.name }?.forEachIndexed { index, region ->
+                                val size = if (editorUI.entityFactorySpriteRealSize) region.let { Size(it.regionWidth, it.regionHeight) } else Size(50, 50)
+                                val prefab = if (editorUI.entityFactorySpritePhysics) PrefabSetup.setupPhysicsSprite(pack, region.name, size) else PrefabSetup.setupSprite(pack, region.name, size)
                                 addImageBtn(region, prefab, false)
 
                                 if ((index + 1) % 3 != 0)
@@ -1441,23 +1446,53 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                             }
                         }
                     }
-                    else -> {
-                        var index = 0
-                        val prefabs = level.resourcesPrefabs() + if (editorSceneUI.entitiesShowOnlyUser) listOf() else PrefabFactory.values().map { it.prefab }
-                        prefabs.filter { it.prefabEntity.tag == tag }.forEach {
-                            it.prefabEntity.loadResources()
+                    EditorScene.EditorUI.EntityFactoryMode.Tag -> {
+                        val tags = level.tags.apply { remove(Tags.Empty.tag) }
 
+                        ImGuiHelper.comboWithSettingsButton("type", editorUI::entityFactoryTagIndex, level.tags.apply { remove(Tags.Empty.tag) }, {
+                            checkbox("afficher seulement les préfabs créés", editorUI::entityFactoryTagShowOnlyUser)
+                        })
+
+                        val tag = tags.elementAtOrElse(editorUI.entityFactoryTagIndex, { Tags.Sprite.tag })
+
+                        var index = 0
+                        val prefabs = level.resourcesPrefabs() + if (editorUI.entityFactoryTagShowOnlyUser) listOf() else PrefabFactory.values().map { it.prefab }
+                        prefabs.filter { it.prefabEntity.tag == tag }.forEach {
                             it.prefabEntity.getCurrentState().getComponent<TextureComponent>()?.apply {
-                                data.elementAtOrNull(currentIndex)?.apply {
-                                    addImageBtn(currentKeyFrame(), it, true)
+                                groups.elementAtOrNull(currentIndex)?.apply {
+                                    addImageBtn(currentFrame().getTextureRegion(), it, true)
 
                                     if (isItemHovered() && Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
-                                        editorSceneUI.prefabInfoPrefabWindow = it
-                                        editorSceneUI.showInfoPrefabWindow = true
+                                        editorUI.prefabInfoPrefabWindow = it
+                                        editorUI.showInfoPrefabWindow = true
                                     }
 
                                     if ((++index) % 3 != 0)
                                         sameLine(0f, style.itemInnerSpacing.x)
+                                }
+                            }
+                        }
+
+                    }
+                    EditorScene.EditorUI.EntityFactoryMode.Group -> {
+                        GroupFactory.values().forEach {
+                            val it = it.group()
+                            var region: TextureRegion = ResourcesManager.defaultPackRegion
+                            it.mainEntity.prefabEntity.getCurrentState().getComponent<TextureComponent>()?.apply {
+                                groups.elementAtOrNull(currentIndex)?.apply {
+                                    region = this.currentFrame().getTextureRegion()
+                                }
+                            }
+
+                            if (imageButton(region.texture.textureObjectHandle, Vec2(50f, 50f), Vec2(region.u, region.v), Vec2(region.u2, region.v2))) {
+                                clearSelectEntities()
+                                it.create(Point(), level, false).forEach(::addSelectEntity)
+                                editorUI.editorMode = EditorUI.EditorMode.COPY
+                            }
+
+                            if (isItemHovered()) {
+                                functionalProgramming.withTooltip {
+                                    text(it.name)
                                 }
                             }
                         }
@@ -1469,7 +1504,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
     private fun drawInfoPrefabWindow(prefab: Prefab) {
         with(ImGui) {
-            functionalProgramming.withWindow("Réglages du prefab", editorSceneUI::showInfoPrefabWindow, WindowFlags.AlwaysAutoResize.i) {
+            functionalProgramming.withWindow("Réglages du prefab", editorUI::showInfoPrefabWindow, WindowFlags.AlwaysAutoResize.i) {
                 val isGamePrefab = PrefabFactory.values().any { it.prefab === prefab }
 
                 if (isGamePrefab) {
@@ -1482,8 +1517,8 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                 } else {
                     if (button("Supprimer ce prefab", Vec2(-1, 0))) {
                         level.removePrefab(prefab)
-                        editorSceneUI.showInfoPrefabWindow = false
-                        editorSceneUI.prefabInfoPrefabWindow = null
+                        editorUI.showInfoPrefabWindow = false
+                        editorUI.prefabInfoPrefabWindow = null
                     }
                 }
 
@@ -1497,20 +1532,20 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         val addComponentTitle = "Ajouter un component"
 
         with(ImGui) {
-            ImGuiHelper.insertUIFields(entity, entity, level, editorSceneUI)
+            ImGuiHelper.insertUIFields(entity, entity, level, editorUI)
 
             separator()
 
-            ImGuiHelper.comboWithSettingsButton("état", editorSceneUI::entityCurrentStateIndex, entity.getStates().map { it.name }, {
+            ImGuiHelper.comboWithSettingsButton("état", editorUI::entityCurrentStateIndex, entity.getStates().map { it.name }, {
                 if (button("Ajouter un état")) {
                     openPopup(newStateTitle)
                 }
 
                 if (entity.getStates().size > 1) {
                     sameLine()
-                    if (button("Supprimer ${entity.getStateOrDefault(editorSceneUI.entityCurrentStateIndex).name}")) {
-                        entity.removeState(editorSceneUI.entityCurrentStateIndex)
-                        editorSceneUI.entityCurrentStateIndex = Math.max(0, editorSceneUI.entityCurrentStateIndex - 1)
+                    if (button("Supprimer ${entity.getStateOrDefault(editorUI.entityCurrentStateIndex).name}")) {
+                        entity.removeState(editorUI.entityCurrentStateIndex)
+                        editorUI.entityCurrentStateIndex = Math.max(0, editorUI.entityCurrentStateIndex - 1)
                     }
                 }
 
@@ -1518,42 +1553,42 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     val comboItems = mutableListOf("État vide").apply { addAll(entity.getStates().map { "Copier de : ${it.name}" }) }
 
                     functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                        combo("type", editorSceneUI::entityAddStateComboIndex, comboItems)
+                        combo("type", editorUI::entityAddStateComboIndex, comboItems)
                     }
 
-                    ImGuiHelper.inputText("nom", editorSceneUI::createStateInputText)
+                    ImGuiHelper.inputText("nom", editorUI::createStateInputText)
 
                     if (button("Ajouter", Vec2(Constants.defaultWidgetsWidth, 0))) {
-                        if (editorSceneUI.entityAddStateComboIndex == 0)
-                            entity.addState(editorSceneUI.createStateInputText) {}
+                        if (editorUI.entityAddStateComboIndex == 0)
+                            entity.addState(editorUI.createStateInputText) {}
                         else
-                            entity.addState(SerializationFactory.copy(entity.getStateOrDefault(editorSceneUI.entityAddStateComboIndex - 1)).apply { name = editorSceneUI.createStateInputText })
+                            entity.addState(SerializationFactory.copy(entity.getStateOrDefault(editorUI.entityAddStateComboIndex - 1)).apply { name = editorUI.createStateInputText })
                         closeCurrentPopup()
                     }
                 }
             })
 
-            ImGuiHelper.action("action de départ", entity.getStateOrDefault(editorSceneUI.entityCurrentStateIndex)::startAction, entity, level, editorSceneUI)
+            ImGuiHelper.action("action de départ", entity.getStateOrDefault(editorUI.entityCurrentStateIndex)::startAction, entity, level, editorUI)
 
-            val components = entity.getStateOrDefault(editorSceneUI.entityCurrentStateIndex).getComponents()
+            val components = entity.getStateOrDefault(editorUI.entityCurrentStateIndex).getComponents()
 
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                combo("component", editorSceneUI::entityCurrentComponentIndex, components.map { ReflectionUtility.simpleNameOf(it).removeSuffix("Component") })
+                combo("component", editorUI::entityCurrentComponentIndex, components.map { ReflectionUtility.simpleNameOf(it).removeSuffix("Component") })
             }
 
-            val component = components.elementAtOrNull(editorSceneUI.entityCurrentComponentIndex)
+            val component = components.elementAtOrNull(editorUI.entityCurrentComponentIndex)
             if (component != null) {
                 functionalProgramming.withIndent {
                     val requiredComponent = component.javaClass.kotlin.findAnnotation<RequiredComponent>()
                     val incorrectComponent = let {
                         requiredComponent?.component?.forEach {
-                            if (!entity.getStateOrDefault(editorSceneUI.entityCurrentStateIndex).hasComponent(it))
+                            if (!entity.getStateOrDefault(editorUI.entityCurrentStateIndex).hasComponent(it))
                                 return@let true
                         }
                         false
                     }
                     if (!incorrectComponent)
-                        ImGuiHelper.insertUIFields(component, entity, level, editorSceneUI)
+                        ImGuiHelper.insertUIFields(component, entity, level, editorUI)
                     else {
                         text("Il manque le(s) component(s) :")
                         functionalProgramming.withIndent {
@@ -1562,23 +1597,23 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     }
                 }
                 if (button("Supprimer ce comp.", Vec2(-1, 0))) {
-                    entity.getStateOrDefault(editorSceneUI.entityCurrentStateIndex).removeComponent(component)
+                    entity.getStateOrDefault(editorUI.entityCurrentStateIndex).removeComponent(component)
                 }
             }
             separator()
-            pushItemFlag(ItemFlags.Disabled.i, entity.getStateOrDefault(editorSceneUI.entityCurrentStateIndex).getComponents().size == Components.values().size)
+            pushItemFlag(ItemFlags.Disabled.i, entity.getStateOrDefault(editorUI.entityCurrentStateIndex).getComponents().size == Components.values().size)
             if (button("Ajouter un component", Vec2(-1, 0)))
                 openPopup(addComponentTitle)
             popItemFlag()
 
             functionalProgramming.popup(addComponentTitle) {
-                val components = Components.values().filter { comp -> entity.getStateOrDefault(editorSceneUI.entityCurrentStateIndex).getComponents().none { comp.component.isInstance(it) } }
+                val components = Components.values().filter { comp -> entity.getStateOrDefault(editorUI.entityCurrentStateIndex).getComponents().none { comp.component.isInstance(it) } }
                 functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                    combo("component", editorSceneUI::entityAddComponentComboIndex, components.map { it.name })
+                    combo("component", editorUI::entityAddComponentComboIndex, components.map { it.name })
                 }
 
-                if (editorSceneUI.entityAddComponentComboIndex in components.indices) {
-                    val componentClass = components[editorSceneUI.entityAddComponentComboIndex].component
+                if (editorUI.entityAddComponentComboIndex in components.indices) {
+                    val componentClass = components[editorUI.entityAddComponentComboIndex].component
 
                     val description = componentClass.findAnnotation<Description>()
                     if (description != null) {
@@ -1593,9 +1628,9 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     }
 
                     if (button("Ajouter", Vec2(-1, 0))) {
-                        if (editorSceneUI.entityAddComponentComboIndex in components.indices) {
-                            val newComp = ReflectionUtility.createInstance(components[editorSceneUI.entityAddComponentComboIndex].component.java)
-                            val state = entity.getStateOrDefault(editorSceneUI.entityCurrentStateIndex)
+                        if (editorUI.entityAddComponentComboIndex in components.indices) {
+                            val newComp = ReflectionUtility.createInstance(components[editorUI.entityAddComponentComboIndex].component.java)
+                            val state = entity.getStateOrDefault(editorUI.entityCurrentStateIndex)
 
                             if (entity.getCurrentState() === state)
                                 newComp.onStateActive(entity, state, level)
@@ -1613,7 +1648,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         val createPrefabTitle = "Créer un prefab"
 
         with(ImGui) {
-            functionalProgramming.withWindow("Réglages de l'entité", editorSceneUI::showInfoEntityWindow, WindowFlags.AlwaysAutoResize.i) {
+            functionalProgramming.withWindow("Réglages de l'entité", editorUI::showInfoEntityWindow, WindowFlags.AlwaysAutoResize.i) {
                 val favChecked = booleanArrayOf(level.favoris.contains(entity.id()))
 
                 if (ImGuiHelper.favButton(tintColor = Vec4(1f, 1f, 1f, if (favChecked[0]) 1f else 0.2f))) {
@@ -1638,17 +1673,17 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     if (selectEntity === entity) {
                         selectEntity = null
                         clearSelectEntities()
-                        editorSceneUI.editorMode = EditorSceneUI.EditorMode.NO_MODE
+                        editorUI.editorMode = EditorUI.EditorMode.NO_MODE
                     }
                 }
 
                 drawInfoEntityProps(entity)
 
                 functionalProgramming.popup(createPrefabTitle) {
-                    ImGuiHelper.inputText("nom", editorSceneUI::createPrefabInputText)
+                    ImGuiHelper.inputText("nom", editorUI::createPrefabInputText)
 
                     if (button("Ajouter", Vec2(-1, 0))) {
-                        level.addPrefab(Prefab(editorSceneUI.createPrefabInputText, SerializationFactory.copy(entity)))
+                        level.addPrefab(Prefab(editorUI.createPrefabInputText, SerializationFactory.copy(entity)))
                         closeCurrentPopup()
                     }
                 }
@@ -1659,22 +1694,22 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
     private fun drawInfoEntityTextWindow(entity: Entity) {
         with(ImGui) {
             setNextWindowSizeConstraints(Vec2(), Vec2(500f, 500f))
-            functionalProgramming.withWindow("Données de l'entité", editorSceneUI::showInfoEntityTextWindow, WindowFlags.AlwaysAutoResize.i) {
+            functionalProgramming.withWindow("Données de l'entité", editorUI::showInfoEntityTextWindow, WindowFlags.AlwaysAutoResize.i) {
                 ImGuiHelper.insertUITextFields(entity)
                 separator()
 
                 val components = entity.getCurrentState().getComponents()
                 functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                    combo("component", editorSceneUI::entityCurrentComponentIndex, components.map { ReflectionUtility.simpleNameOf(it).removeSuffix("Component") })
+                    combo("component", editorUI::entityCurrentComponentIndex, components.map { ReflectionUtility.simpleNameOf(it).removeSuffix("Component") })
                 }
 
-                val component = components.elementAtOrNull(editorSceneUI.entityCurrentComponentIndex)
+                val component = components.elementAtOrNull(editorUI.entityCurrentComponentIndex)
                 if (component != null) {
                     functionalProgramming.withIndent {
                         val requiredComponent = component.javaClass.kotlin.findAnnotation<RequiredComponent>()
                         val incorrectComponent = let {
                             requiredComponent?.component?.forEach {
-                                if (!entity.getStateOrDefault(editorSceneUI.entityCurrentStateIndex).hasComponent(it))
+                                if (!entity.getStateOrDefault(editorUI.entityCurrentStateIndex).hasComponent(it))
                                     return@let true
                             }
                             false

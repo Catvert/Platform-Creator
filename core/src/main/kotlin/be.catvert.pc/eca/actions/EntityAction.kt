@@ -22,9 +22,9 @@ class EntityAction(@UI var target: EntityID, var action: Action) : Action(), UII
         }
     }
 
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
         val target = target.entity(level)
         if (target != null)
-            ImGuiHelper.action("target action", ::action, target, level, editorSceneUI)
+            ImGuiHelper.action("target action", ::action, target, level, editorUI)
     }
 }

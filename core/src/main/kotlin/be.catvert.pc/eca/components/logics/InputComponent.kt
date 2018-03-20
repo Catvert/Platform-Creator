@@ -25,7 +25,7 @@ class InputComponent(var inputs: ArrayList<InputData>) : Component(), Updeatable
     @JsonCreator private constructor() : this(arrayListOf())
 
     data class InputData(var key: Int = Input.Keys.UNKNOWN, var pressed: Boolean = true, @UI var action: Action = EmptyAction()) : UIImpl {
-        override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+        override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
             with(ImGui) {
                 checkbox("", ::pressed)
                 if (ImGui.isItemHovered()) {
@@ -57,8 +57,8 @@ class InputComponent(var inputs: ArrayList<InputData>) : Component(), Updeatable
         }
     }
 
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        ImGuiHelper.addImguiWidgetsArray("inputs", inputs, { item -> Input.Keys.toString(item.key) }, { InputData() }, entity, level, editorSceneUI)
+    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
+        ImGuiHelper.addImguiWidgetsArray("inputs", inputs, { item -> Input.Keys.toString(item.key) }, { InputData() }, entity, level, editorUI)
     }
 
     override fun insertText() {

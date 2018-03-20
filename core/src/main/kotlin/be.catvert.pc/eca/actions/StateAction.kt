@@ -30,7 +30,7 @@ class StateAction(var stateIndex: Int, var usePreviousMoverDirection: Boolean = 
         entity.getCurrentState().startAction(entity, container)
     }
 
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
         with(ImGui) {
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                 combo("état", ::stateIndex, entity.getStates().map { it.name })

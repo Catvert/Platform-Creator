@@ -37,7 +37,7 @@ class TimerComponent(interval: Float, @UI var action: Action) : Component(), Upd
         timer.update()
     }
 
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
             ImGui.sliderFloat("interval", ::interval, 0f, 10f)
         }

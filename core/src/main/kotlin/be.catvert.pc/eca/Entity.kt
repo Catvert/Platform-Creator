@@ -39,7 +39,7 @@ class Entity(@UI(customType = CustomType.TAG_STRING) var tag: EntityTag,
              @UI var box: Rect,
              defaultState: EntityState = EntityState("default"),
              container: EntityContainer? = null,
-             vararg otherStates: EntityState = arrayOf()) : Updeatable, Renderable, ResourceLoader, UIImpl, UITextImpl {
+             vararg otherStates: EntityState = arrayOf()) : Updeatable, Renderable, UIImpl, UITextImpl {
 
     val entityID = EntityID()
 
@@ -174,11 +174,7 @@ class Entity(@UI(customType = CustomType.TAG_STRING) var tag: EntityTag,
         getCurrentState().render(batch)
     }
 
-    override fun loadResources() {
-        states.forEach { it.loadResources() }
-    }
-
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
         with(ImGui) {
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                 if (combo("état initial", ::initialState, getStates().map { it.name }))

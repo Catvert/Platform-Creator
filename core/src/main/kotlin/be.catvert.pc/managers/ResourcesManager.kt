@@ -3,6 +3,8 @@ package be.catvert.pc.managers
 import be.catvert.pc.Log
 import be.catvert.pc.utility.loadOnDemand
 import com.badlogic.gdx.assets.AssetManager
+import com.badlogic.gdx.assets.loaders.TextureAtlasLoader
+import com.badlogic.gdx.assets.loaders.resolvers.LocalFileHandleResolver
 import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
@@ -17,7 +19,7 @@ import com.badlogic.gdx.utils.I18NBundle
  * Permet de gérer les ressources graphiques et sonores
  */
 object ResourcesManager : Disposable {
-    private val assetManager = AssetManager()
+    val assetManager = AssetManager()
 
     val defaultTexture: Texture
     val defaultPack: TextureAtlas
@@ -38,6 +40,8 @@ object ResourcesManager : Disposable {
         }
         defaultPack = TextureAtlas()
         defaultPackRegion = TextureAtlas.AtlasRegion(defaultTexture, 0, 0, 64, 64)
+
+        assetManager.setLoader(TextureAtlas::class.java, PackLoader())
     }
 
     /**
@@ -60,12 +64,6 @@ object ResourcesManager : Disposable {
             ?: defaultPack
 
     /**
-     * Permet d'obtenir une région précise d'un pack
-     */
-    fun getPackRegion(file: FileHandle, region: String): TextureAtlas.AtlasRegion = tryLoad<TextureAtlas>(file)?.findRegion(region)
-            ?: defaultPackRegion
-
-    /**
      * Permet d'obtenir un son
      */
     fun getSound(file: FileHandle): Sound? = tryLoad(file)
@@ -79,10 +77,7 @@ object ResourcesManager : Disposable {
                 assetManager.get(file.path())
             else {
                 if (file.exists() || T::class == I18NBundle::class) {
-                    val res = assetManager.loadOnDemand<T>(file).asset
-                    if (res is TextureAtlas)
-                        fixPackBleeding(res)
-                    res
+                    assetManager.loadOnDemand<T>(file).asset
                 } else {
                     Log.warn { "Ressource non trouvée : ${file.path()}" }
                     null
@@ -95,8 +90,21 @@ object ResourcesManager : Disposable {
         return null
     }
 
+
+    override fun dispose() {
+        assetManager.dispose()
+    }
+}
+
+private class PackLoader : TextureAtlasLoader(LocalFileHandleResolver()) {
+    override fun load(assetManager: AssetManager?, fileName: String?, file: FileHandle?, parameter: TextureAtlasParameter?): TextureAtlas {
+        val pack = super.load(assetManager, fileName, file, parameter)
+        fixPackBleeding(pack)
+        return pack
+    }
+
     /**
-     * Fix by grimrader22 : https://stackoverflow.com/questions/27391911/white-vertical-lines-and-jittery-horizontal-lines-in-tile-map-movement
+     * Fix par grimrader22 : https://stackoverflow.com/questions/27391911/white-vertical-lines-and-jittery-horizontal-lines-in-tile-map-movement
      */
     private fun fixPackBleeding(pack: TextureAtlas) {
         pack.regions.forEach { region ->
@@ -110,9 +118,5 @@ object ResourcesManager : Disposable {
             val invTexHeight = 1f / region.texture.height
             region.setRegion((x + fix) * invTexWidth, (y + fix) * invTexHeight, (x + width - fix) * invTexWidth, (y + height - fix) * invTexHeight)
         }
-    }
-
-    override fun dispose() {
-        assetManager.dispose()
     }
 }

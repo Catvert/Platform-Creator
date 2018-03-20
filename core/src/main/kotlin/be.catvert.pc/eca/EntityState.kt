@@ -5,7 +5,6 @@ import be.catvert.pc.eca.actions.EmptyAction
 import be.catvert.pc.eca.components.Component
 import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.utility.Renderable
-import be.catvert.pc.utility.ResourceLoader
 import be.catvert.pc.utility.Updeatable
 import be.catvert.pc.utility.cast
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -18,7 +17,7 @@ import kotlin.reflect.KClass
  * Représente un état d'une entité, cet état contient différents components.
  * Un état est par exemple quand le joueur à sa vie au maximum, et un autre état quand il lui reste 1 point de vie. Différents états permettent d'avoir différentes interactions sur l'entité au cour du temps.
  */
-class EntityState(var name: String, components: MutableSet<Component> = mutableSetOf()) : Renderable, Updeatable, ResourceLoader {
+class EntityState(var name: String, components: MutableSet<Component> = mutableSetOf()) : Renderable, Updeatable {
     @JsonCreator private constructor() : this("State")
 
     /**
@@ -105,12 +104,6 @@ class EntityState(var name: String, components: MutableSet<Component> = mutableS
     override fun update() {
         components.filter { it is Updeatable && it.active }.forEach {
             (it as Updeatable).update()
-        }
-    }
-
-    override fun loadResources() {
-        components.filter { it is ResourceLoader }.forEach {
-            (it as ResourceLoader).loadResources()
         }
     }
 

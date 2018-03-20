@@ -1,7 +1,6 @@
 package be.catvert.pc.tweens
 
 import be.catvert.pc.eca.Entity
-import be.catvert.pc.eca.actions.RemoveEntityAction
 import be.catvert.pc.eca.components.graphics.TextureComponent
 import be.catvert.pc.utility.Updeatable
 

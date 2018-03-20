@@ -59,13 +59,13 @@ abstract class Tween(var duration: Float = 1f, var interpolationName: String, va
     abstract fun perform(entity: Entity)
 
     private var currentInterpolationIndex = 0
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
         with(ImGui) {
             text("type : ${ReflectionUtility.simpleNameOf(this@Tween).removeSuffix("Tween")}")
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                 inputFloat("durée", ::duration, 0.1f, 0f, 1)
             }
-            ImGuiHelper.action("action de fin", ::endAction, entity, level, editorSceneUI)
+            ImGuiHelper.action("action de fin", ::endAction, entity, level, editorUI)
 
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                 if (combo("interpolation", ::currentInterpolationIndex, interpolations.map { it.component1() })) {
@@ -117,8 +117,8 @@ class MoveTween(duration: Float = 0f, var moveX: Int = 0, var moveY: Int = 0) : 
                 interpolation.apply(initialPosY, initialPosY + moveY, progress))
     }
 
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        super.insertUI(label, entity, level, editorSceneUI)
+    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
+        super.insertUI(label, entity, level, editorUI)
 
         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
             ImGui.inputInt("déplacement x", ::moveX)
@@ -142,8 +142,8 @@ class AlphaTextureTween(duration: Float = 0f, var targetAlpha: Float = 0f) : Twe
         }
     }
 
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        super.insertUI(label, entity, level, editorSceneUI)
+    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
+        super.insertUI(label, entity, level, editorUI)
         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
             ImGui.sliderFloat("alpha ciblé", ::targetAlpha, 0f, 1f, "%.1f")
         }
@@ -159,12 +159,12 @@ class RepeatActionTween(duration: Float = 0f, var repeat: Int = 1, var repeatAct
         }
     }
 
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        super.insertUI(label, entity, level, editorSceneUI)
+    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
+        super.insertUI(label, entity, level, editorUI)
         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
             ImGui.sliderInt("répétition", ::repeat, 1, 100)
         }
-        ImGuiHelper.action("action répétée", ::repeatAction, entity, level, editorSceneUI)
+        ImGuiHelper.action("action répétée", ::repeatAction, entity, level, editorUI)
     }
 }
 
@@ -184,8 +184,8 @@ class ResizeTween(duration: Float = 0f, var newWidth: Int = 1, var newHeight: In
                 interpolation.apply(initialHeight.toFloat(), newHeight.toFloat(), progress).roundToInt())
     }
 
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        super.insertUI(label, entity, level, editorSceneUI)
+    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
+        super.insertUI(label, entity, level, editorUI)
 
         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
             ImGui.inputInt("largeur ciblée", ::newWidth, 1, Constants.maxEntitySize)
@@ -210,8 +210,8 @@ class DisableComponentTween(var disableComponent: Class<out Component> = LifeCom
         }
     }
 
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
-        super.insertUI(label, entity, level, editorSceneUI)
+    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
+        super.insertUI(label, entity, level, editorUI)
 
         functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
             val components = entity.getCurrentState().getComponents()

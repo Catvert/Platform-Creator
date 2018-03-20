@@ -3,6 +3,7 @@ package be.catvert.pc.eca.containers
 import be.catvert.pc.Log
 import be.catvert.pc.PCGame
 import be.catvert.pc.eca.Entity
+import be.catvert.pc.eca.Group
 import be.catvert.pc.eca.Prefab
 import be.catvert.pc.eca.Tags
 import be.catvert.pc.eca.components.graphics.TextureComponent
@@ -10,8 +11,12 @@ import be.catvert.pc.factories.PrefabFactory
 import be.catvert.pc.managers.ScriptsManager
 import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.*
+import com.badlogic.gdx.audio.Music
+import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.OrthographicCamera
+import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonIgnore
 import glm_.func.common.clamp
@@ -25,11 +30,12 @@ class LevelStats(val levelPath: FileWrapper, val timer: Int, val numberOfTries: 
 /**
  * Représente un niveau
  */
-class Level(val levelPath: FileWrapper, val gameVersion: Float, var background: Background?, var musicPath: FileWrapper?) : EntityMatrixContainer() {
-    private val levelTextures = levelPath.get().parent().child("textures") to mutableListOf<FileHandle>()
-    private val levelPacks = levelPath.get().parent().child("packs") to mutableListOf<FileHandle>()
-    private val levelSounds = levelPath.get().parent().child("sounds") to mutableListOf<FileHandle>()
+class Level(val levelPath: FileWrapper, val gameVersion: Float, var background: Background?, var music: ResourceWrapper<Music>?) : EntityMatrixContainer() {
+    private val levelTextures = levelPath.get().parent().child("textures") to mutableListOf<ResourceWrapper<Texture>>()
+    private val levelPacks = levelPath.get().parent().child("packs") to mutableListOf<ResourceWrapper<TextureAtlas>>()
+    private val levelSounds = levelPath.get().parent().child("sounds") to mutableListOf<ResourceWrapper<Sound>>()
     private val levelPrefabs = levelPath.get().parent().child("prefabs") to mutableListOf<Prefab>()
+    private val levelGroups = levelPath.get().parent().child("groups") to mutableListOf<Group>()
     private val levelScripts = levelPath.get().parent().child("scripts") to mutableListOf<Script>()
 
     val tags = arrayListOf(*Tags.values().map { it.tag }.toTypedArray())
@@ -60,23 +66,31 @@ class Level(val levelPath: FileWrapper, val gameVersion: Float, var background: 
         if (!levelTextures.first.exists())
             levelTextures.first.mkdirs()
         else
-            levelTextures.second.addAll(Utility.getFilesRecursivly(levelTextures.first, *Constants.levelTextureExtension))
+            levelTextures.second.addAll(Utility.getFilesRecursivly(levelTextures.first, *Constants.levelTextureExtension).map { resourceWrapperOf<Texture>(it.toFileWrapper()) })
 
         if (!levelPacks.first.exists())
             levelPacks.first.mkdirs()
         else
-            levelPacks.second.addAll(Utility.getFilesRecursivly(levelPacks.first, *Constants.levelPackExtension))
+            levelPacks.second.addAll(Utility.getFilesRecursivly(levelPacks.first, *Constants.levelPackExtension).map { resourceWrapperOf<TextureAtlas>(it.toFileWrapper()) })
 
         if (!levelSounds.first.exists())
             levelSounds.first.mkdirs()
         else
-            levelSounds.second.addAll(Utility.getFilesRecursivly(levelSounds.first, *Constants.levelSoundExtension))
+            levelSounds.second.addAll(Utility.getFilesRecursivly(levelSounds.first, *Constants.levelSoundExtension).map { resourceWrapperOf<Sound>(it.toFileWrapper()) })
 
         if (!levelPrefabs.first.exists())
             levelPrefabs.first.mkdirs()
         else {
             Utility.getFilesRecursivly(levelPrefabs.first, Constants.prefabExtension).forEach {
                 levelPrefabs.second.add(SerializationFactory.deserializeFromFile(it))
+            }
+        }
+
+        if (!levelGroups.first.exists())
+            levelGroups.first.mkdirs()
+        else {
+            Utility.getFilesRecursivly(levelGroups.first, Constants.groupExtension).forEach {
+                levelGroups.second.add(SerializationFactory.deserializeFromFile(it))
             }
         }
 
@@ -93,27 +107,28 @@ class Level(val levelPath: FileWrapper, val gameVersion: Float, var background: 
         }
     }
 
-    fun resourcesTextures() = levelTextures.second.toList()
-    fun resourcesPacks() = levelPacks.second.toList()
-    fun resourcesSounds() = levelSounds.second.toList()
-    fun resourcesPrefabs() = levelPrefabs.second.toList()
-    fun resourcesScripts() = levelScripts.second.toList()
+    fun resourcesTextures(): List<ResourceWrapper<Texture>> = levelTextures.second
+    fun resourcesPacks(): List<ResourceWrapper<TextureAtlas>> = levelPacks.second
+    fun resourcesSounds(): List<ResourceWrapper<Sound>> = levelSounds.second
+    fun resourcesPrefabs(): List<Prefab> = levelPrefabs.second
+    fun resourcesGroups(): List<Group> = levelGroups.second
+    fun resourcesScripts(): List<Script> = levelScripts.second
 
     fun addResources(vararg resources: FileHandle) {
         resources.forEach {
             when {
                 Constants.levelTextureExtension.contains(it.extension()) -> {
                     it.copyTo(levelTextures.first)
-                    levelTextures.second.add(levelTextures.first.child(it.name()))
+                    levelTextures.second.add(resourceWrapperOf(levelTextures.first.child(it.name()).toFileWrapper()))
                 }
                 Constants.levelPackExtension.contains(it.extension()) -> {
                     it.copyTo(levelPacks.first)
                     it.parent().child(it.nameWithoutExtension() + ".png").copyTo(levelPacks.first)
-                    levelPacks.second.add(levelPacks.first.child(it.name()))
+                    levelPacks.second.add(resourceWrapperOf(levelPacks.first.child(it.name()).toFileWrapper()))
                 }
                 Constants.levelSoundExtension.contains(it.extension()) -> {
                     it.copyTo(levelSounds.first)
-                    levelSounds.second.add(levelSounds.first.child(it.name()))
+                    levelSounds.second.add(resourceWrapperOf(levelSounds.first.child(it.name()).toFileWrapper()))
                 }
                 Constants.levelScriptExtension.contains(it.extension()) -> {
                     it.copyTo(levelScripts.first)
@@ -182,7 +197,7 @@ class Level(val levelPath: FileWrapper, val gameVersion: Float, var background: 
         favoris.remove(entity.id())
     }
 
-    override fun toString() = levelPath.get().nameWithoutExtension()
+    override fun toString() = levelPath.toString()
 
     companion object {
         fun newLevel(levelName: String): Level {
@@ -196,7 +211,7 @@ class Level(val levelPath: FileWrapper, val gameVersion: Float, var background: 
                     ?: PCGame.getStandardBackgrounds().elementAtOrNull(0), null)
 
             val ground = PrefabFactory.PhysicsSprite.prefab.create(Point(0f, 0f), level)
-            ground.getCurrentState().getComponent<TextureComponent>()?.data?.elementAtOrNull(0)?.apply {
+            ground.getCurrentState().getComponent<TextureComponent>()?.groups?.elementAtOrNull(0)?.apply {
                 repeatRegion = true
                 repeatRegionSize = Size(50)
             }
@@ -206,8 +221,6 @@ class Level(val levelPath: FileWrapper, val gameVersion: Float, var background: 
 
             level.followEntity.ID = player.id()
             level.favoris.add(player.id())
-
-            level.loadResources()
 
             return level
         }

@@ -5,5 +5,5 @@ import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.scenes.EditorScene
 
 interface UIImpl {
-    fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI)
+    fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI)
 }

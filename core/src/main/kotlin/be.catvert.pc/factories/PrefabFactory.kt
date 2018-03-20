@@ -6,16 +6,16 @@ import be.catvert.pc.eca.Prefab
 import be.catvert.pc.eca.Tags
 import be.catvert.pc.eca.actions.*
 import be.catvert.pc.eca.components.basics.SoundComponent
+import be.catvert.pc.eca.components.graphics.PackRegionData
 import be.catvert.pc.eca.components.graphics.TextureComponent
-import be.catvert.pc.eca.components.graphics.TextureRegion
+import be.catvert.pc.eca.components.graphics.TextureGroup
 import be.catvert.pc.eca.components.logics.*
 import be.catvert.pc.tweens.ResizeTween
-import be.catvert.pc.utility.BoxSide
-import be.catvert.pc.utility.Constants
-import be.catvert.pc.utility.Size
-import be.catvert.pc.utility.toFileWrapper
+import be.catvert.pc.utility.*
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.g2d.Animation
+import com.badlogic.gdx.graphics.g2d.TextureAtlas
+
 
 enum class PrefabType {
     All, Kenney, SMC
@@ -25,15 +25,15 @@ enum class PrefabType {
  * Objet permettant la création de prefab préfait
  */
 object PrefabSetup {
-    fun setupSprite(region: TextureRegion, size: Size) = Prefab("sprite", EntityBuilder(Tags.Sprite.tag, size)
+    fun setupSprite(pack: ResourceWrapper<TextureAtlas>, region: String, size: Size) = Prefab("sprite", EntityBuilder(Tags.Sprite.tag, size)
             .withDefaultState {
-                withComponent(TextureComponent(0, TextureComponent.TextureData("default", region)))
+                withComponent(TextureComponent(0, TextureGroup("default", PackRegionData(pack, region))))
             }
             .build())
 
-    fun setupPhysicsSprite(region: TextureRegion, size: Size) = Prefab("sprite", EntityBuilder(Tags.Sprite.tag, size)
+    fun setupPhysicsSprite(pack: ResourceWrapper<TextureAtlas>, region: String, size: Size) = Prefab("physics sprite", EntityBuilder(Tags.Sprite.tag, size)
             .withDefaultState {
-                withComponent(TextureComponent(0, TextureComponent.TextureData("default", region)))
+                withComponent(TextureComponent(0, TextureGroup("default", PackRegionData(pack, region))))
 
                 withComponent(PhysicsComponent(true))
             }
@@ -68,9 +68,9 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                     .build()
     )),
 
-    Sprite(PrefabType.All, PrefabSetup.setupSprite(Constants.packsKenneyDirPath.child("grassSheet.atlas").toFileWrapper() to "slice03_03", Size(50, 50))),
+    Sprite(PrefabType.All, PrefabSetup.setupSprite(resourceWrapperOf(Constants.packsKenneyDirPath.child("grassSheet.atlas").toFileWrapper()), "slice03_03", Size(50, 50))),
 
-    PhysicsSprite(PrefabType.All, PrefabSetup.setupPhysicsSprite(Constants.packsKenneyDirPath.child("grassSheet.atlas").toFileWrapper() to "slice03_03", Size(50, 50))),
+    PhysicsSprite(PrefabType.All, PrefabSetup.setupPhysicsSprite(resourceWrapperOf(Constants.packsKenneyDirPath.child("grassSheet.atlas").toFileWrapper()), "slice03_03", Size(50, 50))),
 
     //region Kenney
     Player_Kenney(PrefabType.Kenney, Prefab("player",
@@ -79,10 +79,10 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         val pack = Constants.packsKenneyDirPath.child("aliens.atlas").toFileWrapper()
 
                         withComponent(TextureComponent(0,
-                                TextureComponent.TextureData("stand", pack to "alienGreen_stand"),
-                                TextureComponent.TextureData("walk", pack, "alienGreen_walk", 0.33f),
-                                TextureComponent.TextureData("jump", pack to "alienGreen_jump"),
-                                TextureComponent.TextureData("fall", pack to "alienGreen_swim_1"))
+                                TextureGroup("stand", PackRegionData(resourceWrapperOf(pack), "alienGreen_stand")),
+                                TextureGroup("walk", pack, "alienGreen_walk", 0.33f),
+                                TextureGroup("jump", PackRegionData(resourceWrapperOf(pack), "alienGreen_jump")),
+                                TextureGroup("fall", PackRegionData(resourceWrapperOf(pack), "alienGreen_swim_1")))
                         )
 
                         withComponent(InputComponent(
@@ -103,7 +103,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                             onDownAction = TextureAction(3)
                         })
 
-                        withComponent(SoundComponent(SoundComponent.SoundData(Constants.soundsDirPath.child("player/jump.ogg").toFileWrapper())))
+                        withComponent(SoundComponent(SoundComponent.SoundData(resourceWrapperOf(Constants.soundsDirPath.child("player/jump.ogg").toFileWrapper()))))
 
                         withComponent(LifeComponent(LevelAction(LevelAction.LevelActions.FAIL_EXIT)))
                     }
@@ -114,7 +114,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     Spider_Kenney(PrefabType.Kenney, Prefab("spider",
             EntityBuilder(Tags.Enemy.tag, Size(48, 48))
                     .withDefaultState {
-                        withComponent(TextureComponent(0, TextureComponent.TextureData("walk", Constants.packsKenneyDirPath.child("enemies.atlas").toFileWrapper(), "spider_walk", 0.33f)))
+                        withComponent(TextureComponent(0, TextureGroup("walk", Constants.packsKenneyDirPath.child("enemies.atlas").toFileWrapper(), "spider_walk", 0.33f)))
 
                         withComponent(PhysicsComponent(false, 5, collisionsActions = arrayListOf(
                                 CollisionAction(BoxSide.Left, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP))),
@@ -133,7 +133,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     SnakeSlime_Kenney(PrefabType.Kenney, Prefab("snake slime",
             EntityBuilder(Tags.Enemy.tag, Size(35, 120))
                     .withDefaultState {
-                        withComponent(TextureComponent(0, TextureComponent.TextureData("default", Constants.packsKenneyDirPath.child("enemies.atlas").toFileWrapper(), "snakeSlime", 0.33f)))
+                        withComponent(TextureComponent(0, TextureGroup("default", Constants.packsKenneyDirPath.child("enemies.atlas").toFileWrapper(), "snakeSlime", 0.33f)))
 
                         withComponent(PhysicsComponent(true, collisionsActions = arrayListOf(
                                 CollisionAction(BoxSide.All, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP)))
@@ -147,7 +147,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     Bee_Kenney(PrefabType.Kenney, Prefab("bee",
             EntityBuilder(Tags.Enemy.tag, Size(35, 35))
                     .withDefaultState {
-                        withComponent(TextureComponent(0, TextureComponent.TextureData("default", Constants.packsKenneyDirPath.child("enemies.atlas").toFileWrapper() to "bee")))
+                        withComponent(TextureComponent(0, TextureGroup("default", PackRegionData(resourceWrapperOf(Constants.packsKenneyDirPath.child("enemies.atlas").toFileWrapper()), "bee"))))
 
                         withComponent(PhysicsComponent(false, 5, gravity = false, collisionsActions = arrayListOf(
                                 CollisionAction(BoxSide.Left, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP))),
@@ -166,9 +166,9 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     GoldCoin_Kenney(PrefabType.Kenney, Prefab("gold coin",
             EntityBuilder(Tags.Special.tag, Size(35, 35))
                     .withDefaultState {
-                        withComponent(TextureComponent(0, TextureComponent.TextureData("default", Constants.packsKenneyDirPath.child("jumper.atlas").toFileWrapper() to "coin_gold")))
+                        withComponent(TextureComponent(0, TextureGroup("default", PackRegionData(resourceWrapperOf(Constants.packsKenneyDirPath.child("jumper.atlas").toFileWrapper()), "coin_gold"))))
 
-                        withComponent(SoundComponent(SoundComponent.SoundData(Constants.soundsDirPath.child("coin.wav").toFileWrapper())))
+                        withComponent(SoundComponent(SoundComponent.SoundData(resourceWrapperOf(Constants.soundsDirPath.child("coin.wav").toFileWrapper()))))
 
                         withComponent(SensorComponent(SensorComponent.TagSensorData(sensorIn = MultiplexerAction(SoundAction(0), ScoreAction(1), TweenAction(TweenFactory.RemoveEntity(), false)))))
                     }
@@ -181,7 +181,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     FireBall_Left_SMC(PrefabType.SMC, Prefab("fireball left",
             EntityBuilder(Tags.Special.tag, Size(35, 35))
                     .withDefaultState {
-                        withComponent(TextureComponent(0, TextureComponent.TextureData("default", Constants.packsSMCDirPath.child("animations.atlas").toFileWrapper() to "fireball/fireball")))
+                        withComponent(TextureComponent(0, TextureGroup("default", PackRegionData(resourceWrapperOf(Constants.packsSMCDirPath.child("animations.atlas").toFileWrapper()), "fireball/fireball"))))
 
                         withComponent(PhysicsComponent(false, jumpHeight = 50, collisionsActions = arrayListOf(
                                 CollisionAction(BoxSide.Down, Tags.Sprite.tag, PhysicsAction(PhysicsAction.PhysicsActions.JUMP)),
@@ -195,7 +195,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     FireBall_Right_SMC(PrefabType.SMC, Prefab("fireball right",
             EntityBuilder(Tags.Special.tag, Size(35, 35))
                     .withDefaultState {
-                        withComponent(TextureComponent(0, TextureComponent.TextureData("default", Constants.packsSMCDirPath.child("animations.atlas").toFileWrapper() to "fireball/fireball")))
+                        withComponent(TextureComponent(0, TextureGroup("default", PackRegionData(resourceWrapperOf(Constants.packsSMCDirPath.child("animations.atlas").toFileWrapper()), "fireball/fireball"))))
 
                         withComponent(PhysicsComponent(false, jumpHeight = 50, collisionsActions = arrayListOf(
                                 CollisionAction(BoxSide.Down, Tags.Sprite.tag, PhysicsAction(PhysicsAction.PhysicsActions.JUMP)),
@@ -215,10 +215,10 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         withStartAction(MultiplexerAction(TweenAction(ResizeTween(0.5f, 48, 78), false), TweenAction(TweenFactory.DisableLifeComponent(), false)))
 
                         withComponent(TextureComponent(0,
-                                TextureComponent.TextureData("stand", pack to "small/stand_right"),
-                                TextureComponent.TextureData("walk", pack, "small/walk_right", 0.33f),
-                                TextureComponent.TextureData("jump", pack to "small/jump_right"),
-                                TextureComponent.TextureData("fall", pack to "small/fall_right"))
+                                TextureGroup("stand", PackRegionData(resourceWrapperOf(pack), "small/stand_right")),
+                                TextureGroup("walk", pack, "small/walk_right", 0.33f),
+                                TextureGroup("jump", PackRegionData(resourceWrapperOf(pack), "small/jump_right")),
+                                TextureGroup("fall", PackRegionData(resourceWrapperOf(pack), "small/fall_right")))
                         )
 
                         withComponent(InputComponent(
@@ -239,7 +239,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                             onDownAction = TextureAction(3)
                         })
 
-                        withComponent(SoundComponent(SoundComponent.SoundData(Constants.soundsDirPath.child("player/jump.ogg").toFileWrapper())))
+                        withComponent(SoundComponent(SoundComponent.SoundData(resourceWrapperOf(Constants.soundsDirPath.child("player/jump.ogg").toFileWrapper()))))
 
                         withComponent(LifeComponent(LevelAction(LevelAction.LevelActions.FAIL_EXIT)))
                     }
@@ -250,10 +250,10 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         withStartAction(TweenAction(ResizeTween(0.5f, 48, 98), false))
 
                         withComponent(TextureComponent(0,
-                                TextureComponent.TextureData("stand", pack to "big/stand_right"),
-                                TextureComponent.TextureData("walk", pack, "big/walk_right", 0.33f),
-                                TextureComponent.TextureData("jump", pack to "big/jump_right"),
-                                TextureComponent.TextureData("fall", pack to "big/fall_right"))
+                                TextureGroup("stand", PackRegionData(resourceWrapperOf(pack), "big/stand_right")),
+                                TextureGroup("walk", pack, "big/walk_right", 0.33f),
+                                TextureGroup("jump", PackRegionData(resourceWrapperOf(pack), "big/jump_right")),
+                                TextureGroup("fall", PackRegionData(resourceWrapperOf(pack), "big/fall_right")))
                         )
 
                         withComponent(InputComponent(
@@ -274,7 +274,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                             onDownAction = TextureAction(3)
                         })
 
-                        withComponent(SoundComponent(SoundComponent.SoundData(Constants.soundsDirPath.child("player/jump.ogg").toFileWrapper())))
+                        withComponent(SoundComponent(SoundComponent.SoundData(resourceWrapperOf(Constants.soundsDirPath.child("player/jump.ogg").toFileWrapper()))))
 
                         withComponent(LifeComponent(StateAction(0)))
                     }
@@ -285,10 +285,10 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         withStartAction(TweenAction(ResizeTween(0.5f, 48, 98), false))
 
                         withComponent(TextureComponent(0,
-                                TextureComponent.TextureData("stand", pack to "fire/stand_right"),
-                                TextureComponent.TextureData("walk", pack, "fire/walk_right", 0.33f),
-                                TextureComponent.TextureData("jump", pack to "fire/jump_right"),
-                                TextureComponent.TextureData("fall", pack to "fire/fall_right"))
+                                TextureGroup("stand", PackRegionData(resourceWrapperOf(pack), "fire/stand_right")),
+                                TextureGroup("walk", pack, "fire/walk_right", 0.33f),
+                                TextureGroup("jump", PackRegionData(resourceWrapperOf(pack), "fire/jump_right")),
+                                TextureGroup("fall", PackRegionData(resourceWrapperOf(pack), "fire/fall_right")))
                         )
 
                         withComponent(InputComponent(
@@ -310,7 +310,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                             onDownAction = TextureAction(3)
                         })
 
-                        withComponent(SoundComponent(SoundComponent.SoundData(Constants.soundsDirPath.child("player/jump.ogg").toFileWrapper())))
+                        withComponent(SoundComponent(SoundComponent.SoundData(resourceWrapperOf(Constants.soundsDirPath.child("player/jump.ogg").toFileWrapper()))))
 
                         withComponent(LifeComponent(StateAction(0)))
                     }
@@ -321,7 +321,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     Furball_SMC(PrefabType.SMC, Prefab("furball",
             EntityBuilder(Tags.Enemy.tag, Size(48, 48))
                     .withDefaultState {
-                        withComponent(TextureComponent(0, TextureComponent.TextureData("walk", Constants.packsSMCDirPath.child("enemies.atlas").toFileWrapper(), "furball/brown/walk", 0.1f)))
+                        withComponent(TextureComponent(0, TextureGroup("walk", Constants.packsSMCDirPath.child("enemies.atlas").toFileWrapper(), "furball/brown/walk", 0.1f)))
 
                         withComponent(PhysicsComponent(false, 5, collisionsActions = arrayListOf(
                                 CollisionAction(BoxSide.Left, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP))),
@@ -340,7 +340,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     Turtle_SMC(PrefabType.SMC, Prefab("turtle",
             EntityBuilder(Tags.Enemy.tag, Size(48, 98))
                     .withDefaultState {
-                        withComponent(TextureComponent(0, TextureComponent.TextureData("walk", Constants.packsSMCDirPath.child("enemies.atlas").toFileWrapper(), "turtle/green/walk", 0.33f)))
+                        withComponent(TextureComponent(0, TextureGroup("walk", Constants.packsSMCDirPath.child("enemies.atlas").toFileWrapper(), "turtle/green/walk", 0.33f)))
 
                         withComponent(PhysicsComponent(false, 5, collisionsActions = arrayListOf(
                                 CollisionAction(BoxSide.Left, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP))),
@@ -356,7 +356,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                     .withState("shell") {
                         withStartAction(ResizeAction(Size(45, 45)))
 
-                        withComponent(TextureComponent(0, TextureComponent.TextureData("walk", Constants.packsSMCDirPath.child("enemies.atlas").toFileWrapper(), "turtle/green/shell_move", 0.33f)))
+                        withComponent(TextureComponent(0, TextureGroup("walk", Constants.packsSMCDirPath.child("enemies.atlas").toFileWrapper(), "turtle/green/shell_move", 0.33f)))
 
                         withComponent(PhysicsComponent(false, 10, collisionsActions = arrayListOf(
                                 CollisionAction(BoxSide.Left, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP))),
@@ -374,7 +374,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     Eato_SMC(PrefabType.SMC, Prefab("eato",
             EntityBuilder(Tags.Enemy.tag, Size(45, 45))
                     .withDefaultState {
-                        withComponent(TextureComponent(0, TextureComponent.TextureData("default", Constants.packsSMCDirPath.child("enemies.atlas").toFileWrapper(), "eato/green/eato", 0.15f, Animation.PlayMode.LOOP_PINGPONG)))
+                        withComponent(TextureComponent(0, TextureGroup("default", Constants.packsSMCDirPath.child("enemies.atlas").toFileWrapper(), "eato/green/eato", 0.15f, Animation.PlayMode.LOOP_PINGPONG)))
 
                         withComponent(PhysicsComponent(true, collisionsActions = arrayListOf(
                                 CollisionAction(BoxSide.All, action = PrefabSetup.playerAction(LifeAction(LifeAction.LifeActions.REMOVE_LP))))
@@ -388,7 +388,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     MushroomRed_SMC(PrefabType.SMC, Prefab("mushroom red",
             EntityBuilder(Tags.Special.tag, Size(45, 45))
                     .withDefaultState {
-                        withComponent(TextureComponent(0, TextureComponent.TextureData("default", Constants.packsSMCDirPath.child("items.atlas").toFileWrapper() to "mushroom_red")))
+                        withComponent(TextureComponent(0, TextureGroup("default", PackRegionData(resourceWrapperOf(Constants.packsSMCDirPath.child("items.atlas").toFileWrapper()), "mushroom_red"))))
 
                         withComponent(PhysicsComponent(false, 5, collisionsActions = arrayListOf(
                                 CollisionAction(BoxSide.All, action = MultiplexerAction(PrefabSetup.playerAction(StateSwitcherAction(0 to StateAction(1))), TweenAction(TweenFactory.RemoveEntity(), false))))
@@ -402,7 +402,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     FirePlant_SMC(PrefabType.SMC, Prefab("fire plant",
             EntityBuilder(Tags.Special.tag, Size(45, 45))
                     .withDefaultState {
-                        withComponent(TextureComponent(0, TextureComponent.TextureData("default", Constants.packsSMCDirPath.child("items.atlas").toFileWrapper() to "fireplant")))
+                        withComponent(TextureComponent(0, TextureGroup("default", PackRegionData(resourceWrapperOf(Constants.packsSMCDirPath.child("items.atlas").toFileWrapper()), "fireplant"))))
 
                         withComponent(PhysicsComponent(false, 0, collisionsActions = arrayListOf(
                                 CollisionAction(BoxSide.All, action = MultiplexerAction(PrefabSetup.playerAction(StateAction(2)), TweenAction(TweenFactory.RemoveEntity(), false))))
@@ -414,7 +414,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     BoxSpawner_SMC(PrefabType.SMC,
             Prefab("box spawner", EntityBuilder(Tags.Special.tag, Size(48, 48))
                     .withDefaultState {
-                        withComponent(TextureComponent(0, TextureComponent.TextureData("default", Constants.packsSMCDirPath.child("box.atlas").toFileWrapper() to "yellow/default")))
+                        withComponent(TextureComponent(0, TextureGroup("default", PackRegionData(resourceWrapperOf(Constants.packsSMCDirPath.child("box.atlas").toFileWrapper()), "yellow/default"))))
 
                         withComponent(PhysicsComponent(true, collisionsActions = arrayListOf(
                                 CollisionAction(BoxSide.Down, action = StateAction(1)))
@@ -423,11 +423,11 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                     .withState("pop") {
                         withStartAction(SpawnSideAction(MushroomRed_SMC.prefab, BoxSide.Up, true))
 
-                        withComponent(TextureComponent(0, TextureComponent.TextureData("pop", Constants.packsSMCDirPath.child("box.atlas").toFileWrapper() to "brown1_1")))
+                        withComponent(TextureComponent(0, TextureGroup("pop", PackRegionData(resourceWrapperOf(Constants.packsSMCDirPath.child("box.atlas").toFileWrapper()), "brown1_1"))))
                         withComponent(PhysicsComponent(true))
                     }
                     .withLayer(1)
                     .build()
-            )),
+            ));
     //endregion
 }

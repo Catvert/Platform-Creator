@@ -219,7 +219,7 @@ class PhysicsComponent(@UI(customName = "figée") var isStatic: Boolean,
         val potentialCollideEntities = level.getAllEntitiesInCells(entity.box.merge(Rect(entity.box).apply { move(targetMoveX, targetMoveY) })).filter { filter ->
             filter !== entity && filter.getCurrentState().hasComponent<PhysicsComponent>() && let {
                 filter.getCurrentState().getComponent<PhysicsComponent>()?.also { filterComp ->
-                    return@let (!filterComp.ignoreTags.contains(entity.tag) || !this.ignoreTags.contains(filter.tag))
+                    return@let !filterComp.ignoreTags.contains(entity.tag) && !this.ignoreTags.contains(filter.tag)
                             && if (filterComp.isPlatform) {
                         entity.position().y >= filter.position().y + filter.size().height
                     } else true
@@ -364,16 +364,16 @@ class PhysicsComponent(@UI(customName = "figée") var isStatic: Boolean,
         return collideEntities
     }
 
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
         ImGui.pushItemFlag(ItemFlags.Disabled.i, isStatic)
         functionalProgramming.collapsingHeader("actions de déplacement") {
             functionalProgramming.withIndent {
-                ImGuiHelper.action("à gauche", ::onLeftAction, entity, level, editorSceneUI)
-                ImGuiHelper.action("à droite", ::onRightAction, entity, level, editorSceneUI)
-                ImGuiHelper.action("au-dessus", ::onUpAction, entity, level, editorSceneUI)
-                ImGuiHelper.action("en-dessous", ::onDownAction, entity, level, editorSceneUI)
-                ImGuiHelper.action("au saut", ::onJumpAction, entity, level, editorSceneUI)
-                ImGuiHelper.action("rien", ::onNothingAction, entity, level, editorSceneUI)
+                ImGuiHelper.action("à gauche", ::onLeftAction, entity, level, editorUI)
+                ImGuiHelper.action("à droite", ::onRightAction, entity, level, editorUI)
+                ImGuiHelper.action("au-dessus", ::onUpAction, entity, level, editorUI)
+                ImGuiHelper.action("en-dessous", ::onDownAction, entity, level, editorUI)
+                ImGuiHelper.action("au saut", ::onJumpAction, entity, level, editorUI)
+                ImGuiHelper.action("rien", ::onNothingAction, entity, level, editorUI)
             }
         }
         ImGui.popItemFlag()
@@ -386,13 +386,13 @@ class PhysicsComponent(@UI(customName = "figée") var isStatic: Boolean,
 
         functionalProgramming.collapsingHeader("tags ignorés") {
             functionalProgramming.withIndent {
-                ImGuiHelper.addImguiWidgetsArray("tags ignorés", ignoreTags, { it }, { Tags.Player.tag }, entity, level, editorSceneUI, UIFactory.createUI(customType = CustomType.TAG_STRING))
+                ImGuiHelper.addImguiWidgetsArray("tags ignorés", ignoreTags, { it }, { Tags.Player.tag }, entity, level, editorUI, UIFactory.createUI(customType = CustomType.TAG_STRING))
             }
         }
 
         functionalProgramming.collapsingHeader("actions de collision") {
             functionalProgramming.withIndent {
-                ImGuiHelper.addImguiWidgetsArray("collide actions", collisionsActions, { it.side.name }, { CollisionAction() }, entity, level, editorSceneUI)
+                ImGuiHelper.addImguiWidgetsArray("collide actions", collisionsActions, { it.side.name }, { CollisionAction() }, entity, level, editorUI)
             }
         }
     }

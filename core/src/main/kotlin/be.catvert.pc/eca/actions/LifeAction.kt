@@ -25,7 +25,7 @@ class LifeAction(@UI var action: LifeActions) : Action() {
     enum class LifeActions {
         ADD_LP, REMOVE_LP, ONE_SHOT;
 
-        override fun toString() = when(this) {
+        override fun toString() = when (this) {
             LifeAction.LifeActions.ADD_LP -> "Ajouter"
             LifeAction.LifeActions.REMOVE_LP -> "Retirer"
             LifeAction.LifeActions.ONE_SHOT -> "One shot"

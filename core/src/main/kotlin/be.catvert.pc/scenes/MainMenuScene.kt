@@ -41,7 +41,7 @@ class MainMenuScene(val levelStats: LevelStats?, applyMusicTransition: Boolean) 
 
     init {
         if (applyMusicTransition)
-            MusicsManager.startMusic(Constants.menuMusicPath, true)
+            MusicsManager.startMusic(PCGame.menuMusic, true)
 
         refreshLevels()
     }

@@ -6,13 +6,12 @@ import be.catvert.pc.eca.EntityTag
 import be.catvert.pc.serialization.PostDeserialization
 import be.catvert.pc.serialization.SerializationFactory
 import be.catvert.pc.utility.Renderable
-import be.catvert.pc.utility.ResourceLoader
 import be.catvert.pc.utility.Updeatable
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 
-abstract class EntityContainer : Renderable, Updeatable, PostDeserialization, ResourceLoader {
+abstract class EntityContainer : Renderable, Updeatable, PostDeserialization {
     @JsonProperty("objects")
     protected val entities: MutableSet<Entity> = mutableSetOf()
 
@@ -43,8 +42,6 @@ abstract class EntityContainer : Renderable, Updeatable, PostDeserialization, Re
     }
 
     open fun addEntity(entity: Entity): Entity {
-        entity.loadResources()
-
         entities.add(entity)
         entity.container = this
         entitiesByID[entity.entityID.ID] = entity
@@ -66,15 +63,12 @@ abstract class EntityContainer : Renderable, Updeatable, PostDeserialization, Re
         }
     }
 
+    @JsonIgnore
+    fun getNextID() = _lastGeneratedID + 1
+
     fun generateID() = ++_lastGeneratedID
 
     protected open fun onRemoveEntity(entity: Entity) {}
-
-    override fun loadResources() {
-        entities.forEach {
-            it.loadResources()
-        }
-    }
 
     override fun render(batch: Batch) {
         if (allowRendering)
@@ -114,8 +108,6 @@ abstract class EntityContainer : Renderable, Updeatable, PostDeserialization, Re
                 removeEntities.add(it)
             }
         }
-
-        loadResources()
     }
 
     operator fun plusAssign(entity: Entity) {

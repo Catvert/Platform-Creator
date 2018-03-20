@@ -83,7 +83,7 @@ class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeata
         }
     }
 
-    override fun insertUI(label: String, entity: Entity, level: Level, editorSceneUI: EditorScene.EditorSceneUI) {
+    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
         ImGuiHelper.addImguiWidgetsArray("sensors", sensors, { "sensor" }, { EntitySensorData() }, {
             val typeIndex = intArrayOf(if (it.obj is EntitySensorData) 0 else 1)
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
@@ -95,7 +95,7 @@ class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeata
                 }
             }
             ImGui.separator()
-            ImGuiHelper.insertUIFields(it.obj, entity, level, editorSceneUI)
+            ImGuiHelper.insertUIFields(it.obj, entity, level, editorUI)
         })
     }
 }
