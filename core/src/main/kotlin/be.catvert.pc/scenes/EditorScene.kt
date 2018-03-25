@@ -198,7 +198,11 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
     private var selectEntityTryMode: Entity? = null
 
-    private var selectLayer = 0
+    private var selectLayer = Constants.defaultLayer
+        set(value) {
+            if(value in 0..Constants.maxLayer)
+                field = value
+        }
 
     /**
      * Est-ce que à la dernière frame, la bouton gauche était pressé
@@ -1139,6 +1143,9 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                         checkbox("Afficher la fenêtre Fabrique d'entités", editorUI::showEntityFactoryWindow)
                         checkbox("Afficher la grille", gridMode::active)
                         checkbox("Placement intelligent", ::smartPositioning)
+                        functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
+                            inputInt("Couche sélectionnée", ::selectLayer, 1, 2)
+                        }
                     }
                 } else {
                     ImGuiHelper.textColored(Color.ORANGE, "Test du niveau..")
@@ -1405,7 +1412,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
                 fun addImageBtn(region: TextureRegion, prefab: Prefab, showTooltip: Boolean) {
                     if (imageButton(region.texture.textureObjectHandle, Vec2(50f, 50f), Vec2(region.u, region.v), Vec2(region.u2, region.v2))) {
-                        setCopyEntity(prefab.create(Point()))
+                        setCopyEntity(prefab.create(Point()).apply { this.layer = selectLayer })
                     }
 
                     if (showTooltip && isItemHovered()) {

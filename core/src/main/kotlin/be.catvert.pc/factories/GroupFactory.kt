@@ -19,6 +19,7 @@ import com.badlogic.gdx.Input
 enum class GroupFactory(val group: () -> Group) {
     Pipe({
         val pipeEndID = EntityID(3)
+        val layer = Constants.defaultLayer + 1
         Group("pipes", arrayListOf(pipeEndID),
                 Prefab("pipe start",
                         EntityBuilder(Tags.Special.tag, Size(100, 50)).withDefaultState {
@@ -26,26 +27,26 @@ enum class GroupFactory(val group: () -> Group) {
                             withComponent(PhysicsComponent(true,
                                     collisionsActions = arrayListOf(CollisionAction(BoxSide.Up, action = InputAction(InputComponent.InputData(Input.Keys.S, false,
                                             TweenAction(TweenBuilder(MoveTween(0.5f, 0, -50)).build(TeleportSideAction(pipeEndID, BoxSide.Up, true))))), applyActionOnCollider = true))))
-                        }.withLayer(1).build()
+                        }.withLayer(layer).build()
                 ),
                 EntityDescriptor(
                         Prefab("pipe start body",
                                 EntityBuilder(Tags.Special.tag, Size(100, 50)).withDefaultState {
                                     withComponent(TextureComponent(0, TextureGroup("default", PackRegionData(resourceWrapperOf(Constants.packsSMCDirPath.child("pipes.atlas").toFileWrapper()), "blue/ver"))))
                                     withComponent(PhysicsComponent(true))
-                                }.withLayer(1).build()), Point(0f, -50f)),
+                                }.withLayer(layer).build()), Point(0f, -50f)),
                 EntityDescriptor(
                         Prefab("pipe end",
                                 EntityBuilder(Tags.Special.tag, Size(100, 50)).withDefaultState {
                                     withComponent(TextureComponent(0, TextureGroup("default", PackRegionData(resourceWrapperOf(Constants.packsSMCDirPath.child("pipes.atlas").toFileWrapper()), "green/up"))))
                                     withComponent(PhysicsComponent(true))
-                                }.withLayer(1).build()), Point(200f, 0f)),
+                                }.withLayer(layer).build()), Point(200f, 0f)),
                 EntityDescriptor(
                         Prefab("pipe end body",
                                 EntityBuilder(Tags.Special.tag, Size(100, 50)).withDefaultState {
                                     withComponent(TextureComponent(0, TextureGroup("default", PackRegionData(resourceWrapperOf(Constants.packsSMCDirPath.child("pipes.atlas").toFileWrapper()), "green/ver"))))
                                     withComponent(PhysicsComponent(true))
-                                }.withLayer(1).build()), Point(200f, -50f))
+                                }.withLayer(layer).build()), Point(200f, -50f))
         )
     });
 }

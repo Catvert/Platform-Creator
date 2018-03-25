@@ -11,8 +11,8 @@ object Constants {
     const val gameVersion = 2.0f
 
     const val maxEntitySize = 10000
-    const val minLayerIndex = -100
-    const val maxLayerIndex = 100
+    const val maxLayer = 100
+    const val defaultLayer = 5
 
     const val minMatrixSize = 10
     const val matrixCellSize = 300

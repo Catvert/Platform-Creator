@@ -46,10 +46,10 @@ class Entity(@UI(customType = CustomType.TAG_STRING) var tag: EntityTag,
     /**
      * Représente la "couche" à laquelle cette entité va être affichée
      */
-    @UI(min = -100f, max = 100f, customName = "couche")
-    var layer: Int = 0
+    @UI(min = 0f, max = Constants.maxLayer.toFloat(), customName = "couche")
+    var layer: Int = Constants.defaultLayer
         set(value) {
-            if (value in Constants.minLayerIndex until Constants.maxLayerIndex) field = value
+            if (value in 0..Constants.maxLayer) field = value
         }
 
     /**
