@@ -16,6 +16,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import glm_.vec2.Vec2
 import imgui.ImGui
+import imgui.WindowFlag
 import imgui.WindowFlags
 import ktx.app.use
 
@@ -30,6 +31,8 @@ class GameScene(private val level: Level, private val levelNumberTries: Int = 1)
 
     private val glyphTimer = GlyphLayout()
 
+    private var isLevelExit = false
+
     init {
         level.entitiesInitialStartActions()
 
@@ -38,11 +41,15 @@ class GameScene(private val level: Level, private val levelNumberTries: Int = 1)
             MusicsManager.startMusic(level.music!!, true)
 
         level.exit = {
-            ResourcesManager.getSound(if (it) Constants.gameDirPath.child("game-over-success.wav") else Constants.gameDirPath.child("game-over-fail.wav"))?.play(PCGame.soundVolume)
-            if (it)
-                PCGame.scenesManager.loadScene(MainMenuScene(LevelStats(level.levelPath, level.getTimer(), levelNumberTries), true))
-            else {
-                PCGame.scenesManager.loadScene(GameScene(SerializationFactory.deserializeFromFile(level.levelPath.get()), levelNumberTries + 1))
+            if(!isLevelExit) {
+                isLevelExit = true
+
+                ResourcesManager.getSound(if (it) Constants.gameDirPath.child("game-over-success.wav") else Constants.gameDirPath.child("game-over-fail.wav"))?.play(PCGame.soundVolume)
+                if (it)
+                    PCGame.scenesManager.loadScene(MainMenuScene(LevelStats(level.levelPath, level.getTimer(), levelNumberTries), true))
+                else {
+                    PCGame.scenesManager.loadScene(GameScene(SerializationFactory.deserializeFromFile(level.levelPath.get()), levelNumberTries + 1))
+                }
             }
         }
     }
@@ -52,7 +59,7 @@ class GameScene(private val level: Level, private val levelNumberTries: Int = 1)
 
         with(ImGui) {
             if (pause) {
-                ImGuiHelper.withCenteredWindow("pause", null, Vec2(200f, 105f), WindowFlags.NoResize.i or WindowFlags.NoCollapse.i or WindowFlags.NoTitleBar.i) {
+                ImGuiHelper.withCenteredWindow("pause", null, Vec2(200f, 105f), WindowFlag.NoResize.i or WindowFlag.NoCollapse.i or WindowFlag.NoTitleBar.i) {
                     if (button("Reprendre", Vec2(-1, 0))) {
                         pause = false
                         entityContainer.allowUpdating = true
@@ -63,7 +70,6 @@ class GameScene(private val level: Level, private val levelNumberTries: Int = 1)
                             PCGame.scenesManager.loadScene(GameScene(level))
                     }
                     if (button("Quitter le niveau", Vec2(-1, 0))) {
-                        ResourcesManager.unloadAssets()
                         PCGame.scenesManager.loadScene(MainMenuScene(null, true))
                     }
                 }

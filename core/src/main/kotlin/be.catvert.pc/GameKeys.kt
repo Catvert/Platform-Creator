@@ -41,8 +41,8 @@ enum class GameKeys(var key: Int, val description: String) {
     GAME_PLAYER_LEFT(Input.Keys.Q, "[Jeu] Déplacer le joueur vers le gauche"),
     GAME_PLAYER_RIGHT(Input.Keys.D, "[Jeu] Déplacer le joueur vers la droite"),
     GAME_PLAYER_JUMP(Input.Keys.SPACE, "[Jeu] Faire sauter le joueur"),
-    GAME_PLAYER_GOD_UP(Input.Keys.Z, "[Jeu] Déplacer le joueur vers le haut"),
-    GAME_PLAYER_GOD_DOWN(Input.Keys.S, "[Jeu] Déplacer le joueur vers le bas"),
+    GAME_PLAYER_UP(Input.Keys.Z, "[Jeu] Faire monter le joueur"),
+    GAME_PLAYER_DOWN(Input.Keys.S, "[Jeu] Faire descendre le joueur"),
 
     GAME_EDIT_LEVEL(Input.Keys.F2, "[Jeu] Éditer le niveau"),
 

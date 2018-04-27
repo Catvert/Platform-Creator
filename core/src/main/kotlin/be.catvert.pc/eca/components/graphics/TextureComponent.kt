@@ -6,6 +6,7 @@ import be.catvert.pc.eca.components.Component
 import be.catvert.pc.eca.components.graphics.PackRegionData.Companion.findAnimationRegions
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.managers.ResourcesManager
+import be.catvert.pc.managers.ScenesManager
 import be.catvert.pc.scenes.EditorScene
 import be.catvert.pc.ui.*
 import be.catvert.pc.utility.*
@@ -21,10 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import glm_.vec2.Vec2
 import glm_.vec4.Vec4
-import imgui.ImGui
-import imgui.ItemFlags
-import imgui.WindowFlags
-import imgui.functionalProgramming
+import imgui.*
 
 /**
  * Component permettant d'ajouter des textures et animations a l'entité
@@ -97,7 +95,7 @@ class TextureComponent(var currentIndex: Int = 0, vararg groups: TextureGroup) :
     private fun drawEditWindow(level: Level) {
         with(ImGui) {
             setNextWindowSizeConstraints(Vec2(editWindowWidth, 170f), Vec2(editWindowWidth, 500f))
-            functionalProgramming.withWindow("Éditer la texture", ::showEditTextureWindow, flags = WindowFlags.AlwaysAutoResize.i) {
+            functionalProgramming.withWindow("Éditer la texture", ::showEditTextureWindow, flags = WindowFlag.AlwaysAutoResize.i) {
                 if (groups.isEmpty()) {
                     if (button("Ajouter un groupe", Vec2(-1))) {
                         openPopup(addGroupTitle)
@@ -106,7 +104,7 @@ class TextureComponent(var currentIndex: Int = 0, vararg groups: TextureGroup) :
                     var openAddGroupPopup = false
 
                     ImGuiHelper.comboWithSettingsButton("groupe", ::groupIndex, groups.map { it.name }, {
-                        pushItemFlag(ItemFlags.Disabled.i, groups.isEmpty())
+                        pushItemFlag(ItemFlag.Disabled.i, groups.isEmpty())
                         if (button("Supprimer ${groups.elementAtOrNull(groupIndex)?.name
                                         ?: ""}", Vec2(Constants.defaultWidgetsWidth, 0f))) {
                             groups.removeAt(groupIndex)
@@ -151,7 +149,7 @@ class TextureComponent(var currentIndex: Int = 0, vararg groups: TextureGroup) :
                                 functionalProgramming.withGroup {
                                     val btnSize = Vec2((regionBtnSize.x + style.itemInnerSpacing.x) / 2f)
 
-                                    pushItemFlag(ItemFlags.Disabled.i, it !is PackRegionData)
+                                    pushItemFlag(ItemFlag.Disabled.i, it !is PackRegionData)
                                     functionalProgramming.withId("previous frame $regionIndex") {
                                         if (button("<-", btnSize)) {
                                             it.cast<PackRegionData>()?.previousFrameRegion()
@@ -233,7 +231,7 @@ class TextureComponent(var currentIndex: Int = 0, vararg groups: TextureGroup) :
                     drawResources(level)
                 }
 
-                functionalProgramming.popupModal(addGroupTitle, extraFlags = WindowFlags.AlwaysAutoResize.i) {
+                functionalProgramming.popupModal(addGroupTitle, extraFlags = WindowFlag.AlwaysAutoResize.i) {
                     ImGuiHelper.inputText("nom", ::addGroupBuf)
                     if (button("Ajouter", Vec2(-1, 0))) {
                         groups.add(TextureGroup(addGroupBuf))

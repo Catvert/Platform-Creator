@@ -92,7 +92,7 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
 
         initializeUI()
 
-        scenesManager = ScenesManager(MainMenuScene(null, true))
+        scenesManager = ScenesManager(MainMenuScene(null, false))
     }
 
     override fun render() {
@@ -221,10 +221,6 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
                         colors[Col.ResizeGripHovered] = Vec4.fromColor(40, 44, 52, 255)
 
                         colors[Col.CheckMark] = Vec4.fromColor(66, 150, 250)
-
-                        colors[Col.CloseButton] = Vec4.fromColor(50, 77, 109, 200)
-                        colors[Col.CloseButtonActive] = Vec4.fromColor(58, 68, 86, 255)
-                        colors[Col.CloseButtonHovered] = Vec4.fromColor(49, 59, 76, 255)
 
                         colors[Col.SliderGrab] = Vec4.fromColor(66, 150, 250)
                         colors[Col.SliderGrabActive] = Vec4.fromColor(66, 160, 255)

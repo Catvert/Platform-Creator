@@ -24,27 +24,29 @@ class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeata
     private var level: Level? = null
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
-    abstract class SensorData(@UI(description = "Action appelée quand l'entité ciblée passe devant/derrière(overlaps) cette entité") var sensorIn: Action = EmptyAction(), @UI(description = "Action appelée quand l'entité ciblée quitte cette entité") var sensorOut: Action = EmptyAction()) {
+    abstract class SensorData(@UI(customName = "entrée", description = "Action appelée quand l'entité ciblée passe devant/derrière(overlaps) cette entité") var onIn: Action = EmptyAction(), @UI(customName="sortie", description = "Action appelée quand l'entité ciblée quitte cette entité") var onOut: Action = EmptyAction(), @UI(customName="m.a.j dedans", description = "Action appelée quand l'entité ciblée est devant/derrière(overlaps) cette entité") var insideUpdate: Action = EmptyAction()) {
         protected val sensorOverlaps: MutableSet<Entity> = mutableSetOf()
 
         abstract fun checkSensorOverlaps(entity: Entity, level: Level)
     }
 
-    class TagSensorData(@UI(customType = CustomType.TAG_STRING) var target: EntityTag = Tags.Player.tag, sensorIn: Action = EmptyAction(), sensorOut: Action = EmptyAction()) : SensorData(sensorIn, sensorOut) {
+    class TagSensorData(@UI(customType = CustomType.TAG_STRING) var target: EntityTag = Tags.Player.tag, onIn: Action = EmptyAction(), onOut: Action = EmptyAction(), insideUpdate: Action = EmptyAction()) : SensorData(onIn, onOut, insideUpdate) {
         override fun checkSensorOverlaps(entity: Entity, level: Level) {
             val checkedEntities = mutableSetOf<Entity>()
 
             level.getAllEntitiesInCells(entity.box).filter { it !== entity && it.tag == target && entity.box.overlaps(it.box) }.forEach {
                 if (!sensorOverlaps.contains(it)) {
-                    sensorIn(entity, level)
+                    onIn(entity, level)
                     sensorOverlaps += it
                 }
+
+                insideUpdate(entity, level)
 
                 checkedEntities += it
             }
 
             sensorOverlaps.filter { !checkedEntities.contains(it) }.forEach {
-                sensorOut(entity, level)
+                onOut(entity, level)
                 sensorOverlaps.remove(it)
             }
         }
@@ -52,17 +54,19 @@ class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeata
         override fun toString(): String = ""
     }
 
-    class EntitySensorData(@UI var target: EntityID = EntityID(), sensorIn: Action = EmptyAction(), sensorOut: Action = EmptyAction()) : SensorData(sensorIn, sensorOut) {
+    class EntitySensorData(@UI var target: EntityID = EntityID(), sensorIn: Action = EmptyAction(), sensorOut: Action = EmptyAction(), insideUpdate: Action = EmptyAction()) : SensorData(sensorIn, sensorOut, insideUpdate) {
         override fun checkSensorOverlaps(entity: Entity, level: Level) {
             val target = target.entity(level)
             if (target != null) {
                 if (entity.box.overlaps(target.box)) {
                     if (!sensorOverlaps.contains(target)) {
-                        sensorIn(entity, level)
+                        onIn(entity, level)
                         sensorOverlaps += target
                     }
+
+                    insideUpdate(entity, level)
                 } else if (sensorOverlaps.contains(target)) {
-                    sensorOut(entity, level)
+                    onOut(entity, level)
                     sensorOverlaps.remove(target)
                 }
             }

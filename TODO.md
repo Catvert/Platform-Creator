@@ -9,6 +9,8 @@
 
 ## BUGS
 
+vertical mover + hold
+
 ## IDÉE
 - Editeur des couleurs imgui
 - Place order pour l'expose editor 

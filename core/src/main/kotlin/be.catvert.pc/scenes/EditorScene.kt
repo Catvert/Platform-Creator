@@ -372,9 +372,19 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                         entity.getCurrentState().getComponent<TextureComponent>()?.apply {
                             if (this.currentIndex in groups.indices) {
                                 val data = this.groups[currentIndex]
+
                                 PCGame.mainBatch.use {
                                     it.withColor(Color.WHITE.apply { a = 0.5f }) {
-                                        it.draw(data.currentFrame().getTextureRegion(), rect)
+                                        val frame = data.currentFrame()
+
+                                        if (data.repeatRegion && data.regions.size == 1) {
+                                            for (x in 0 until MathUtils.floor(rect.width / data.repeatRegionSize.width.toFloat())) {
+                                                for (y in 0 until MathUtils.floor(rect.height / data.repeatRegionSize.height.toFloat())) {
+                                                    frame.render(Rect(rect.x + x * data.repeatRegionSize.width, rect.y + y * data.repeatRegionSize.height, data.repeatRegionSize.width, data.repeatRegionSize.height), flipX, flipY, rotation, it)
+                                                }
+                                            }
+                                        } else
+                                            frame.render(rect, flipX, flipY, rotation, it)
                                     }
                                 }
                             }
@@ -1131,7 +1141,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
     private fun drawInfoEditorWindow() {
         with(ImGui) {
             setNextWindowPos(Vec2(10f, 10f + (g.fontBaseSize + g.style.framePadding.y * 2f).roundToInt()), Cond.Once)
-            functionalProgramming.withWindow("editor info", null, WindowFlags.AlwaysAutoResize.i or WindowFlags.NoTitleBar.i or WindowFlags.NoBringToFrontOnFocus.i) {
+            functionalProgramming.withWindow("editor info", null, WindowFlag.AlwaysAutoResize.i or WindowFlag.NoTitleBar.i or WindowFlag.NoBringToFrontOnFocus.i) {
                 ImGuiHelper.textPropertyColored(Color.ORANGE, "Nombre d'entités :", entityContainer.getEntitiesData().size)
 
                 if (editorUI.editorMode != EditorUI.EditorMode.TRY_LEVEL) {
@@ -1157,9 +1167,8 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
     }
 
     private fun drawExitWindow() {
-        ImGuiHelper.withCenteredWindow("Sauvegarder le niveau ?", editorUI::showExitWindow, Vec2(240f, 105f), WindowFlags.NoResize.i or WindowFlags.NoCollapse.i or WindowFlags.NoTitleBar.i) {
+        ImGuiHelper.withCenteredWindow("Sauvegarder le niveau ?", editorUI::showExitWindow, Vec2(240f, 105f), WindowFlag.NoResize.i or WindowFlag.NoCollapse.i or WindowFlag.NoTitleBar.i) {
             fun showMainMenu() {
-                ResourcesManager.unloadAssets()
                 PCGame.scenesManager.loadScene(MainMenuScene(null, false))
             }
 
@@ -1215,7 +1224,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                                 val tag = it.next()
 
                                 functionalProgramming.withId("del btn ${++counter}") {
-                                    pushItemFlag(ItemFlags.Disabled.i, Tags.values().any { it.tag == tag })
+                                    pushItemFlag(ItemFlag.Disabled.i, Tags.values().any { it.tag == tag })
                                     if (button("Suppr.")) {
                                         it.remove()
                                     }
@@ -1379,7 +1388,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
     private fun drawGridSettingsWindow() {
         with(ImGui) {
-            functionalProgramming.withWindow("Réglages de la grille", null, WindowFlags.AlwaysAutoResize.i) {
+            functionalProgramming.withWindow("Réglages de la grille", null, WindowFlag.AlwaysAutoResize.i) {
                 val size = intArrayOf(gridMode.cellWidth, gridMode.cellHeight)
 
                 functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
@@ -1411,6 +1420,9 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                 separator()
 
                 fun addImageBtn(region: TextureRegion, prefab: Prefab, showTooltip: Boolean) {
+                    // Dé-flip la texture
+                    region.flip(region.isFlipX, region.isFlipY)
+
                     if (imageButton(region.texture.textureObjectHandle, Vec2(50f, 50f), Vec2(region.u, region.v), Vec2(region.u2, region.v2))) {
                         setCopyEntity(prefab.create(Point()).apply { this.layer = selectLayer })
                     }
@@ -1511,7 +1523,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
     private fun drawInfoPrefabWindow(prefab: Prefab) {
         with(ImGui) {
-            functionalProgramming.withWindow("Réglages du prefab", editorUI::showInfoPrefabWindow, WindowFlags.AlwaysAutoResize.i) {
+            functionalProgramming.withWindow("Réglages du prefab", editorUI::showInfoPrefabWindow, WindowFlag.AlwaysAutoResize.i) {
                 val isGamePrefab = PrefabFactory.values().any { it.prefab === prefab }
 
                 if (isGamePrefab) {
@@ -1608,7 +1620,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                 }
             }
             separator()
-            pushItemFlag(ItemFlags.Disabled.i, entity.getStateOrDefault(editorUI.entityCurrentStateIndex).getComponents().size == Components.values().size)
+            pushItemFlag(ItemFlag.Disabled.i, entity.getStateOrDefault(editorUI.entityCurrentStateIndex).getComponents().size == Components.values().size)
             if (button("Ajouter un component", Vec2(-1, 0)))
                 openPopup(addComponentTitle)
             popItemFlag()
@@ -1655,8 +1667,9 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
         val createPrefabTitle = "Créer un prefab"
 
         with(ImGui) {
-            functionalProgramming.withWindow("Réglages de l'entité", editorUI::showInfoEntityWindow, WindowFlags.AlwaysAutoResize.i) {
+            functionalProgramming.withWindow("Réglages de l'entité", editorUI::showInfoEntityWindow, WindowFlag.AlwaysAutoResize.i) {
                 val favChecked = booleanArrayOf(level.favoris.contains(entity.id()))
+
 
                 if (ImGuiHelper.favButton(tintColor = Vec4(1f, 1f, 1f, if (favChecked[0]) 1f else 0.2f))) {
                     if (!favChecked[0])
@@ -1664,6 +1677,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                     else
                         level.favoris.remove(entity.id())
                 }
+
                 if (isItemHovered()) {
                     functionalProgramming.withTooltip {
                         text("Favoris")
@@ -1701,7 +1715,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
     private fun drawInfoEntityTextWindow(entity: Entity) {
         with(ImGui) {
             setNextWindowSizeConstraints(Vec2(), Vec2(500f, 500f))
-            functionalProgramming.withWindow("Données de l'entité", editorUI::showInfoEntityTextWindow, WindowFlags.AlwaysAutoResize.i) {
+            functionalProgramming.withWindow("Données de l'entité", editorUI::showInfoEntityTextWindow, WindowFlag.AlwaysAutoResize.i) {
                 ImGuiHelper.insertUITextFields(entity)
                 separator()
 

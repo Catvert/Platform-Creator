@@ -241,9 +241,11 @@ object ImGuiHelper {
 
             sameLine(0f, style.itemInnerSpacing.x)
 
-            pushItemFlag(ItemFlags.Disabled.i, settingsBtnDisabled)
+            pushItemFlag(ItemFlag.Disabled.i, settingsBtnDisabled)
+
             if (settingsButton())
                 openPopup(popupTitle)
+
             popItemFlag()
 
             if (settingsBtnDisabled)

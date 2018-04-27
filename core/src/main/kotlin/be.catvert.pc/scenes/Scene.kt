@@ -5,6 +5,7 @@ import be.catvert.pc.Log
 import be.catvert.pc.PCGame
 import be.catvert.pc.eca.components.graphics.TextureComponent
 import be.catvert.pc.eca.containers.EntityContainer
+import be.catvert.pc.managers.ResourcesManager
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.OrthographicCamera

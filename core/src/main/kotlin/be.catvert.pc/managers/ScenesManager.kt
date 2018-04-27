@@ -1,6 +1,7 @@
 package be.catvert.pc.managers
 
 import be.catvert.pc.Log
+import be.catvert.pc.scenes.MainMenuScene
 import be.catvert.pc.scenes.Scene
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.graphics.Pixmap
@@ -10,6 +11,9 @@ import com.badlogic.gdx.utils.Disposable
 import imgui.ImGui
 import imgui.impl.LwjglGL3
 import ktx.app.clearScreen
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.GL20
+
 
 /**
  * Permet de gérer les scènes
@@ -32,6 +36,7 @@ class ScenesManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Di
     private val duration = 1f
 
     private var screenshotWithoutImGui: ((Pixmap) -> Unit)? = null
+
     fun takeScreenshotWithoutImGui(result: (Pixmap) -> Unit) {
         screenshotWithoutImGui = result
     }

@@ -15,6 +15,7 @@ import be.catvert.pc.utility.*
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
+import ktx.assets.toLocalFile
 
 
 enum class PrefabType {
@@ -42,6 +43,12 @@ object PrefabSetup {
     val killActionTween = MultiplexerAction(TweenAction(TweenFactory.RemoveEntity(), false), TweenAction(TweenFactory.ReduceSize(), false))
 
     fun playerAction(action: Action) = TagAction(Tags.Player.tag, action)
+
+    enum class PlayerStates(val index: Int, val ladderIndex: Int) {
+        Small(0, 1), Big(2, 3), Fire(4, 5);
+
+        fun stateName() = this.name.toLowerCase()
+    }
 }
 
 /**
@@ -73,44 +80,6 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     PhysicsSprite(PrefabType.All, PrefabSetup.setupPhysicsSprite(resourceWrapperOf(Constants.packsKenneyDirPath.child("grassSheet.atlas").toFileWrapper()), "slice03_03", Size(50, 50))),
 
     //region Kenney
-    Player_Kenney(PrefabType.Kenney, Prefab("player",
-            EntityBuilder(Tags.Player.tag, Size(48, 98))
-                    .withDefaultState {
-                        val pack = Constants.packsKenneyDirPath.child("aliens.atlas").toFileWrapper()
-
-                        withComponent(TextureComponent(0,
-                                TextureGroup("stand", PackRegionData(resourceWrapperOf(pack), "alienGreen_stand")),
-                                TextureGroup("walk", pack, "alienGreen_walk", 0.33f),
-                                TextureGroup("jump", PackRegionData(resourceWrapperOf(pack), "alienGreen_jump")),
-                                TextureGroup("fall", PackRegionData(resourceWrapperOf(pack), "alienGreen_swim_1")))
-                        )
-
-                        withComponent(InputComponent(
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_LEFT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.MOVE_LEFT), TextureFlipAction(true, false))),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_RIGHT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.MOVE_RIGHT), TextureFlipAction(false, false))),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_UP.key, true, PhysicsAction(PhysicsAction.PhysicsActions.MOVE_UP)),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_DOWN.key, true, PhysicsAction(PhysicsAction.PhysicsActions.MOVE_DOWN)),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_JUMP.key, false, PhysicsAction(PhysicsAction.PhysicsActions.JUMP)))
-                        )
-
-                        withComponent(PhysicsComponent(false, 10, MovementType.SMOOTH, jumpHeight = 200).apply {
-                            val walkAction = TextureAction(1)
-                            onRightAction = walkAction
-                            onLeftAction = walkAction
-                            onNothingAction = TextureAction(0)
-                            onJumpAction = SoundAction(0)
-                            onUpAction = TextureAction(2)
-                            onDownAction = TextureAction(3)
-                        })
-
-                        withComponent(SoundComponent(SoundComponent.SoundData(resourceWrapperOf(Constants.soundsDirPath.child("player/jump.ogg").toFileWrapper()))))
-
-                        withComponent(LifeComponent(LevelAction(LevelAction.LevelActions.FAIL_EXIT)))
-                    }
-                    .withOutOfMap(LevelAction(LevelAction.LevelActions.FAIL_EXIT))
-                    .build()
-    )),
-
     Spider_Kenney(PrefabType.Kenney, Prefab("spider",
             EntityBuilder(Tags.Enemy.tag, Size(48, 48))
                     .withDefaultState {
@@ -170,10 +139,36 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
 
                         withComponent(SoundComponent(SoundComponent.SoundData(resourceWrapperOf(Constants.soundsDirPath.child("coin.wav").toFileWrapper()))))
 
-                        withComponent(SensorComponent(SensorComponent.TagSensorData(sensorIn = MultiplexerAction(SoundAction(0), ScoreAction(1), TweenAction(TweenFactory.RemoveEntity(), false)))))
+                        withComponent(SensorComponent(SensorComponent.TagSensorData(onIn = MultiplexerAction(SoundAction(0), ScoreAction(1), TweenAction(TweenFactory.RemoveEntity(), false)))))
                     }
                     .build()
     )),
+
+    Bumper_Kenney(PrefabType.Kenney, Prefab("bumper",
+            EntityBuilder(Tags.Special.tag, Size(50, 50))
+                    .withDefaultState {
+                        withComponent(TextureComponent(0, TextureGroup("default", PackRegionData(resourceWrapperOf(Constants.packsKenneyDirPath.child("jumper.atlas").toFileWrapper()), "spring_out"))))
+
+                        withComponent(PhysicsComponent(true, collisionsActions = arrayListOf(
+                               CollisionAction(BoxSide.Up, action = PrefabSetup.playerAction(PhysicsAction(PhysicsAction.PhysicsActions.FORCE_JUMP)))
+                        )))
+                    }.build())),
+    Ladder_Kenney(PrefabType.Kenney, Prefab("ladder",
+            EntityBuilder(Tags.Special.tag, Size(50, 150))
+                    .withDefaultState {
+                        withComponent(TextureComponent(0, TextureGroup("default", PackRegionData(resourceWrapperOf(Constants.packsKenneyDirPath.child("abstract_platform.atlas").toFileWrapper()), "ladderNarrow_mid")).apply {
+                            repeatRegion = true
+                            repeatRegionSize = Size(50, 50)
+                        }))
+
+                        withComponent(PhysicsComponent(true, isPlatform = true))
+
+                        withComponent(SensorComponent(SensorComponent.TagSensorData(Tags.Player.tag,
+                                insideUpdate = InputAction(InputComponent.InputData(Input.Keys.Z, action = PrefabSetup.playerAction(StateSwitcherAction(
+                                        *PrefabSetup.PlayerStates.values().map { it.index to PrefabSetup.playerAction(StateAction(it.ladderIndex)) }.toTypedArray()
+                                )))), onOut = PrefabSetup.playerAction(StateSwitcherAction(
+                                *PrefabSetup.PlayerStates.values().map { it.ladderIndex to PrefabSetup.playerAction(StateAction(it.index)) }.toTypedArray())))))
+                    }.build())),
     //endregion
 
     //region SMC
@@ -224,8 +219,6 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         withComponent(InputComponent(
                                 InputComponent.InputData(GameKeys.GAME_PLAYER_LEFT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.MOVE_LEFT), TextureFlipAction(true, false))),
                                 InputComponent.InputData(GameKeys.GAME_PLAYER_RIGHT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.MOVE_RIGHT), TextureFlipAction(false, false))),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_UP.key, true, PhysicsAction(PhysicsAction.PhysicsActions.MOVE_UP)),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_DOWN.key, true, PhysicsAction(PhysicsAction.PhysicsActions.MOVE_DOWN)),
                                 InputComponent.InputData(GameKeys.GAME_PLAYER_JUMP.key, false, PhysicsAction(PhysicsAction.PhysicsActions.JUMP)))
                         )
 
@@ -243,78 +236,63 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
 
                         withComponent(LifeComponent(LevelAction(LevelAction.LevelActions.FAIL_EXIT)))
                     }
-                    // Big state
-                    .withState("big") {
-                        val pack = Constants.packsSMCDirPath.child("maryo.atlas").toFileWrapper()
-
-                        withStartAction(TweenAction(ResizeTween(0.5f, 48, 98), false))
-
-                        withComponent(TextureComponent(0,
-                                TextureGroup("stand", PackRegionData(resourceWrapperOf(pack), "big/stand_right")),
-                                TextureGroup("walk", pack, "big/walk_right", 0.33f),
-                                TextureGroup("jump", PackRegionData(resourceWrapperOf(pack), "big/jump_right")),
-                                TextureGroup("fall", PackRegionData(resourceWrapperOf(pack), "big/fall_right")))
-                        )
-
-                        withComponent(InputComponent(
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_LEFT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.MOVE_LEFT), TextureFlipAction(true, false))),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_RIGHT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.MOVE_RIGHT), TextureFlipAction(false, false))),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_UP.key, true, PhysicsAction(PhysicsAction.PhysicsActions.MOVE_UP)),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_DOWN.key, true, PhysicsAction(PhysicsAction.PhysicsActions.MOVE_DOWN)),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_JUMP.key, false, PhysicsAction(PhysicsAction.PhysicsActions.JUMP)))
-                        )
-
-                        withComponent(PhysicsComponent(false, 10, MovementType.SMOOTH, jumpHeight = 200).apply {
-                            val walkAction = TextureAction(1)
-                            onRightAction = walkAction
-                            onLeftAction = walkAction
-                            onNothingAction = TextureAction(0)
-                            onJumpAction = SoundAction(0)
-                            onUpAction = TextureAction(2)
-                            onDownAction = TextureAction(3)
-                        })
-
-                        withComponent(SoundComponent(SoundComponent.SoundData(resourceWrapperOf(Constants.soundsDirPath.child("player/jump.ogg").toFileWrapper()))))
-
-                        withComponent(LifeComponent(StateAction(0)))
-                    }
-                    // Fire state
-                    .withState("fire") {
-                        val pack = Constants.packsSMCDirPath.child("maryo.atlas").toFileWrapper()
-
-                        withStartAction(TweenAction(ResizeTween(0.5f, 48, 98), false))
-
-                        withComponent(TextureComponent(0,
-                                TextureGroup("stand", PackRegionData(resourceWrapperOf(pack), "fire/stand_right")),
-                                TextureGroup("walk", pack, "fire/walk_right", 0.33f),
-                                TextureGroup("jump", PackRegionData(resourceWrapperOf(pack), "fire/jump_right")),
-                                TextureGroup("fall", PackRegionData(resourceWrapperOf(pack), "fire/fall_right")))
-                        )
-
-                        withComponent(InputComponent(
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_LEFT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.MOVE_LEFT), TextureFlipAction(true, false))),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_RIGHT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.MOVE_RIGHT), TextureFlipAction(false, false))),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_UP.key, true, PhysicsAction(PhysicsAction.PhysicsActions.MOVE_UP)),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_GOD_DOWN.key, true, PhysicsAction(PhysicsAction.PhysicsActions.MOVE_DOWN)),
-                                InputComponent.InputData(GameKeys.GAME_PLAYER_JUMP.key, false, PhysicsAction(PhysicsAction.PhysicsActions.JUMP)),
-                                InputComponent.InputData(Input.Keys.E, false, TextureFlipSwitcherAction(unFlipXAction = SpawnSideAction(FireBall_Right_SMC.prefab, BoxSide.Right, false), flipXAction = SpawnSideAction(FireBall_Left_SMC.prefab, BoxSide.Left, false))))
-                        )
-
-                        withComponent(PhysicsComponent(false, 10, MovementType.SMOOTH, jumpHeight = 200).apply {
-                            val walkAction = TextureAction(1)
-                            onRightAction = walkAction
-                            onLeftAction = walkAction
-                            onNothingAction = TextureAction(0)
-                            onJumpAction = SoundAction(0)
-                            onUpAction = TextureAction(2)
-                            onDownAction = TextureAction(3)
-                        })
-
-                        withComponent(SoundComponent(SoundComponent.SoundData(resourceWrapperOf(Constants.soundsDirPath.child("player/jump.ogg").toFileWrapper()))))
-
-                        withComponent(LifeComponent(StateAction(0)))
-                    }
                     .withOutOfMap(LevelAction(LevelAction.LevelActions.FAIL_EXIT))
+                    .apply {
+                        val pack = Constants.packsSMCDirPath.child("maryo.atlas").toFileWrapper()
+
+                        PrefabSetup.PlayerStates.values().forEach {
+                            if(it != PrefabSetup.PlayerStates.Small) {
+                                withState(it.stateName()) {
+                                    withStartAction(TweenAction(ResizeTween(0.5f, 48, 98), false))
+
+                                    withComponent(TextureComponent(0,
+                                            TextureGroup("stand", PackRegionData(resourceWrapperOf(pack), "${it.stateName()}/stand_right")),
+                                            TextureGroup("walk", pack, "${it.stateName()}/walk_right", 0.33f),
+                                            TextureGroup("jump", PackRegionData(resourceWrapperOf(pack), "${it.stateName()}/jump_right")),
+                                            TextureGroup("fall", PackRegionData(resourceWrapperOf(pack), "${it.stateName()}/fall_right")))
+                                    )
+
+                                    withComponent(InputComponent(
+                                            InputComponent.InputData(GameKeys.GAME_PLAYER_LEFT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.MOVE_LEFT), TextureFlipAction(true, false))),
+                                            InputComponent.InputData(GameKeys.GAME_PLAYER_RIGHT.key, true, MultiplexerAction(PhysicsAction(PhysicsAction.PhysicsActions.MOVE_RIGHT), TextureFlipAction(false, false))),
+                                            InputComponent.InputData(GameKeys.GAME_PLAYER_JUMP.key, false, PhysicsAction(PhysicsAction.PhysicsActions.JUMP))).apply {
+                                        if (it == PrefabSetup.PlayerStates.Fire)
+                                            inputs.add(InputComponent.InputData(Input.Keys.E, false, TextureFlipSwitcherAction(unFlipXAction = SpawnSideAction(FireBall_Right_SMC.prefab, BoxSide.Right, false), flipXAction = SpawnSideAction(FireBall_Left_SMC.prefab, BoxSide.Left, false))))
+                                    })
+
+                                    withComponent(PhysicsComponent(false, 10, MovementType.SMOOTH, jumpHeight = 200).apply {
+                                        val walkAction = TextureAction(1)
+                                        onRightAction = walkAction
+                                        onLeftAction = walkAction
+                                        onNothingAction = TextureAction(0)
+                                        onJumpAction = SoundAction(0)
+                                        onUpAction = TextureAction(2)
+                                        onDownAction = TextureAction(3)
+                                    })
+
+                                    withComponent(SoundComponent(SoundComponent.SoundData(resourceWrapperOf(Constants.soundsDirPath.child("player/jump.ogg").toFileWrapper()))))
+
+                                    withComponent(LifeComponent(StateAction(PrefabSetup.PlayerStates.Small.index)))
+                                }
+                            }
+                            withState("ladder-${it.stateName()}") {
+                                withComponent(TextureComponent(0,
+                                        TextureGroup("climb", PackRegionData(resourceWrapperOf(pack), "${it.stateName()}/climb_left"), PackRegionData(resourceWrapperOf(pack), "${it.stateName()}/climb_right")))
+                                )
+
+                                withComponent(InputComponent(
+                                        InputComponent.InputData(GameKeys.GAME_PLAYER_LEFT.key, true, PhysicsAction(PhysicsAction.PhysicsActions.MOVE_LEFT)),
+                                        InputComponent.InputData(GameKeys.GAME_PLAYER_RIGHT.key, true, PhysicsAction(PhysicsAction.PhysicsActions.MOVE_RIGHT)),
+                                        InputComponent.InputData(GameKeys.GAME_PLAYER_UP.key, true, PhysicsAction(PhysicsAction.PhysicsActions.MOVE_UP)),
+                                        InputComponent.InputData(GameKeys.GAME_PLAYER_DOWN.key, true, PhysicsAction(PhysicsAction.PhysicsActions.MOVE_DOWN)))
+                                )
+
+                                withComponent(PhysicsComponent(false, 5, MovementType.SMOOTH, false))
+
+                                withComponent(LifeComponent(StateAction(PrefabSetup.PlayerStates.Small.index)))
+                            }
+                        }
+                    }
                     .build()
     )),
 
@@ -391,7 +369,10 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         withComponent(TextureComponent(0, TextureGroup("default", PackRegionData(resourceWrapperOf(Constants.packsSMCDirPath.child("items.atlas").toFileWrapper()), "mushroom_red"))))
 
                         withComponent(PhysicsComponent(false, 5, collisionsActions = arrayListOf(
-                                CollisionAction(BoxSide.All, action = MultiplexerAction(PrefabSetup.playerAction(StateSwitcherAction(0 to StateAction(1))), TweenAction(TweenFactory.RemoveEntity(), false))))
+                                CollisionAction(BoxSide.All, action = MultiplexerAction(PrefabSetup.playerAction(
+                                        StateSwitcherAction(
+                                                PrefabSetup.PlayerStates.Small.index to StateAction(PrefabSetup.PlayerStates.Big.index),
+                                                PrefabSetup.PlayerStates.Small.ladderIndex to StateAction(PrefabSetup.PlayerStates.Big.ladderIndex))), TweenAction(TweenFactory.RemoveEntity(), false))))
                         ))
 
                         withComponent(MoverComponent(5, 0))
@@ -405,7 +386,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         withComponent(TextureComponent(0, TextureGroup("default", PackRegionData(resourceWrapperOf(Constants.packsSMCDirPath.child("items.atlas").toFileWrapper()), "fireplant"))))
 
                         withComponent(PhysicsComponent(false, 0, collisionsActions = arrayListOf(
-                                CollisionAction(BoxSide.All, action = MultiplexerAction(PrefabSetup.playerAction(StateAction(2)), TweenAction(TweenFactory.RemoveEntity(), false))))
+                                CollisionAction(BoxSide.All, action = MultiplexerAction(PrefabSetup.playerAction(StateAction(PrefabSetup.PlayerStates.Fire.index)), TweenAction(TweenFactory.RemoveEntity(), false))))
                         ))
                     }
                     .build()

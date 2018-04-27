@@ -53,6 +53,7 @@ class MainMenuScene(val levelStats: LevelStats?, applyMusicTransition: Boolean) 
 
     override fun render(batch: Batch) {
         super.render(batch)
+
         drawUI()
     }
 
@@ -93,7 +94,7 @@ class MainMenuScene(val levelStats: LevelStats?, applyMusicTransition: Boolean) 
         if (levelStats == null)
             return
         with(ImGui) {
-            ImGuiHelper.withCenteredWindow("Niveau $levelStats terminé !", ::showLevelStatsWindow, Vec2(280f, 245f), WindowFlags.NoCollapse.i or WindowFlags.NoResize.i) {
+            ImGuiHelper.withCenteredWindow("Niveau $levelStats terminé !", ::showLevelStatsWindow, Vec2(280f, 245f), WindowFlag.NoCollapse.i or WindowFlag.NoResize.i) {
                 functionalProgramming.withIndent(30f) {
                     if (imageButton(ResourcesManager.getTexture(levelStats.levelPath.get().parent().child(Constants.levelPreviewFile)).textureObjectHandle, Vec2(200f, 112.5f), uv1 = Vec2(1))) {
                         launchLevel(levelStats.levelPath.get().parent(), false)
@@ -118,7 +119,7 @@ class MainMenuScene(val levelStats: LevelStats?, applyMusicTransition: Boolean) 
     private fun drawMainMenu() {
         with(ImGui) {
             ImGuiHelper.withMenuButtonsStyle {
-                ImGuiHelper.withCenteredWindow("main menu", null, Vec2(300f, 180f), WindowFlags.NoTitleBar.i or WindowFlags.NoCollapse.i or WindowFlags.NoMove.i or WindowFlags.NoResize.i or WindowFlags.NoBringToFrontOnFocus.i, Cond.Always) {
+                ImGuiHelper.withCenteredWindow("main menu", null, Vec2(300f, 180f), WindowFlag.NoTitleBar.i or WindowFlag.NoCollapse.i or WindowFlag.NoMove.i or WindowFlag.NoResize.i or WindowFlag.NoBringToFrontOnFocus.i, Cond.Always) {
                     if (ImGuiHelper.tickSoundButton(MenusText.MM_PLAY_BUTTON(), Vec2(-1, 0))) {
                         showSelectLevelWindow = true
                     }
@@ -159,7 +160,7 @@ class MainMenuScene(val levelStats: LevelStats?, applyMusicTransition: Boolean) 
 
     private fun drawSelectLevelWindow() {
         with(ImGui) {
-            ImGuiHelper.withCenteredWindow(MenusText.MM_SELECT_LEVEL_WINDOW_TITLE(), ::showSelectLevelWindow, Vec2(225f, 285f), WindowFlags.NoResize.i or WindowFlags.NoCollapse.i) {
+            ImGuiHelper.withCenteredWindow(MenusText.MM_SELECT_LEVEL_WINDOW_TITLE(), ::showSelectLevelWindow, Vec2(225f, 285f), WindowFlag.NoResize.i or WindowFlag.NoCollapse.i) {
                 functionalProgramming.withChild("level panel", Vec2(210f, 205f)) {
                     val titleText = if (levelItem == null) "Aucun niveau sélectionné" else levelItem.toString()
                     ImGuiHelper.centeredTextPropertyColored(200f, Color.ORANGE, if (levelItem == null) "" else "Niveau : ", titleText)
@@ -175,7 +176,7 @@ class MainMenuScene(val levelStats: LevelStats?, applyMusicTransition: Boolean) 
                         }
                     }
 
-                    pushItemFlag(ItemFlags.Disabled.i, levelItem == null)
+                    pushItemFlag(ItemFlag.Disabled.i, levelItem == null)
 
                     if (button(MenusText.MM_SELECT_LEVEL_PLAY_BUTTON(), Vec2(-1, 0))) {
                         if (!launchLevel(levelItem!!.dir, false))
@@ -190,7 +191,7 @@ class MainMenuScene(val levelStats: LevelStats?, applyMusicTransition: Boolean) 
                     popItemFlag()
 
                     setNextWindowSize(Vec2(205f, if (levels.isEmpty()) 70f else 350f), Cond.Always)
-                    functionalProgramming.popupModal(selectLevelTitle, selectLevelOpen, WindowFlags.NoResize.i) {
+                    functionalProgramming.popupModal(selectLevelTitle, selectLevelOpen, WindowFlag.NoResize.i) {
                         functionalProgramming.withIndent(10f) {
                             if (levels.isNotEmpty()) {
                                 ImGuiHelper.inputText("", ::selectLevelSearchBuf, 168f)
@@ -315,7 +316,7 @@ class MainMenuScene(val levelStats: LevelStats?, applyMusicTransition: Boolean) 
                     newLevelOpen[0] = true
                 }
 
-                functionalProgramming.popupModal(newLevelTitle, newLevelOpen, WindowFlags.NoResize.i or WindowFlags.NoCollapse.i) {
+                functionalProgramming.popupModal(newLevelTitle, newLevelOpen, WindowFlag.NoResize.i or WindowFlag.NoCollapse.i) {
                     functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                         ImGuiHelper.inputText(MenusText.MM_NAME(), ::newLevelNameBuf)
                     }
@@ -353,7 +354,7 @@ class MainMenuScene(val levelStats: LevelStats?, applyMusicTransition: Boolean) 
 
     private fun drawSettingsWindow() {
         with(ImGui) {
-            ImGuiHelper.withCenteredWindow(MenusText.MM_SETTINGS_WINDOW_TITLE(), ::showSettingsWindow, Vec2(435f, 440f), WindowFlags.NoResize.i) {
+            ImGuiHelper.withCenteredWindow(MenusText.MM_SETTINGS_WINDOW_TITLE(), ::showSettingsWindow, Vec2(435f, 440f), WindowFlag.NoResize.i) {
                 functionalProgramming.withGroup {
                     functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                         sliderFloat(MenusText.MM_SETTINGS_SOUND(), ::soundVolume, 0f, 1f, "%.1f")

@@ -17,9 +17,10 @@ import imgui.ImGui
 import imgui.functionalProgramming
 
 @Description("Permet d'effectuer une action tout les x secondes")
-class TimerComponent(interval: Float, @UI var action: Action) : Component(), Updeatable, UIImpl {
+class TimerComponent(interval: Float, @UI var action: Action) : Component(), Updeatable {
     @JsonCreator private constructor() : this(1f, EmptyAction())
 
+    @UI(max = 10f)
     var interval = interval
         set(value) {
             field = value
@@ -35,12 +36,6 @@ class TimerComponent(interval: Float, @UI var action: Action) : Component(), Upd
 
     override fun update() {
         timer.update()
-    }
-
-    override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
-        functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-            ImGui.sliderFloat("interval", ::interval, 0f, 10f)
-        }
     }
 
     override fun toString() = "interval : $interval"

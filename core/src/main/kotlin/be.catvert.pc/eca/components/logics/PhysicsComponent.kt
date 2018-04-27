@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import glm_.func.common.clamp
 import glm_.min
 import imgui.ImGui
-import imgui.ItemFlags
+import imgui.ItemFlag
 import imgui.functionalProgramming
 import kotlin.math.roundToInt
 
@@ -365,7 +365,7 @@ class PhysicsComponent(@UI(customName = "figée") var isStatic: Boolean,
     }
 
     override fun insertUI(label: String, entity: Entity, level: Level, editorUI: EditorScene.EditorUI) {
-        ImGui.pushItemFlag(ItemFlags.Disabled.i, isStatic)
+        ImGui.pushItemFlag(ItemFlag.Disabled.i, isStatic)
         functionalProgramming.collapsingHeader("actions de déplacement") {
             functionalProgramming.withIndent {
                 ImGuiHelper.action("à gauche", ::onLeftAction, entity, level, editorUI)

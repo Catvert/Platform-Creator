@@ -1,6 +1,7 @@
 package be.catvert.pc.utility
 
 import be.catvert.pc.Log
+import be.catvert.pc.PCGame
 import be.catvert.pc.managers.ResourcesManager
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.OrthographicCamera

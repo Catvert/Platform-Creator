@@ -1,9 +1,11 @@
 package be.catvert.pc.utility
 
 import be.catvert.pc.Log
+import be.catvert.pc.PCGame
 import be.catvert.pc.managers.ResourcesManager
 import be.catvert.pc.serialization.PostDeserialization
 import com.badlogic.gdx.assets.AssetDescriptor
+import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.utils.GdxRuntimeException
 import ktx.assets.DelayedAsset
 
@@ -35,7 +37,7 @@ class ResourceWrapper<T>(path: FileWrapper, val resourceClass: Class<T>) : PostD
     }
 
     private fun loadAsset() {
-        asset = DelayedAsset(ResourcesManager.assetManager, AssetDescriptor(path.get(), resourceClass))
+        asset = DelayedAsset(ResourcesManager.manager, AssetDescriptor(path.get(), resourceClass))
     }
 
     override fun onPostDeserialization() {

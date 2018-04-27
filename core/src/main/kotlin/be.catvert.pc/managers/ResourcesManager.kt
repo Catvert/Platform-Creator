@@ -15,12 +15,13 @@ import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.I18NBundle
 
+
+
 /**
  * Permet de gérer les ressources graphiques et sonores
  */
 object ResourcesManager : Disposable {
-    val assetManager = AssetManager()
-
+    val manager = AssetManager()
     val defaultTexture: Texture
     val defaultPack: TextureAtlas
     val defaultPackRegion: TextureAtlas.AtlasRegion
@@ -41,14 +42,14 @@ object ResourcesManager : Disposable {
         defaultPack = TextureAtlas()
         defaultPackRegion = TextureAtlas.AtlasRegion(defaultTexture, 0, 0, 64, 64)
 
-        assetManager.setLoader(TextureAtlas::class.java, PackLoader())
+        manager.setLoader(TextureAtlas::class.java, PackLoader())
     }
 
     /**
      * Permet de désallouer les ressources chargées
      */
     fun unloadAssets() {
-        assetManager.clear()
+        manager.clear()
     }
 
     /**
@@ -73,11 +74,11 @@ object ResourcesManager : Disposable {
      */
     private inline fun <reified T : Any> tryLoad(file: FileHandle): T? {
         try {
-            return if (assetManager.isLoaded(file.path()))
-                assetManager.get(file.path())
+            return if (manager.isLoaded(file.path()))
+                manager.get(file.path())
             else {
                 if (file.exists() || T::class == I18NBundle::class) {
-                    assetManager.loadOnDemand<T>(file).asset
+                    manager.loadOnDemand<T>(file).asset
                 } else {
                     Log.warn { "Ressource non trouvée : ${file.path()}" }
                     null
@@ -92,7 +93,7 @@ object ResourcesManager : Disposable {
 
 
     override fun dispose() {
-        assetManager.dispose()
+        manager.dispose()
     }
 }
 

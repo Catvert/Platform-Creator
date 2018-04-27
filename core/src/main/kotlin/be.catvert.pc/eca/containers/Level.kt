@@ -217,7 +217,7 @@ class Level(val levelPath: FileWrapper, val gameVersion: Float, var background: 
             }
             ground.box.width = 300
 
-            val player = PrefabFactory.Player_Kenney.prefab.create(Point(100f, 50f), level)
+            val player = PrefabFactory.Player_SMC.prefab.create(Point(100f, 50f), level)
 
             level.followEntity.ID = player.id()
             level.favoris.add(player.id())
