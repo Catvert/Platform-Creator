@@ -179,6 +179,8 @@ class Level(val levelPath: FileWrapper, val gameVersion: Float, var background: 
         }
     }
 
+    fun customBackgroundPath() = levelPath.get().parent().child(Constants.levelCustomBackgroundFile)
+
     override fun onPostDeserialization() {
         super.onPostDeserialization()
         zoom = initialZoom

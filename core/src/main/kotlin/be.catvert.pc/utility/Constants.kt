@@ -65,6 +65,8 @@ object Constants {
     val groupExtension = "group"
     val levelExtension = "pclvl"
 
+
+
     val levelTextureExtension = arrayOf("jpg", "png")
     val levelPackExtension = arrayOf("atlas")
     val levelSoundExtension = arrayOf("mp3", "wav", "ogg")
@@ -72,6 +74,7 @@ object Constants {
 
     val exportLevelExtension = arrayOf("zip")
 
+    val levelCustomBackgroundFile = "background.png"
     val levelDataFile = "data.$levelExtension"
     val levelPreviewFile = "preview.png"
     val levelCustomMusicFile = "music.mp3"

@@ -16,7 +16,6 @@ import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.I18NBundle
 
 
-
 /**
  * Permet de gérer les ressources graphiques et sonores
  */
@@ -43,13 +42,6 @@ object ResourcesManager : Disposable {
         defaultPackRegion = TextureAtlas.AtlasRegion(defaultTexture, 0, 0, 64, 64)
 
         manager.setLoader(TextureAtlas::class.java, PackLoader())
-    }
-
-    /**
-     * Permet de désallouer les ressources chargées
-     */
-    fun unloadAssets() {
-        manager.clear()
     }
 
     /**

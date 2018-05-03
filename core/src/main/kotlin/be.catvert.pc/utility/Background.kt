@@ -16,11 +16,12 @@ import java.io.FileReader
 import kotlin.math.roundToInt
 
 enum class BackgroundType {
-    Standard, Parallax, None;
+    Standard, Parallax, Imported, None;
 
     override fun toString() = when (this) {
         BackgroundType.Standard -> "Standard"
         BackgroundType.Parallax -> "Parallaxe"
+        BackgroundType.Imported -> "Importé"
         BackgroundType.None -> "Aucun"
     }
 }
@@ -29,6 +30,16 @@ enum class BackgroundType {
 sealed class Background(val type: BackgroundType) : Renderable
 
 class StandardBackground(val backgroundFile: FileWrapper) : Background(BackgroundType.Standard) {
+    private val background = ResourcesManager.getTexture(backgroundFile.get())
+
+    override fun render(batch: Batch) {
+        batch.draw(background, 0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
+    }
+}
+
+// FIX DRY :'(
+
+class ImportedBackground(val backgroundFile: FileWrapper): Background(BackgroundType.Imported) {
     private val background = ResourcesManager.getTexture(backgroundFile.get())
 
     override fun render(batch: Batch) {
