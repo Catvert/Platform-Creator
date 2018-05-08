@@ -1,5 +1,6 @@
 package be.catvert.pc.i18n
 
-enum class EditorText(val key: String) {
-
-}
+/**
+ * Non fini
+ */
+enum class EditorText(val key: String)

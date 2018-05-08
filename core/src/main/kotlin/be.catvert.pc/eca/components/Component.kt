@@ -26,7 +26,7 @@ enum class Components(val component: KClass<out Component>) {
 }
 
 /**
- * Représente un élément consituant un entity
+ * Représente une fonctionnalité d'une entité
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
 abstract class Component {

@@ -6,6 +6,9 @@ import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.ui.Description
 import be.catvert.pc.ui.UI
 
+/**
+ * @see TextureComponent
+ */
 @Description("Permet d'appeler une action selon l'état de flip du TextureComponent")
 class TextureFlipSwitcherAction(@UI var unFlipXAction: Action = EmptyAction(), @UI var flipXAction: Action = EmptyAction(), @UI var unFlipYAction: Action = EmptyAction(), @UI var flipYAction: Action = EmptyAction()) : Action() {
     override fun invoke(entity: Entity, container: EntityContainer) {

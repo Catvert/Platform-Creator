@@ -4,6 +4,9 @@ import be.catvert.pc.eca.containers.EntityContainer
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
 
+/**
+ * Permet d'identifier chaque entité de manière unique.
+ */
 class EntityID(var ID: Int = INVALID_ID) {
     @JsonCreator private constructor() : this(INVALID_ID)
 

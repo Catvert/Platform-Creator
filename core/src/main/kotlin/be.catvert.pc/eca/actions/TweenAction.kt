@@ -21,7 +21,6 @@ import kotlin.reflect.full.createInstance
 
 
 /**
- * Action permettant de lancer un Tween sur une entité
  * @see Tween
  * @see TweenSystem
  */

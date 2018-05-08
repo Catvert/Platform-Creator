@@ -8,9 +8,6 @@ import be.catvert.pc.ui.UIImpl
 import com.sun.org.glassfish.gmbal.Description
 import imgui.ImGui
 
-/**
- * Action permettant de supprimer une entité
- */
 @Description("Permet de supprimer une entité")
 class RemoveEntityAction : Action(), UIImpl {
     override fun invoke(entity: Entity, container: EntityContainer) {

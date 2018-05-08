@@ -28,7 +28,9 @@ class LevelStats(val levelPath: FileWrapper, val timer: Int, val numberOfTries: 
 }
 
 /**
- * Représente un niveau
+ * Permet de regrouper les entités au sein d'un niveau.
+ * @see EntityContainer
+ * @see EntityMatrixContainer
  */
 class Level(val levelPath: FileWrapper, val gameVersion: Float, var background: Background?, var music: ResourceWrapper<Music>?) : EntityMatrixContainer() {
     private val levelTextures = levelPath.get().parent().child("textures") to mutableListOf<ResourceWrapper<Texture>>()

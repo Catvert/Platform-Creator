@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import imgui.ImGui
 import imgui.functionalProgramming
 
-@Description("Permet d'effectuer une action quand une entité précise est au-dessus d'une autre entité (couche)")
+@Description("Permet de déclencher une action quand une entité précise passe par-dessus une autre entité")
 class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeatable, UIImpl {
     constructor(vararg sensors: SensorData) : this(arrayListOf(*sensors))
     @JsonCreator private constructor() : this(arrayListOf())
@@ -24,7 +24,7 @@ class SensorComponent(var sensors: ArrayList<SensorData>) : Component(), Updeata
     private var level: Level? = null
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
-    abstract class SensorData(@UI(customName = "entrée", description = "Action appelée quand l'entité ciblée passe devant/derrière(overlaps) cette entité") var onIn: Action = EmptyAction(), @UI(customName="sortie", description = "Action appelée quand l'entité ciblée quitte cette entité") var onOut: Action = EmptyAction(), @UI(customName="m.a.j dedans", description = "Action appelée quand l'entité ciblée est devant/derrière(overlaps) cette entité") var insideUpdate: Action = EmptyAction()) {
+    abstract class SensorData(@UI(customName = "entrée", description = "Action appelée quand l'entité ciblée passe par-dessus cette entité") var onIn: Action = EmptyAction(), @UI(customName="sortie", description = "Action appelée quand l'entité ciblée quitte cette entité") var onOut: Action = EmptyAction(), @UI(customName="m.a.j dedans", description = "Action appelée quand l'entité ciblée est devant/derrière(overlaps) cette entité") var insideUpdate: Action = EmptyAction()) {
         protected val sensorOverlaps: MutableSet<Entity> = mutableSetOf()
 
         abstract fun checkSensorOverlaps(entity: Entity, level: Level)

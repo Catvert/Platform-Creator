@@ -33,7 +33,7 @@ enum class MovementType {
 
 /**
  * Classe de données permettant de gérer les sauts notament en définissant la hauteur du saut
- * @property isJumping : Permet de savoir si l'entité est entrain de sauté
+ * @property isJumping : Permet de savoir si l'entité est entrain de sauter
  * @property targetHeight : La hauteur en y à atteindre
  */
 private data class JumpData(var isJumping: Boolean = false, var targetHeight: Int = 0)
@@ -51,7 +51,7 @@ data class CollisionAction(@UI(customName = "côté") var side: BoxSide = BoxSid
 
 /**
  * Ce component permet d'ajouter à l'entité des propriétés physique tel que la gravité, vitesse de déplacement ...
- * Une entité contenant ce component ne pourra pas être traversé par une autre entité ayant également ce component
+ * Une entité ayant ce component ne pourra pas être traversé par une autre entité ayant également ce component
  * @param isStatic : Permet de spécifier si l'entité est sensé bougé ou non
  * @param moveSpeed : La vitesse de déplacement de l'entité qui sera utilisée avec les NextActions
  * @param movementType : Permet de définir le type de déplacement de l'entité

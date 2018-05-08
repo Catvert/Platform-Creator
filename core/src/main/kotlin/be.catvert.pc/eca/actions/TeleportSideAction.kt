@@ -10,9 +10,6 @@ import be.catvert.pc.ui.UI
 import be.catvert.pc.utility.BoxSide
 import com.fasterxml.jackson.annotation.JsonCreator
 
-/**
- * Action permettant de téléporter une entité sur un des côtés d'une autre entité (centré au centre)
- */
 @Description("Permet de téléporter une entité sur un des côtés d'une autre entité")
 class TeleportSideAction(@UI var teleportTo: EntityID, @UI var spawnSide: BoxSide, @UI var tweenMove: Boolean) : Action() {
     @JsonCreator private constructor() : this(EntityID(), BoxSide.Up, true)

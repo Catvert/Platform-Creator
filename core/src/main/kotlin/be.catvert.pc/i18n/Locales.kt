@@ -5,6 +5,9 @@ import be.catvert.pc.utility.Constants
 import com.badlogic.gdx.utils.I18NBundle
 import java.util.*
 
+/**
+ * Permet de gérer les traductions des textes
+ */
 object Locales {
     val menusPath = Constants.bundlesDirPath.child("menus/bundle")
     val gamePath = Constants.bundlesDirPath.child("game/bundle")

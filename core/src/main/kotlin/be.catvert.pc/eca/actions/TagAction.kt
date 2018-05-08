@@ -1,6 +1,5 @@
 package be.catvert.pc.eca.actions
 
-
 import be.catvert.pc.eca.Entity
 import be.catvert.pc.eca.EntityTag
 import be.catvert.pc.eca.Tags
@@ -12,9 +11,6 @@ import be.catvert.pc.ui.*
 import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
 
-/**
- * Permet d'effectuer une action sur toutes les entités ayant un tag précis présents dans l'active rect
- */
 @Description("[Expérimental] Permet d'effectuer une action sur toutes les entités ayant un tag précis")
 class TagAction(@UI(customType = CustomType.TAG_STRING) var tag: EntityTag, var action: Action) : Action(), UIImpl {
     @JsonCreator private constructor() : this(Tags.Player.tag, EmptyAction())

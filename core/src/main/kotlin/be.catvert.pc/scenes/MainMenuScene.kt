@@ -28,7 +28,7 @@ import kotlin.collections.set
 
 
 /**
- * Scène du menu principal
+ * Scène du menu principal.
  */
 class MainMenuScene(val levelStats: LevelStats?, applyMusicTransition: Boolean) : Scene(StandardBackground(Constants.gameBackgroundMenuPath.toFileWrapper())) {
     private val logo = PCGame.generateLogo(entityContainer)

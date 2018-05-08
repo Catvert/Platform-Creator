@@ -9,11 +9,10 @@ import be.catvert.pc.ui.UI
 import com.fasterxml.jackson.annotation.JsonCreator
 
 /**
- * Action permettant de flip horizontalement ou verticalement la texture d'une entité
  * @see TextureComponent
  */
 @RequiredComponent(TextureComponent::class)
-@Description("Permet d'appliquer un effet de miroir sur la texture actuelle d'une entité")
+@Description("Permet d'appliquer un effet miroir horizontal et/ou vertical sur la texture actuelle d'une entité")
 class TextureFlipAction(@UI(customName = "miroir x") var flipX: Boolean, @UI(customName = "miroir y") var flipY: Boolean) : Action() {
     @JsonCreator private constructor() : this(false, false)
 

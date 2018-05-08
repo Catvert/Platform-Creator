@@ -17,7 +17,7 @@ import com.badlogic.gdx.utils.I18NBundle
 
 
 /**
- * Permet de gérer les ressources graphiques et sonores
+ * Permet de gérer les ressources graphiques et sonores.
  */
 object ResourcesManager : Disposable {
     val manager = AssetManager()
@@ -60,6 +60,10 @@ object ResourcesManager : Disposable {
      * Permet d'obtenir un son
      */
     fun getSound(file: FileHandle): Sound? = tryLoad(file)
+
+    fun unloadAsset(file: FileHandle) {
+        manager.unload(file.path())
+    }
 
     /**
      * Permet d'essayer le chargement d'une ressource si elle n'est déjà pas chargée, dans le cas contraire, elle renvoi la-dite ressource chargée

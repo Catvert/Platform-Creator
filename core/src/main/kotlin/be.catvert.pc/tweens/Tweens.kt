@@ -21,6 +21,9 @@ import net.dermetfan.gdx.math.InterpolationUtils
 import kotlin.math.roundToInt
 import kotlin.reflect.KClass
 
+/**
+ * Énumération des différents tweens disponibles.
+ */
 enum class Tweens(val tween: KClass<out Tween>) {
     Empty(EmptyTween::class),
     Move(MoveTween::class),
@@ -30,6 +33,11 @@ enum class Tweens(val tween: KClass<out Tween>) {
     DisableComponent(DisableComponentTween::class)
 }
 
+/**
+ * Un tween permet de rendre un déplacement, un changement de vitesse, ... sur une entité "fluide" grâce à l'interpolation.
+ * L'interpolation est une opération mathématique, qui grâce à une fonction, permet de construire une courbe.
+ * Par exemple, un changement de vitesse de 10 à 5, grâce à une fonction linéaire, passera d'abord par 9,8,7.. avant d'arriver à la vitesse de 5.
+ */
 @JsonTypeInfo(include = JsonTypeInfo.As.WRAPPER_ARRAY, use = JsonTypeInfo.Id.MINIMAL_CLASS)
 abstract class Tween(var duration: Float = 1f, var interpolationName: String, var authorizeTweenState: Boolean = true) : UIImpl, PostDeserialization {
     var nextTween: Tween? = null
@@ -97,10 +105,16 @@ abstract class Tween(var duration: Float = 1f, var interpolationName: String, va
     }
 }
 
+/**
+ * Un tween vide.
+ */
 class EmptyTween : Tween(0f, linearInterpolation) {
     override fun perform(entity: Entity) {}
 }
 
+/**
+ * Un tween réalisant un déplacement x et/ou y sur une entité.
+ */
 class MoveTween(duration: Float = 0f, var moveX: Int = 0, var moveY: Int = 0) : Tween(duration, linearInterpolation) {
     private var initialPosX = 0f
     private var initialPosY = 0f
@@ -127,6 +141,9 @@ class MoveTween(duration: Float = 0f, var moveX: Int = 0, var moveY: Int = 0) : 
     }
 }
 
+/**
+ * Un tween permettant de modifier le canal alpha sur une entité.
+ */
 class AlphaTextureTween(duration: Float = 0f, var targetAlpha: Float = 0f) : Tween(duration, linearInterpolation) {
     private var initialAlpha = 0f
 
@@ -150,6 +167,9 @@ class AlphaTextureTween(duration: Float = 0f, var targetAlpha: Float = 0f) : Twe
     }
 }
 
+/**
+ * Un tween permettant de répéter le déclenchement d'une action sur une entité sur une durée précise.
+ */
 class RepeatActionTween(duration: Float = 0f, var repeat: Int = 1, var repeatAction: Action = EmptyAction()) : Tween(duration, linearInterpolation) {
     override fun perform(entity: Entity) {
         val progress = Math.round(interpolation.apply(progress) * 100)
@@ -168,6 +188,9 @@ class RepeatActionTween(duration: Float = 0f, var repeat: Int = 1, var repeatAct
     }
 }
 
+/**
+ * Un tween permettant de redimensionné une entité.
+ */
 class ResizeTween(duration: Float = 0f, var newWidth: Int = 1, var newHeight: Int = 1) : Tween(duration, linearInterpolation) {
     private var initialWidth = 0
     private var initialHeight = 0
@@ -194,6 +217,9 @@ class ResizeTween(duration: Float = 0f, var newWidth: Int = 1, var newHeight: In
     }
 }
 
+/**
+ * Un tween permettant de désactivé un component d'une entité.
+ */
 class DisableComponentTween(var disableComponent: Class<out Component> = LifeComponent::class.java, duration: Float = 0f) : Tween(duration, linearInterpolation, false) {
     private var component: Component? = null
 

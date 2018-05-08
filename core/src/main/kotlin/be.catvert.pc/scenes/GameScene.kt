@@ -22,7 +22,7 @@ import ktx.app.use
 
 
 /**
- * Scène du jeu
+ * Scène du jeu.
  */
 class GameScene(private val level: Level, private val levelNumberTries: Int = 1) : Scene(level.background, level.backgroundColor) {
     override var entityContainer: EntityContainer = level

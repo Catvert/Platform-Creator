@@ -3,8 +3,15 @@ package be.catvert.pc.eca
 import be.catvert.pc.eca.containers.EntityContainer
 import be.catvert.pc.utility.Point
 
+/**
+ * Décrit l'entité au sein du groupe
+ * @param deltaMainEntity Décalage x et y entre cette entité et l'entité principale du groupe.
+ */
 class EntityDescriptor(val prefab: Prefab, val deltaMainEntity: Point)
 
+/**
+ * Un groupe permet de rassembler plusieurs entités entre-elles, les entités ayant une fonction commune.
+ */
 class Group(var name: String, val idRefs: ArrayList<EntityID>, var mainEntity: Prefab, vararg entities: EntityDescriptor) {
     val entities = arrayListOf(*entities)
 

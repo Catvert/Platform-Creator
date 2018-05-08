@@ -31,7 +31,7 @@ private class PostDeserializer(private val deserializer: JsonDeserializer<*>) : 
 }
 
 /**
- * Objet permettant de dé/sérialiser n'importe quel classe dé/sérialisable en JSON/Smile
+ * Objet permettant de dé/sérialiser n'importe quel objets dé/sérialisable en JSON/Smile
  */
 object SerializationFactory {
     enum class MapperType {

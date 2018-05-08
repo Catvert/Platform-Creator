@@ -11,7 +11,6 @@ import com.fasterxml.jackson.annotation.JsonCreator
 
 
 /**
- * Une action permettant d'ajouter ou de retirer des points de vies à une entité ayant le component LifeComponent
  * @see LifeComponent
  */
 @RequiredComponent(LifeComponent::class)

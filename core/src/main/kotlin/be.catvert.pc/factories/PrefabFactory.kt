@@ -23,7 +23,7 @@ enum class PrefabType {
 }
 
 /**
- * Objet permettant la création de prefab préfait
+ * Objet permettant la création d'entités pré-faites.
  */
 object PrefabSetup {
     fun setupSprite(pack: ResourceWrapper<TextureAtlas>, region: String, size: Size) = Prefab("sprite", EntityBuilder(Tags.Sprite.tag, size)
@@ -52,7 +52,7 @@ object PrefabSetup {
 }
 
 /**
- * Permet d'ajouter des préfabs de base au jeu
+ * Usines de fabrication d'entités pré-faites
  */
 enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
     Empty(PrefabType.All, Prefab("empty",
@@ -407,7 +407,7 @@ enum class PrefabFactory(val type: PrefabType, val prefab: Prefab) {
                         withComponent(TextureComponent(0, TextureGroup("pop", PackRegionData(resourceWrapperOf(Constants.packsSMCDirPath.child("box.atlas").toFileWrapper()), "brown1_1"))))
                         withComponent(PhysicsComponent(true))
                     }
-                    .withLayer(1)
+                    .withLayer(6)
                     .build()
             ));
     //endregion

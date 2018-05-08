@@ -10,7 +10,6 @@ import be.catvert.pc.utility.cast
 import com.fasterxml.jackson.annotation.JsonCreator
 
 /**
- * Action permettant de terminer le niveau, selon si le joueur est mort ou a terminé le niveau
  * @see Level
  */
 @Description("Permet de quitter le niveau en spécifiant si le joueur à réussi ou non")

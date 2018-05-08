@@ -36,6 +36,7 @@ import com.badlogic.gdx.math.Circle
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
+import com.badlogic.gdx.utils.GdxRuntimeException
 import glm_.func.common.clamp
 import glm_.func.common.min
 import glm_.vec2.Vec2
@@ -49,7 +50,7 @@ import kotlin.math.roundToInt
 import kotlin.reflect.full.findAnnotation
 
 /**
- * Scène de l'éditeur de niveau
+ * Scène de l'éditeur de niveau.
  */
 class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level.background, level.backgroundColor) {
     private enum class ResizeMode(val resizeName: String) {
@@ -927,17 +928,17 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
                 if (Gdx.input.isKeyPressed(GameKeys.CAMERA_ZOOM_RESET.key))
                     targetCameraZoom = 1f
-
-                val minCameraX = camera.zoom * (camera.viewportWidth / 2)
-                val maxCameraX = level.matrixRect.width - minCameraX
-                val minCameraY = camera.zoom * (camera.viewportHeight / 2)
-                val maxCameraY = level.matrixRect.height - minCameraY
-
-                val x = MathUtils.lerp(camera.position.x, camera.position.x + moveCameraX, 0.5f)
-                val y = MathUtils.lerp(camera.position.y, camera.position.y + moveCameraY, 0.5f)
-
-                camera.position.set(MathUtils.clamp(x, minCameraX, maxCameraX), MathUtils.clamp(y, minCameraY, maxCameraY), 0f)
             }
+
+            val minCameraX = camera.zoom * (camera.viewportWidth / 2)
+            val maxCameraX = level.matrixRect.width - minCameraX
+            val minCameraY = camera.zoom * (camera.viewportHeight / 2)
+            val maxCameraY = level.matrixRect.height - minCameraY
+
+            val x = MathUtils.lerp(camera.position.x, camera.position.x + moveCameraX, 0.5f)
+            val y = MathUtils.lerp(camera.position.y, camera.position.y + moveCameraY, 0.5f)
+
+            camera.position.set(MathUtils.clamp(x, minCameraX, maxCameraX), MathUtils.clamp(y, minCameraY, maxCameraY), 0f)
         } else
             entityContainer.cast<Level>()?.updateCamera(camera, true)
 
@@ -1075,14 +1076,24 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
     private fun saveLevelToFile() {
         try {
             SerializationFactory.serializeToFile(level, level.levelPath.get())
+
+            val levelPreviewPath = level.levelPath.get().parent().child(Constants.levelPreviewFile)
+
             PCGame.scenesManager.takeScreenshotWithoutImGui {
                 val resizePixmap = Pixmap(Gdx.graphics.backBufferWidth, Gdx.graphics.backBufferHeight - editorUI.menuBarHeight, Pixmap.Format.RGBA8888)
                 resizePixmap.drawPixmap(it, 0, -editorUI.menuBarHeight)
 
-                PixmapIO.writePNG(level.levelPath.get().parent().child(Constants.levelPreviewFile), resizePixmap)
+                PixmapIO.writePNG(levelPreviewPath, resizePixmap)
 
                 resizePixmap.dispose()
                 it.dispose()
+            }
+
+            try {
+                ResourcesManager.unloadAsset(levelPreviewPath)
+            } catch(e: GdxRuntimeException) {
+                // L'erreur peut se produire si l'image de prévisualisation n'existait pas avant, c'est le cas lors de la première sauvegarde d'un nouveau niveau.
+                // On peut sans soucis l'ignorer
             }
         } catch (e: Exception) {
             Log.error(e) { "Erreur lors de l'enregistrement du niveau !" }
@@ -1277,6 +1288,9 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                                             }
                                         }
                                         BackgroundType.Parallax -> {
+
+
+
                                             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                                                 if (sliderInt("fond d'écran", editorUI.settingsLevelParallaxBackgroundIndex, 0, PCGame.getParallaxBackgrounds().size - 1)) {
                                                     updateBackground(PCGame.getParallaxBackgrounds()[editorUI.settingsLevelParallaxBackgroundIndex[0]])

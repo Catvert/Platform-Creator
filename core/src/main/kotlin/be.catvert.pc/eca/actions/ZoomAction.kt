@@ -9,10 +9,9 @@ import be.catvert.pc.utility.cast
 import com.fasterxml.jackson.annotation.JsonCreator
 
 /**
- * Action permettant de modifier le niveau de zoom
  * @see Level
  */
-@Description("Permet d'effectuer un zoom")
+@Description("Permet d'effectuer un zoom avant ou arrière")
 class ZoomAction(@UI(max = 2f) var zoom: Float) : Action() {
     @JsonCreator private constructor() : this(1f)
 

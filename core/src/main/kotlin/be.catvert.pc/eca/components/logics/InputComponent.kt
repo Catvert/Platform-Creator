@@ -15,11 +15,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
 import imgui.functionalProgramming
 
-
-/**
- * Component permettant d'effectuer une action quand l'utilisateur appuie sur une touche
- */
-@Description("Ajoute la possibilité d'effectuer une action sur une entité quand une touche est pressée")
+@Description("Ajoute la possibilité de déclencher une action sur une entité quand une touche est pressée")
 class InputComponent(var inputs: ArrayList<InputData>) : Component(), Updeatable, UIImpl, UITextImpl {
     constructor(vararg inputs: InputData) : this(arrayListOf(*inputs))
     @JsonCreator private constructor() : this(arrayListOf())

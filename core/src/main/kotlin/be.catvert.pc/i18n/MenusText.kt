@@ -1,5 +1,8 @@
 package be.catvert.pc.i18n
 
+/**
+ * Énumérations des différents textes du menu principal pour une traduction.
+ */
 enum class MenusText(val key: String) {
     MM_WINDOW_TITLE("mm_windowTitle"),
     MM_PLAY_BUTTON("mm_playButton"),

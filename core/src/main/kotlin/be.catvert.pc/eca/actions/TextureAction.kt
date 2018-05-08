@@ -14,7 +14,7 @@ import imgui.ImGui
 import imgui.functionalProgramming
 
 /**
- * Action permettant de changer la texture en cour d'une entité
+ * @see TextureComponent
  */
 @RequiredComponent(TextureComponent::class)
 @Description("Permet de changer la texture actuelle d'une entité")

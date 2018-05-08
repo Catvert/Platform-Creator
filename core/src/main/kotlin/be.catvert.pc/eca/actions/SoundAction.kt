@@ -15,7 +15,6 @@ import imgui.ImGui
 import imgui.functionalProgramming
 
 /**
- * Action permettant de jouer un son à partir d'un entity ayant un SoundComponent
  * @see SoundComponent
  */
 @RequiredComponent(SoundComponent::class)

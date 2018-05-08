@@ -19,10 +19,6 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 import glm_.func.common.max
 
-/**
- * Component permettant d'ajouter des points de vie à une entité
- * Chaque point de vie à une action quand celui-ci devient actif et inactif
- */
 @Description("Ajoute la possibilité d'ajouter des points de vie à une entité")
 class LifeComponent(onDeathAction: Action, lifePointActions: ArrayList<Action> = arrayListOf()) : Component(), UIImpl, UITextImpl {
     @JsonCreator private constructor() : this(RemoveEntityAction(), arrayListOf())

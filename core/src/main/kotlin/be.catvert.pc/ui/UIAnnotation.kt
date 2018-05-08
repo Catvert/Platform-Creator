@@ -6,10 +6,16 @@ enum class CustomType {
     DEFAULT, TAG_STRING
 }
 
+/**
+ * Permet de générer automatiquement une interface graphique pour une variable.
+ */
 @Target(AnnotationTarget.FIELD)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class UI(val customName: String = "", val min: Float = 0f, val max: Float = 0f, val customType: CustomType = CustomType.DEFAULT, val description: String = "")
 
+/**
+ * Permet de créer une annotation et de la transformer en objet via la réflection.
+ */
 object UIFactory {
     val empty: UI = TypeFactory.annotation(UI::class.java, mapOf())
 

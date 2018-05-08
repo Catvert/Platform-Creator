@@ -16,9 +16,6 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import imgui.ImGui
 import imgui.functionalProgramming
 
-/**
- * Component permettant d'ajouter des sons à une entité
- */
 @Description("Ajoute la possibilité d'ajouter des sons à une entité")
 class SoundComponent(var sounds: ArrayList<SoundData>) : Component(), UIImpl, UITextImpl {
     constructor(vararg sounds: SoundData) : this(arrayListOf(*sounds))

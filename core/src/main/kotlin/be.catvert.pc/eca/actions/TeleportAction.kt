@@ -10,9 +10,6 @@ import be.catvert.pc.ui.UIImpl
 import be.catvert.pc.utility.Point
 import com.fasterxml.jackson.annotation.JsonCreator
 
-/**
- * Action permettant de téléporter un entity à un point précis
- */
 @Description("Permet de téléporter une entité")
 class TeleportAction(var teleportPoint: Point) : Action(), UIImpl {
     @JsonCreator private constructor() : this(Point())

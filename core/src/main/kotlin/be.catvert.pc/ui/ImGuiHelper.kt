@@ -28,6 +28,9 @@ import uno.kotlin.isPrintable
 import kotlin.math.roundToInt
 import kotlin.reflect.KMutableProperty0
 
+/**
+ * Classe utilitaire utilisée dans la création de l'interface graphique.
+ */
 object ImGuiHelper {
     class Item<T>(var obj: T) {
         inline fun <reified T : Any> cast() = this as Item<T>

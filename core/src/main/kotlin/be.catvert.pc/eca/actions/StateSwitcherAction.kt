@@ -14,10 +14,7 @@ import imgui.functionalProgramming
 
 typealias StateSwitchAction = Pair<Int, Action>
 
-/**
- * Permet d'effectuer une action sur une entité selon l'état actuel de l'entité
- */
-@Description("Permet d'effectuer une action sur une entité selon son état.")
+@Description("Permet d'effectuer une action sur une entité en fonction de son état.")
 class StateSwitcherAction(var stateSwitchActions: ArrayList<StateSwitchAction>) : Action(), UIImpl {
     constructor(vararg stateSwitchActions: StateSwitchAction) : this(arrayListOf(*stateSwitchActions))
     @JsonCreator private constructor() : this(arrayListOf())

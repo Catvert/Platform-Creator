@@ -14,9 +14,6 @@ import be.catvert.pc.utility.Point
 import be.catvert.pc.utility.cast
 import com.fasterxml.jackson.annotation.JsonCreator
 
-/**
- * Action permettant de faire apparaître une entité à un position spécifique
- */
 @Description("Permet de faire apparaître une entité à une position spécifique")
 class SpawnPositionAction(@UI var prefab: Prefab, var position: Point) : Action(), UIImpl {
     @JsonCreator private constructor() : this(PrefabFactory.MushroomRed_SMC.prefab, Point(0f, 0f))

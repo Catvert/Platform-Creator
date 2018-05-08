@@ -4,6 +4,9 @@ import be.catvert.pc.eca.Entity
 import be.catvert.pc.eca.components.graphics.TextureComponent
 import be.catvert.pc.utility.Updeatable
 
+/**
+ * Système permettant au tweens d'être mis à jour.
+ */
 object TweenSystem : Updeatable {
     private data class TweenData(val tween: Tween, val stateBackupIndex: Int)
 

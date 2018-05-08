@@ -11,6 +11,10 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 
+/**
+ * Permet de réunir différentes entités au sein d'un même groupe, exemple : un niveau.
+ * @see Level
+ */
 abstract class EntityContainer : Renderable, Updeatable, PostDeserialization {
     @JsonProperty("objects")
     protected val entities: MutableSet<Entity> = mutableSetOf()

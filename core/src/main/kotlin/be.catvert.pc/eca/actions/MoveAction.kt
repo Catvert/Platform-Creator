@@ -9,6 +9,9 @@ import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.Utility
 import com.fasterxml.jackson.annotation.JsonCreator
 
+/**
+ * @see PhysicsComponent
+ */
 @Description("Permet de déplacer une entité en utilisant ou non le moteur physique")
 class MoveAction(@UI(min = -100f, max = 100f) var moveX: Int, @UI(min = -100f, max = 100f) var moveY: Int, @UI var physics: Boolean) : Action() {
     @JsonCreator private constructor() : this(0, 0, true)

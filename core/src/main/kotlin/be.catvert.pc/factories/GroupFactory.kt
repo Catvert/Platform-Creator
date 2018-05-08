@@ -16,6 +16,9 @@ import be.catvert.pc.tweens.MoveTween
 import be.catvert.pc.utility.*
 import com.badlogic.gdx.Input
 
+/**
+ * Usine de fabrication de groupes pré-faits.
+ */
 enum class GroupFactory(val group: () -> Group) {
     Pipe({
         val pipeEndID = EntityID(3)

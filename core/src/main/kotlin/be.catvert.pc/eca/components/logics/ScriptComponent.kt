@@ -6,6 +6,7 @@ import be.catvert.pc.eca.components.Component
 import be.catvert.pc.eca.containers.Level
 import be.catvert.pc.managers.ScriptsManager
 import be.catvert.pc.scenes.EditorScene
+import be.catvert.pc.ui.Description
 import be.catvert.pc.ui.UIImpl
 import be.catvert.pc.utility.Constants
 import be.catvert.pc.utility.Updeatable
@@ -15,6 +16,10 @@ import imgui.ImGui
 import imgui.functionalProgramming
 import javax.script.ScriptException
 
+/**
+ * @see ScriptsManager
+ */
+@Description("Ajoute la possibilité d'appeler des scripts personnalisés [JavaScript]")
 class ScriptComponent(var scriptIndex: Int) : Component(), Updeatable, UIImpl {
     @JsonCreator private constructor() : this(0)
 

@@ -25,9 +25,8 @@ import glm_.vec4.Vec4
 import imgui.*
 
 /**
- * Component permettant d'ajouter des textures et animations a l'entité
  * @param currentIndex La texture actuelle à dessiner
- * @param groups Les groupes disponibles pour l'entité
+ * @param groups Les groupes de textures/animations disponibles pour l'entité
  */
 @Description("Permet d'ajouter une texture ou une animation à une entité")
 class TextureComponent(var currentIndex: Int = 0, vararg groups: TextureGroup) : Component(), Renderable, UIImpl, UITextImpl {

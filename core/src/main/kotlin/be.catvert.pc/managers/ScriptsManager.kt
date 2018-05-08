@@ -8,7 +8,7 @@ import javax.script.ScriptContext
 import javax.script.ScriptEngineManager
 
 /**
- * Permet de gérer les scripts
+ * Permet de gérer les scripts.
  */
 object ScriptsManager {
     val scriptEngine = ScriptEngineManager().getEngineByName("nashorn") as NashornScriptEngine

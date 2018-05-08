@@ -15,8 +15,7 @@ import be.catvert.pc.utility.*
 import com.fasterxml.jackson.annotation.JsonCreator
 
 /**
- * Component permettant d'ajouter la possibilité à une entité de se déplacer automatiquement dans une direction.
- * Si l'entité rencontre un obstacle, elle ira dans la direction opposé
+ * Si l'entité rencontre un obstacle, elle ira dans la direction opposée
  * @param moveSpeedX Vitesse de déplacement horizontal
  * @param moveSpeedY Vitesse de déplacement vertical
  * @see PhysicsComponent

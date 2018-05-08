@@ -16,7 +16,7 @@ import com.badlogic.gdx.graphics.GL20
 
 
 /**
- * Permet de gérer les scènes
+ * Permet de gérer les scènes.
  */
 class ScenesManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Disposable {
     private var currentScene: Scene = initialScene

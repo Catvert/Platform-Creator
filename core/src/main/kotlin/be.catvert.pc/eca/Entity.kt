@@ -19,7 +19,7 @@ import imgui.functionalProgramming
 
 /**
  * Représente une entité dans le jeu
- * Cette entité est représentée dans l'espace grâce à sa box
+ * Cette entité est représentée dans l'espace grâce à une boîte, un rectangle.
  *
  * Une entité a un état de base et un conteneur
  * @see EntityState

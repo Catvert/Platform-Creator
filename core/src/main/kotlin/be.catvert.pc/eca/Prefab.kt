@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators
  */
 @JsonIdentityInfo(property = "entityID", generator = ObjectIdGenerators.IntSequenceGenerator::class)
 class Prefab(val name: String, val prefabEntity: Entity) {
+
     /**
      * Permet de créer une nouvelle entité en copiant l'entité de base définie dans ce préfab
      */

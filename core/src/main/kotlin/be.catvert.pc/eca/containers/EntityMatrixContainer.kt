@@ -13,6 +13,10 @@ import glm_.func.common.clamp
 import glm_.max
 import kotlin.math.roundToInt
 
+/**
+ * Permet de regrouper les entités entre-elles en plus d'ajouter la capacité de mettre à jour et d'afficher à l'écran seulement
+ * les entités présents dans une zone spécifique, par exemple à l'écran.
+ */
 abstract class EntityMatrixContainer : EntityContainer() {
     private val shapeRenderer = ShapeRenderer()
 

@@ -8,9 +8,6 @@ import be.catvert.pc.ui.Description
 import be.catvert.pc.ui.UIImpl
 import imgui.ImGui
 
-/**
- * Une action qui ne fait rien
- */
 @Description("Une action qui ne fait absolument rien")
 class EmptyAction : Action(), UIImpl {
     override fun invoke(entity: Entity, container: EntityContainer) {}

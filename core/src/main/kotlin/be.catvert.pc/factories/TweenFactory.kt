@@ -7,7 +7,8 @@ import be.catvert.pc.eca.components.logics.LifeComponent
 import be.catvert.pc.tweens.*
 
 /**
- * Permet d'ajouter des tweens de base au jeu
+ * Usine de fabrication de Tweens pré-faits.
+ * @see Tween
  */
 enum class TweenFactory(val tween: () -> Tween) {
     Empty({ EmptyTween() }),

@@ -15,7 +15,8 @@ import kotlin.reflect.KClass
 
 /**
  * Représente un état d'une entité, cet état contient différents components.
- * Un état est par exemple quand le joueur à sa vie au maximum, et un autre état quand il lui reste 1 point de vie. Différents états permettent d'avoir différentes interactions sur l'entité au cour du temps.
+ * Un état est par exemple quand le joueur à sa vie au maximum, et un autre état quand il lui reste 1 point de vie.
+ * Différents états permettent d'avoir différentes interactions avec l'entité au cour du temps.
  */
 class EntityState(var name: String, components: MutableSet<Component> = mutableSetOf()) : Renderable, Updeatable {
     @JsonCreator private constructor() : this("State")

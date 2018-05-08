@@ -10,7 +10,7 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.utils.GdxRuntimeException
 
 /**
- * Permet de gérer la musique
+ * Permet de gérer la musique.
  */
 object MusicsManager : Updeatable {
     private var music: Music? = null
