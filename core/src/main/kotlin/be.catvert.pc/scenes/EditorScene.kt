@@ -1477,6 +1477,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                             pack()?.regions?.sortedBy { it.name }?.forEachIndexed { index, region ->
                                 val size = if (editorUI.entityFactorySpriteRealSize) region.let { Size(it.regionWidth, it.regionHeight) } else Size(50, 50)
                                 val prefab = if (editorUI.entityFactorySpritePhysics) PrefabSetup.setupPhysicsSprite(pack, region.name, size) else PrefabSetup.setupSprite(pack, region.name, size)
+
                                 addImageBtn(region, prefab, false)
 
                                 if ((index + 1) % 3 != 0)

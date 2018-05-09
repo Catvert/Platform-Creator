@@ -10,6 +10,9 @@ import java.io.FileWriter
 import java.io.IOException
 import java.util.*
 
+/**
+ * Classe de donnée pour la configuration du jeu.
+ */
 data class GameConfig(val screenWidth: Int, val screenHeight: Int, val refreshRate: Int, val fullScreen: Boolean, val soundVolume: Float, val darkUI: Boolean, val locale: Locale) {
     companion object {
         /**

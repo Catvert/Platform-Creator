@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 /**
- * Permet d'écrire des informations de débuggage pendant l'exécution du jeu.
+ * Permet d'écrire des informations de débuggage pendant l'exécution du jeu. Le dernier fichier de log se trouve à la racine de l'exécutable avec comme nom : last_log.txt
  */
 object Log : Disposable {
     private val writer = FileWriter("last_log.txt")

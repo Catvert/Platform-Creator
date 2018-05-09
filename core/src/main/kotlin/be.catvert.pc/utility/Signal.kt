@@ -3,7 +3,8 @@ package be.catvert.pc.utility
 class SignalListener<in T>(var cancel: Boolean = false, val removeAfterInvoke: Boolean = false, val onSignal: (T) -> Unit)
 
 /**
- * Représente un événement
+ * Représente un événement.
+ * Cette classe n'est pas utilisée pour les événements entre les entités car il est impossible de la sérialiser.
  */
 class Signal<T> {
     private val listeners = mutableSetOf<SignalListener<T>>()

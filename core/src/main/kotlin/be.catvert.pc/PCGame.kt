@@ -32,7 +32,9 @@ import java.util.*
 import kotlin.collections.set
 
 
-/** [com.badlogic.gdx.ApplicationListener, implementation shared by all platforms.  */
+/**
+ * Classe principale du jeu, c'est dans celle-ci qu'est chargée les ressources, la mise en place de la boucle du jeu et la libération des ressources.
+ */
 class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
     /**
      * Permet d'initialiser ImGui

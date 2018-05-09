@@ -11,6 +11,10 @@ import ktx.assets.DelayedAsset
 
 inline fun <reified T> resourceWrapperOf(path: FileWrapper, resourceClass: Class<T> = T::class.java) = ResourceWrapper(path, resourceClass)
 
+/**
+ * Permet de sauvegarder une ressource quelconque en JSON.
+ * Le chemin vers le fichier de la ressource sera sauvegardée, et lors de la dé-sérialisation, la ressource sera chargée en mémoire via son chemin.
+ */
 class ResourceWrapper<T>(path: FileWrapper, val resourceClass: Class<T>) : PostDeserialization {
     private var asset: DelayedAsset<T>? = null
 

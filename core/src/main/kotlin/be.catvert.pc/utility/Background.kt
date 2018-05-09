@@ -15,6 +15,9 @@ import ktx.math.div
 import java.io.FileReader
 import kotlin.math.roundToInt
 
+/**
+ * Énumération des différents types de fond d'écran.
+ */
 enum class BackgroundType {
     Standard, Parallax, Imported, None;
 
@@ -29,7 +32,10 @@ enum class BackgroundType {
 @JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
 sealed class Background(val type: BackgroundType) : Renderable
 
-class StandardBackground(val backgroundFile: FileWrapper) : Background(BackgroundType.Standard) {
+/**
+ * Fond d'écran simple, une seule image de fond.
+ */
+open class StandardBackground(val backgroundFile: FileWrapper) : Background(BackgroundType.Standard) {
     private val background = ResourcesManager.getTexture(backgroundFile.get())
 
     override fun render(batch: Batch) {
@@ -37,16 +43,15 @@ class StandardBackground(val backgroundFile: FileWrapper) : Background(Backgroun
     }
 }
 
-// FIX DRY :'(
+/**
+ * Marqueur pour spécifier que le fond d'écran est importé -> même fonction que le standard background
+ */
+class ImportedBackground(backgroundFile: FileWrapper): StandardBackground(backgroundFile)
 
-class ImportedBackground(val backgroundFile: FileWrapper): Background(BackgroundType.Imported) {
-    private val background = ResourcesManager.getTexture(backgroundFile.get())
-
-    override fun render(batch: Batch) {
-        batch.draw(background, 0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
-    }
-}
-
+/**
+ * Fond d'écran à déplacement parallaxe. Plusieurs images sont utilisées et avec une différence de vitesse de déplacement ainsi qu'un système de couche,
+ * on réussi à obtenir une impression de profondeur.
+ */
 class ParallaxBackground(val parallaxDataFile: FileWrapper) : Background(BackgroundType.Parallax) {
     private data class Layer(val layer: TextureRegion, val applyYOffset: Boolean, val speed: Float, var x: Float = 0f)
 

@@ -79,6 +79,9 @@ fun ShapeRenderer.withColor(color: Color, block: ShapeRenderer.() -> Unit) {
 
 inline fun <reified T : Any> Any?.cast(): T? = this as? T
 
+/**
+ * Objet utilitaire
+ */
 object Utility {
     /**
      * Permet de parcourir les fichiers d'un dossier récursivement en ne gardant que les fichiers ayant une extension particulière
@@ -162,6 +165,9 @@ object Utility {
         fis.close()
     }
 
+    /**
+     * Ouvre une fenêtre de dialogue pour ouvrir un fichier.
+     */
     fun openFileDialog(title: String, description: String, extensions: Array<String>, allowMultipleSelects: Boolean): List<FileHandle> {
         MemoryStack.stackPush().also { stack ->
             val aFilterPatterns = stack.mallocPointer(extensions.size)
@@ -187,6 +193,9 @@ object Utility {
         return listOf()
     }
 
+    /**
+     * Ouvre une fenêtre de dialogue pour enregistrer un fichier.
+     */
     fun saveFileDialog(title: String, description: String, extensions: Array<String>): FileHandle? {
         MemoryStack.stackPush().also { stack ->
             val aFilterPatterns = stack.mallocPointer(extensions.size)
