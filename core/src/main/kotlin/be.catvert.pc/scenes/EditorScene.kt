@@ -1288,9 +1288,6 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                                             }
                                         }
                                         BackgroundType.Parallax -> {
-
-
-
                                             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
                                                 if (sliderInt("fond d'écran", editorUI.settingsLevelParallaxBackgroundIndex, 0, PCGame.getParallaxBackgrounds().size - 1)) {
                                                     updateBackground(PCGame.getParallaxBackgrounds()[editorUI.settingsLevelParallaxBackgroundIndex[0]])
@@ -1300,7 +1297,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                                         BackgroundType.Imported -> {
                                             if(button("Importer...", Vec2(Constants.defaultWidgetsWidth, 0))) {
                                                 try {
-                                                    val backgroundFile = Utility.openFileDialog("Choisir un fond d'écran", "Fond d'écran", arrayOf("png"), false)
+                                                    val backgroundFile =   Utility.openFileDialog("Importer un fond d'écran", "Image", arrayOf("png"), false)
                                                     backgroundFile.firstOrNull()?.also {
                                                         val copyPath = level.customBackgroundPath()
                                                         it.copyTo(copyPath)

@@ -67,11 +67,8 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         GameKeys.loadKeysConfig()
 
         mainBatch = SpriteBatch()
-        hudBatch = SpriteBatch()
 
         PCGame.defaultProjection = mainBatch.projectionMatrix.cpy()
-
-        PCGame.mainFont = BitmapFont(Constants.mainFontPath)
 
         gamePacks = let {
             val packs = mutableMapOf<FileHandle, List<ResourceWrapper<TextureAtlas>>>()
@@ -125,11 +122,8 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         GameKeys.saveKeysConfig()
 
         mainBatch.dispose()
-        hudBatch.dispose()
 
         scenesManager.dispose()
-
-        mainFont.dispose()
 
         menuMusic.dispose()
 
@@ -147,9 +141,6 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
         lateinit var mainBatch: SpriteBatch
             private set
 
-        lateinit var hudBatch: SpriteBatch
-            private set
-
         lateinit var scenesManager: ScenesManager
             private set
 
@@ -158,11 +149,6 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
                 field = value
                 Locales.load(value)
             }
-        /**
-         * Le font principal du jeu
-         */
-        lateinit var mainFont: BitmapFont
-            private set
 
         lateinit var imguiDefaultFont: Font
         lateinit var imguiBigFont: Font

@@ -17,12 +17,14 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.MathUtils
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const
 import glm_.func.common.clamp
 import glm_.min
 import imgui.ImGui
 import imgui.ItemFlag
 import imgui.functionalProgramming
 import kotlin.math.roundToInt
+import kotlin.reflect.jvm.internal.impl.load.java.Constant
 
 /**
  * Enmu permettant de définir le type de mouvement de l'entité (fluide ou linéaire)
@@ -257,9 +259,9 @@ class PhysicsComponent(@UI(customName = "figée") var isStatic: Boolean,
                 moveY += Math.signum(targetMoveY) * Constants.physicsEpsilon
             else {
                 if (!collide && entity.container != null) {
-                    if (moveY > 0 && entity.box.top() != level.matrixRect.top())
+                    if (moveY > Constants.physicsEpsilon && entity.box.top() != level.matrixRect.top())
                         onUpAction(entity, entity.container!!)
-                    else if (moveY < 0)
+                    else if (moveY < Constants.physicsEpsilon)
                         onDownAction(entity, entity.container!!)
                 } else
                     returnCollide = true
@@ -296,9 +298,9 @@ class PhysicsComponent(@UI(customName = "figée") var isStatic: Boolean,
                 moveX += Math.signum(targetMoveX) * Constants.physicsEpsilon
             else {
                 if (!collide && entity.container != null) {
-                    if (moveX > 0 && entity.box.right() != level.matrixRect.right())
+                    if (moveX > Constants.physicsEpsilon && entity.box.right() != level.matrixRect.right())
                         onRightAction(entity, entity.container!!)
-                    else if (moveX < 0 && entity.box.left() != level.matrixRect.left())
+                    else if (moveX < Constants.physicsEpsilon && entity.box.left() != level.matrixRect.left())
                         onLeftAction(entity, entity.container!!)
                 } else
                     returnCollide = true

@@ -40,7 +40,6 @@ object Constants {
 
     val fontDirPath = assetsDirPath.child("fonts/")
     val imguiFontPath = fontDirPath.child("imgui.ttf")
-    val mainFontPath = fontDirPath.child("mainFont.fnt")
     val editorFontPath = fontDirPath.child("editorFont.fnt")
 
     val keysConfigPath = assetsDirPath.child("keysConfig.json")

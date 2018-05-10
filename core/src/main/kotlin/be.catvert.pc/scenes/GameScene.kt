@@ -15,9 +15,7 @@ import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import glm_.vec2.Vec2
-import imgui.ImGui
-import imgui.WindowFlag
-import imgui.WindowFlags
+import imgui.*
 import ktx.app.use
 
 
@@ -26,11 +24,7 @@ import ktx.app.use
  */
 class GameScene(private val level: Level, private val levelNumberTries: Int = 1) : Scene(level.background, level.backgroundColor) {
     override var entityContainer: EntityContainer = level
-
     private var pause = false
-
-    private val glyphTimer = GlyphLayout()
-
     private var isLevelExit = false
 
     init {
@@ -41,7 +35,7 @@ class GameScene(private val level: Level, private val levelNumberTries: Int = 1)
             MusicsManager.startMusic(level.music!!, true)
 
         level.exit = {
-            if(!isLevelExit) {
+            if (!isLevelExit) {
                 isLevelExit = true
 
                 ResourcesManager.getSound(if (it) Constants.gameDirPath.child("game-over-success.wav") else Constants.gameDirPath.child("game-over-fail.wav"))?.play(PCGame.soundVolume)
@@ -58,6 +52,20 @@ class GameScene(private val level: Level, private val levelNumberTries: Int = 1)
         super.render(batch)
 
         with(ImGui) {
+            ImGuiHelper.withMenuButtonsStyle {
+                setNextWindowPos(Vec2(0), Cond.Always)
+                functionalProgramming.withWindow("#score_window", null, WindowFlag.NoTitleBar.i or WindowFlag.NoCollapse.i or WindowFlag.NoMove.i or WindowFlag.NoResize.i or WindowFlag.NoBringToFrontOnFocus.i or WindowFlag.AlwaysAutoResize.i) {
+                    ImGui.text("Score : ${level.scorePoints} point(s)")
+                }
+
+                val timer_text = "Temps écoulé : ${level.getTimer()}s"
+
+                setNextWindowPos(Vec2(Gdx.graphics.width - PCGame.imguiBigFont.fontSize * timer_text.length / 2.5, 0), Cond.Always)
+                functionalProgramming.withWindow("#timer_window", null, WindowFlag.NoTitleBar.i or WindowFlag.NoCollapse.i or WindowFlag.NoMove.i or WindowFlag.NoResize.i or WindowFlag.NoBringToFrontOnFocus.i or WindowFlag.AlwaysAutoResize.i) {
+                    ImGui.text(timer_text)
+                }
+            }
+
             if (pause) {
                 ImGuiHelper.withCenteredWindow("pause", null, Vec2(200f, 105f), WindowFlag.NoResize.i or WindowFlag.NoCollapse.i or WindowFlag.NoTitleBar.i) {
                     if (button("Reprendre", Vec2(-1, 0))) {
@@ -77,20 +85,6 @@ class GameScene(private val level: Level, private val levelNumberTries: Int = 1)
         }
     }
 
-    override fun postBatchRender() {
-        super.postBatchRender()
-        level.drawDebug()
-
-        glyphTimer.setText(PCGame.mainFont, "Temps écoulé : ${level.getTimer()}")
-
-        PCGame.hudBatch.projectionMatrix = PCGame.defaultProjection
-        PCGame.hudBatch.use {
-            PCGame.mainFont.color.a = alpha
-            PCGame.mainFont.draw(it, "Score : ${level.scorePoints}", 10f, Gdx.graphics.height - PCGame.mainFont.lineHeight)
-
-            PCGame.mainFont.draw(it, glyphTimer, Gdx.graphics.width - glyphTimer.width - 10f, Gdx.graphics.height - glyphTimer.height)
-        }
-    }
 
     override fun update() {
         super.update()
@@ -105,9 +99,13 @@ class GameScene(private val level: Level, private val levelNumberTries: Int = 1)
             PCGame.scenesManager.loadScene(EditorScene(Level.loadFromFile(level.levelPath.get().parent())!!, true))
     }
 
+    override fun postBatchRender() {
+        super.postBatchRender()
+        level.drawDebug()
+    }
+
     private fun updateCamera(lerp: Boolean) {
         level.updateCamera(camera, lerp)
-
         camera.update()
     }
 }
