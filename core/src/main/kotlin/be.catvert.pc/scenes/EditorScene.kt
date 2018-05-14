@@ -1472,7 +1472,7 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
 
                         (if (importedPacks) level.resourcesPacks().getOrNull(editorUI.entityFactorySpritePackIndex) else PCGame.gamePacks.entries.elementAtOrNull(editorUI.entityFactorySpritePackTypeIndex)?.value?.getOrNull(editorUI.entityFactorySpritePackIndex))?.also { pack ->
                             pack()?.regions?.sortedBy { it.name }?.forEachIndexed { index, region ->
-                                val size = if (editorUI.entityFactorySpriteRealSize) region.let { Size(it.regionWidth, it.regionHeight) } else Size(50, 50)
+                                val size = if (editorUI.entityFactorySpriteRealSize) region.let { Size(it.regionWidth, it.regionHeight) } else editorUI.entityFactorySpriteCustomSize
                                 val prefab = if (editorUI.entityFactorySpritePhysics) PrefabSetup.setupPhysicsSprite(pack, region.name, size) else PrefabSetup.setupSprite(pack, region.name, size)
 
                                 addImageBtn(region, prefab, false)
