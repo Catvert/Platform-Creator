@@ -13,6 +13,7 @@ import imgui.impl.LwjglGL3
 import ktx.app.clearScreen
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.GL20
+import vkk.appBuffer
 
 
 /**
@@ -138,6 +139,8 @@ class ScenesManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Di
             if (ImGui.drawData != null)
                 LwjglGL3.renderDrawData(ImGui.drawData!!)
         }
+
+        appBuffer.reset()
     }
 
     override fun resize(size: Size) {

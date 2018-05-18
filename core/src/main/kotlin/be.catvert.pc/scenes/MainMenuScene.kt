@@ -269,6 +269,8 @@ class MainMenuScene(val levelStats: LevelStats?, applyMusicTransition: Boolean) 
                                 if (copyLevelNameBuf.isNotBlank()) {
                                     val copyLevelDir = settingsLevelItem.dir.parent().child(copyLevelNameBuf)
                                     if (!copyLevelDir.exists()) {
+                                        copyLevelDir.mkdirs()
+
                                         settingsLevelItem.dir.list().forEach {
                                             try {
                                                 it.copyTo(copyLevelDir)

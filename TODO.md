@@ -10,6 +10,7 @@
 ## BUGS
 
 vertical mover + hold
+copie + background import
 
 ## IDÉE
 - Editeur des couleurs imgui
