@@ -6,6 +6,7 @@
 - Ajouter la possibilité de supprimer une ressource importé
 - Écran de chargement d'un niveau
 - Utiliser un i18n pour les descriptions des props des components/actions (à la place de la description en str mettre : desc_physics_movementType par exemple)
+- SAT + AABB 
 
 ## BUGS
 

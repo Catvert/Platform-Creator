@@ -410,7 +410,7 @@ object ImGuiHelper {
         with(ImGui) {
             val pos = floatArrayOf(point.get().x, point.get().y)
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth - g.fontSize - g.style.itemInnerSpacing.x * 3f) {
-                if (inputFloat2("", pos, 0)) {
+                if (inputFloat2("", pos,"%f")) {
                     val x = pos[0]
                     val y = pos[1]
 

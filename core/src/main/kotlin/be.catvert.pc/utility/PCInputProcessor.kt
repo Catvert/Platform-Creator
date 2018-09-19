@@ -3,7 +3,7 @@ package be.catvert.pc.utility
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputAdapter
 import glm_.vec2.Vec2d
-import imgui.impl.LwjglGL3
+import imgui.impl.LwjglGlfw
 import org.lwjgl.glfw.GLFW
 
 /**
@@ -50,24 +50,24 @@ object PCInputProcessor : InputAdapter() {
     }
 
     override fun keyTyped(character: Char): Boolean {
-        LwjglGL3.charCallback(character.toInt())
+        LwjglGlfw.charCallback(character.toInt())
         return false
     }
 
     override fun scrolled(amount: Int): Boolean {
         scrolledSignal(amount)
-        LwjglGL3.scrollCallback(Vec2d(0f, -amount))
+        LwjglGlfw.scrollCallback(Vec2d(0f, -amount))
         return false
     }
 
     override fun touchUp(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
-        LwjglGL3.mouseButtonCallback(button, GLFW.GLFW_PRESS, 0)
+        LwjglGlfw.mouseButtonCallback(button, GLFW.GLFW_PRESS, 0)
         return false
     }
 
     override fun keyUp(keycode: Int): Boolean {
         gdxGLFWKeyMap[keycode]?.apply {
-            LwjglGL3.keyCallback(this, 0, GLFW.GLFW_RELEASE, 0)
+            LwjglGlfw.keyCallback(this, 0, GLFW.GLFW_RELEASE, 0)
         }
 
         return false
@@ -77,7 +77,7 @@ object PCInputProcessor : InputAdapter() {
         keyDownSignal(keycode)
 
         gdxGLFWKeyMap[keycode]?.apply {
-            LwjglGL3.keyCallback(this, 0, GLFW.GLFW_PRESS, 0)
+            LwjglGlfw.keyCallback(this, 0, GLFW.GLFW_PRESS, 0)
         }
 
         return false

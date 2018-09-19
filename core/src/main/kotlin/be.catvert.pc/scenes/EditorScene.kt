@@ -45,7 +45,7 @@ import imgui.*
 import imgui.functionalProgramming.mainMenuBar
 import imgui.functionalProgramming.menu
 import imgui.functionalProgramming.menuItem
-import ktx.app.use
+import ktx.graphics.use
 import kotlin.math.roundToInt
 import kotlin.reflect.full.findAnnotation
 
@@ -1282,14 +1282,14 @@ class EditorScene(val level: Level, applyMusicTransition: Boolean) : Scene(level
                                     when (editorUI.settingsLevelBackgroundType.obj.cast<BackgroundType>()) {
                                         BackgroundType.Standard -> {
                                             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                                                if (sliderInt("fond d'écran", editorUI.settingsLevelStandardBackgroundIndex, 0, PCGame.getStandardBackgrounds().size - 1)) {
+                                                if (sliderInt("fond d'écran", editorUI.settingsLevelStandardBackgroundIndex, 0, 0, PCGame.getStandardBackgrounds().size - 1)) {
                                                     updateBackground(PCGame.getStandardBackgrounds()[editorUI.settingsLevelStandardBackgroundIndex[0]])
                                                 }
                                             }
                                         }
                                         BackgroundType.Parallax -> {
                                             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                                                if (sliderInt("fond d'écran", editorUI.settingsLevelParallaxBackgroundIndex, 0, PCGame.getParallaxBackgrounds().size - 1)) {
+                                                if (sliderInt("fond d'écran", editorUI.settingsLevelParallaxBackgroundIndex, 0,0, PCGame.getParallaxBackgrounds().size - 1)) {
                                                     updateBackground(PCGame.getParallaxBackgrounds()[editorUI.settingsLevelParallaxBackgroundIndex[0]])
                                                 }
                                             }

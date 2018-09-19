@@ -1,5 +1,6 @@
 package be.catvert.pc.managers
 
+import ab.appBuffer
 import be.catvert.pc.Log
 import be.catvert.pc.scenes.MainMenuScene
 import be.catvert.pc.scenes.Scene
@@ -9,11 +10,11 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.utils.Disposable
 import imgui.ImGui
-import imgui.impl.LwjglGL3
+import imgui.impl.LwjglGlfw
 import ktx.app.clearScreen
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.GL20
-import vkk.appBuffer
+import imgui.impl.ImplGL3
 
 
 /**
@@ -109,7 +110,7 @@ class ScenesManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Di
         else
             clearScreen(currentScene.backgroundColors[0], currentScene.backgroundColors[1], currentScene.backgroundColors[2])
 
-        LwjglGL3.newFrame()
+        LwjglGlfw.newFrame()
 
         ImGui.style.alpha = currentScene.alpha
         batch.setColor(1f, 1f, 1f, currentScene.alpha)
@@ -124,7 +125,7 @@ class ScenesManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Di
         ImGui.render()
 
         if (ImGui.drawData != null)
-            LwjglGL3.renderDrawData(ImGui.drawData!!)
+            ImplGL3.renderDrawData(ImGui.drawData!!)
 
         nextScene?.apply {
             ImGui.newFrame()
@@ -137,10 +138,8 @@ class ScenesManager(initialScene: Scene) : Updeatable, Renderable, Resizable, Di
             ImGui.render()
 
             if (ImGui.drawData != null)
-                LwjglGL3.renderDrawData(ImGui.drawData!!)
+                ImplGL3.renderDrawData(ImGui.drawData!!)
         }
-
-        appBuffer.reset()
     }
 
     override fun resize(size: Size) {

@@ -10,6 +10,7 @@ buildscript {
   dependencies {
     classpath "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+    classpath "net.onedaybeard.artemis:artemis-odb-gradle-plugin:1.4.0"
   }
 }
 

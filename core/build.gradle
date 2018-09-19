@@ -22,6 +22,7 @@ dependencies {
     compile "io.github.libktx:ktx-scene2d:$ktxVersion"
     compile "io.github.libktx:ktx-app:$ktxVersion"
     compile "io.github.libktx:ktx-async:$ktxVersion"
+    compile "io.github.libktx:ktx-graphics:$ktxVersion"
 
     compile group: 'org.lwjgl', name: 'lwjgl-tinyfd', version: lwjglVersion
     compile "org.lwjgl:lwjgl-tinyfd:$lwjglVersion:natives-windows"
@@ -44,6 +45,8 @@ dependencies {
     compile "com.github.kotlin-graphics:imgui:$imguiVersion"
     compile "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
     compile "io.leangen.geantyref:geantyref:$geantyrefVersion"
+
+    compile "net.onedaybeard.artemis:artemis-odb:2.1.0"
 
     compile files('../libs/reflectasm_java8.jar')
 }

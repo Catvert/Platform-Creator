@@ -25,7 +25,7 @@ import com.badlogic.gdx.math.Matrix4
 import glm_.c
 import glm_.vec4.Vec4
 import imgui.*
-import imgui.impl.LwjglGL3
+import imgui.impl.LwjglGlfw
 import ktx.app.KtxApplicationAdapter
 import uno.glfw.GlfwWindow
 import java.util.*
@@ -40,13 +40,13 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
      * Permet d'initialiser ImGui
      */
     private fun initializeUI() {
-        LwjglGL3.init(GlfwWindow((Gdx.graphics as Lwjgl3Graphics).window.windowHandle), false)
+        LwjglGlfw.init(GlfwWindow((Gdx.graphics as Lwjgl3Graphics).window.windowHandle), false)
 
         PCGame.darkUI = initialConfig.darkUI
 
         val fontBytes = Constants.imguiFontPath.readBytes()
-        imguiDefaultFont = imgui.g.io.fonts.addFontFromMemoryTTF(CharArray(fontBytes.size, { fontBytes[it].c }), 21f, FontConfig(), glyphRanges = imgui.g.io.fonts.glyphRangesDefault)
-        imguiBigFont = imgui.g.io.fonts.addFontFromMemoryTTF(CharArray(fontBytes.size, { fontBytes[it].c }), 32f, FontConfig(), glyphRanges = imgui.g.io.fonts.glyphRangesDefault)
+        imguiDefaultFont = imgui.g.io.fonts.addFontFromMemoryTTF(CharArray(fontBytes.size, { fontBytes[it].c }), 21f, FontConfig())
+        imguiBigFont = imgui.g.io.fonts.addFontFromMemoryTTF(CharArray(fontBytes.size, { fontBytes[it].c }), 32f, FontConfig())
     }
 
     override fun create() {
@@ -131,7 +131,7 @@ class PCGame(private val initialConfig: GameConfig) : KtxApplicationAdapter {
 
         Log.dispose()
 
-        LwjglGL3.shutdown()
+        LwjglGlfw.shutdown()
         imguiCtx.destroy()
     }
 

@@ -71,7 +71,7 @@ abstract class Tween(var duration: Float = 1f, var interpolationName: String, va
         with(ImGui) {
             text("type : ${ReflectionUtility.simpleNameOf(this@Tween).removeSuffix("Tween")}")
             functionalProgramming.withItemWidth(Constants.defaultWidgetsWidth) {
-                inputFloat("durée", ::duration, 0.1f, 0f, 1)
+                inputFloat("durée", ::duration, 0.1f, 0f, "%1.f")
             }
             ImGuiHelper.action("action de fin", ::endAction, entity, level, editorUI)
 

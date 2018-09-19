@@ -14,7 +14,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.viewport.StretchViewport
 import imgui.ImGui
-import ktx.app.use
+import ktx.graphics.use
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 

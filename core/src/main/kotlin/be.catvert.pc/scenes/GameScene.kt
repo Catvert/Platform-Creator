@@ -16,7 +16,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import glm_.vec2.Vec2
 import imgui.*
-import ktx.app.use
+import ktx.graphics.use
 
 
 /**
